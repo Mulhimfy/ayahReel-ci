@@ -53,6 +53,18 @@ Rules that each cost a failed build or a wrong patch once:
 - **Line endings:** `.gitattributes` pins bundled READMEs and JSON to LF.
   A CRLF checkout of them shows up as an asset diff and blocks the patch.
 
+## CI runs on the public mirror
+
+Since 2026-10-13 the private repo's Actions jobs don't start ("recent
+account payments have failed"). Tests, preview APKs and patch tags run
+on the public repo `Mulhimfy/ayahReel-ci` instead, with the same
+workflow files and the same secrets (copied from `/root/keys`, see its
+README). `tool/public_mirror.sh <ref> <branch> [tag]` pushes a snapshot
+of a private commit there: same tree and message, no history, the
+GitHub noreply author. Patch tags go on the mirror, never on `origin`,
+or a second run could publish the same patch once billing is back.
+Everything on the mirror is public: code, run logs and artifacts.
+
 ## Saves on small phones
 
 Before changing the export for a "can't save" or "the app closed"
