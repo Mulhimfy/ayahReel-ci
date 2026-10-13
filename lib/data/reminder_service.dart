@@ -77,14 +77,41 @@ abstract final class ReminderService {
   /// * iOS keeps at most 64 pending local notifications per app and
   ///   silently discards the rest, so two reminders get 30 days each
   ///   with room to spare for anything else the app ever schedules.
-  /// * Android delivers these through inexact alarms, which carry no
-  ///   comparable ceiling, so it gets a full quarter.
+  /// * On Android the plugin keeps every pending one in a list that it
+  ///   reads and rewrites whole on the main thread, for each one laid
+  ///   or cancelled and each that fires, and a broadcast isn't done
+  ///   until that write is on disk. The quarter Android used to get
+  ///   made that list ~130 KB: Play, 1.0.8, ANRs in its
+  ///   ScheduledNotificationReceiver (realme C63, Android 16), and its
+  ///   boot receiver re-arming more alarms than an Infinix would hold.
+  ///   So Android gets thirty days too, laid again each week the app is
+  ///   opened ([_relayAfter]): the reminders still run a month past the
+  ///   last visit.
   ///
   /// A truly endless schedule is not reachable this way — the plugin
   /// recomputes a repeating notification's first fire from today, so a
   /// repeating tail cannot be parked beyond the window without also
   /// firing inside it. Endless *and* varied needs a push server.
-  static int get _horizonDays => _iOS ? 30 : 90;
+  static int get _horizonDays => 30;
+
+  /// How long Android trusts a laid window before laying it again.
+  ///
+  /// `pendingNotificationRequests` there reads the plugin's own list,
+  /// not the alarms the system holds. An alarm the system dropped (a
+  /// force stop, a cleaner) stays listed: its day never comes, and at
+  /// the next boot the plugin re-arms it, past, so it fires at once
+  /// with every other one like it. Laid again weekly, the list holds
+  /// at most a week of those.
+  static const _relayAfter = Duration(days: 7);
+
+  /// True when [laidOn], as [_scheduleDaily] saved it, is less than
+  /// [age] ago. A time in the future (the clock was set back) is not.
+  static bool _laidWithin(Object? laidOn, Duration age) {
+    final at = DateTime.tryParse('${laidOn ?? ''}');
+    if (at == null) return false;
+    final since = DateTime.now().difference(at);
+    return !since.isNegative && since < age;
+  }
 
   /// The platform as Flutter sees it — the same as dart:io's on a phone,
   /// and one a test can set.
@@ -569,6 +596,10 @@ abstract final class ReminderService {
         prefs['copy'] == ReminderCopy.version &&
         prefs['lang'] == l.lang.code &&
         prefs['zone'] == tz.local.name &&
+        // And one laid at another length — the 90 days earlier patches
+        // laid on Android — or, there, a week ago or more.
+        prefs['horizon'] == horizon &&
+        (_iOS || _laidWithin(prefs['laidOn'], _relayAfter)) &&
         await _coverageIsHealthy(_dailyBase, horizon)) {
       await _retireOldWindows();
       return;
@@ -643,6 +674,8 @@ abstract final class ReminderService {
       'copy': ReminderCopy.version,
       'lang': l.lang.code,
       'zone': tz.local.name,
+      'horizon': horizon,
+      'laidOn': DateTime.now().toIso8601String(),
     });
   }
 
