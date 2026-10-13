@@ -1,0 +1,16 @@
+# Copy to android/key.properties and fill in. That file is gitignored — it must
+# never be committed, and the .jks it points at must be backed up somewhere safe.
+#
+# Losing this keystore after launch means you can no longer update the app on
+# Play under the same listing, and every existing Shorebird release becomes
+# unpatchable. Back up the .jks AND these passwords before the first release.
+#
+# Generate with:
+#   keytool -genkey -v -keystore C:/Users/dell/keys/ayahreel-upload.jks \
+#     -storetype JKS -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+
+storePassword=
+keyPassword=
+keyAlias=upload
+# Absolute path, or relative to android/app/. Keep this OUTSIDE the repo.
+storeFile=C:/Users/dell/keys/ayahreel-upload.jks

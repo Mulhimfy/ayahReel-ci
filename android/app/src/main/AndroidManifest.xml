@@ -1,0 +1,143 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Quran text + recitation audio are fetched on demand -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Daily create-a-reel reminder -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Gallery save (gal) on Android 9 and below -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
+    <!-- requestLegacyExternalStorage is what lets gal write into an
+         album on API 29 (Android 10), where it still goes through the
+         legacy storage path: without it, getExternalStoragePublicDirectory
+         is unwritable under scoped storage and Save fails on every
+         Android 10 phone. Ignored from API 30 up. -->
+    <application
+        android:label="AyahReel"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:requestLegacyExternalStorage="true"
+        android:largeHeap="true">
+        <!-- A save's FFmpeg encodes run in a process of their own, so a
+             crash or a low-memory kill takes the encode and not the app
+             (RenderService.kt, EXPORT_MEMORY.md). -->
+        <service
+            android:name=".RenderService"
+            android:process=":render"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <!-- Specifies an Android theme to apply to this Activity as soon as
+                 the Android process has started. This theme is visible to the user
+                 while the Flutter UI initializes. After that, this theme continues
+                 to determine the Window background behind the Flutter UI. -->
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
+              />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- ayahreel://verse/<surah>/<from>[/<to>]: what a tap on the
+                 home-screen widget opens the app with (see VerseWidget
+                 and the ayahreel/widget channel in MainActivity), and
+                 ayahreel://arena/<code>: a Tanafus challenge (see
+                 ArenaChallenge.link in Dart). Both ride the same channel. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="ayahreel" android:host="verse"/>
+                <data android:scheme="ayahreel" android:host="arena"/>
+            </intent-filter>
+        </activity>
+        <!-- The home-screen verse widget. Drawn by the launcher from its
+             own copy of the verse list (assets/quran_verses.json) and
+             the bundled pictures; turns at noon and midnight on its own
+             alarm, and on any change of clock, zone or language. -->
+        <receiver
+            android:name=".VerseWidget"
+            android:exported="true"
+            android:label="@string/widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="com.ayahreel.app.widget.TURN"/>
+                <action android:name="android.intent.action.TIME_SET"/>
+                <action android:name="android.intent.action.TIMEZONE_CHANGED"/>
+                <action android:name="android.intent.action.LOCALE_CHANGED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/verse_widget_info"/>
+        </receiver>
+        <!-- Don't delete the meta-data below.
+             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+        <!-- Skia, not Impeller. Phones without a usable Vulkan driver get
+             Impeller's OpenGL ES fallback, where Flutter 3.47.5 crashes
+             drawing a picture with no surface (CreateSnapshotSurface,
+             flutter/flutter#192365: Play's largest crash on 1.0.8) and
+             compiles every shader before the first frame, which on
+             PowerVR phones held the main thread past an ANR (1.0.9, Oppo
+             CPH2269). Skia does neither. Read only from <application>.
+             Deprecated upstream: drop it once a Flutter release fixes
+             both. A store build, not a patch. -->
+        <meta-data
+            android:name="io.flutter.embedding.android.EnableImpeller"
+            android:value="false" />
+        <!-- Serves rendered reels to WhatsApp and to Instagram's reel
+             composer for the direct-share buttons (see MainActivity's
+             ayahreel/whatsapp and ayahreel/instagram channels) -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.ayahreel.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/ayahreel_file_paths" />
+        </provider>
+        <!-- Keep the daily reminder alive across reboots/updates -->
+        <receiver
+            android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
+        <receiver
+            android:exported="false"
+            android:name="com.ayahreel.app.BootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
+    </application>
+    <!-- Required to query activities that can process text, see:
+         https://developer.android.com/training/package-visibility and
+         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+
+         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Direct-share buttons need to see these on Android 11+ -->
+        <package android:name="com.whatsapp" />
+        <package android:name="com.whatsapp.w4b" />
+        <package android:name="com.instagram.android" />
+    </queries>
+</manifest>

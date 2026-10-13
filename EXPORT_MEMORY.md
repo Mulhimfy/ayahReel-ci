@@ -1,0 +1,238 @@
+# Saves that die on small phones — what we know, what to do next
+
+Read this before touching the export (`lib/render/video_renderer.dart`,
+`lib/data/export_budget.dart`) for a "can't save" or "the app closed"
+report.
+
+## The symptom
+
+Feedback with `source: exportTrouble` and an `export` field like
+
+    tightest, 2772 MB, 32-bit, 2 lost · lost: the app closed while a reel was saving
+
+The app died during a save, and the next launch noticed it. Android's
+low-memory killer leaves no error behind, so until 2026-10-08 a note
+couldn't say where the save died or how big the app had grown. Almost
+every such phone has 2–3 GB of memory, and many run the app as 32-bit
+code, which gives the whole process about 3 GB of address space.
+
+## How a save spends memory
+
+A save is FFmpeg running inside the app's own process. One `-i` input
+and one overlay per verse card; word highlighting makes a card per word.
+Measured with desktop FFmpeg 8.0.1 and the app's own graph (2026-10-04):
+
+| Part | Memory |
+|---|---|
+| The graph before any verse | about 350 MB |
+| … of which libx264 at 1080x1920, veryfast | about 200 MB |
+| Each verse card in a pass | 12–17 MB (about 8 MB of it per-input overhead) |
+
+`PhoneBudget` (`export_budget.dart`) sizes each save to the phone:
+
+| Budget | Who | Cards per pass | Encoder threads | Since |
+|---|---|---|---|---|
+| roomy | everyone else | the plan's own | up to 16 | — |
+| tight | under 4.6 GB, or 32-bit, or 1 loss | 16 | 4 | `4a2bba3` |
+| tightest | under 3.2 GB, or 2 losses | 8 | 2 | `4a2bba3` |
+| tightest + lean x264 | same phones | 8 | 2, no lookahead or B-frames | 2026-10-08 |
+| tightest + lean, superfast | same phones | 8 | 2, x264 `superfast` | 2026-10-11 |
+| tightest + lean with mbtree | same phones | 8 | 2, `superfast`, 5-frame lookahead, mbtree on | 2026-10-13 |
+
+And separately from the budget, since 2026-10-11 (`PhoneBudget.hardwareTrusted`):
+a phone where a save died inside a hardware encode (`, hardware` in the
+stage), or that has lost two saves anywhere, never uses MediaCodec
+again. It runs x264, slower but finished.
+
+The first lean x264 settings (`rc-lookahead=0:bframes=0:mbtree=0:sync-lookahead=0`)
+took a 4-second 1080x1920 encode at 2 threads from 339 MB to 199 MB
+peak, and from 13.6 s to 7.5 s, with a 1.6x bigger file. That was
+measured on FFmpeg's `testsrc2`, which has no grain, and it was wrong
+for real reels; see 2026-10-13 below. Since then lean is
+`rc-lookahead=5:mbtree=1:bframes=0:sync-lookahead=0`. Phones whose
+hardware encoder works (`h264_mediacodec`) don't run x264 at all, so
+this doesn't help them.
+
+Earlier fixes, all in the 2026-10-07 code: the budget and losses
+(`4a2bba3`), the image cache's memory handed to the encode (`3927308`),
+renders kept out of the cache folder (`cccba8f`, `b96ee14`), and
+background deaths not counted as losses (`e17c800`).
+
+## 2026-10-11: two reports, and FFmpeg moved out of the app
+
+Two notes from `code: 2026-10-08`:
+
+    tightest, 3647 MB, 2 lost · lost: … (4 cards in one pass, hardware; app 305 MB, 1079 MB at most; phone 443 MB free)
+    tightest, 3761 MB, 1 lost      ("the saving is slow and the app sometimes stops", Realme RMX3830)
+
+The first died in a hardware pass with the app at 305 MB and 443 MB of
+the phone still free: not a phone out of memory. The likeliest cause is
+the device encoder's path crashing the process (FFmpeg's MediaCodec
+wrapper or the vendor code under it). Its 1079 MB peak was the whole
+run's, so it may well predate the save. Done, all in one store build
+(the render process needs native code):
+
+- **The render process** (`android/…/RenderService.kt`,
+  `lib/render/render_process.dart`). Every encode the renderer runs
+  (`_encodeOnce`: passes, single encodes, the join) goes to a service in
+  `android:process=":render"`. A crash or a low-memory kill there ends
+  that process and not the app. Bound without `BIND_IMPORTANT`, it
+  ranks below the app, so the system kills it first. The app sees
+  `died`, records it (`PhoneBudget.renderDied`: a loss, `hwLost` if it
+  was hardware, `survived` in the note), and the renderer's existing
+  retries take over: hardware is redone on x264, and an x264 death is
+  read as out of memory and redone a budget smaller. A hardware encode
+  wedged past its cancel is ended by killing the process, which frees
+  what it held; in the app it was "left behind". The probes, ffprobe
+  and the small FFmpeg jobs elsewhere still run in the app.
+  Fallbacks: if no binding comes within 4 s, FFmpeg fails to start there
+  (`unavailable`), or three encodes die there in one run, the app
+  encodes in-process as before for the rest of the run.
+- **Hardware retired** after a death in it, or after two losses
+  (above). This one is Dart only, so an OTA can carry it.
+- **`superfast`** for lean x264, which is now also the x264 the retired
+  phones run. Speed for the slowest phones, at a larger file.
+- **The peak is the save's own.** `exportStarted` writes 5 to
+  `/proc/self/clear_refs`. Where Android allows it, the note says
+  `… MB at most in the save`. The render process's memory goes in the
+  note as `render … MB` when the save ran there.
+- `FeedbackService.codeDate` is now `2026-10-11`.
+
+**Not device-tested.** No phone or emulator was available. Before a
+release, save on a real phone and check that the reel saves, that
+`render-process encode` shows in the debug log, and that cancel works
+mid-save.
+
+Later the same day, a third `code: 2026-10-08` note ("the clip wasn't
+saved"):
+
+    tightest, 1897 MB, 32-bit, 1 lost · lost: … (cards; app 131 MB, 167 MB at most; phone 444 MB free)
+
+It died while Flutter drew the verse cards, before any FFmpeg, with the
+app small and the phone not full: a crash, not memory. It matches Play's
+largest 1.0.8 crash (16 users, Honor/realme/Infinix): Impeller's OpenGL
+path segfaulting in `toImage` with the app out of sight. Fixed on this
+branch by `OnScreen.settle` (`f6267a1`, `lib/render/on_screen.dart`): a
+save left in the background waits there and goes on when the app is
+back. Dart only, so a 1.0.8 patch could carry it — and did: the same
+evening the save fixes went out to 1.0.8+19..+22 as Patches 8, 7, 4 and
+3 (`OnScreen.settle`, hardware retirement, `superfast`, the save's own
+peak; RELEASES.md). Their notes say `code: 2026-10-11` with `version:
+1.0.8`; the render process came with the store build, Android `1.0.9+23`
+(2026-10-12; RELEASES.md).
+
+## 2026-10-13: saved reels that wouldn't play
+
+One note from `version: 1.0.9`, `code: 2026-10-11`, Realme RMX3830
+(Android 15), source `settings`:
+
+    tightest, 3761 MB, 4 lost, x264 only
+    "every time I save a reel and then play it, it says playback error"
+
+The save finished, and the file wouldn't play. FFmpeg's own picture
+check (`_decodesToPicture`) passed, because FFmpeg decodes anything.
+The cause was the lean x264 above. `superfast` and lean's
+`rc-lookahead=0`/`mbtree=0` turn off x264's macroblock tree. That is
+what lets x264 skip the grain the graph adds to every frame
+(`noise=c0s=2:c0f=t+u`, more with the Grain slider), so without it
+every frame coded the grain in full. Desktop FFmpeg 8.0.1, the app's
+graph, 1080x1920, 2 threads, 8 cards, 150 frames:
+
+| x264 | still sky | moving scenery | peak memory (sky) | time (sky) |
+|---|---|---|---|---|
+| roomy (`veryfast`) | 0.05 Mbps | 1.3 Mbps | 428 MB | 19.3 s |
+| lean until 2026-10-13 | **26.4 Mbps** | **12 Mbps** | 314 MB | 25.4 s |
+| lean since 2026-10-13 (mbtree, lookahead 5) | 0.05 Mbps | 1.3 Mbps | 344 MB | 16.4 s |
+
+The stream says High@4.0, and Level 4.0 allows 25 Mbps, which is
+about what a budget phone's decoder is built to. The old lean was
+past that, 200 times the size, and slower than `veryfast` too. The
+Grain slider at its top took even roomy x264 to 58 Mbps.
+
+Fixed, all in Dart:
+
+- **Lean keeps the macroblock tree** on a 5-frame lookahead
+  (`VideoRenderer.leanX264`). That costs 30 MB more than the old lean
+  for the bare encode (220 MB against 189; `veryfast` is 325).
+- **Every x264 encode has a ceiling** (`_x264CeilingFor`): twice the
+  hardware rate at the same length (12M, 8M, 6M, 4M), with a buffer
+  of one second, for both quality settings. A reel under it is
+  unchanged. With the grain at its top and three-second passes joined
+  by stream copy, the joined file peaks at 17.5 Mbps over any second,
+  and it still says Level 4.0. The join's re-encode uses the same
+  settings now (`videoCodec`).
+- **The render key** carries `_lx` on a phone planned `tightest`, so
+  a Save of a reel made with the old lean renders it again. Without
+  this, My Reels (one entry per key) and the "already in gallery"
+  check hand back the old file. Reels already saved stay as they
+  were. The user has to delete them and save again.
+- `FeedbackService.codeDate` is now `2026-10-13`.
+
+Affected: phones on the tightest budget running x264, which are every
+phone with two lost saves (`x264 only`) and any phone under 3.2 GB
+without a working hardware encoder. That covers 1.0.8 since Patches
+3, 4, 7 and 8 (2026-10-11) and 1.0.9+23 (the lean x264 itself goes
+back to 2026-10-08). Also any x264 reel with heavy grain. iOS encodes
+every reel on x264 (there is no `h264_mediacodec` there), so the
+ceiling applies to every iOS save, and lean to iPhones on the tightest
+budget. **Not device-tested.** Before shipping, save a reel on the tightest budget
+on a real phone, play it in the gallery, and check its size.
+
+## What a note says since 2026-10-08
+
+While a foreground save runs, `PhoneBudget` writes its stage and the
+app's memory into `export_budget.json` every 3 seconds and at each
+stage. If the app dies, the next launch's note reads, for example:
+
+    lost: the app closed while a reel was saving (pass 3/7, 8 cards; app 640 MB, 690 MB at most; phone 180 MB free)
+
+- **stage**: `starting`, `cards` (drawing the verse PNGs in Flutter),
+  `N cards in one pass`, `pass i/n, N cards`, `join`. `, hardware` means
+  the MediaCodec encoder was running.
+- **app … MB**: the process's resident memory (`VmRSS`) at the last
+  reading, and its peak (`VmHWM`).
+- **phone … MB free**: `MemAvailable` at that moment.
+
+Only notes with `code: 2026-10-08` or later carry this, and the stage
+only says where the save was within about 3 seconds.
+
+## What to do with the next reports
+
+1. **Stage `cards`.** The save died while Flutter drew the verse cards,
+   before FFmpeg started. Look at `AyahRasterizer` (PNG encoding on the
+   UI isolate, the image cache), not at the encoder. A small app and a
+   phone with room (the 2026-10-11 note: 131 MB, 444 MB free) is a
+   crash, most likely `toImage` with the app out of sight: check that
+   the phone's code has `OnScreen.settle`, and Play's vitals for the
+   stack.
+2. **A pass with `, hardware`.** MediaCodec was encoding, and lean x264
+   didn't apply. Try software x264 lean on the tightest budget, or a
+   lower hardware bitrate there.
+3. **A pass, software, with a high peak** (past about 600 MB on a
+   2–3 GB phone). The per-card inputs are the cost. Next lever: the
+   constant-memory renderer below.
+4. **A modest peak (under about 450 MB) but little free memory** (under
+   about 150 MB). The phone itself is full, and the system kills the
+   foreground app anyway. Only a smaller save (720p on the tightest
+   budget) or FFmpeg out of the app's process can help.
+5. **`join`.** The join re-encodes only when the passes can't be stream
+   copied (`copyVideo`). Find out why.
+6. **No more such notes from `2026-10-08` code.** Stop here.
+7. **From `2026-10-11` code**, a note with `N survived` means the render
+   process took N deaths and the app lived. A *lost* save there (the
+   app itself died) is something else: look at the app's own memory,
+   the `cards` stage first, since FFmpeg is no longer in the app.
+
+## The bigger levers, in order of cost
+
+- **720p on the tightest budget.** Add `scale=720:1280` before the
+  encoder only. x264's frames shrink 2.25x. Dart only, so an OTA can
+  carry it, but every reel those phones make looks softer.
+- **Constant-memory renderer.** Collapse the per-card PNG inputs into
+  one stream: every card padded to a full 1080x1920 transparent PNG,
+  fed through the concat demuxer with durations, and one overlay at
+  0,0. Memory stops growing with the card count. Fades between cards
+  and the letterbox layout need rework. A big renderer change; test it
+  on a real 3 GB phone before any OTA.
+- **FFmpeg in its own process.** Done 2026-10-11 (above); shipped in
+  Android `1.0.9+23` (2026-10-12).
