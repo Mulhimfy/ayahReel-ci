@@ -15,6 +15,7 @@ import 'data/rewards_service.dart';
 import 'data/scene_catalog.dart';
 import 'data/settings_service.dart';
 import 'l10n/l10n.dart';
+import 'render/on_screen.dart';
 import 'screens/home_shell.dart';
 import 'screens/onboarding_screen.dart';
 import 'theme/app_theme.dart';
@@ -27,6 +28,10 @@ final appNavigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // Before anything draws a picture off-screen: a frame drawn since
+  // the launch, or since the app came back, is what says the surface
+  // those pictures borrow is there.
+  OnScreen.watch();
   // Before anything can run an encode: FFmpeg's plugin starts out
   // posting every log line and progress report to the main thread.
   unawaited(configureFfmpeg());
