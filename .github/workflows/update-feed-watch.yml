@@ -1,0 +1,136 @@
+# Watches the update feed, because the app cannot.
+#
+# UpdateService swallows every failure by design — no network, a 404, a
+# malformed body, all of them end as "no update" and never as an error the
+# user has to dismiss. That is right for the user and blind for us: if the
+# gist is deleted, rate-limited, or edited into nonsense, every phone
+# quietly concludes it is current and nobody is ever told. The whole
+# update mechanism can be dead for months without producing one symptom.
+#
+# So the check lives here instead. Once a day this fetches the same URL the
+# app fetches, from outside our network, and fails loudly if the answer is
+# not one the app could use.
+#
+# HOW THE ALARM REACHES YOU: GitHub emails the account that last edited the
+# cron schedule whenever a scheduled workflow fails. That is the emailer —
+# no SMTP secret, no third-party action. Confirm it is on at
+# https://github.com/settings/notifications ("Actions" -> Email, and check
+# "Send notifications for failed workflows only" is not disabled).
+#
+# TWO THINGS TO KNOW ABOUT SCHEDULED WORKFLOWS:
+#   1. They only run from the repository's DEFAULT branch. This file has no
+#      effect until it is on main.
+#   2. GitHub disables them automatically after 60 days with no repository
+#      activity. A dormant repo means a silent watcher — the failure mode
+#      this file exists to remove, so if the app goes quiet for a while,
+#      check that this is still enabled.
+name: update-feed watch
+
+on:
+  schedule:
+    # Daily, deliberately off the hour: the top of the hour is the busiest
+    # slot on GitHub's scheduler and the most likely to be delayed.
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      # Full history, tags included: the staleness check below dates the
+      # release tag to decide whether a lagging feed is a release still in
+      # review or a bump somebody forgot.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch and validate the feed
+        env:
+          # How long a released version may sit unpublished in the feed
+          # before that counts as forgotten rather than in review. Apple
+          # review is usually days; two weeks is generous.
+          GRACE_DAYS: '14'
+        run: |
+          set -uo pipefail
+          fail=0
+          note() { echo "$1"; echo "$1" >> "$GITHUB_STEP_SUMMARY"; }
+          die()  { note "FAIL: $1"; fail=1; }
+
+          # The URL is read out of the app's own source rather than copied
+          # here. A monitor pointed at a different URL than the app uses is
+          # worse than no monitor: it reports health for a file nobody
+          # reads. Dart splits the literal across two lines, so take every
+          # quoted run in the declaration and join them.
+          feed=$(sed -n '/static const feedUrl/,/;/p' lib/data/update_service.dart \
+                 | grep -o "'[^']*'" | tr -d "'" | tr -d '\n')
+          if [ -z "$feed" ]; then
+            die "could not read feedUrl out of lib/data/update_service.dart — has the declaration moved?"
+            exit 1
+          fi
+          note "feed: $feed"
+
+          # Guard the documented trap: gist raw URLs also come in a
+          # /raw/<40-hex-sha>/ shape pinned to one revision, which would
+          # freeze the feed at whatever version it named the day it was
+          # pasted in — and freeze it silently.
+          if printf '%s' "$feed" | grep -qE '/raw/[0-9a-f]{40}/'; then
+            die "feedUrl is pinned to a gist revision; the app would never see an edit again."
+          fi
+
+          code=$(curl -sS -o feed.json -w '%{http_code}' --max-time 20 \
+                      --retry 2 --retry-delay 5 "$feed") || code=000
+          if [ "$code" != "200" ]; then
+            die "feed returned HTTP $code — deleted, renamed, rate-limited or unreachable."
+            exit 1
+          fi
+          if ! jq -e . feed.json > /dev/null 2>&1; then
+            die "feed is not valid JSON. Body follows:"
+            head -c 500 feed.json >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          # The marketing version on this branch, read exactly the way
+          # tool/sync-version.sh reads it.
+          appver=$(sed -n 's/^version: *\([^+ ]*\).*/\1/p' pubspec.yaml | head -1)
+          note "pubspec: $appver"
+
+          # a < b, numerically per component — the comparison compareVersions()
+          # makes in the app, where 1.0.10 is above 1.0.9.
+          vlt() { [ "$1" != "$2" ] && \
+                  [ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | head -n1)" = "$1" ]; }
+
+          tagged=$(git for-each-ref --format='%(creatordate:unix)' "refs/tags/v$appver")
+
+          for p in ios android; do
+            v=$(jq -r --arg p "$p" '.[$p].latest // empty' feed.json)
+            if [ -z "$v" ]; then
+              die "$p: no .latest in the feed — the app reads this as 'no update' forever."
+              continue
+            fi
+            if ! printf '%s' "$v" | grep -qE '^[0-9]+(\.[0-9]+)*$'; then
+              die "$p: latest is '$v', which is not a dotted version. Non-numeric parts count as zero, so this may silently mean 0.0.0."
+              continue
+            fi
+
+            if vlt "$appver" "$v"; then
+              # The feed names a version this repo has never cut. Users are
+              # being sent to a store listing for a build that does not exist.
+              die "$p: feed says $v but pubspec is $appver — the feed is ahead of the repo."
+            elif vlt "$v" "$appver"; then
+              # Expected while a cut release is in review; a forgotten bump
+              # once that release has been out for a while.
+              if [ -n "$tagged" ] && \
+                 [ $(( ( $(date +%s) - tagged ) / 86400 )) -gt "$GRACE_DAYS" ]; then
+                die "$p: feed still on $v, $GRACE_DAYS+ days after v$appver was tagged. Every user is being told they are current when they are not."
+              else
+                note "$p: feed on $v, repo on $appver — fine if $appver is not live on this store yet."
+              fi
+            else
+              note "$p: $v, current."
+            fi
+          done
+
+          exit "$fail"

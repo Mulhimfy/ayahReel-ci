@@ -1,0 +1,182 @@
+# Android Shorebird patches, built on GitHub's Linux runners: the same
+# job as Codemagic's android-patch (codemagic.yaml), moved here while
+# Codemagic billing is off (402 BILLING_NOT_ENABLED since 2026-10-07).
+# Same checks and the same two-asset exception, under its own prefix so
+# Codemagic and this can never both publish one patch:
+#
+#   gpatch-dry-<release>[--N]   build and check only
+#   gpatch-<release>[--N]       check, then publish if the check is clean
+#
+# <release> is the exact Shorebird release string, `1.0.8+21`. A tag
+# name can't be reused: a later patch of the same release takes a
+# suffix, `gpatch-1.0.8+21--2`. At most three tags per `git push`, or
+# GitHub sends no event. GitHub runs the workflow file of the tagged
+# commit, so a patch branch must carry this file.
+#
+# Needs the SHOREBIRD_TOKEN repository secret: an API key from
+# console.shorebird.dev (set 2026-10-08).
+name: Android patch
+
+on:
+  push:
+    tags: ['gpatch-*']
+
+permissions:
+  contents: read
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      # The runner's disk fills by the third build of a publish run (two
+      # checks, then the patch): +21 and +22 died "No space left on
+      # device" on 2026-10-08. Drop toolchains this job never uses.
+      - name: Free disk space
+        run: |
+          df -h / | tail -1
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup \
+            /usr/local/share/boost /opt/hostedtoolcache/CodeQL /usr/share/swift \
+            /usr/local/share/powershell /usr/local/share/chromium \
+            /usr/local/lib/node_modules || true
+          df -h / | tail -1
+      - name: Install Shorebird
+        run: |
+          set -euo pipefail
+          if [ -z "${SHOREBIRD_TOKEN:-}" ]; then
+            echo "SHOREBIRD_TOKEN is not set (repo Settings > Secrets > Actions)." >&2
+            exit 1
+          fi
+          curl --proto '=https' --tlsv1.2 -sSf \
+            https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | bash
+          # ~/.config/shorebird on Linux, ~/.shorebird on a Mac.
+          for d in "$HOME/.config/shorebird/bin" "$HOME/.shorebird/bin"; do
+            if [ -x "$d/shorebird" ]; then echo "$d" >> "$GITHUB_PATH"; fi
+          done
+      - name: Patch
+        run: |
+          set -euo pipefail
+          TAG_REST="${TAG#gpatch-}"
+          DRY=0
+          case "$TAG_REST" in
+            dry-*) DRY=1; TAG_REST="${TAG_REST#dry-}" ;;
+          esac
+          RELEASE_VERSION="${TAG_REST%%--*}"
+          if [ -z "$RELEASE_VERSION" ]; then
+            echo "Tag '$TAG' names no release version." >&2
+            exit 1
+          fi
+          echo "Release $RELEASE_VERSION, $([ $DRY = 1 ] && echo 'check only' || echo 'check, then publish')"
+          echo "Setting kAppVersion to $(bash tool/sync-version.sh "$RELEASE_VERSION")"
+          sed -i 's/-Xmx8G/-Xmx4G/' android/gradle.properties
+          { echo "== java"; java -version; echo "== shorebird"; shorebird --version; } \
+            > env.log 2>&1 || true
+          ALLOW=""
+          dry_run() {
+            set +e
+            shorebird --verbose patch android \
+              --release-version="$RELEASE_VERSION" --dry-run $ALLOW > dry-run.log 2>&1
+            STATUS=$?
+            set -e
+            tail -n 60 dry-run.log
+          }
+          dry_run
+          # The releases were built on the Windows PC: its CRLF checkout
+          # of the widget's quran_verses.json and the gzip header of
+          # NOTICES.Z differ from any other machine's. The user approved
+          # allowing exactly those two on 2026-10-05, and only once
+          # tool/verify_asset_diffs.py has matched them against the
+          # release's own bundle (RELEASES.md, "Android patches from
+          # Codemagic").
+          if grep -qi 'asset changes' dry-run.log &&
+             ! grep -qiE 'Kotlin or Java|native code changes' dry-run.log; then
+            echo "== Asset changes: comparing with the release's own bundle"
+            set +e
+            python3 tool/verify_asset_diffs.py dry-run.log 2>&1 | tee asset-check.log
+            VERIFIED=${PIPESTATUS[0]}
+            set -e
+            if [ "$VERIFIED" = 0 ]; then
+              mv dry-run.log dry-run-1.log
+              ALLOW="--allow-asset-diffs"
+              echo "== Checking again, the two verified assets allowed"
+              dry_run
+            fi
+          fi
+          ASSETS_OK=0
+          if ! grep -qi 'asset changes' dry-run.log; then
+            ASSETS_OK=1
+          elif [ -n "$ALLOW" ]; then
+            if ! grep -q 'Changed files:' dry-run.log ||
+               python3 tool/verify_asset_diffs.py dry-run.log > asset-check-2.log 2>&1; then
+              ASSETS_OK=1
+            fi
+          fi
+          CLEAN=0
+          if [ "$STATUS" = 0 ] && grep -qi 'No issues detected' dry-run.log &&
+             ! grep -qiE 'Kotlin or Java|native code changes' dry-run.log &&
+             [ "$ASSETS_OK" = 1 ]; then
+            CLEAN=1
+          fi
+          has() { grep -qiE "$1" dry-run.log && echo 1 || echo 0; }
+          {
+            echo "release=$RELEASE_VERSION status=$STATUS clean=$CLEAN"
+            echo "exception=$([ -n "$ALLOW" ] && echo 1 || echo 0)"
+            echo "noissues=$(has 'No issues detected')"
+            echo "native=$(has 'Kotlin or Java|native code changes')"
+            echo "asset=$(has 'asset changes')"
+            echo "gradlefail=$(has 'FAILURE: Build failed|BUILD FAILED|Gradle task .* failed')"
+            echo "norelease=$(has 'release .*not found|No release found|could not find release')"
+          } | tee verdict.txt
+          sed -n '/asset changes/,/^[[:space:]]*$/p' dry-run.log > changed-assets.txt || true
+          cat changed-assets.txt
+          if [ "$DRY" = 1 ]; then
+            echo "Check only; nothing published."
+            exit 0
+          fi
+          if [ "$CLEAN" != 1 ]; then
+            echo "The check was not clean (dry-run.log); nothing published." >&2
+            exit 0
+          fi
+          shorebird patch android --release-version="$RELEASE_VERSION" $ALLOW 2>&1 | tee publish.log
+          echo "published=1" >> verdict.txt
+      - name: Verdict
+        if: always()
+        run: |
+          {
+            echo '```'
+            cat verdict.txt 2>/dev/null || echo 'no verdict'
+            cat changed-assets.txt 2>/dev/null || true
+            grep -iE 'Published Patch|patch number' publish.log 2>/dev/null || true
+            df -h / | tail -1
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+      # Red unless it did what the tag asked: a clean check for a dry
+      # tag, a published patch for the other.
+      - name: Done
+        run: |
+          case "$TAG" in
+            gpatch-dry-*) grep -q 'clean=1' verdict.txt ;;
+            *) grep -q '^published=1' verdict.txt ;;
+          esac
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shorebird-logs
+          if-no-files-found: ignore
+          path: |
+            dry-run.log
+            dry-run-1.log
+            asset-check.log
+            asset-check-2.log
+            publish.log
+            verdict.txt
+            changed-assets.txt
+            env.log

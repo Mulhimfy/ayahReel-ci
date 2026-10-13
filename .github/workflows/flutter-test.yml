@@ -1,0 +1,48 @@
+# Analyze and test on every push of app code.
+#
+# The VPS these fixes are written on has no Flutter, and Codemagic only
+# runs on tags (where a green run can also ship). This answers a pushed
+# branch in a few minutes, with a log anyone with repo access can read:
+# `gh run view --log-failed`. It builds and publishes nothing.
+#
+# Flutter is the version Codemagic's analyze and test steps use
+# (codemagic.yaml `flutter:`), so a branch green here is green there.
+name: Flutter tests
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'lib/**'
+      - 'test/**'
+      - 'assets/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - 'analysis_options.yaml'
+      - '.github/workflows/flutter-test.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: flutter-test-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.6
+          channel: stable
+          cache: true
+      - name: Get packages
+        run: flutter pub get
+      - name: Analyze
+        run: flutter analyze
+      - name: Test
+        run: flutter test
