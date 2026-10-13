@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The app's palette (lib/theme/app_theme.dart), for the widget. -->
+    <color name="widget_gold">#FFD4A947</color>
+    <color name="widget_gold_bright">#FFEEC96B</color>
+    <color name="widget_text">#F2F2EFE6</color>
+    <color name="widget_muted">#D9C9CFD6</color>
+</resources>
