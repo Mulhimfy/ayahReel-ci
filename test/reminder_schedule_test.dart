@@ -121,10 +121,10 @@ void main() {
     await onAndroid(t, () => ReminderService.setStreakReminder(true));
 
     final days = daily();
-    expect(days, hasLength(90));
+    expect(days, hasLength(30));
     expect({
       for (final m in days) DateTime(at(m).year, at(m).month, at(m).day),
-    }, hasLength(90), reason: "never two of the day's own on one day");
+    }, hasLength(30), reason: "never two of the day's own on one day");
     expect(fridays(), hasLength(fridaysAmong(days)),
         reason: 'and a second every Friday');
     for (final m in days) {
@@ -162,8 +162,8 @@ void main() {
     final quizzes =
         days.where((m) => m['payload'] == ReminderService.openQuiz);
     final reels = days.where((m) => m['payload'] == ReminderService.openReel);
-    expect(quizzes, hasLength(54));
-    expect(reels, hasLength(36));
+    expect(quizzes, hasLength(18));
+    expect(reels, hasLength(12));
     for (final m in days) {
       expect(
           m['payload'],
@@ -194,7 +194,7 @@ void main() {
         .copyWith(streakReminderOn: true, personalReminderOn: false);
     await onAndroid(t, () => ReminderService.setPersonalReminder(7, 30));
 
-    expect(daily(), hasLength(90));
+    expect(daily(), hasLength(30));
     final mornings = ReminderCopy.timePhrases[AppLang.en]![DayPart.morning]!;
     for (final m in daily()) {
       expect((at(m).hour, at(m).minute), (7, 30));
@@ -219,7 +219,7 @@ void main() {
         personalMinute: 0);
     await onAndroid(t, () => ReminderService.cancelPersonalReminder());
 
-    expect(daily(), hasLength(90));
+    expect(daily(), hasLength(30));
     expect(daily().map((m) => at(m).hour).toSet(), {8, 14});
   });
 
@@ -237,7 +237,7 @@ void main() {
         ReminderService.setStreakReminder(false),
       ]);
     });
-    expect(daily(), hasLength(90), reason: 'the on was laid whole');
+    expect(daily(), hasLength(30), reason: 'the on was laid whole');
     expect(pendingIds, isEmpty, reason: 'and the off, after it, took it up');
   });
 
@@ -245,20 +245,25 @@ void main() {
       're-arm at boot, and lays only that from then on', (t) async {
     // Infinix HOT 50i, 1.0.8: the plugin's boot receiver crashed the app
     // re-arming the 90-day window, AlarmManager refusing one alarm too
-    // many.
-    alarmCeiling = 40;
+    // many. A phone that holds fewer than the thirty days' alarms.
+    alarmCeiling = 20;
     SettingsService.state.value = AppSettings.defaults
         .copyWith(streakReminderOn: true, personalReminderOn: false);
     await onAndroid(t, () => ReminderService.setStreakReminder(true));
     expect(t.takeException(), isNotNull, reason: 'the refusal is logged');
 
-    // Two thirds of the 40 it took, at eight alarms a week: 22 days.
+    // Two thirds of the 20 it took, at eight alarms a week: 11 days.
     expect(pendingIds.where((id) => id < 1400).toList()..sort(),
-        [for (var i = 0; i < 22; i++) 1300 + i]);
-    expect(pendingIds.length, lessThanOrEqualTo(26),
+        [for (var i = 0; i < 11; i++) 1300 + i]);
+    expect(pendingIds.length, lessThanOrEqualTo(13),
         reason: 'a third of the ceiling left free');
     expect(pendingIds.where((id) => id >= 1400),
-        everyElement(lessThan(1400 + 22)));
+        everyElement(lessThan(1400 + 11)));
+
+    // The next launch keeps the short window as it is.
+    scheduled.clear();
+    await onAndroid(t, ReminderService.scheduleIfPermitted);
+    expect(scheduled, isEmpty);
 
     // The window runs down; the next one is laid short from the start,
     // and the phone refuses none of it.
@@ -266,15 +271,15 @@ void main() {
     pendingIds.clear();
     await onAndroid(t, () => ReminderService.setStreakReminder(true));
     expect(t.takeException(), isNull);
-    expect(daily(), hasLength(22));
-    expect(scheduled, hasLength(22 + fridaysAmong(daily())));
+    expect(daily(), hasLength(11));
+    expect(scheduled, hasLength(11 + fridaysAmong(daily())));
   });
 
   testWidgets('both off: nothing is left queued', (t) async {
     SettingsService.state.value = AppSettings.defaults
         .copyWith(streakReminderOn: true, personalReminderOn: false);
     await onAndroid(t, () => ReminderService.setStreakReminder(true));
-    expect(pendingIds.where((id) => id < 1400), hasLength(90));
+    expect(pendingIds.where((id) => id < 1400), hasLength(30));
     expect(pendingIds.where((id) => id >= 1400), isNotEmpty);
     SettingsService.state.value = AppSettings.defaults
         .copyWith(streakReminderOn: true, personalReminderOn: false);
@@ -304,12 +309,59 @@ void main() {
     SettingsService.state.value = AppSettings.defaults
         .copyWith(streakReminderOn: true, personalReminderOn: false);
     await onAndroid(t, ReminderService.scheduleIfPermitted);
-    expect(daily(), hasLength(90));
-    expect(pendingIds.where((id) => id < 1400), hasLength(90));
+    expect(daily(), hasLength(30));
+    expect(pendingIds.where((id) => id < 1400), hasLength(30));
 
     scheduled.clear();
     await onAndroid(t, ReminderService.scheduleIfPermitted);
     expect(scheduled, isEmpty, reason: 'already in these words');
+  });
+
+  testWidgets('on Android a window is laid again once it is a week old, '
+      'and the 90 days older builds laid come back as 30', (t) async {
+    SettingsService.state.value = AppSettings.defaults
+        .copyWith(streakReminderOn: true, personalReminderOn: false);
+    await onAndroid(t, ReminderService.scheduleIfPermitted);
+    expect(daily(), hasLength(30));
+
+    final prefsFile = File('${tmp.path}/reminder_prefs.json');
+    Map<String, dynamic> prefs() =>
+        jsonDecode(prefsFile.readAsStringSync()) as Map<String, dynamic>;
+    void edit(Map<String, dynamic> Function(Map<String, dynamic>) f) =>
+        prefsFile.writeAsStringSync(jsonEncode(f(prefs())));
+    expect(prefs()['horizon'], 30);
+
+    // Six days on: still trusted.
+    edit((p) => p
+      ..['laidOn'] = DateTime.now()
+          .subtract(const Duration(days: 6))
+          .toIso8601String());
+    scheduled.clear();
+    await onAndroid(t, ReminderService.scheduleIfPermitted);
+    expect(scheduled, isEmpty);
+
+    // A week: the plugin's list may hold alarms the system dropped, so
+    // the window is laid again, whole.
+    edit((p) => p
+      ..['laidOn'] = DateTime.now()
+          .subtract(const Duration(days: 7, minutes: 1))
+          .toIso8601String());
+    scheduled.clear();
+    await onAndroid(t, ReminderService.scheduleIfPermitted);
+    expect(daily(), hasLength(30));
+    expect(pendingIds.where((id) => id < 1400), hasLength(30));
+
+    // A 90-day window, as builds before 2026-10-13 laid it: healthy by
+    // count, laid yesterday, but at the old length.
+    pendingIds
+      ..clear()
+      ..addAll([for (var i = 0; i < 90; i++) 1300 + i]);
+    edit((p) => p..remove('horizon'));
+    scheduled.clear();
+    await onAndroid(t, ReminderService.scheduleIfPermitted);
+    expect(daily(), hasLength(30));
+    expect(pendingIds.where((id) => id < 1400), hasLength(30),
+        reason: 'the other sixty cancelled');
   });
 
   testWidgets('on iOS: thirty days, each with a picture file of its own',
@@ -402,7 +454,7 @@ void main() {
     }
     final tuesdays = daily().where((m) => at(m).weekday == DateTime.tuesday);
     expect(shares, hasLength(tuesdays.length + fridays().length));
-    expect(daily(), hasLength(90), reason: 'a share takes a slot, never adds one');
+    expect(daily(), hasLength(30), reason: 'a share takes a slot, never adds one');
     // Both kinds, taking turns, each with its door and its picture.
     final verses = shares.where((m) => m['payload'] == ReminderService.openVerses);
     final rounds = shares.where((m) => m['payload'] != ReminderService.openVerses);

@@ -83,20 +83,48 @@ abstract final class ReminderService {
   /// therefore laid down as a rolling window of dated one-shots — one
   /// per day, each with its own wording from [ReminderCopy].
   ///
-  /// The window is as long as each platform will allow, because the day
-  /// it runs out is the day the reminders stop:
+  /// The day the window runs out is the day the reminders stop, so it
+  /// is as long as each platform can carry: thirty days on both.
   ///
   /// * iOS keeps at most 64 pending local notifications per app and
   ///   silently discards the rest, so two reminders get 30 days each
   ///   with room to spare for anything else the app ever schedules.
-  /// * Android delivers these through inexact alarms, which carry no
-  ///   comparable ceiling, so it gets a full quarter.
+  /// * On Android the plugin keeps every pending one in a list that it
+  ///   reads and rewrites whole on the main thread, for each one laid
+  ///   or cancelled and each that fires, and a broadcast isn't done
+  ///   until that write is on disk. The quarter Android used to get,
+  ///   103 alarms with Friday's seconds, made it ~150 KB: Play, 1.0.8,
+  ///   ANRs in its ScheduledNotificationReceiver (realme C63, Android
+  ///   16), and its boot receiver re-arming more alarms than an Infinix
+  ///   would hold. Thirty days is a third of the list and a ninth of
+  ///   the work of laying it. Laid again each week the app is opened
+  ///   ([_relayAfter]), the reminders still run a month past the last
+  ///   visit.
   ///
   /// A truly endless schedule is not reachable this way — the plugin
   /// recomputes a repeating notification's first fire from today, so a
   /// repeating tail cannot be parked beyond the window without also
   /// firing inside it. Endless *and* varied needs a push server.
-  static int get _horizonDays => _iOS ? 30 : 90;
+  static int get _horizonDays => 30;
+
+  /// How long Android trusts a laid window before laying it again.
+  ///
+  /// `pendingNotificationRequests` there reads the plugin's own list,
+  /// not the alarms the system holds. An alarm the system dropped (a
+  /// force stop, a cleaner) stays listed: its day never comes, and at
+  /// the next boot the plugin re-arms it, past, so it fires at once
+  /// with every other one like it. Laid again weekly, the list holds
+  /// at most a week of those.
+  static const _relayAfter = Duration(days: 7);
+
+  /// True when [laidOn], as [_scheduleDaily] saved it, is less than
+  /// [age] ago. A time in the future (the clock was set back) is not.
+  static bool _laidWithin(Object? laidOn, Duration age) {
+    final at = DateTime.tryParse('${laidOn ?? ''}');
+    if (at == null) return false;
+    final since = DateTime.now().difference(at);
+    return !since.isNegative && since < age;
+  }
 
   /// The window's length on a phone that once refused an alarm after
   /// [cap] of them; [_horizonDays] on every other phone.
@@ -503,8 +531,8 @@ abstract final class ReminderService {
       await _init();
       await SettingsService.init();
       if (await _permitted() || await requestPermission()) {
-        // Laid behind the user rather than in front of them: ninety
-        // days with their pictures is seconds of platform calls on a
+        // Laid behind the user rather than in front of them: a month
+        // of days with their pictures is seconds of platform calls on a
         // slow phone, and onboarding's last button used to wait for
         // every one of them, looking frozen.
         unawaited(_armAll().catchError((_) {}));
@@ -610,11 +638,15 @@ abstract final class ReminderService {
     // in Jakarta.
     final prefs = await _loadPrefs();
     final horizon = _horizonFor(prefs['alarmCap']);
+    // And one laid at another length — the 90 days builds before
+    // 2026-10-13 laid on Android — or, there, a week ago or more.
     if (!force &&
         prefs['copy'] == ReminderCopy.version &&
         prefs['lang'] == l.lang.code &&
         prefs['zone'] == tz.local.name &&
         prefs['shares'] == shares.signature &&
+        prefs['horizon'] == horizon &&
+        (_iOS || _laidWithin(prefs['laidOn'], _relayAfter)) &&
         await _coverageIsHealthy(_dailyBase, horizon)) {
       await _retireOldWindows();
       return;
@@ -774,6 +806,10 @@ abstract final class ReminderService {
       'lang': l.lang.code,
       'zone': tz.local.name,
       'shares': shares.signature,
+      // What the next launch will ask for: the shorter window, when the
+      // phone refused an alarm of this one.
+      'horizon': cap != null ? _horizonFor(cap) : horizon,
+      'laidOn': DateTime.now().toIso8601String(),
     });
   }
 
@@ -852,12 +888,14 @@ abstract final class ReminderService {
   ///
   /// Laying a window down costs one platform call per day, so doing it
   /// at every cold launch would be wasteful; doing it only when the
-  /// window is half spent keeps that to roughly once a month on iOS and
-  /// once a quarter on Android, and still leaves weeks of slack.
+  /// window is half spent keeps that to roughly every two weeks, and
+  /// still leaves weeks of slack.
   ///
-  /// Counted from what the OS actually still holds rather than from a
-  /// date written down here, so it self-corrects if the system ever
-  /// drops our alarms behind our back.
+  /// Counted from what the plugin still lists. On iOS that is what the
+  /// OS holds, so it self-corrects if the system drops one. On Android
+  /// it is the plugin's own list, which keeps an alarm the system
+  /// dropped; there the window is also laid again weekly
+  /// ([_relayAfter]).
   static Future<bool> _coverageIsHealthy(int baseId, int horizon) async {
     try {
       final pending = await _plugin.pendingNotificationRequests();
