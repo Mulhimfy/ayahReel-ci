@@ -1,0 +1,895 @@
+# Codemagic CI — iOS App Store build for AyahReel.
+#
+# BEFORE THE FIRST RUN, four things must be set up in the Codemagic UI. None of
+# them can live in this file:
+#
+#   1. Connect this repo. Codemagic builds from a hosted git remote; the repo
+#      currently has none (`git remote -v` is empty).
+#   2. Team integrations -> Apple Developer Portal -> add the App Store Connect
+#      API key (Key ID PCCGPRB5YD, Issuer db2e1474-4b8c-4a69-b318-7fa020ce74ff,
+#      private key AuthKey_PCCGPRB5YD.p8). Name it exactly as referenced under
+#      `integrations:` below, or change the name here to match.
+#   3. App settings -> Environment variables -> add CERTIFICATE_PRIVATE_KEY
+#      (contents of C:\Users\dell\keys\ayahreel-ios-cert-key, an RSA PEM),
+#      mark it Secret, put it in a group named `ios_signing`. Without it the
+#      signing step dies with "Cannot save Signing Certificates without
+#      certificate private key" — the ASC API key can create certificates,
+#      but Apple never stores private keys, so we must supply a stable one.
+#      There is still no .p12 or .mobileprovision to upload; the certificate
+#      and profile are minted from this key + the API key on first run and
+#      reused afterwards.
+#   4. App settings -> Environment variables -> add SHOREBIRD_TOKEN, mark it
+#      Secret, put it in a group named `shorebird`. Mint the value as an API key
+#      at https://console.shorebird.dev (the older `shorebird login:ci` command
+#      has been retired and now just points here). The build releases
+#      through Shorebird rather than plain Flutter so the binary ships with the
+#      updater in it — see the Build IPA step.
+#
+# The bundle id below MUST stay `com.ayahReel.app`, capital R. That is how the
+# App Store Connect record (Apple ID 6794389870) is registered, and Apple
+# matches bundle ids case-sensitively — a lowercase build is rejected with
+# "no suitable application record found". Android deliberately keeps the
+# all-lowercase `com.ayahreel.app`; Play is a separate namespace. See LAUNCH.md.
+
+workflows:
+  ios-appstore:
+    name: iOS - App Store / TestFlight
+    max_build_duration: 60
+
+    integrations:
+      # Must match the App Store Connect key name in Codemagic's UI.
+      app_store_connect: AyahReel ASC key
+
+    # Builds are triggered from the terminal by pushing a version tag:
+    #
+    #   git tag v0.1.0 && git push origin v0.1.0
+    #
+    # Tags rather than every push to main, so ordinary commits don't each burn
+    # ~20 min of the monthly build allowance. Change `events` to `[push]` with a
+    # branch_patterns block if you'd rather build on every commit to main.
+    #
+    # The tag itself is cosmetic — it does not set the build number. Apple still
+    # decides that (see the Build IPA step).
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'v*'
+          include: true
+
+    environment:
+      groups:
+        # Must exist in the Codemagic UI and contain the secret variable
+        # CERTIFICATE_PRIVATE_KEY (see header comment, item 3).
+        # Also where GITHUB_TOKEN goes if you want the Podfile.lock pin
+        # below to work — a personal access token with `repo` scope. It
+        # deliberately does NOT get a group of its own: a group named in
+        # this list that does not exist in the Codemagic UI aborts the
+        # whole workflow before the first step ("references to unknown
+        # variable group(s)"), which is a hard failure in exchange for an
+        # optional optimisation. Only the variable matters; which group
+        # holds it does not.
+        - ios_signing
+        # Contains SHOREBIRD_TOKEN (see header comment, item 4). The Shorebird
+        # CLI reads that variable directly; there is no login step.
+        - shorebird
+      # flutter_version.txt's Flutter, written out because Codemagic can't
+      # read the file: tool/check_flutter_version.sh fails CI if the two
+      # differ. pubspec.lock is committed and this app has 9 native plugins,
+      # so a Flutter bump changes native code and invalidates every existing
+      # Shorebird patch. Do not float this to `stable`.
+      flutter: 3.47.5
+      # `latest` until a build is green, then pin it to whatever that build used
+      # — an Xcode major bump can change signing and bitcode behaviour.
+      xcode: latest
+      cocoapods: default
+      # No `ios_signing:` block here on purpose. It runs a strict lookup during
+      # build initialisation and aborts everything before the first step when
+      # nothing matches ("No matching profiles found for bundle identifier"),
+      # with no log to read. Signing is set up in a script step instead, which
+      # can create what is missing rather than only fetch it.
+      vars:
+        # Used to ask Apple for the last accepted build number.
+        APP_STORE_APPLE_ID: 6794389870
+
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+
+      # kAppVersion is what the update checker compares the published feed
+      # against, and it has to equal the version this build ships as. Doing
+      # it here rather than trusting a hand edit means the only number
+      # anyone bumps for a release is pubspec.yaml's. A no-op when the two
+      # already agree — which the Test step below insists on anyway.
+      #
+      # Invoked through `bash` rather than as `./tool/sync-version.sh`: this
+      # repo is authored on Windows, where git records no executable bit, so
+      # the file arrives here mode 644 and running it directly dies on
+      # "Permission denied" (exit 126). `bash <script>` does not care.
+      - name: Sync app version
+        script: bash tool/sync-version.sh
+
+      - name: Install CocoaPods dependencies
+        script: find . -name "Podfile" -execdir pod install \;
+
+      - name: Install Shorebird
+        script: |
+          set -euo pipefail
+
+          if [ -z "${SHOREBIRD_TOKEN:-}" ]; then
+            echo "SHOREBIRD_TOKEN is not set." >&2
+            echo "Add it as a secret env var in the 'shorebird' group in the Codemagic UI" >&2
+            echo "(mint an API key at https://console.shorebird.dev)." >&2
+            exit 1
+          fi
+
+          curl --proto '=https' --tlsv1.2 -sSf \
+            https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | bash
+
+          # Each script step is its own shell, so exporting PATH here would be
+          # lost. CM_ENV is how Codemagic carries a variable to later steps.
+          echo "PATH=$PATH:$HOME/.shorebird/bin" >> "$CM_ENV"
+
+      - name: Fetch signing certificate and provisioning profile
+        script: |
+          set -euo pipefail
+
+          # Fail fast with a readable message instead of the CLI's cryptic
+          # "Cannot save Signing Certificates without certificate private key".
+          if [ -z "${CERTIFICATE_PRIVATE_KEY:-}" ]; then
+            echo "CERTIFICATE_PRIVATE_KEY is not set." >&2
+            echo "Add it as a secret env var in the 'ios_signing' group in the Codemagic UI" >&2
+            echo "(contents of C:\\Users\\dell\\keys\\ayahreel-ios-cert-key)." >&2
+            exit 1
+          fi
+
+          # --create is the whole point: it lets the App Store Connect key mint
+          # the distribution certificate and the provisioning profile itself.
+          # Generating a certificate the usual way needs a CSR from a Mac
+          # keychain, and there is no Mac here — the build machine is the only
+          # macOS in this pipeline, so it makes its own from
+          # CERTIFICATE_PRIVATE_KEY. The key must stay the same across builds:
+          # certificates are matched to it by public key, so a fresh key each
+          # run would mint a new certificate every time until Apple's limit
+          # (2 distribution certs) is hit.
+          #
+          # Already-existing files are reused, so this is safe to re-run.
+          keychain initialize
+          app-store-connect fetch-signing-files com.ayahReel.app \
+            --type IOS_APP_STORE \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
+            --create
+          # The home-screen widget is an app extension with a bundle id
+          # of its own, and an extension is signed with its own profile.
+          # --create registers the id in the portal the first time. No
+          # capabilities are needed on it: the widget shares nothing
+          # with the app (no App Group), it carries its own verse list.
+          app-store-connect fetch-signing-files com.ayahReel.app.AyahWidget \
+            --type IOS_APP_STORE \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
+            --create
+          keychain add-certificates
+          xcode-project use-profiles
+
+      - name: Analyze
+        script: flutter analyze
+
+      - name: Test
+        script: flutter test
+
+      - name: Build IPA
+        script: |
+          set -euo pipefail
+
+          # The build number comes from Apple, not from build_number.txt.
+          #
+          # build_number.txt + tool/build-number.sh only work when the bumped
+          # file is committed back, which cannot happen here: Codemagic clones
+          # the repo fresh, the script would write into a workspace that is then
+          # thrown away, and every build would emit the same CFBundleVersion.
+          # Apple accepts the first and rejects the rest as duplicates.
+          #
+          # Asking Apple sidesteps that entirely and is immune to any counter
+          # resetting. Gaps in the sequence are legal; only "strictly greater
+          # than the last accepted upload" matters.
+          #
+          # BOTH trains have to be asked. This workflow publishes with
+          # submit_to_app_store: false, so builds land in TestFlight and never
+          # become App Store versions — get-latest-app-store-build-number alone
+          # answers "none" forever, every build computes 1, and Apple rejects
+          # each one after the first as a duplicate CFBundleVersion. Taking the
+          # larger of the two is what actually makes this climb every build.
+          #
+          # The `|| true` on each handles a train with nothing in it yet: the
+          # command exits non-zero and prints nothing, which `set -e` would
+          # otherwise turn into a failed build on the very first run.
+          LATEST_TESTFLIGHT=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || true)
+          LATEST_APPSTORE=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || true)
+
+          # The CLI prints a bare integer on success and an error string on
+          # failure. Treat anything that is not purely digits as "no builds",
+          # rather than salvaging digits out of it — an error like
+          # "Error 404: not found" would otherwise be read as build 404 and
+          # burn the number range for good.
+          only_number () {
+            local v
+            v=$(printf '%s' "$1" | tr -d '[:space:]')
+            case "$v" in
+              '' | *[!0-9]*) printf '0' ;;
+              *) printf '%s' "$v" ;;
+            esac
+          }
+          LATEST_TESTFLIGHT=$(only_number "$LATEST_TESTFLIGHT")
+          LATEST_APPSTORE=$(only_number "$LATEST_APPSTORE")
+
+          LATEST=$(( LATEST_TESTFLIGHT > LATEST_APPSTORE ? LATEST_TESTFLIGHT : LATEST_APPSTORE ))
+          BUILD_NUMBER=$(( LATEST + 1 ))
+
+          echo "Latest build — TestFlight: ${LATEST_TESTFLIGHT}, App Store: ${LATEST_APPSTORE}"
+
+          # Read from pubspec rather than hardcoded: this string is what a
+          # later `shorebird patch ios --release-version ...` must match
+          # exactly, so it must never drift from what was actually built.
+          APP_VERSION=$(sed -n 's/^version: *\([^+ ]*\).*/\1/p' pubspec.yaml | head -1)
+
+          echo "Building CFBundleVersion $BUILD_NUMBER"
+          echo "Shorebird release-version for this build will be $APP_VERSION+$BUILD_NUMBER"
+
+          # `shorebird release ios` wraps `flutter build ipa` and links the
+          # updater into the binary. A plain `flutter build ipa` produces an app
+          # with nothing listening for patches, so every Dart fix would need a
+          # fresh review — which is exactly the state builds up to vc8 are in.
+          # Patch a release cut here with the ios-patch workflow below, whose
+          # tag carries the release-version printed just above:
+          #
+          #   git tag patch-$APP_VERSION+$BUILD_NUMBER && git push origin ...
+          #
+          # --flutter-version is flutter_version.txt's: the Flutter that the
+          # Analyze and Test steps above, the preview APKs and GitHub's tests
+          # use too (tool/check_flutter_version.sh). Without it Shorebird
+          # builds with its newest Flutter, which nothing was tested on.
+          # Shorebird only builds versions it carries
+          # (`shorebird flutter versions list`).
+          #
+          # META_APP_ID is what Instagram checks before it will take
+          # Meta's straight-to-Reels hand-off, and it earns the "shared
+          # from AyahReel" line on the finished reel
+          # (lib/data/instagram_share.dart). The button works without
+          # it — the reel goes over by a plain send, into the same
+          # composer, unattributed — so unset in the Codemagic UI is a
+          # working state, just not the best one. It is a
+          # Dart compile-time constant though, so whatever it is here has to
+          # be identical in `shorebird patch ios` below: a patch built
+          # against a different value is a patch that changes a const, which
+          # is the one thing Shorebird cannot ship.
+          #
+          # Everything after `--` is forwarded to `flutter build ipa` untouched.
+          shorebird release ios --flutter-version="$(tr -d '[:space:]' < flutter_version.txt)" \
+            -- \
+            --build-number="$BUILD_NUMBER" \
+            --dart-define=META_APP_ID="${META_APP_ID:-}" \
+            --export-options-plist=/Users/builder/export_options.plist
+
+      # Podfile.lock cannot be generated on Windows — pod install needs macOS —
+      # so this build machine is the only place it can come from. Without it in
+      # the repo, CI resolves fresh pod versions on every run, native code
+      # shifts under the app, and Shorebird refuses a later patch as
+      # incompatible with the release it was cut against.
+      #
+      # Runs after the build on purpose: only a resolution that actually built
+      # is worth pinning. Never fails the build — a lock that didn't make it
+      # back is a missed optimisation, not a broken release.
+      - name: Pin Podfile.lock back into the repo
+        ignore_failure: true
+        script: |
+          set -euo pipefail
+
+          if [ -z "${GITHUB_TOKEN:-}" ]; then
+            echo "GITHUB_TOKEN not set — skipping. Add it as a secret env var"
+            echo "in the 'ios_signing' group to have CI pin Podfile.lock itself."
+            exit 0
+          fi
+          if [ ! -f ios/Podfile.lock ]; then
+            echo "No ios/Podfile.lock was produced; nothing to pin."
+            exit 0
+          fi
+
+          # The build checks out the tag, so HEAD is detached. Move onto main
+          # before committing. Podfile.lock is untracked at this point, so the
+          # checkout leaves the freshly generated file in place.
+          git config user.name "Codemagic CI"
+          git config user.email "ci@ayahreel.app"
+          git remote set-url origin \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/Mulhimfy/ayahReel.git"
+          git fetch --quiet origin main
+          git checkout --quiet -B main origin/main
+
+          git add ios/Podfile.lock
+          if git diff --cached --quiet; then
+            echo "Podfile.lock already pinned and unchanged."
+            exit 0
+          fi
+
+          git commit --quiet -m "Pin ios/Podfile.lock from build $BUILD_NUMBER
+
+          Generated on the build machine; pod install cannot run on Windows.
+          Pinning it keeps native code stable between a release and the
+          Shorebird patches cut against it."
+          git push --quiet origin main
+          echo "Pinned ios/Podfile.lock onto main."
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      # Also kept as an artifact so the lock is downloadable even when the
+      # commit-back step above is skipped for a missing GITHUB_TOKEN.
+      - ios/Podfile.lock
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        # TestFlight, and then straight into App Review: the listing has
+        # carried its screenshots, icon and description since 1.0, so
+        # there is nothing left for a submission to be rejected for
+        # missing. The reviewed version still waits for a manual release
+        # in App Store Connect (Codemagic's default release type).
+        submit_to_testflight: true
+        submit_to_app_store: true
+      email:
+        recipients:
+          - ahmeddevfy@gmail.com
+        notify:
+          success: true
+          failure: true
+
+  # ---------------------------------------------------------------------------
+
+  ios-patch:
+    name: iOS - Shorebird OTA patch
+    max_build_duration: 60
+
+    integrations:
+      app_store_connect: AyahReel ASC key
+
+    # Ships a Dart-only fix straight to installed apps — no App Review, no
+    # TestFlight round trip. Triggered by a tag naming the release to patch:
+    #
+    #   git tag patch-0.1.0+12 && git push origin patch-0.1.0+12
+    #
+    # The part after `patch-` must be the release version EXACTLY as built.
+    # The ios-appstore build prints it ("Shorebird release-version for this
+    # build will be ...") and `shorebird releases list` can be used to confirm.
+    #
+    # A release accepts any number of patches, each superseding the last, but
+    # git will not reuse a tag name. So for the second and later patches to
+    # one release, append `--<anything>`; it is stripped before the version
+    # is read:
+    #
+    #   git tag patch-0.1.0+12--2      # patches 0.1.0+12 a second time
+    #   git tag patch-0.1.0+12--3      # and a third
+    #
+    # Before this, re-patching meant deleting the tag and pushing it again,
+    # which left no record of what shipped when.
+    #
+    # A patch exists only for the one release it was cut against. Patching
+    # 0.1.0+12 does nothing for users on 0.1.0+11 — each store build needs its
+    # own patch. Cut the patch from a commit that is the release commit plus
+    # the fix, or the diff will carry unrelated changes into it.
+    #
+    # This workflow exists because patches cannot be built on Windows: the
+    # compile needs the Xcode toolchain, same as the release.
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'patch-*'
+          include: true
+
+    environment:
+      groups:
+        - ios_signing
+        - shorebird
+      flutter: 3.47.5
+      # Pinned to the Xcode the 1.0.6 release was built with (its
+      # Assets.car names Xcode 26.6 (17F113)). A different asset compiler
+      # re-authors Assets.car, which Shorebird counts as an asset change
+      # and refuses to patch over — 1.0.5 sat on 26.4.1 for that reason,
+      # and the first 1.0.6 patch failed on it the other way round. Move
+      # this only together with a store build, to what that build used.
+      # 1.0.7 (build 9) shares 1.0.6's sdkBuild 23F81a, so this holds for
+      # both; how to check the next one is in RELEASES.md.
+      xcode: 26.6
+      cocoapods: default
+
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+
+      - name: Install CocoaPods dependencies
+        script: find . -name "Podfile" -execdir pod install \;
+
+      - name: Install Shorebird
+        script: |
+          set -euo pipefail
+
+          if [ -z "${SHOREBIRD_TOKEN:-}" ]; then
+            echo "SHOREBIRD_TOKEN is not set." >&2
+            echo "Add it as a secret env var in the 'shorebird' group in the Codemagic UI" >&2
+            echo "(mint an API key at https://console.shorebird.dev)." >&2
+            exit 1
+          fi
+
+          curl --proto '=https' --tlsv1.2 -sSf \
+            https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | bash
+
+          echo "PATH=$PATH:$HOME/.shorebird/bin" >> "$CM_ENV"
+
+      # Same step as the release workflow: a patch is compiled and archived
+      # like any build, so it needs the certificate and profile too. Both are
+      # reused when they already exist, so re-running costs nothing.
+      - name: Fetch signing certificate and provisioning profile
+        script: |
+          set -euo pipefail
+
+          if [ -z "${CERTIFICATE_PRIVATE_KEY:-}" ]; then
+            echo "CERTIFICATE_PRIVATE_KEY is not set." >&2
+            echo "Add it as a secret env var in the 'ios_signing' group in the Codemagic UI" >&2
+            echo "(contents of C:\\Users\\dell\\keys\\ayahreel-ios-cert-key)." >&2
+            exit 1
+          fi
+
+          keychain initialize
+          app-store-connect fetch-signing-files com.ayahReel.app \
+            --type IOS_APP_STORE \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
+            --create
+          app-store-connect fetch-signing-files com.ayahReel.app.AyahWidget \
+            --type IOS_APP_STORE \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
+            --create
+          keychain add-certificates
+          xcode-project use-profiles
+
+      # A patch reaches users without review, so the gate matters MORE here
+      # than on the store build, not less. Nothing ships if these fail.
+      - name: Analyze
+        script: flutter analyze
+
+      - name: Test
+        script: flutter test
+
+      - name: Patch
+        script: |
+          set -euo pipefail
+
+          # CM_TAG is the tag that triggered this build, e.g. patch-0.1.0+12.
+          RELEASE_VERSION="${CM_TAG#patch-}"
+
+          if [ -z "$RELEASE_VERSION" ] || [ "$RELEASE_VERSION" = "$CM_TAG" ]; then
+            echo "Tag '$CM_TAG' is not of the form patch-<release-version>." >&2
+            echo "Example: git tag patch-0.1.0+12" >&2
+            exit 1
+          fi
+
+          # Everything from the first `--` on is a uniquifier, not part of the
+          # version — see the header comment. A release version never contains
+          # `--` (it is `<major>.<minor>.<patch>+<build>`), so this can never
+          # truncate a real one.
+          RELEASE_VERSION="${RELEASE_VERSION%%--*}"
+
+          if [ -z "$RELEASE_VERSION" ]; then
+            echo "Tag '$CM_TAG' has no release version before its '--'." >&2
+            echo "Example: git tag patch-0.1.0+12--2" >&2
+            exit 1
+          fi
+
+          echo "Patching release $RELEASE_VERSION"
+
+          # kAppVersion comes from the TAG here, not from pubspec.yaml, and
+          # this is the one place the two genuinely differ.
+          #
+          # A patch pushed at an older release — say the update checker
+          # itself, sent back to users still on 1.0.1 — is cut from a commit
+          # whose pubspec has long since moved on to 1.0.2. Ship that number
+          # and every one of those phones reads itself as already current,
+          # compares 1.0.2 against a feed saying 1.0.2, and stays silent
+          # forever. The users the patch existed for are the ones it would
+          # fail. The tag names the release actually being patched, so the
+          # tag is the honest source.
+          #
+          # In the ordinary case — patching the release just built from this
+          # same commit — the tag and pubspec agree and this changes nothing.
+          #
+          # It runs after Analyze and Test on purpose: those gate the tree as
+          # committed, where version_sync_test.dart requires the two to match.
+          echo "Setting kAppVersion to $(bash tool/sync-version.sh "$RELEASE_VERSION")"
+
+          # No --allow-native-diffs / --allow-asset-diffs on purpose. Shorebird
+          # refuses by default when the patch touches native code or assets,
+          # because neither ships over the air — the patch would appear to
+          # succeed and then behave differently from what was tested. If this
+          # step fails on a diff check, the change needs a real store build,
+          # which is exactly the right answer.
+          #
+          # The --dart-define has to match the release it patches, exactly;
+          # see the release workflow above for what happens otherwise.
+          shorebird patch ios --release-version "$RELEASE_VERSION" \
+            -- \
+            --dart-define=META_APP_ID="${META_APP_ID:-}"
+
+    artifacts:
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      # No app_store_connect block: a patch never touches Apple.
+      email:
+        recipients:
+          - ahmeddevfy@gmail.com
+        notify:
+          success: true
+          failure: true
+
+  android-patch:
+    name: Android - Shorebird OTA patch
+    max_build_duration: 90
+
+    # The Android twin of ios-patch, so a Dart-only fix can reach Android
+    # phones without the Windows PC that holds the release keystore. A
+    # patch needs no keystore: Shorebird ships the compiled Dart, not a
+    # signed app, and checks the build against the release's own
+    # artifacts, fetched from Shorebird with the token.
+    #
+    # Triggered by a tag naming the release EXACTLY as Shorebird lists
+    # it (`shorebird releases list`; Android and iOS build numbers
+    # differ):
+    #
+    #   git tag apatch-dry-1.0.8+19     # check only: build, compare, upload nothing
+    #   git tag apatch-1.0.8+19         # check, and publish if the check is clean
+    #   git tag apatch-1.0.8+19--2      # a later patch of the same release
+    #
+    # `apatch-`, not `patch-`: ios-patch takes every `patch-*` tag.
+    #
+    # The check is the dry run CLAUDE.md asks for before any Android
+    # patch. A publishing tag runs it first and stops unless it reports
+    # no native and no asset change — the same refusal as leaving out
+    # --allow-native-diffs and --allow-asset-diffs. --allow-native-diffs
+    # is never passed. --allow-asset-diffs is passed in one case only,
+    # allowed by the user on 2026-10-05: a release built on the Windows
+    # PC, whose NOTICES.Z and widget quran_verses.json no Mac can write
+    # byte for byte, when tool/verify_asset_diffs.py finds those two and
+    # nothing else changed, with the same content as the release's own
+    # (a patch never carries assets; phones keep the release's). Java and
+    # Kotlin are compiled here as they were for the
+    # release; should a different JDK make them come out different,
+    # that refusal is what says so, and the patch goes back to the PC.
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'apatch-*'
+          include: true
+
+    environment:
+      groups:
+        - shorebird
+      flutter: 3.47.5
+      java: 21
+
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+
+      - name: Install Shorebird
+        script: |
+          set -euo pipefail
+
+          if [ -z "${SHOREBIRD_TOKEN:-}" ]; then
+            echo "SHOREBIRD_TOKEN is not set." >&2
+            echo "Add it as a secret env var in the 'shorebird' group in the Codemagic UI" >&2
+            echo "(mint an API key at https://console.shorebird.dev)." >&2
+            exit 1
+          fi
+
+          curl --proto '=https' --tlsv1.2 -sSf \
+            https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | bash
+
+          echo "PATH=$PATH:$HOME/.shorebird/bin" >> "$CM_ENV"
+
+      # The same gate as ios-patch: nothing reaches a phone that fails it.
+      - name: Analyze
+        script: flutter analyze
+
+      - name: Test
+        script: flutter test
+
+      - name: Patch
+        script: |
+          set -euo pipefail
+
+          TAG_REST="${CM_TAG#apatch-}"
+          if [ "$TAG_REST" = "$CM_TAG" ]; then
+            echo "Tag '$CM_TAG' is not of the form apatch-[dry-]<release-version>." >&2
+            exit 1
+          fi
+          DRY=0
+          case "$TAG_REST" in
+            dry-*) DRY=1; TAG_REST="${TAG_REST#dry-}" ;;
+          esac
+          # Everything from the first `--` on is a uniquifier, as in ios-patch.
+          RELEASE_VERSION="${TAG_REST%%--*}"
+          if [ -z "$RELEASE_VERSION" ]; then
+            echo "Tag '$CM_TAG' names no release version." >&2
+            exit 1
+          fi
+
+          echo "Release $RELEASE_VERSION, $([ $DRY = 1 ] && echo 'check only' || echo 'check, then publish')"
+          echo "Setting kAppVersion to $(bash tool/sync-version.sh "$RELEASE_VERSION")"
+
+          # gradle.properties asks for an 8 GB heap, sized for the PC; on
+          # this machine that is all of its memory. JVM flags only — what
+          # Gradle builds is the same either way.
+          sed -i.bak 's/-Xmx8G/-Xmx4G/' android/gradle.properties
+
+          # No --dart-define: every Android release so far was built
+          # without one (see RELEASES.md), and a patch must compile to the
+          # same constants as its release.
+          { echo "== java"; java -version; echo "== shorebird"; shorebird --version; } \
+            > env.log 2>&1 || true
+          ALLOW=""
+          dry_run() {
+            set +e
+            shorebird --verbose patch android \
+              --release-version="$RELEASE_VERSION" --dry-run $ALLOW > dry-run.log 2>&1
+            STATUS=$?
+            set -e
+            tail -n 60 dry-run.log
+          }
+          dry_run
+          # A release built on the PC: its NOTICES.Z and the widget's
+          # quran_verses.json come out of any Mac in other bytes (the gzip
+          # header's OS byte, line endings). When those two are all that
+          # changed and their content is the release's own, they are
+          # allowed, and the check runs again on that footing. Anything
+          # else changed, or other content, and nothing is allowed.
+          if grep -qi 'asset changes' dry-run.log &&
+             ! grep -qiE 'Kotlin or Java|native code changes' dry-run.log; then
+            echo "== Asset changes: comparing with the release's own bundle"
+            set +e
+            python3 tool/verify_asset_diffs.py dry-run.log 2>&1 | tee asset-check.log
+            VERIFIED=${PIPESTATUS[0]}
+            set -e
+            if [ "$VERIFIED" = 0 ]; then
+              mv dry-run.log dry-run-1.log
+              ALLOW="--allow-asset-diffs"
+              echo "== Checking again, the two verified assets allowed"
+              dry_run
+            fi
+          fi
+          # Clean means Shorebird finished, said so, and found no change it
+          # can't ship: Kotlin or Java (native) or assets.
+          # No asset change at all, or (with the exception) only the two
+          # verified again on the second check's own list.
+          ASSETS_OK=0
+          if ! grep -qi 'asset changes' dry-run.log; then
+            ASSETS_OK=1
+          elif [ -n "$ALLOW" ]; then
+            # The list it was allowed on was verified above; one this
+            # check prints again must pass the same test.
+            if ! grep -q 'Changed files:' dry-run.log ||
+               python3 tool/verify_asset_diffs.py dry-run.log > asset-check-2.log 2>&1; then
+              ASSETS_OK=1
+            fi
+          fi
+          CLEAN=0
+          if [ "$STATUS" = 0 ] && grep -qi 'No issues detected' dry-run.log &&
+             ! grep -qiE 'Kotlin or Java|native code changes' dry-run.log &&
+             [ "$ASSETS_OK" = 1 ]; then
+            CLEAN=1
+          fi
+          has() { grep -qiE "$1" dry-run.log && echo 1 || echo 0; }
+          {
+            echo "release=$RELEASE_VERSION status=$STATUS clean=$CLEAN"
+            echo "exception=$([ -n "$ALLOW" ] && echo 1 || echo 0)"
+            echo "noissues=$(has 'No issues detected')"
+            echo "native=$(has 'Kotlin or Java|native code changes')"
+            echo "asset=$(has 'asset changes')"
+            echo "gradlefail=$(has 'FAILURE: Build failed|BUILD FAILED|Gradle task .* failed')"
+            echo "norelease=$(has 'release .*not found|No release found|could not find release')"
+          } | tee verdict.txt
+          # What Shorebird named as changed, for the Assets steps below.
+          sed -n '/asset changes/,/^[[:space:]]*$/p' dry-run.log > changed-assets.txt || true
+          cat changed-assets.txt
+
+          # This step never fails on a verdict, so the Verdict steps after
+          # it always run and show what the check found, one tick or cross
+          # each, in the GitHub check: a failed build's log needs a
+          # Codemagic login and its email links nothing. Whether anything
+          # shipped is the last step, "Published".
+          if [ "$DRY" = 1 ]; then
+            echo "Check only; nothing published."
+            exit 0
+          fi
+          if [ "$CLEAN" != 1 ]; then
+            echo "The check was not clean (dry-run.log); nothing published." >&2
+            exit 0
+          fi
+
+          shorebird patch android --release-version="$RELEASE_VERSION" $ALLOW
+          echo "published=1" >> verdict.txt
+
+      # The verdict again, one fact a step, for anyone who can't open the
+      # log: each shows as a tick or a cross in the GitHub check, and
+      # none of them fails the build.
+      - name: "Verdict: Shorebird finished"
+        ignore_failure: true
+        script: grep -q 'status=0 ' verdict.txt
+      - name: "Verdict: Gradle built"
+        ignore_failure: true
+        script: grep -q '^gradlefail=0' verdict.txt
+      - name: "Verdict: release found"
+        ignore_failure: true
+        script: grep -q '^norelease=0' verdict.txt
+      - name: "Verdict: no Kotlin or Java change"
+        ignore_failure: true
+        script: grep -q '^native=0' verdict.txt
+      - name: "Verdict: no asset change"
+        ignore_failure: true
+        script: grep -q '^asset=0' verdict.txt
+      - name: "Verdict: No issues detected"
+        ignore_failure: true
+        script: grep -q '^noissues=1' verdict.txt
+      - name: "Verdict: clean"
+        ignore_failure: true
+        script: grep -q 'clean=1' verdict.txt
+      # A tick here means the check passed only by the PC exception: the
+      # two assets differed in bytes, and verify_asset_diffs.py found the
+      # release's content in both.
+      - name: "Verdict: no PC asset exception needed"
+        ignore_failure: true
+        script: grep -q '^exception=0' verdict.txt
+      # And which assets, when there are any: a release built on the
+      # Windows PC can differ from a build here in line endings or in
+      # what a host tool (font subsetter, shader compiler) wrote.
+      - name: "Assets: shorebird.yaml same"
+        ignore_failure: true
+        script: "! grep -q 'shorebird.yaml' changed-assets.txt"
+      - name: "Assets: icon font same"
+        ignore_failure: true
+        script: "! grep -qi 'MaterialIcons' changed-assets.txt"
+      - name: "Assets: shaders same"
+        ignore_failure: true
+        script: "! grep -qi 'shaders/' changed-assets.txt"
+      - name: "Assets: NOTICES same"
+        ignore_failure: true
+        script: "! grep -qi 'NOTICES' changed-assets.txt"
+      - name: "Assets: manifests same"
+        ignore_failure: true
+        script: "! grep -qiE 'AssetManifest|FontManifest' changed-assets.txt"
+      - name: "Assets: other fonts same"
+        ignore_failure: true
+        script: "! grep -iE '\\.(ttf|otf)' changed-assets.txt | grep -qvi 'MaterialIcons'"
+      - name: "Assets: json and README same"
+        ignore_failure: true
+        script: "! grep -qiE '\\.json|README' changed-assets.txt"
+      - name: "Assets: pictures and sound same"
+        ignore_failure: true
+        script: "! grep -qiE '\\.(jpg|png|mp3|mp4|gz)' changed-assets.txt"
+      # Red when a publishing tag shipped nothing; a check-only tag never
+      # publishes, and passes here.
+      - name: Published
+        script: |
+          case "$CM_TAG" in
+            apatch-dry-*) exit 0 ;;
+          esac
+          grep -q '^published=1' verdict.txt
+
+    artifacts:
+      - dry-run.log
+      - dry-run-1.log
+      - asset-check.log
+      - asset-check-2.log
+      - verdict.txt
+      - changed-assets.txt
+      - env.log
+
+    publishing:
+      email:
+        recipients:
+          - ahmeddevfy@gmail.com
+        notify:
+          success: true
+          failure: true
+
+  android-release:
+    name: Android - Shorebird store build (AAB)
+    max_build_duration: 90
+
+    # The Play upload, built here instead of on the PC:
+    # `shorebird release android`, signed with the upload keystore kept in
+    # Codemagic as `ayahreel_upload` (Team settings → codemagic.yaml
+    # settings → Code signing identities → Android keystores: the .jks,
+    # its password, alias `upload`, the key password). Triggered by a tag
+    # naming the build number, which must match pubspec.yaml:
+    #
+    #   git tag arelease-20 && git push origin arelease-20
+    #
+    # The .aab is this build's artifact, downloaded from its page and
+    # uploaded to Play. A release built here also keeps its patches here:
+    # android-patch builds the same bytes, which against a PC-built
+    # release it can't (see RELEASES.md, "Android patches from Codemagic").
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'arelease-*'
+          include: true
+
+    environment:
+      android_signing:
+        - ayahreel_upload
+      groups:
+        - shorebird
+      flutter: 3.47.5
+      java: 21
+
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+
+      - name: Install Shorebird
+        script: |
+          set -euo pipefail
+          if [ -z "${SHOREBIRD_TOKEN:-}" ]; then
+            echo "SHOREBIRD_TOKEN is not set (the 'shorebird' group)." >&2
+            exit 1
+          fi
+          curl --proto '=https' --tlsv1.2 -sSf \
+            https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | bash
+          echo "PATH=$PATH:$HOME/.shorebird/bin" >> "$CM_ENV"
+
+      - name: Analyze
+        script: flutter analyze
+
+      - name: Test
+        script: flutter test
+
+      # build.gradle.kts signs with whatever android/key.properties names,
+      # and falls back to the debug key without it — which Play refuses.
+      # Codemagic has put the keystore on disk and its passwords in CM_*.
+      - name: Signing
+        script: |
+          set -euo pipefail
+          if [ -z "${CM_KEYSTORE_PATH:-}" ]; then
+            echo "No keystore: upload it to Codemagic as ayahreel_upload." >&2
+            exit 1
+          fi
+          cat > android/key.properties <<EOF
+          storePassword=$CM_KEYSTORE_PASSWORD
+          keyPassword=$CM_KEY_PASSWORD
+          keyAlias=$CM_KEY_ALIAS
+          storeFile=$CM_KEYSTORE_PATH
+          EOF
+
+      - name: Build AAB
+        script: |
+          set -euo pipefail
+          BUILD="${CM_TAG#arelease-}"
+          WANT="$(sed -n 's/^version: .*+//p' pubspec.yaml)"
+          if [ "$BUILD" != "$WANT" ]; then
+            echo "Tag says build $BUILD, pubspec.yaml says $WANT." >&2
+            exit 1
+          fi
+          # JVM flags only; see android-patch.
+          sed -i.bak 's/-Xmx8G/-Xmx4G/' android/gradle.properties
+          shorebird release android --build-number="$BUILD" --flutter-version="$(tr -d '[:space:]' < flutter_version.txt)"
+
+    artifacts:
+      - build/app/outputs/bundle/release/*.aab
+
+    publishing:
+      email:
+        recipients:
+          - ahmeddevfy@gmail.com
+        notify:
+          success: true
+          failure: true

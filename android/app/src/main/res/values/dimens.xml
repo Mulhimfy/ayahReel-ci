@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Widget corners below Android 12, where the launcher's own
+         radius cannot be read. -->
+    <dimen name="widget_radius">16dp</dimen>
+</resources>
