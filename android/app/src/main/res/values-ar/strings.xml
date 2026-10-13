@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_name">آية من القرآن</string>
+    <string name="widget_description">آية من القرآن، مرتين في اليوم، على خلفية جديدة. انقرها لفتح التطبيق.</string>
+    <string name="widget_label">آية من القرآن</string>
+    <string name="widget_jumuah">اليوم الجمعة</string>
+</resources>
