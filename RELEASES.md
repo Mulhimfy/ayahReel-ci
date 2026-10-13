@@ -21,8 +21,8 @@ the facts came from.
 
 | Release (Shorebird) | Platform | Built from | Built | Xcode / SDK | Store state | Patches |
 |---|---|---|---|---|---|---|
-| `1.0.9+11` | iOS | `2c015f8` on `main` = the app code of `8e4b5fc` (the same as Android `1.0.9+23`) + `2c015f8` (the release jobs' fix, no app code). Tag `girelease-1.0.9--2`, GitHub run 38209584875 (`ios-release.yml`): Xcode 26.6, Shorebird 1.6.128, Flutter 3.47.5 (`ff900e7fba`); build number from Apple (TestFlight's newest was 9), passing over 10, which Shorebird had from the failed first run; "Published Release 1.0.9+11" (Shorebird release id 891550). IPA `com.ayahReel.app` 1.0.9 (11), `DTSDKBuild` `23F81a`, 74,903,081 bytes, kept 30 days as the run's `ipa` artifact; uploaded by altool 26.40.1 ~05:55 UTC (delivery `f9cf3315…`), processed VALID, no non-exempt encryption | 2026-10-12 (~05:54 UTC) | sdkBuild `23F81a` (Xcode 26.6, the `ios-patch.yml` pin) | App Store: **WAITING_FOR_REVIEW**: version 1.0.9 (`c54be1ce…`) submitted 2026-10-12 05:59:37 UTC (review submission `1ac02a03-6fbf-4044-8aa0-661d29c135de`), release type `AFTER_APPROVAL` (on sale by itself once approved), no phased release, copyright "2026 AyahReel", What's New from `docs/store/release-notes/1.0.9/app-store.json` (en-US). iOS buyers go from 1.0.7 straight to this; there was never an iOS 1.0.8. Feed `ios.latest` not raised yet (only once the App Store serves it) | none; patch with `gipatch-1.0.9+11` |
-| `1.0.9+23` | Android | `8e4b5fc` on `main` (2026-10-12): `main`'s `f81f0d8` + the merge of `feat/live-recitation` at `e6cf90d` (`ff5d388`: live recitation in the verse picker, Instagram Story, Your verses / My works, the Tanafus card, share notifications, frames and kept colours, the `:render` save process, `BootReceiver`, and the 2026-10-11 save and crash fixes) + `a97738f` (version 1.0.9+23, `kAppVersion` 1.0.9, `build_number.txt` 23, the GitHub release jobs) + `8e4b5fc` (release notes). Tag `garelease-23`, GitHub run 38208595778 (`android-release.yml`): `shorebird release android --build-number=23 --flutter-version=3.47.5`, Shorebird 1.6.128, Flutter 3.47.5 (`ff900e7fba`); Gradle printed "AyahReel version: 1.0.9+23"; "Published Release 1.0.9+23" (Shorebird release id 891549). Before it: `flutter analyze` clean and 936 tests passed, 143 skipped (run 38208119290, on `a97738f`, whose app code is the tag's) | 2026-10-12 (~05:50 UTC) | — | Play: **production, status completed (everyone, no staged rollout), sent for review** 2026-10-12 ~05:52 UTC by the same run's Play job (`tool/play_upload.mjs release`), replacing 22 (1.0.8); notes from `docs/store/release-notes/1.0.9/play.json` in en-US, ar, fr-FR, hi-IN, id, ru-RU. Bundle: `com.ayahreel.app`, versionCode 23, versionName 1.0.9 (bundletool), signed with the upload key `C2:C9:DA:6D…` (keytool), 128,505,829 bytes, SHA-256 `9a0986ff…`; kept 30 days as the run's `aab` artifact. Built on GitHub's Linux runner, so its patches need no asset exception. Feed `android.latest` not raised yet (only once Play serves it) | none |
+| `1.0.9+11` | iOS | `2c015f8` on `main` = the app code of `8e4b5fc` (the same as Android `1.0.9+23`) + `2c015f8` (the release jobs' fix, no app code). Tag `girelease-1.0.9--2`, GitHub run 38209584875 (`ios-release.yml`): Xcode 26.6, Shorebird 1.6.128, Flutter 3.47.5 (`ff900e7fba`); build number from Apple (TestFlight's newest was 9), passing over 10, which Shorebird had from the failed first run; "Published Release 1.0.9+11" (Shorebird release id 891550). IPA `com.ayahReel.app` 1.0.9 (11), `DTSDKBuild` `23F81a`, 74,903,081 bytes, kept 30 days as the run's `ipa` artifact; uploaded by altool 26.40.1 ~05:55 UTC (delivery `f9cf3315…`), processed VALID, no non-exempt encryption | 2026-10-12 (~05:54 UTC) | sdkBuild `23F81a` (Xcode 26.6, the `ios-patch.yml` pin) | App Store: **READY_FOR_SALE** (ASC API, checked 2026-10-13 ~18:10 UTC). Before that **WAITING_FOR_REVIEW**: version 1.0.9 (`c54be1ce…`) submitted 2026-10-12 05:59:37 UTC (review submission `1ac02a03-6fbf-4044-8aa0-661d29c135de`), release type `AFTER_APPROVAL` (on sale by itself once approved), no phased release, copyright "2026 AyahReel", What's New from `docs/store/release-notes/1.0.9/app-store.json` (en-US). iOS buyers go from 1.0.7 straight to this; there was never an iOS 1.0.8. Feed `ios.latest` not raised yet (only once the App Store serves it) | **Patch 1** (id 716474): **published to stable 2026-10-13** by `gipatch-1.0.9+11` on the public mirror (run 38448437728; Xcode 26.6, SDK `23F81a`): the same three fixes as Android `1.0.9+23` Patch 1, from `patch/1.0.9` = `d7e28c9`. See "Android patches from GitHub Actions", 2026-10-13. Next: `gipatch-1.0.9+11--2` |
+| `1.0.9+23` | Android | `8e4b5fc` on `main` (2026-10-12): `main`'s `f81f0d8` + the merge of `feat/live-recitation` at `e6cf90d` (`ff5d388`: live recitation in the verse picker, Instagram Story, Your verses / My works, the Tanafus card, share notifications, frames and kept colours, the `:render` save process, `BootReceiver`, and the 2026-10-11 save and crash fixes) + `a97738f` (version 1.0.9+23, `kAppVersion` 1.0.9, `build_number.txt` 23, the GitHub release jobs) + `8e4b5fc` (release notes). Tag `garelease-23`, GitHub run 38208595778 (`android-release.yml`): `shorebird release android --build-number=23 --flutter-version=3.47.5`, Shorebird 1.6.128, Flutter 3.47.5 (`ff900e7fba`); Gradle printed "AyahReel version: 1.0.9+23"; "Published Release 1.0.9+23" (Shorebird release id 891549). Before it: `flutter analyze` clean and 936 tests passed, 143 skipped (run 38208119290, on `a97738f`, whose app code is the tag's) | 2026-10-12 (~05:50 UTC) | — | Play: **production, status completed (everyone, no staged rollout), sent for review** 2026-10-12 ~05:52 UTC by the same run's Play job (`tool/play_upload.mjs release`), replacing 22 (1.0.8); notes from `docs/store/release-notes/1.0.9/play.json` in en-US, ar, fr-FR, hi-IN, id, ru-RU. Bundle: `com.ayahreel.app`, versionCode 23, versionName 1.0.9 (bundletool), signed with the upload key `C2:C9:DA:6D…` (keytool), 128,505,829 bytes, SHA-256 `9a0986ff…`; kept 30 days as the run's `aab` artifact. Built on GitHub's Linux runner, so its patches need no asset exception. Feed `android.latest` not raised yet (only once Play serves it) | **Patch 1** (id 716426): **published to stable 2026-10-13** by `gpatch-1.0.9+23` on the public mirror (run 38448430138, after the clean `gpatch-dry-1.0.9+23`, run 38446960751: "No issues detected", no native or asset diff): saves that play, reminders at 30 days, pictures that wait for a drawn frame; from `patch/1.0.9` = `d7e28c9` (mirror `4756e5d`). See "Android patches from GitHub Actions", 2026-10-13 |
 | `1.0.9+10` | iOS | `8e4b5fc` on `main`, tag `girelease-1.0.9`, GitHub run 38208596040 (`ios-release.yml`): Xcode 26.6, SDK `23F81a`, Shorebird 1.6.128, Flutter 3.47.5 (`ff900e7fba`) | 2026-10-12 (~05:40 UTC) | sdkBuild `23F81a` | **Never reached Apple. Do not patch it.** "Published Release 1.0.9+10" (Shorebird release id 891532), then the job's IPA check died on macOS's `unzip`, which has no `-W`, before the IPA was kept or uploaded. Shorebird makes one version+build once, so the release went out as `1.0.9+11` below; the job now keeps the IPA first and passes over numbers Shorebird has (`2c015f8`) | none |
 | `1.0.8+22` | Android | `2a1b5be` on `design/living-sky-home` = `17dd5b0` (origin's `21bb1c2` merged into the local `+21` commits on 2026-10-07) + the version bump: `1.0.8+21`'s code + `b96ee14` (photos FFmpeg's image reader can't open, such as the Galaxy S24 Ultra's HEIC, converted to PNG first; the encode's `.part` made in the render folder, so a cache sweep can't delete it mid-encode). `shorebird release android --build-number=22` on the PC's `C:\Users\dell\ayah_reels` checkout, Shorebird 1.6.123, Flutter 3.47.5; Gradle printed "AyahReel version: 1.0.8+22"; "Published Release 1.0.8+22" (Shorebird release id 881270). Before the build: `flutter analyze` clean; 849 tests pass, 142 skipped, 12 fail, the same Windows-only ones as `+21` | 2026-10-07 (~07:21 UTC) | — | Play: **production**, status completed, found by the Play check of 2026-10-12 ~05:21 UTC (run 38207576906; when it was rolled out is not recorded), until `1.0.9+23` passes review and takes over. Before that, in the bundle library, on no track — the Play check run of 2026-10-07 ~11:33 UTC (GitHub run 37614813659) lists bundles 11, 12, 16, 17, 19, 20, 21, 22; production holds 21 (completed) and an empty draft. When it was uploaded is not recorded. Play then refused a second upload of the same file ("Version code 22 has already been used"): an uploaded code is spent, so it is added to a release with "Add from library", not uploaded again. Rollout is the user's call. AAB copy at `D:\Downloads\ayahreel-1.0.8+22.aab`, 127,836,334 bytes; versionCode 22, versionName 1.0.8 (Gradle's merged manifest), signed with the upload key — SHA-1 `C2:C9:DA:6D…`, SHA-256 `CA:9D:DD:CF…`, same as `+21`; feed `android.latest` not raised. Built on the PC's CRLF checkout, so its patches are cut on the PC, or on Codemagic only under the two-asset exception | **Patch 1** (id 705044): **published to stable 2026-10-08 ~14:10 UTC** — the "None" verse translation (`75ffe97`) and, for the smallest phones, lean x264 plus a note that says where a lost save died (`4ade252`, see `EXPORT_MEMORY.md`); feedback code date `2026-10-08`. Dart only, no icon change — from `246325c` on `design/living-sky-home` (`git log 2a1b5be..` adds only these, ledger and CI commits), tag `gpatch-1.0.8+22--2`, by GitHub Actions `android-patch.yml` (Shorebird 1.6.124 on ubuntu-latest): dry run "No issues detected", no native change, only the two PC assets (`NOTICES.Z`, `quran_verses.json`), matched by `tool/verify_asset_diffs.py`, so published with the approved exception. Before it: `gpatch-dry-1.0.8+22` (Shorebird not on PATH), `gpatch-dry-1.0.8+22--2` (clean) and `gpatch-1.0.8+22` (runner out of disk; Shorebird showed no patch afterwards) |
 | `1.0.8+21` | Android | `532c86c` on `design/living-sky-home` = `cdb23ba` (origin's head after a pull on 2026-10-05) + the version bump: `1.0.8+20`'s code + both code reviews' Dart fixes (`e17c800`, `a00abff`, `fd1285f`), the native fix for replayed launch links on Android (`4fe79c6`, `MainActivity.kt`, the reason this needs a store build and not only a patch), saves that survive a vanished backdrop (`069bee5`), rendering from a folder the system doesn't empty (`cccba8f`) and the image cache's memory given to the encode on small phones (`3927308`). `shorebird release android --build-number=21` on the PC's `C:\Users\dell\ayah_reels` checkout, Shorebird 1.6.123, Flutter 3.47.5; Gradle printed "AyahReel version: 1.0.8+21"; "Published Release 1.0.8+21" (Shorebird release id 876952). Before the build: `flutter analyze` clean; 845 tests pass, 142 skipped, 12 fail, all the known Windows-only ones (seven `/` vs `\` compares in `download_test.dart`, the symlink needing privilege, one path compare, three reminders read in UTC on a UTC+4 machine) | 2026-10-05 (~16:12 UTC) | — | Play: **production** — found 2026-10-07 by the Play upload workflow's check run (GitHub run 37587396899): the production track holds "21 (1.0.8)", status completed (when it was uploaded and rolled out is not recorded; this row said not uploaded). It lacks `b96ee14`, which `+22` has and a `+21` patch could carry. AAB copy at `D:\Downloads\ayahreel-1.0.8+21.aab`, 127,827,828 bytes; versionCode 21, versionName 1.0.8 (Gradle's merged manifest; no bundletool on the PC), signed with the upload key — SHA-1 `C2:C9:DA:6D…`, SHA-256 `CA:9D:DD:CF…`, same as `+20`; feed `android.latest` not raised. Built on the PC's CRLF checkout like `+19` and `+20`, so its patches are cut on the PC, or on Codemagic only under the two-asset exception (see "Android patches from Codemagic") | **Patch 1** (id 701633): **published to stable 2026-10-07 ~08:14 UTC from this PC** (the `ayah_patch_108_21` worktree; "Published Patch 1!", arm32 1.20 MB, arm64 1.12 MB, x86_64 1.12 MB, no `[WARN]`), at the user's word after Codemagic could not build it. Three earlier PC tries published nothing: one stalled at 60% of the release AAB download and two failed with "Connection closed while receiving data" (the PC's internet dropping; Shorebird links its Windows download issue #2532); the fourth went through. Branch `patch/1.0.8-21` at `e387e72` = `532c86c` + cherry-pick `-x` of `b96ee14` (photos FFmpeg can't open converted to PNG; the encode's `.part` kept in the render folder), Dart only, no icon change, lib identical to `+22`'s (whose 849 tests pass). The other session's 05:24 UTC patches (`+20` #4, `+19` #5, `1.0.7+17` #11) skipped `+21` because its commits were not pushed yet. Tag `apatch-1.0.8+21` pushed ~07:33 UTC: the second Codemagic app failed as always, and the working app started nothing; the API answers 402 `BILLING_NOT_ENABLED` ("Please enable billing to continue building"), so Codemagic builds nothing until billing is on. PC dry run in the `ayah_patch_108_21` worktree ~07:45 UTC: "No issues detected", no `[WARN]`, "AyahReel version: 1.0.8+21". **Do not re-run the `apatch-1.0.8+21` tag on Codemagic**: it would publish the same code again as Patch 2. Next is Patch 2. **Patch 2** (id 705047): **published to stable 2026-10-08 ~14:10 UTC** — the "None" verse translation (`75ffe97`) and, for the smallest phones, lean x264 plus a note that says where a lost save died (`4ade252`, see `EXPORT_MEMORY.md`); feedback code date `2026-10-08`. Dart only, no icon change — from `5eb18c1` on `patch/1.0.8-21` (`e387e72` + cherry-picks of `75ffe97`, `4ade252` and the workflow file; `lib/` identical to `+22` Patch 1's), tag `gpatch-1.0.8+21--2`, by GitHub Actions `android-patch.yml` (Shorebird 1.6.124 on ubuntu-latest): dry run "No issues detected", no native change, only the two PC assets (`NOTICES.Z`, `quran_verses.json`), matched by `tool/verify_asset_diffs.py`, so published with the approved exception. `gpatch-1.0.8+21` before it ran out of disk and published nothing |
@@ -140,6 +140,95 @@ https://api.shorebird.dev/api/v1/apps/<app_id>/releases` and
 `…/releases/<id>/patches` (number, channel, artifacts). A publish run builds
 three times and once filled the runner's disk, so the job frees disk first.
 If a run dies, check the patches list before tagging again.
+
+**Since 2026-10-13 the tags go to the public mirror `Mulhimfy/ayahReel-ci`**,
+not to `origin`: the private repo's jobs don't start ("recent account
+payments have failed"), and public repos' Actions minutes are free.
+Same workflow files, same secrets (copied from `/root/keys`).
+`tool/public_mirror.sh <ref> <branch> [tag]` pushes a snapshot of the
+private commit (same tree and message, no history, noreply author) and
+tags it there; see `CLAUDE.md`. Record both commits.
+
+**2026-10-13, from the VPS via the public mirror: saves that play, and
+Play's crashes and ANRs. Dart only.** At the user's word ("fix them all
+... ota patch it at end"). From a feedback note (Realme RMX3830, 1.0.9:
+"every reel I save says playback error") and Play's Crashes and ANRs,
+28 days to 2026-10-13. 1.0.9 is branch `patch/1.0.9` = `d7e28c9`
+(`garelease-23`'s `8e4b5fc` + release-job, ledger and CI commits + the
+three fixes below); `git diff 8e4b5fc d7e28c9 -- lib` is only them.
+
+- `e2f8ee3` **Saves that play.** Lean x264 (the tightest budget) ran
+  without its macroblock tree and coded the grain into every frame:
+  12-26 Mbps reels, over the H.264 level they declare, which phones'
+  decoders refuse ("playback error"). mbtree back on with a 5-frame
+  lookahead, and every x264 encode capped at twice the hardware ladder
+  over a one-second buffer (`EXPORT_MEMORY.md`, 2026-10-13). Saves of
+  the same reel on tightest phones get a new cache key (`_lx`), so the
+  broken file isn't handed back; reels already saved stay broken.
+  Feedback code date `2026-10-13`.
+- `3ef77be` **Reminders: 30 days on Android, laid again weekly.**
+  ScheduledNotificationReceiver ANRs (realme C63, iotapk; Android 16)
+  and the boot receiver's alarm-limit crash (Infinix HOT 50i): the
+  plugin rewrites its whole list on the main thread for every alarm;
+  90 days made it ~150 KB. Stale entries (alarms the system dropped)
+  were never re-laid and fired together after a reboot.
+- `d7e28c9` **OnScreen waits for a frame drawn since the app came
+  back.** The CreateSnapshotSurface SIGSEGV family (12 + 4 + 2 + 1 + 1
+  users on 1.0.8: `OUTLINED_FUNCTION_7962`/`_1031`,
+  `DeviceBufferGLES::OnGetContents`, unsymbolized arm64/armv7; one
+  bug, flutter/flutter#192365). "Resumed" can come before the surface,
+  and reminders re-armed on the way back from the system's settings
+  drew their pictures right then.
+- 1.0.8 only: `4519820` (scene matching normalizes its stems once; the
+  `IrregexpInterpreter` ANR on `1.0.8+19` Patch 7), already in 1.0.9.
+
+The four 1.0.8 branches got `4519820` and `e2f8ee3` cherry-picked with
+`-x` (`EXPORT_MEMORY.md` kept as the branch had it), the reminder change
+by hand on their older `ReminderService` (no Friday second, no ceiling
+code), and `d7e28c9` with `main.dart` by hand; their `lib/` is the same
+file for file. Flutter tests green on all six branches (feat: 939
+passed, 143 skipped, analyze clean).
+
+Mirror commits: `patch/1.0.9` `4756e5d` = `d7e28c9`; `patch/1.0.8-22`
+`610e998` = `ef7a4d0`; `-21` `c4252fb` = `2d8da7c`; `-20` `5df885f` =
+`beafd1f`; `-19` `77d7651` = `e5b3f1e`.
+
+Dry runs first, all clean: `gpatch-dry-1.0.9+23` (run 38446960751)
+"No issues detected", no native or asset diff (that release was built
+on GitHub's runner); the four 1.0.8 ones (runs 38447031923,
+38447037903, 38447047749, 38447056275) "No issues detected", no native
+diff, only the two PC assets, verified. **Published to stable**
+(Shorebird's patches list, 2026-10-13; arm, aarch64 and x86_64):
+
+| Release | Commit (mirror) | Tag | GitHub run | Patch |
+|---|---|---|---|---|
+| `1.0.9+23` | `d7e28c9` (`4756e5d`), `patch/1.0.9` | `gpatch-1.0.9+23` | 38448430138 | Patch 1 (id 716426) |
+| `1.0.8+22` | `ef7a4d0` (`610e998`), `patch/1.0.8-22` | `gpatch-1.0.8+22--5` | 38448586754 | Patch 4 (id 716437) |
+| `1.0.8+21` | `2d8da7c` (`c4252fb`), `patch/1.0.8-21` | `gpatch-1.0.8+21--5` | 38448594241 | Patch 5 (id 716432) |
+| `1.0.8+20` | `beafd1f` (`5df885f`), `patch/1.0.8-20` | `gpatch-1.0.8+20--4` | 38448606103 | Patch 8 (id 716436) |
+| `1.0.8+19` | `e5b3f1e` (`77d7651`), `patch/1.0.8-19` | `gpatch-1.0.8+19--4` | 38448615207 | Patch 9 (id 716440) |
+
+iOS, same code: `gipatch-1.0.9+11` on the mirror's `4756e5d` (=
+`d7e28c9`), run 38448437728 (`ios-patch.yml`, macos-26): Xcode 26.6,
+SDK `23F81a` as the release's; its own dry run "No issues detected", no
+native or asset change; **published to stable as `1.0.9+11` Patch 1**
+(id 716474, aarch64), 2026-10-13 ~19:05 UTC. Android's dry run of the
+same code had checked the icon font first. The App Store serves 1.0.9
+(READY_FOR_SALE, checked 2026-10-13 with the VPS's ASC key).
+
+Next tags: `gpatch-1.0.9+23--2`, `gpatch-1.0.8+22--6`, `+21--6`,
+`+20--5`, `+19--5`, `gipatch-1.0.9+11--2` (on the mirror). Not patched:
+`1.0.7+17` and `1.0.7+9`: no lean x264 there (`patch/1.0.7-reciters-quizzes`
+has no `mbtree=0`), and Play's issues above are on 1.0.8 and 1.0.9;
+1.0.7's Android reminders keep their 90 days.
+
+Not in any patch, for the next store build (the user's call):
+`fix/android-skia` (`c5076a2`), the manifest's
+`io.flutter.embedding.android.EnableImpeller=false`, which ends both
+Impeller OpenGL ES failures (the snapshot crash and the PowerVR
+shader-compile ANR at surface creation on 1.0.9). Also native: the
+notification plugin's receivers still work on the main thread
+(`goAsync`, or a fork that skips past-due entries at boot).
 
 **2026-10-11 ~21:32 UTC, from the VPS: the save fixes, Dart only.**
 At the user's word ("patch the save stuff only", then "to android"). One

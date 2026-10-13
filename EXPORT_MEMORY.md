@@ -175,8 +175,11 @@ without a working hardware encoder. That covers 1.0.8 since Patches
 back to 2026-10-08). Also any x264 reel with heavy grain. iOS encodes
 every reel on x264 (there is no `h264_mediacodec` there), so the
 ceiling applies to every iOS save, and lean to iPhones on the tightest
-budget. **Not device-tested.** Before shipping, save a reel on the tightest budget
-on a real phone, play it in the gallery, and check its size.
+budget. Shipped 2026-10-13 as Shorebird patches to Android `1.0.9+23`
+and `1.0.8+19` to `+22`, and iOS `1.0.9+11` (`RELEASES.md`). **Not
+device-tested** before it shipped: save a reel on the tightest budget
+on a real phone (the preview APK of `patch/1.0.9` installs beside the
+store app), play it in the gallery, and check its size.
 
 ## What a note says since 2026-10-08
 
