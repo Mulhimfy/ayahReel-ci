@@ -65,6 +65,16 @@ GitHub noreply author. Patch tags go on the mirror, never on `origin`,
 or a second run could publish the same patch once billing is back.
 Everything on the mirror is public: code, run logs and artifacts.
 
+**Artifacts leak what logs hide.** GitHub masks secrets in a job's log,
+never in a file the job uploads. On 2026-10-13 the uploaded iOS patch
+log (`shorebird --verbose` writes the whole environment) carried the
+Shorebird token, the App Store Connect key and the signing key, and all
+three had to be replaced. Every log upload now goes through
+`tool/redact_logs.py`, each secret reaches only the steps that need it,
+and `public_mirror.sh` refuses a commit whose workflows upload logs
+without the redaction. A patch branch cut from an older release tag
+needs that commit cherry-picked first.
+
 ## Saves on small phones
 
 Before changing the export for a "can't save" or "the app closed"

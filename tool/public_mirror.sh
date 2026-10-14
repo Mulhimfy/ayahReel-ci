@@ -30,6 +30,20 @@ NOREPLY='244372596+Mulhimfy@users.noreply.github.com'
 SRC=$(git rev-parse --verify "$REF^{commit}")
 ME=$(git config user.email || true)
 
+# The mirror's artifacts are public, and GitHub masks secrets only in a
+# job's own log, never in a file the job uploads: on 2026-10-13 an iOS
+# patch log carried three secrets that way. A workflow that uploads logs
+# must pass them through tool/redact_logs.py first. A branch cut from an
+# older release tag needs that commit cherry-picked before it's mirrored.
+for wf in $(git ls-tree --name-only "$SRC" .github/workflows/); do
+  body=$(git cat-file blob "$SRC:$wf")
+  if grep -q 'upload-artifact' <<<"$body" && grep -qE '\.log\b' <<<"$body" &&
+     ! grep -q 'tool/redact_logs.py' <<<"$body"; then
+    echo "$wf uploads logs without tool/redact_logs.py: not mirrored." >&2
+    exit 1
+  fi
+done
+
 export GIT_INDEX_FILE
 GIT_INDEX_FILE=$(mktemp)
 trap 'rm -f "$GIT_INDEX_FILE"' EXIT

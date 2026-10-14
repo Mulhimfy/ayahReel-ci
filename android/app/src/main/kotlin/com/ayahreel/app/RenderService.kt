@@ -1,5 +1,6 @@
 package com.ayahreel.app
 
+import android.app.Activity
 import android.app.ActivityManager
 import android.app.Service
 import android.content.ComponentName
@@ -16,11 +17,13 @@ import android.os.Messenger
 import android.os.Process
 import android.os.RemoteException
 import android.util.Log
+import android.view.WindowManager
 import com.antonkarpenko.ffmpegkit.FFmpegKit
 import com.antonkarpenko.ffmpegkit.FFmpegKitConfig
 import com.antonkarpenko.ffmpegkit.Level
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import java.lang.ref.WeakReference
 
 /**
  * Runs a save's FFmpeg encodes in a process of their own, ":render".
@@ -150,6 +153,7 @@ object RenderClient {
     private const val IDLE_UNBIND_MS = 30000L
 
     private lateinit var app: Context
+    private var activity: WeakReference<Activity>? = null
     private val main = Handler(Looper.getMainLooper())
 
     private var service: Messenger? = null
@@ -206,6 +210,7 @@ object RenderClient {
 
     fun attach(context: Context, channel: MethodChannel) {
         app = context.applicationContext
+        activity = (context as? Activity)?.let { WeakReference(it) }
         channel.setMethodCallHandler { call, result -> handle(call, result) }
     }
 
@@ -259,6 +264,19 @@ object RenderClient {
             // whole graph until the process ends: end it.
             "kill" -> result.success(killRenderProcess())
             "pid" -> result.success(renderPid())
+            // A save the user waits on keeps the screen on: a slow one
+            // outlasts the timeout, and with the screen off the app is
+            // in the background, where the render process is the first
+            // thing Android reclaims.
+            "keepScreenOn" -> {
+                val window = activity?.get()?.window
+                if (call.argument<Boolean>("on") == true) {
+                    window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                } else {
+                    window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                }
+                result.success(window != null)
+            }
             else -> result.notImplemented()
         }
     }

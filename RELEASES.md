@@ -226,7 +226,17 @@ Not in any patch, for the next store build (the user's call):
 `fix/android-skia` (`c5076a2`), the manifest's
 `io.flutter.embedding.android.EnableImpeller=false`, which ends both
 Impeller OpenGL ES failures (the snapshot crash and the PowerVR
-shader-compile ANR at surface creation on 1.0.9). Also native: the
+shader-compile ANR at surface creation on 1.0.9). Not shipped on
+2026-10-14: it moves every phone to Skia, also those where Impeller runs
+on Vulkan and works. In this engine (`ff900e7`, `flutter_main.cc` and
+`driver_info_vk.cc`) only these take Impeller's OpenGL path: Adreno 650
+and older, PowerVR older than CXT, Huawei Maleoon, Xclipse below Vulkan
+1.3, and phones whose Vulkan won't start; below API 29 it is Skia
+already. The narrower fix is Skia for those phones alone, passed as
+`--enable-impeller=false` (command-line flags beat the manifest in
+`FlutterLoader`) from the first engine start in each process. First
+check whether the 10-13 patches ended the snapshot crash on 1.0.8+19..22
+and 1.0.9+23; if they did, Impeller stays. Also native: the
 notification plugin's receivers still work on the main thread
 (`goAsync`, or a fork that skips past-due entries at boot).
 
@@ -302,10 +312,18 @@ tags `gipatch-dry-<release>` / `gipatch-<release>[--N]`, `macos-26` with
 Xcode 26.6 (the job stops unless the iOS SDK build is `23F81a`). Signing
 as on Codemagic: `codemagic-cli-tools` fetches the existing certificate and
 App Store profiles (never creates them) with the repo secrets `ASC_KEY_ID`
-`M2J3MM4WX5`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (set from the VPS 2026-10-09)
-and `CERTIFICATE_PRIVATE_KEY` (the key of the release's distribution
-certificate, `C:\Users\dell\keys\ayahreel-ios-cert-key` on the PC; it
-is not on the VPS). No `--dart-define=META_APP_ID`: the code's default is
+`6ZMFW75VF7` (since 2026-10-14; `M2J3MM4WX5` leaked with the log and is
+revoked), `ASC_ISSUER_ID`, `ASC_KEY_P8` (set from the VPS)
+and `CERTIFICATE_PRIVATE_KEY` (the key of the distribution certificate;
+the readable copy is the VPS's `/root/keys/ayahreel-ios-cert-key`, and
+the PC's `C:\Users\dell\keys\ayahreel-ios-cert-key` is stale). Replaced on
+2026-10-14 after an unredacted patch log leaked it on the public CI
+mirror (CLAUDE.md): certificate `QC4CGJ346D` revoked, `AWY4M8ZZQG`
+(expires 2027-10-14) made from a new key, with new App Store profiles
+`P35M3M9UAM` (`com.ayahReel.app`) and `F9NWM929G6` (`.AyahWidget`); the
+secret on both repos and Codemagic's `ios_signing` group hold the new
+key. Store builds are unaffected; the next iOS build or patch signs with
+the new certificate. No `--dart-define=META_APP_ID`: the code's default is
 the Meta app id. macOS minutes count 10x against the repo's Actions
 allowance. The Telegram patch of `1.0.7+9` goes out as `gipatch-1.0.7+9`.
 `gipatch-1.0.7+9` (run 37963448840, on `fb7d615`) stopped at signing,

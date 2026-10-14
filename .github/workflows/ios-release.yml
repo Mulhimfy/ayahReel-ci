@@ -218,6 +218,16 @@ jobs:
             grep -iE 'Published Release|release .* created|Flutter version' release.log || true
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+      # Artifacts of the public CI mirror are public, and GitHub masks
+      # secrets only in the job's own log, never in a file it wrote.
+      - name: Blank secrets out of the logs
+        if: always()
+        env:
+          REDACT_VARS: >-
+            SHOREBIRD_TOKEN APP_STORE_CONNECT_KEY_IDENTIFIER
+            APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_PRIVATE_KEY
+            CERTIFICATE_PRIVATE_KEY
+        run: python3 tool/redact_logs.py release.log Info.plist ios/Podfile.lock
       - uses: actions/upload-artifact@v4
         if: always()
         with:

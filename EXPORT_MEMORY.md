@@ -181,6 +181,52 @@ device-tested** before it shipped: save a reel on the tightest budget
 on a real phone (the preview APK of `patch/1.0.9` installs beside the
 store app), play it in the gallery, and check its size.
 
+## 2026-10-14: saves the system ended while the app was away
+
+One note from `version: 1.0.9`, `code: 2026-10-13`, Infinix X6525B
+(Android 13 Go), source `exportTrouble`, "my reel didn't save, and it
+takes long":
+
+    tightest, 7742 MB, 32-bit, 1 lost · render: RenderFailed(outOfMemory): the render process died during the encode
+
+The render process died, yet the note counts no death: no `survived`,
+still `1 lost`, no `x264 only`. `PhoneBudget.renderDied` skips only
+when the app is out of sight, so every encode that died there died
+with the app away. The save was slow, its owner left it running, and
+Android, quickest on Go phones, reclaimed the background app's biggest
+process. The renderer took that for a lack of memory: x264 after
+hardware, then nothing smaller than tightest, so the save failed with
+the "out of memory" message.
+
+Fixed in Dart (`_encodeOnce`, `VideoRenderer.reclaimedAway`). A
+render-process death counts as reclaimed when the app is away as the
+death is heard, or came back under 10 s before after leaving during
+that encode (`OnScreen.departures`: hidden or paused, not the
+notification shade). A frozen app hears of the death only once it
+thaws. An encode the stall watchdog had given up on doesn't count:
+that goes to x264 as before. A reclaimed encode runs again on the
+same encoder and budget once the app is in front (`OnScreen.back`).
+There is no limit, since each rerun needs its owner to leave and come
+back. It counts neither as a lost save nor toward the three deaths
+that send encodes back into the app. After any death, the next encode
+waits up to 20 s for a new render process (`RenderProcess.awaitRestart`)
+instead of falling back into the app after RenderClient's 4 s, and a
+render superseded during that wait stops before its encode reaches
+the process. `FeedbackService.codeDate` is `2026-10-14`. Android
+`1.0.9` only: 1.0.8 has no render process, and iOS encodes in the app.
+
+The likeliest trigger is the screen's own timeout. A save of several
+minutes on a slow phone outlasts it, and with the screen off the app
+is in the background. From the next store build, a save the user
+waits on keeps the screen on (`RenderProcess.keepScreenOn`,
+`FLAG_KEEP_SCREEN_ON` in `RenderClient`). The Dart call is in the
+patch and does nothing on 1.0.9's native code.
+
+Not fixed: a save left in the background still pauses there. Keeping
+it going needs a foreground service with a notification around the
+render process: native, a store build, and a Play foreground-service
+declaration.
+
 ## What a note says since 2026-10-08
 
 While a foreground save runs, `PhoneBudget` writes its stage and the
@@ -221,7 +267,12 @@ only says where the save was within about 3 seconds.
 5. **`join`.** The join re-encodes only when the passes can't be stream
    copied (`copyVideo`). Find out why.
 6. **No more such notes from `2026-10-08` code.** Stop here.
-7. **From `2026-10-11` code**, a note with `N survived` means the render
+7. **`render: … the render process died` with no `survived`** (from
+   `2026-10-13` code or older): it died with the app away; see
+   2026-10-14. From `2026-10-14` code such deaths are rerun, so a
+   `render process died` failure there was heard with the app in front
+   for 10 s or more: memory or a crash, as before.
+8. **From `2026-10-11` code**, a note with `N survived` means the render
    process took N deaths and the app lived. A *lost* save there (the
    app itself died) is something else: look at the app's own memory,
    the `cards` stage first, since FFmpeg is no longer in the app.

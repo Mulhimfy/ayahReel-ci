@@ -42,6 +42,7 @@ import '../data/word_align_service.dart';
 import '../l10n/l10n.dart';
 import '../render/ayah_rasterizer.dart';
 import '../render/letterbox_layout.dart';
+import '../render/render_process.dart';
 import '../render/scene_plan.dart';
 import '../render/video_renderer.dart';
 import '../state/creation_state.dart';
@@ -1584,6 +1585,7 @@ class _PreviewScreenState extends State<PreviewScreen>
     // between, the next launch knows an export did that here, and plans
     // smaller from then on. See [PhoneBudget].
     await PhoneBudget.exportStarted();
+    unawaited(RenderProcess.keepScreenOn(true));
     try {
       // Instant when the eager render (or a previous Save/Share with
       // the same styling) already produced this exact file. When it
@@ -1614,6 +1616,7 @@ class _PreviewScreenState extends State<PreviewScreen>
     } catch (e, s) {
       _renderJob = null; // allow retry after a failure
       unawaited(PhoneBudget.exportEnded());
+      unawaited(RenderProcess.keepScreenOn(false));
       if (!mounted) return;
       setState(() {
         _rendering = false;
@@ -1641,6 +1644,7 @@ class _PreviewScreenState extends State<PreviewScreen>
       return;
     }
     unawaited(PhoneBudget.exportEnded());
+    unawaited(RenderProcess.keepScreenOn(false));
     if (mounted) setState(() => _rendering = false); // encode is done
 
     try {

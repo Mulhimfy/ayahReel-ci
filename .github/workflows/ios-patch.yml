@@ -19,8 +19,14 @@
 # Secrets: SHOREBIRD_TOKEN; ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 (an App
 # Store Connect API key); CERTIFICATE_PRIVATE_KEY, the private key of the
 # distribution certificate the releases were signed with (Codemagic's
-# `ios_signing` group, from C:\Users\dell\keys\ayahreel-ios-cert-key).
+# `ios_signing` group; replaced on 2026-10-14, the readable copy is the
+# VPS's /root/keys/ayahreel-ios-cert-key).
 # Signing files are fetched, never created: a missing one fails the job.
+#
+# Each secret reaches only the steps that use it, and the logs are
+# uploaded only after tool/redact_logs.py has blanked them: artifacts of
+# the public CI mirror are public, and `shorebird --verbose` writes the
+# whole environment into dry-run.log.
 name: iOS patch
 
 on:
@@ -35,17 +41,18 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 75
     env:
-      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-      APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.ASC_KEY_ID }}
-      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-      APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.ASC_KEY_P8 }}
-      CERTIFICATE_PRIVATE_KEY: ${{ secrets.CERTIFICATE_PRIVATE_KEY }}
       TAG: ${{ github.ref_name }}
       XCODE_APP: /Applications/Xcode_26.6.app
       EXPECTED_SDK_BUILD: 23F81a
     steps:
       - uses: actions/checkout@v4
       - name: Check secrets
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.ASC_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.ASC_KEY_P8 }}
+          CERTIFICATE_PRIVATE_KEY: ${{ secrets.CERTIFICATE_PRIVATE_KEY }}
         run: |
           missing=""
           for v in SHOREBIRD_TOKEN APP_STORE_CONNECT_KEY_IDENTIFIER \
@@ -77,6 +84,11 @@ jobs:
             if [ -x "$d/shorebird" ]; then echo "$d" >> "$GITHUB_PATH"; fi
           done
       - name: Fetch signing certificate and provisioning profiles
+        env:
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.ASC_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.ASC_KEY_P8 }}
+          CERTIFICATE_PRIVATE_KEY: ${{ secrets.CERTIFICATE_PRIVATE_KEY }}
         run: |
           set -euo pipefail
           # The key was set from Windows: drop CRLF and a byte-order mark
@@ -102,6 +114,8 @@ jobs:
           keychain add-certificates
           xcode-project use-profiles
       - name: Patch
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
         run: |
           set -euo pipefail
           TAG_REST="${TAG#gipatch-}"
@@ -186,6 +200,21 @@ jobs:
             cat verdict.txt 2>/dev/null || echo "no verdict (an earlier step failed)"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Blank secrets out of the logs
+        if: always()
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.ASC_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.ASC_KEY_P8 }}
+          CERTIFICATE_PRIVATE_KEY: ${{ secrets.CERTIFICATE_PRIVATE_KEY }}
+          REDACT_VARS: >-
+            SHOREBIRD_TOKEN APP_STORE_CONNECT_KEY_IDENTIFIER
+            APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_PRIVATE_KEY
+            CERTIFICATE_PRIVATE_KEY
+        run: >-
+          python3 tool/redact_logs.py dry-run.log dry-run-1.log
+          podfile-lock-runner.txt publish.log verdict.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
