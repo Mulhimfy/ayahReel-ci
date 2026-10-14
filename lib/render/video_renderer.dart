@@ -209,9 +209,10 @@ abstract final class VideoRenderer {
   /// left behind.
   static const _cancelGrace = Duration(seconds: 30);
 
-  /// How many times one encode is run again after Android reclaimed
-  /// its render process with the app out of sight.
-  static const _awayRetryLimit = 5;
+  /// How soon after the app came back a render-process death still
+  /// counts as one it suffered while away: Android holds a background
+  /// app still, and the app hears of the death once it thaws.
+  static const _awayGrace = Duration(seconds: 10);
 
   /// Encodes that were given up on while still running: wedged inside
   /// the device encoder, where a cancel may never reach them. Their
@@ -1729,13 +1730,12 @@ abstract final class VideoRenderer {
     FfmpegProgressFile? progress,
     Duration? stallLimit,
     void Function(double progress)? onProgress,
-    int awayRetries = 0,
   }) async {
     final departures = OnScreen.departures;
     // Progress comes off a file, not FFmpegKit's statistics events:
     // see FfmpegProgressFile for why those are switched off. The file
     // is also what makes the render process's progress the app's.
-    final session = await _start('${progress?.arg ?? ''}$cmd');
+    final session = await _start('${progress?.arg ?? ''}$cmd', gen);
     rlog('render: ffmpeg ${session.name} running (gen $gen)');
     if (gen != _generation) {
       // Canceled while the session was launching: kill it here, since
@@ -1819,6 +1819,14 @@ abstract final class VideoRenderer {
     if (identical(_active, session)) _active = null;
 
     if (code == null || !ReturnCode.isSuccess(code)) {
+      Future<EncodeRun?> again() => _encodeOnce(
+          cmd: cmd,
+          gen: gen,
+          segMs: segMs,
+          dest: dest,
+          progress: progress,
+          stallLimit: stallLimit,
+          onProgress: onProgress);
       if (dest.existsSync()) dest.deleteSync();
       if (gen != _generation) {
         rlog('render: gen $gen canceled (ffmpeg code ${code?.getValue()})');
@@ -1828,15 +1836,7 @@ abstract final class VideoRenderer {
       // as it always had, and leaves the render process alone after.
       if (session is RemoteRun && session.unavailable) {
         RenderProcess.noteUnavailable(await session.logs());
-        return _encodeOnce(
-            cmd: cmd,
-            gen: gen,
-            segMs: segMs,
-            dest: dest,
-            progress: progress,
-            stallLimit: stallLimit,
-            onProgress: onProgress,
-            awayRetries: awayRetries);
+        return again();
       }
       // Reclaimed with the app out of sight, not killed for what the
       // encode asked: Android ends a background app's processes on any
@@ -1846,26 +1846,21 @@ abstract final class VideoRenderer {
       // note counted no death, so every encode that died there died with
       // the app away. A smaller budget or x264 would fare no better, so
       // the same encode runs again once the app is back, and the phone's
-      // record stays as it was.
-      if (session.died &&
-          (OnScreen.departures != departures || OnScreen.away) &&
-          awayRetries < _awayRetryLimit) {
+      // record stays as it was. No limit: each run again needs its
+      // owner to leave and come back.
+      if (reclaimedAway(
+          died: session.died,
+          givenUp: givenUp != null,
+          departed: OnScreen.departures != departures,
+          away: OnScreen.away,
+          backFor: OnScreen.backFor)) {
         rlogError('render: encode',
             'the render process died with the app out of sight — '
             'the same encode again once it is back');
         RenderProcess.noteAwayDeath();
-        await OnScreen.settle('encode');
+        await OnScreen.back();
         if (gen != _generation) throw const RenderCancelled();
-        await RenderProcess.awaitRestart();
-        return _encodeOnce(
-            cmd: cmd,
-            gen: gen,
-            segMs: segMs,
-            dest: dest,
-            progress: progress,
-            stallLimit: stallLimit,
-            onProgress: onProgress,
-            awayRetries: awayRetries + 1);
+        return again();
       }
       // It died under the encode, and the app lived: the caller plans
       // the encode again, on x264 or smaller (see [_outOfMemory]), and
@@ -1888,9 +1883,32 @@ abstract final class VideoRenderer {
     return null;
   }
 
+  /// Whether an encode that died in the render process was reclaimed
+  /// by Android with the app away, rather than ended by what it asked
+  /// for: the app is away as the death is heard, or came back moments
+  /// before after leaving during the encode ([_awayGrace]). Not one the
+  /// stall watchdog had given up on ([givenUp]): that is a wedged
+  /// encoder, whether the watchdog's kill or something else ended it.
+  @visibleForTesting
+  static bool reclaimedAway({
+    required bool died,
+    required bool givenUp,
+    required bool departed,
+    required bool away,
+    required Duration backFor,
+  }) =>
+      died && !givenUp && (away || (departed && backFor < _awayGrace));
+
   /// Starts [cmd] in the render process where there is one (Android),
   /// and in the app where there isn't or it can't take it.
-  static Future<EncodeRun> _start(String cmd) async {
+  ///
+  /// After a death there it first waits for Android to start the
+  /// process again, and a render superseded meanwhile ([gen]) stops
+  /// here: its encode would reach the process the next render runs in,
+  /// where its cancel would end whatever is running.
+  static Future<EncodeRun> _start(String cmd, int gen) async {
+    await RenderProcess.awaitRestart(stillWanted: () => gen == _generation);
+    if (gen != _generation) throw const RenderCancelled();
     final hw = cmd.contains('h264_mediacodec');
     final remote = await RenderProcess.start(cmd, hardware: hw);
     PhoneBudget.renderPid = remote == null ? null : RenderProcess.knownPid;

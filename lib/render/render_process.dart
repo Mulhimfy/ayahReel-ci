@@ -150,6 +150,16 @@ abstract final class RenderProcess {
   static int _deaths = 0;
   static int? _pid;
 
+  /// Set by a death there until a new process is seen, with the pid of
+  /// the one that died: see [awaitRestart].
+  static bool _restarting = false;
+  static int? _deadPid;
+
+  /// How long a process just seen started gets to load FFmpeg and
+  /// answer the app's binding, which RenderClient waits 4 s for.
+  @visibleForTesting
+  static Duration restartSettle = const Duration(seconds: 2);
+
   /// The render process's pid, once an encode has started there: its
   /// memory goes into a lost save's note ([pid] fetches it).
   static int? get knownPid => _pid;
@@ -161,6 +171,8 @@ abstract final class RenderProcess {
     _off = !enabled;
     _deaths = 0;
     _pid = null;
+    _restarting = false;
+    _deadPid = null;
   }
 
   /// Starts [cmd] there; null when it can't take it, and the caller runs
@@ -186,7 +198,7 @@ abstract final class RenderProcess {
 
   /// An encode died there and the app lived.
   static void noteDeath() {
-    _pid = null;
+    _died();
     if (++_deaths >= deathLimit && !_off) {
       _off = true;
       rlogError('render', 'the render process died $_deaths times — '
@@ -197,19 +209,54 @@ abstract final class RenderProcess {
   /// An encode died there with the app out of sight: Android reclaiming
   /// a background app's processes, which says nothing against this
   /// one, so it doesn't count toward [deathLimit].
-  static void noteAwayDeath() => _pid = null;
+  static void noteAwayDeath() => _died();
 
-  /// Waits, up to [limit], for Android to start the render process
-  /// again after a death. It does that by itself, a second or more
-  /// later and longer when memory is short, and an encode sent before
-  /// then finds no process and runs in the app for the rest of the run.
-  static Future<void> awaitRestart(
-      {Duration limit = const Duration(seconds: 20)}) async {
-    if (_off) return;
-    final until = DateTime.now().add(limit);
-    while (await pid() == null && DateTime.now().isBefore(until)) {
+  static void _died() {
+    _deadPid = _pid;
+    _pid = null;
+    _restarting = true;
+  }
+
+  /// After a death there, waits up to [limit] for Android to start the
+  /// render process again, and returns at once otherwise. Android does
+  /// it by itself, a second or more later and longer when memory is
+  /// short. An encode sent before then waits 4 s for the binding, then
+  /// runs in the app for the rest of the run. The dead process can
+  /// still be listed for a moment, so only another pid counts. Stops
+  /// early once [stillWanted] says the encode is no longer wanted.
+  static Future<void> awaitRestart({
+    bool Function()? stillWanted,
+    Duration limit = const Duration(seconds: 20),
+  }) async {
+    if (_off || !_restarting) return;
+    final clock = Stopwatch()..start();
+    var waited = false;
+    while (stillWanted?.call() ?? true) {
+      final p = await pid();
+      if (p != null && p != _deadPid) {
+        _restarting = false;
+        if (waited) await Future<void>.delayed(restartSettle);
+        return;
+      }
+      if (clock.elapsed >= limit) {
+        _restarting = false;
+        return;
+      }
+      waited = true;
       await Future<void>.delayed(const Duration(milliseconds: 500));
     }
+  }
+
+  /// Keeps the screen on while a save the user waits on runs. A slow
+  /// save outlasts the screen's timeout, and with the screen off the
+  /// app is in the background, where Android reclaims the render
+  /// process first (2026-10-14). Store builds up to 1.0.9 don't know
+  /// the call, and the screen goes off as it always did.
+  static Future<void> keepScreenOn(bool on) async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _channel.invokeMethod<void>('keepScreenOn', {'on': on});
+    } catch (_) {}
   }
 
   /// FFmpeg couldn't be started there at all.

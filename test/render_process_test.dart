@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ayah_reels/render/render_process.dart';
+import 'package:ayah_reels/render/video_renderer.dart';
 
 /// The app's side of the render process: what it sends, how it follows
 /// an encode there, and when it gives up on the process and encodes in
@@ -100,26 +101,76 @@ void main() {
     expect(RenderProcess.enabled, isTrue);
   });
 
-  test('after a death, the next encode waits for the process to be back',
-      () async {
-    var pids = <int?>[null, null, 99];
+  test('after a death, the next encode waits for a new process', () async {
+    RenderProcess.restartSettle = Duration.zero;
+    var pids = <int?>[4321];
+    var pidCalls = 0;
     messenger.setMockMethodCallHandler(channel, (call) async {
       calls.add(call);
-      return call.method == 'pid'
-          ? (pids.isEmpty ? 99 : pids.removeAt(0))
-          : null;
+      if (call.method == 'pid') {
+        pidCalls++;
+        return pids.isEmpty ? null : pids.removeAt(0);
+      }
+      return call.method == 'run' ? 7 : null;
     });
-    await RenderProcess.awaitRestart(limit: const Duration(seconds: 5));
-    expect(calls.where((c) => c.method == 'pid').length, 3);
-    expect(RenderProcess.knownPid, 99);
+    // No death, no wait.
+    await RenderProcess.awaitRestart();
+    expect(pidCalls, 0);
 
-    // And gives up in time, for the app to encode it.
+    await RenderProcess.start('-y o.mp4', hardware: false);
+    expect(RenderProcess.knownPid, 4321);
+    RenderProcess.noteAwayDeath();
+    // The dead process is still listed for a moment: not the new one.
+    pids = [4321, null, 99];
+    pidCalls = 0;
+    await RenderProcess.awaitRestart(limit: const Duration(seconds: 5));
+    expect(pidCalls, 3);
+    expect(RenderProcess.knownPid, 99);
+    pidCalls = 0;
+    await RenderProcess.awaitRestart();
+    expect(pidCalls, 0, reason: 'seen once, waited for once');
+
+    // A render no longer wanted stops waiting.
+    RenderProcess.noteDeath();
+    await RenderProcess.awaitRestart(stillWanted: () => false);
+    expect(pidCalls, 0);
+
+    // And it gives up in time, for the app to encode it.
     pids = List<int?>.filled(100, null, growable: true);
-    calls.clear();
     final clock = Stopwatch()..start();
     await RenderProcess.awaitRestart(limit: const Duration(seconds: 1));
     expect(clock.elapsed, lessThan(const Duration(seconds: 3)));
-    expect(RenderProcess.knownPid, isNull);
+    pidCalls = 0;
+    await RenderProcess.awaitRestart();
+    expect(pidCalls, 0, reason: 'given up on, not waited for again');
+  });
+
+  test('a death is taken for Android reclaiming the app only when the app '
+      'was away for it', () {
+    bool reclaimed({
+      bool died = true,
+      bool givenUp = false,
+      bool departed = true,
+      bool away = false,
+      Duration backFor = const Duration(seconds: 1),
+    }) =>
+        VideoRenderer.reclaimedAway(
+            died: died,
+            givenUp: givenUp,
+            departed: departed,
+            away: away,
+            backFor: backFor);
+
+    expect(reclaimed(away: true, departed: false), isTrue,
+        reason: 'heard of with the app away');
+    expect(reclaimed(), isTrue, reason: 'heard of just after it came back');
+    expect(reclaimed(backFor: const Duration(minutes: 2)), isFalse,
+        reason: 'a trip away long before says nothing about this death');
+    expect(reclaimed(departed: false), isFalse, reason: 'never away');
+    expect(reclaimed(away: true, givenUp: true), isFalse,
+        reason: 'the watchdog had given up on a wedged encoder');
+    expect(reclaimed(away: true, died: false), isFalse,
+        reason: 'a failure, not a death');
   });
 
   test('FFmpeg failing to start there sends the encode back to the app',

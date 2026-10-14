@@ -52,16 +52,23 @@ abstract final class OnScreen {
   static bool get away => !_visible;
   static bool _visible = true;
 
+  /// How long the app has been in front since it last came back; zero
+  /// while it is away.
+  static Duration get backFor => _visible ? _back.elapsed : Duration.zero;
+  static final _back = Stopwatch();
+
   /// Starts telling an app that is back from one that has drawn again.
   /// Called once, at launch, before the first frame.
   static void watch() {
     if (_away != null) return;
     _drawn = false;
+    _back.start();
     _away = AppLifecycleListener(onStateChange: (s) {
       if (s != AppLifecycleState.resumed) _drawn = false;
       final visible =
           s == AppLifecycleState.resumed || s == AppLifecycleState.inactive;
       if (_visible && !visible) _departures++;
+      if (!_visible && visible) _back.reset();
       _visible = visible;
     });
     SchedulerBinding.instance.addTimingsCallback((timings) {
@@ -78,22 +85,27 @@ abstract final class OnScreen {
     if (now && _drawn) return;
     rlog('$why: the app is out of sight; drawing waits for it');
     while (!now || !_drawn) {
-      if (!now) {
-        final back = Completer<void>();
-        final listener = AppLifecycleListener(onStateChange: (_) {
-          if (now && !back.isCompleted) back.complete();
-        });
-        try {
-          await back.future;
-        } finally {
-          listener.dispose();
-        }
-      }
+      await back();
       await _drawFrame();
     }
     await WidgetsBinding.instance.endOfFrame;
     await Future<void>.delayed(const Duration(milliseconds: 300));
     rlog('$why: back on screen');
+  }
+
+  /// Returns once the app is in front again, at once if it is: for work
+  /// that needs the app foremost but not its surface.
+  static Future<void> back() async {
+    if (now) return;
+    final returned = Completer<void>();
+    final listener = AppLifecycleListener(onStateChange: (_) {
+      if (now && !returned.isCompleted) returned.complete();
+    });
+    try {
+      await returned.future;
+    } finally {
+      listener.dispose();
+    }
   }
 
   /// Asks for frames until one is drawn, the app leaves again, or three
