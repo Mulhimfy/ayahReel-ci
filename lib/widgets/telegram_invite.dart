@@ -124,8 +124,10 @@ abstract final class TelegramInvite {
 
   /// A good moment has passed: counted, and followed by the invitation
   /// after [TelegramMoment.delay] when it is due. One at a time: a
-  /// moment while one waits only counts.
+  /// moment while one waits only counts. Nothing before [start], which
+  /// the app calls at boot and a widget test never does.
   static Future<void> after(TelegramMoment moment) async {
+    if (_navigator == null) return;
     try {
       final r = await _load();
       if (r.joined || r.shows >= maxShows) return;
