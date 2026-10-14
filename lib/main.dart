@@ -19,6 +19,7 @@ import 'render/on_screen.dart';
 import 'screens/home_shell.dart';
 import 'screens/onboarding_screen.dart';
 import 'theme/app_theme.dart';
+import 'widgets/telegram_invite.dart';
 import 'widgets/cinematic_hero.dart';
 
 /// The app's one navigator, for the places that open a screen without
@@ -191,6 +192,7 @@ class _RootState extends State<_Root> {
     // Streak/points and the reminder re-arm can finish after the first
     // frame; neither gates what the user sees, and neither prompts.
     RewardsService.init();
+    unawaited(TelegramInvite.start(appNavigatorKey));
     // Laying a reminder window down is a platform call per day, on the
     // main thread — the thread the first frame also needs. Started
     // here, it held the launch screen for as long as it ran; a few

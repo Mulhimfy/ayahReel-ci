@@ -1733,6 +1733,25 @@ class L10n {
       'اجر میں شریک کریں', 'BAGIKAN PAHALANYA', 'DEN LOHN TEILEN');
   String get joinTelegramTitle => _t('Join Telegram', 'انضم إلى تيليجرام',
       'ٹیلیگرام جوائن کریں', 'Gabung Telegram', 'Telegram beitreten');
+
+  /// The Telegram invitation that follows a good moment
+  /// (TelegramInvite).
+  String get telegramInviteTitle => _t(
+      'Join us on Telegram',
+      'انضم إلينا على تيليجرام',
+      'ٹیلیگرام پر ہمارے ساتھ شامل ہوں',
+      'Gabung bersama kami di Telegram',
+      'Komm zu uns auf Telegram');
+  String get telegramInviteBody => _t(
+      'New reciters and features are announced there first.',
+      'نعلن هناك أولًا عن القرّاء والميزات الجديدة.',
+      'نئے قاری اور نئی سہولتوں کا اعلان سب سے پہلے وہیں ہوتا ہے۔',
+      'Qari dan fitur baru diumumkan di sana lebih dulu.',
+      'Neue Rezitatoren und Funktionen kündigen wir dort zuerst an.');
+  String get telegramJoin =>
+      _t('Join', 'انضم', 'شامل ہوں', 'Gabung', 'Beitreten');
+  String get telegramJoined => _t("I've joined", 'انضممت بالفعل',
+      'میں پہلے سے شامل ہوں', 'Sudah bergabung', 'Bin schon dabei');
   String get inviteEarnTitle => _t('Invite someone · earn ✦ 5',
       'ادعُ أحدًا · اكسب ✦ 5', 'کسی کو مدعو کریں · کمائیں ✦ 5',
       'Ajak seseorang · dapat ✦ 5', 'Lade jemanden ein · verdien ✦ 5');

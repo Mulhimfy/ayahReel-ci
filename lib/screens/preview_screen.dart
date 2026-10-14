@@ -64,6 +64,7 @@ import '../widgets/reel_finish.dart';
 import '../widgets/reel_watermark.dart';
 import '../widgets/shimmer_text.dart';
 import '../widgets/step_dots.dart';
+import '../widgets/telegram_invite.dart';
 import '../widgets/verses_milestone.dart';
 import 'home_shell.dart';
 
@@ -1752,6 +1753,7 @@ class _PreviewScreenState extends State<PreviewScreen>
       // It is also the only moment worth spending a rating ask on:
       // see [_offerAfterExport] for how the two share it.
       if (mounted) _offerAfterExport(context);
+      unawaited(TelegramInvite.after(TelegramMoment.reel));
     } catch (e, s) {
       // The render already succeeded by here, so this is the share
       // sheet or the gallery write — say which, rather than blaming

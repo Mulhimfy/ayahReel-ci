@@ -11,6 +11,7 @@ import '../l10n/l10n.dart';
 import '../theme/app_theme.dart';
 import '../widgets/a11y.dart';
 import '../widgets/arena_fx.dart';
+import '../widgets/telegram_invite.dart';
 import '../widgets/glow_button.dart';
 import '../widgets/illumination.dart';
 import '../widgets/night_sky.dart';
@@ -203,6 +204,7 @@ class _ArenaPlayScreenState extends State<ArenaPlayScreen>
     // round a second time).
     if (_finished) return;
     _finished = true;
+    unawaited(TelegramInvite.after(TelegramMoment.quiz));
     final me = ModalRoute.of(context);
     final route = BloomRoute<void>(
       builder: (_) => ArenaResultScreen(
