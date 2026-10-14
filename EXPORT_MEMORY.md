@@ -178,6 +178,38 @@ ceiling applies to every iOS save, and lean to iPhones on the tightest
 budget. **Not device-tested.** Before shipping, save a reel on the tightest budget
 on a real phone, play it in the gallery, and check its size.
 
+## 2026-10-14: saves the system ended while the app was away
+
+One note from `version: 1.0.9`, `code: 2026-10-13`, Infinix X6525B
+(Android 13 Go), source `exportTrouble`, "my reel didn't save, and it
+takes long":
+
+    tightest, 7742 MB, 32-bit, 1 lost · render: RenderFailed(outOfMemory): the render process died during the encode
+
+The render process died, yet the note counts no death: no `survived`,
+still `1 lost`, no `x264 only`. `PhoneBudget.renderDied` skips only
+when the app is out of sight, so every encode that died there died
+with the app away. The save was slow, its owner left it running, and
+Android, quickest on Go phones, reclaimed the background app's biggest
+process. The renderer took that for a lack of memory: x264 after
+hardware, then nothing smaller than tightest, so the save failed with
+the "out of memory" message.
+
+Fixed, Dart only (`_encodeOnce`): a render-process death across a
+departure (`OnScreen.departures`, hidden or paused, not the
+notification shade) or with the app still away is not the encode's
+fault. The same encode, same encoder and budget, runs again once the
+app is back (`OnScreen.settle`) and the render process is up again
+(`RenderProcess.awaitRestart`, up to 20 s, else the app encodes it),
+at most 5 times per encode. It isn't counted toward the three deaths
+that send encodes back into the app. `FeedbackService.codeDate` is
+`2026-10-14`. Android `1.0.9` only: 1.0.8 has no render process, and
+iOS encodes in the app.
+
+Not fixed: keeping a save alive while the app is away. That needs a
+foreground service with a notification around the render process
+(native, a store build, and a Play foreground-service declaration).
+
 ## What a note says since 2026-10-08
 
 While a foreground save runs, `PhoneBudget` writes its stage and the
@@ -218,7 +250,11 @@ only says where the save was within about 3 seconds.
 5. **`join`.** The join re-encodes only when the passes can't be stream
    copied (`copyVideo`). Find out why.
 6. **No more such notes from `2026-10-08` code.** Stop here.
-7. **From `2026-10-11` code**, a note with `N survived` means the render
+7. **`render: … the render process died` with no `survived`** (from
+   `2026-10-13` code or older): it died with the app away; see
+   2026-10-14. From `2026-10-14` code such a death is retried when the
+   app is back, so a note like it means five departures in one encode.
+8. **From `2026-10-11` code**, a note with `N survived` means the render
    process took N deaths and the app lived. A *lost* save there (the
    app itself died) is something else: look at the app's own memory,
    the `cards` stage first, since FFmpeg is no longer in the app.

@@ -88,6 +88,40 @@ void main() {
     expect(await RenderProcess.start('-y o.mp4', hardware: false), isNull);
   });
 
+  test('deaths with the app out of sight are not counted against it',
+      () async {
+    answer();
+    for (var i = 0; i < RenderProcess.deathLimit + 2; i++) {
+      expect(await RenderProcess.start('-y o.mp4', hardware: false),
+          isNotNull);
+      RenderProcess.noteAwayDeath();
+      expect(RenderProcess.knownPid, isNull, reason: 'a new process');
+    }
+    expect(RenderProcess.enabled, isTrue);
+  });
+
+  test('after a death, the next encode waits for the process to be back',
+      () async {
+    var pids = <int?>[null, null, 99];
+    messenger.setMockMethodCallHandler(channel, (call) async {
+      calls.add(call);
+      return call.method == 'pid'
+          ? (pids.isEmpty ? 99 : pids.removeAt(0))
+          : null;
+    });
+    await RenderProcess.awaitRestart(limit: const Duration(seconds: 5));
+    expect(calls.where((c) => c.method == 'pid').length, 3);
+    expect(RenderProcess.knownPid, 99);
+
+    // And gives up in time, for the app to encode it.
+    pids = List<int?>.filled(100, null, growable: true);
+    calls.clear();
+    final clock = Stopwatch()..start();
+    await RenderProcess.awaitRestart(limit: const Duration(seconds: 1));
+    expect(clock.elapsed, lessThan(const Duration(seconds: 3)));
+    expect(RenderProcess.knownPid, isNull);
+  });
+
   test('FFmpeg failing to start there sends the encode back to the app',
       () async {
     answer();

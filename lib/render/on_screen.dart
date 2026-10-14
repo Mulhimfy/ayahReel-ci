@@ -40,6 +40,18 @@ abstract final class OnScreen {
 
   static AppLifecycleListener? _away;
 
+  /// How many times the app has gone out of sight since the launch:
+  /// another app in front, or the screen off. Android reclaims the
+  /// processes of an app that is away, so a process that died across
+  /// one of these may have died for that alone.
+  static int get departures => _departures;
+  static int _departures = 0;
+
+  /// Out of sight now: hidden or paused. Not while merely inactive (the
+  /// notification shade, a system dialog), with the app still showing.
+  static bool get away => !_visible;
+  static bool _visible = true;
+
   /// Starts telling an app that is back from one that has drawn again.
   /// Called once, at launch, before the first frame.
   static void watch() {
@@ -47,6 +59,10 @@ abstract final class OnScreen {
     _drawn = false;
     _away = AppLifecycleListener(onStateChange: (s) {
       if (s != AppLifecycleState.resumed) _drawn = false;
+      final visible =
+          s == AppLifecycleState.resumed || s == AppLifecycleState.inactive;
+      if (_visible && !visible) _departures++;
+      _visible = visible;
     });
     SchedulerBinding.instance.addTimingsCallback((timings) {
       if (timings.isNotEmpty && now) _drawn = true;

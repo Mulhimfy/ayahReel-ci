@@ -166,6 +166,16 @@ jobs:
             gpatch-dry-*) grep -q 'clean=1' verdict.txt ;;
             *) grep -q '^published=1' verdict.txt ;;
           esac
+      # Artifacts of the public CI mirror are public, and GitHub masks
+      # secrets only in the job's own log, never in a file it wrote.
+      - name: Blank secrets out of the logs
+        if: always()
+        env:
+          REDACT_VARS: SHOREBIRD_TOKEN
+        run: >-
+          python3 tool/redact_logs.py dry-run.log dry-run-1.log
+          asset-check.log asset-check-2.log publish.log verdict.txt
+          changed-assets.txt env.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

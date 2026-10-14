@@ -37,11 +37,19 @@ void main() {
     await OnScreen.settle('test').then((_) => done = true);
     expect(done, isTrue, reason: 'on screen and drawn: at once');
 
+    // The notification shade leaves the app showing.
+    final before = OnScreen.departures;
+    go([AppLifecycleState.inactive, AppLifecycleState.resumed]);
+    expect(OnScreen.departures, before);
+    expect(OnScreen.away, isFalse);
+
     go([
       AppLifecycleState.inactive,
       AppLifecycleState.hidden,
       AppLifecycleState.paused,
     ]);
+    expect(OnScreen.departures, before + 1, reason: 'one departure');
+    expect(OnScreen.away, isTrue);
     done = false;
     final waiting = OnScreen.settle('test').then((_) => done = true);
     await t.pump(const Duration(seconds: 1));
@@ -54,6 +62,8 @@ void main() {
     ]);
     await t.pump(const Duration(milliseconds: 500));
     expect(done, isFalse, reason: 'back, but nothing drawn yet');
+    expect(OnScreen.away, isFalse);
+    expect(OnScreen.departures, before + 1);
 
     b.platformDispatcher.onReportTimings!([drawn()]);
     await t.pump(const Duration(milliseconds: 200));

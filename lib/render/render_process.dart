@@ -194,6 +194,24 @@ abstract final class RenderProcess {
     }
   }
 
+  /// An encode died there with the app out of sight: Android reclaiming
+  /// a background app's processes, which says nothing against this
+  /// one, so it doesn't count toward [deathLimit].
+  static void noteAwayDeath() => _pid = null;
+
+  /// Waits, up to [limit], for Android to start the render process
+  /// again after a death. It does that by itself, a second or more
+  /// later and longer when memory is short, and an encode sent before
+  /// then finds no process and runs in the app for the rest of the run.
+  static Future<void> awaitRestart(
+      {Duration limit = const Duration(seconds: 20)}) async {
+    if (_off) return;
+    final until = DateTime.now().add(limit);
+    while (await pid() == null && DateTime.now().isBefore(until)) {
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    }
+  }
+
   /// FFmpeg couldn't be started there at all.
   static void noteUnavailable(String why) {
     _off = true;

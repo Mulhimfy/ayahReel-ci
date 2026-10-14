@@ -29,6 +29,7 @@ import '../state/creation_state.dart'
 import '../widgets/reel_watermark.dart' show ReelDedication;
 import 'ayah_rasterizer.dart';
 import 'letterbox_layout.dart';
+import 'on_screen.dart';
 import 'render_dir.dart';
 import 'render_plan.dart';
 import 'render_process.dart';
@@ -207,6 +208,10 @@ abstract final class VideoRenderer {
   /// How long a cancelled hardware encode is given to end before it is
   /// left behind.
   static const _cancelGrace = Duration(seconds: 30);
+
+  /// How many times one encode is run again after Android reclaimed
+  /// its render process with the app out of sight.
+  static const _awayRetryLimit = 5;
 
   /// Encodes that were given up on while still running: wedged inside
   /// the device encoder, where a cancel may never reach them. Their
@@ -1724,7 +1729,9 @@ abstract final class VideoRenderer {
     FfmpegProgressFile? progress,
     Duration? stallLimit,
     void Function(double progress)? onProgress,
+    int awayRetries = 0,
   }) async {
+    final departures = OnScreen.departures;
     // Progress comes off a file, not FFmpegKit's statistics events:
     // see FfmpegProgressFile for why those are switched off. The file
     // is also what makes the render process's progress the app's.
@@ -1828,7 +1835,37 @@ abstract final class VideoRenderer {
             dest: dest,
             progress: progress,
             stallLimit: stallLimit,
-            onProgress: onProgress);
+            onProgress: onProgress,
+            awayRetries: awayRetries);
+      }
+      // Reclaimed with the app out of sight, not killed for what the
+      // encode asked: Android ends a background app's processes on any
+      // phone, the render process first, and Android Go phones within
+      // moments. 2026-10-14: an Infinix Go phone (1.0.9) lost a save as
+      // "out of memory" after its owner left the slow save running; its
+      // note counted no death, so every encode that died there died with
+      // the app away. A smaller budget or x264 would fare no better, so
+      // the same encode runs again once the app is back, and the phone's
+      // record stays as it was.
+      if (session.died &&
+          (OnScreen.departures != departures || OnScreen.away) &&
+          awayRetries < _awayRetryLimit) {
+        rlogError('render: encode',
+            'the render process died with the app out of sight — '
+            'the same encode again once it is back');
+        RenderProcess.noteAwayDeath();
+        await OnScreen.settle('encode');
+        if (gen != _generation) throw const RenderCancelled();
+        await RenderProcess.awaitRestart();
+        return _encodeOnce(
+            cmd: cmd,
+            gen: gen,
+            segMs: segMs,
+            dest: dest,
+            progress: progress,
+            stallLimit: stallLimit,
+            onProgress: onProgress,
+            awayRetries: awayRetries + 1);
       }
       // It died under the encode, and the app lived: the caller plans
       // the encode again, on x264 or smaller (see [_outOfMemory]), and
