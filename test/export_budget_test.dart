@@ -133,8 +133,9 @@ void main() {
     test('a lost export says where it died', () async {
       await PhoneBudget.exportStarted();
       PhoneBudget.exportStage('pass 3/7, 8 cards');
-      // The stage is written once the file's path is known.
-      await Future<void>.delayed(Duration.zero);
+      // The stage is written once the file's path is known, without
+      // waiting on the disk.
+      await Future<void>.delayed(const Duration(milliseconds: 50));
       expect(jsonDecode(history().readAsStringSync())['stage'],
           'pass 3/7, 8 cards');
       // The app is killed here. Next launch:
@@ -149,7 +150,7 @@ void main() {
       expect(PhoneBudget.hardwareTrusted, isTrue);
       await PhoneBudget.exportStarted();
       PhoneBudget.exportStage('4 cards in one pass, hardware');
-      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
       // The app is killed here. Next launch:
       PhoneBudget.reset();
       await PhoneBudget.load();
