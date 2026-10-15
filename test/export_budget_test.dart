@@ -135,7 +135,7 @@ void main() {
       PhoneBudget.exportStage('pass 3/7, 8 cards');
       // The stage is written once the file's path is known, without
       // waiting on the disk.
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await PhoneBudget.debugFlush();
       expect(jsonDecode(history().readAsStringSync())['stage'],
           'pass 3/7, 8 cards');
       // The app is killed here. Next launch:
@@ -150,7 +150,7 @@ void main() {
       expect(PhoneBudget.hardwareTrusted, isTrue);
       await PhoneBudget.exportStarted();
       PhoneBudget.exportStage('4 cards in one pass, hardware');
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await PhoneBudget.debugFlush();
       // The app is killed here. Next launch:
       PhoneBudget.reset();
       await PhoneBudget.load();
@@ -206,12 +206,32 @@ void main() {
       expect(PhoneBudget.summary, contains('1 survived'));
     });
 
+    test('a device encoder that crashed in the eager render is retired',
+        () async {
+      await PhoneBudget.load();
+      await PhoneBudget.renderDied(hardware: true, crashed: true);
+      expect(PhoneBudget.now, ExportBudget.roomy, reason: 'not a lost save');
+      expect(PhoneBudget.hardwareTrusted, isFalse);
+      PhoneBudget.reset();
+      await PhoneBudget.load();
+      expect(PhoneBudget.hardwareTrusted, isFalse, reason: 'for good');
+    });
+
+    test('leaving during a save is on disk at once', () async {
+      await PhoneBudget.exportStarted();
+      await PhoneBudget.appHidden(true);
+      expect(jsonDecode(history().readAsStringSync())['hidden'], isTrue);
+      PhoneBudget.exportStage('pass 1/2, 8 cards');
+      await PhoneBudget.debugFlush();
+      expect(jsonDecode(history().readAsStringSync())['hidden'], isTrue);
+    });
+
     test('readings and marks land in order: an ended export stays ended',
         () async {
       await PhoneBudget.exportStarted();
       PhoneBudget.exportStage('pass 1/2, 8 cards');
       await PhoneBudget.exportEnded();
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await PhoneBudget.debugFlush();
       expect(jsonDecode(history().readAsStringSync())['running'], isFalse);
     });
 

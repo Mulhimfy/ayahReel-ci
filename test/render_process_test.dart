@@ -55,6 +55,41 @@ void main() {
     expect(RenderProcess.knownPid, 4321);
   });
 
+  test('the pid is read at every encode: the process can be replaced '
+      'with no death seen', () async {
+    var pid = 4321;
+    messenger.setMockMethodCallHandler(channel, (call) async {
+      calls.add(call);
+      return switch (call.method) {
+        'run' => 7,
+        'pid' => pid,
+        _ => null,
+      };
+    });
+    await RenderProcess.start('-y o.mp4', hardware: false);
+    expect(RenderProcess.knownPid, 4321);
+    // Let go when idle, reclaimed, and started again by the next encode.
+    pid = 5555;
+    await RenderProcess.start('-y o.mp4', hardware: false);
+    expect(RenderProcess.knownPid, 5555);
+  });
+
+  test('before Android 11 there is no record, and nothing is waited for',
+      () async {
+    messenger.setMockMethodCallHandler(channel, (call) async {
+      calls.add(call);
+      return switch (call.method) {
+        'run' => 7,
+        'pid' => 4321,
+        'exitInfo' => {'unsupported': true},
+        _ => null,
+      };
+    });
+    await RenderProcess.start('-y o.mp4', hardware: false);
+    expect(await RenderProcess.lastExit(), isNull);
+    expect(calls.where((c) => c.method == 'exitInfo').length, 1);
+  });
+
   test('it is followed until it ends, and its log comes back with it',
       () async {
     answer();
@@ -244,11 +279,27 @@ void main() {
       () async {
     RenderProcess.cancelGrace = const Duration(milliseconds: 300);
     RenderProcess.restartSettle = Duration.zero;
-    answer();
+    var killed = false;
+    messenger.setMockMethodCallHandler(channel, (call) async {
+      calls.add(call);
+      return switch (call.method) {
+        'run' => 7,
+        'pid' => 4321,
+        // Heard as a death once the process is gone.
+        'poll' => killed
+            ? {'code': RenderProcess.died, 'logs': 'the render process died'}
+            : null,
+        'kill' => (killed = true),
+        _ => null,
+      };
+    });
     final run = (await RenderProcess.start('-y o.mp4', hardware: true))!;
     await run.cancel();
+    final clock = Stopwatch()..start();
     await RenderProcess.settleCancelled();
     expect(calls.map((c) => c.method), contains('kill'));
+    expect(run.died, isTrue, reason: 'waited for until its death was heard');
+    expect(clock.elapsed, lessThan(const Duration(seconds: 2)));
     // Nothing left to settle.
     calls.clear();
     await RenderProcess.settleCancelled();
@@ -302,5 +353,9 @@ void main() {
     expect(VideoRenderer.tooHeavyToPlay(f, 20000), isFalse);
     expect(VideoRenderer.tooHeavyToPlay(File('${dir.path}/none'), 10000),
         isFalse);
+    // 1.5 s made now: 12 Mbps and a full first buffer, about 19 Mbps on
+    // average, most of it the buffer.
+    f.writeAsBytesSync(List.filled((12e6 * 1.5 + 10.8e6) ~/ 8, 0));
+    expect(VideoRenderer.tooHeavyToPlay(f, 1500), isFalse);
   });
 }

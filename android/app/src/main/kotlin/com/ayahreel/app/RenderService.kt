@@ -273,9 +273,12 @@ object RenderClient {
             // clock: 1, 4, 16, 64 s for one that keeps dying, longer when
             // memory is short, and a bind meanwhile waits with it. Let go
             // of the binding, which drops the pending restart, and bind
-            // afresh, which starts the service now.
+            // afresh, which starts the service now. Whatever [bound]
+            // says: after onBindingDied there is no binding at all, and
+            // nothing else would bind one. A connection still held is
+            // left alone: the app waits to hear of the death first.
             "restart" -> {
-                if (bound && service == null) {
+                if (service == null) {
                     unbind()
                     whenConnected { }
                 }
@@ -354,10 +357,13 @@ object RenderClient {
      * Android's record of how the render process [pid] ended, if it
      * keeps one (Android 11 and up) and it is recent: why, and how
      * important the process was as it died, which says whether the app
-     * was in front.
+     * was in front. Null for a record not written yet, which the app
+     * asks for again; "unsupported" where there will never be one.
      */
     private fun exitInfo(pid: Int): Map<String, Any>? {
-        if (pid <= 0 || Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return null
+        if (pid <= 0 || Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            return mapOf("unsupported" to true)
+        }
         val am = app.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
             ?: return null
         val info: ApplicationExitInfo = try {

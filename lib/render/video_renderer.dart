@@ -331,6 +331,25 @@ abstract final class VideoRenderer {
               '${_x264CeilingFor(reelMs)}'
               '${lean ? leanX264 : ''}';
 
+  /// Whether [file], a reel [reelMs] long, is heavier than any reel
+  /// made since the ceiling: a lean or grainy reel from before
+  /// 2026-10-13 (26 to 58 Mbps), which budget phones would not play.
+  /// Reels since average under the 12 Mbps ceiling; a join of short
+  /// passes peaks near 18, so 18 on average is past anything made now.
+  /// Beside it, 2 MB any reel carries whatever its length: the
+  /// encoder's first buffer (up to 12 Mbit under the ceiling), the
+  /// sound's start and the mp4's boxes. Over a reel of a second or two
+  /// they are most of the file, and a reel made now read as too heavy.
+  static bool tooHeavyToPlay(File file, int reelMs) {
+    if (reelMs <= 0 || !file.existsSync()) return false;
+    return file.lengthSync() * 8 > 18e6 * reelMs / 1000 + 16e6;
+  }
+
+  /// Keys made again this run for being too heavy: once each, so a
+  /// reel that somehow comes out heavy again is served rather than
+  /// encoded at every Save.
+  static final _remade = <String>{};
+
   /// The most an x264 encode may spend, whatever its CRF would ask
   /// for: twice what the hardware encoder is given at the same length,
   /// over a buffer of one second.
@@ -349,21 +368,6 @@ abstract final class VideoRenderer {
   /// level holds. A reel that never reaches the ceiling is unchanged.
   /// The same for both rungs of quality: it is what phones can play,
   /// not how good the reel looks.
-  /// Whether [file], a reel [reelMs] long, is heavier than any reel
-  /// made since the ceiling: a lean or grainy reel from before
-  /// 2026-10-13 (26 to 58 Mbps), which budget phones would not play.
-  /// Reels since average under the 12 Mbps ceiling; a join of short
-  /// passes peaks near 18, so 18 on average is past anything made now.
-  static bool tooHeavyToPlay(File file, int reelMs) {
-    if (reelMs <= 0 || !file.existsSync()) return false;
-    return file.lengthSync() * 8 * 1000 / reelMs > 18e6;
-  }
-
-  /// Keys made again this run for being too heavy: once each, so a
-  /// reel that somehow comes out heavy again is served rather than
-  /// encoded at every Save.
-  static final _remade = <String>{};
-
   static String _x264CeilingFor(int reelMs) {
     final mbps = const [12, 8, 6, 4][_rung(reelMs)];
     return '-maxrate:v ${mbps}M -bufsize:v ${mbps}M ';
@@ -600,6 +604,11 @@ abstract final class VideoRenderer {
   /// the threads it started with.
   static void promote() => _promoted = _generation;
   static int? _promoted;
+
+  /// Whether the encode running now is the device encoder's, whose pace
+  /// the thread count doesn't change ([promote] gains it nothing it
+  /// would not have had, and starting it over only loses its work).
+  static bool get encodingOnHardware => _active?.hardware ?? false;
 
   /// Stops the in-flight render, if one exists — including one that
   /// hasn't reached FFmpeg yet. Safe to call when nothing is running.
@@ -918,9 +927,11 @@ abstract final class VideoRenderer {
     final sceneKey = multi
         ? 'm${scenes.length}_${_sceneFingerprint(scenes, cuts, fadeMs)}'
         : background.id;
-    // How this phone's saves are planned, read once: the key answers to
-    // it, and so does the encode below.
+    // How this phone's saves are planned, read once: the encode below
+    // answers to it. The key answers to what lasts past this run (see
+    // the `_lx` below).
     final planned = PhoneBudget.now;
+    final leanKey = PhoneBudget.lasting == ExportBudget.tightest;
     final key = 'v13_${recitation.reciterId}_${sceneKey}_$layoutKey'
         '_${(overlayAlign * 100).round()}_${rasterKey}_fx${effects.key}'
         // A cut reel is a different file from the whole one, so it
@@ -946,17 +957,21 @@ abstract final class VideoRenderer {
         // play. Keyed as they were, a Save of the same reel would be
         // handed the old file again — from this cache, and from My
         // Reels, which keeps one entry per key and says the gallery
-        // has it already. Every other phone keeps the key it had.
-        '${planned == ExportBudget.tightest ? '_lx' : ''}';
+        // has it already. Every other phone keeps the key it had, one
+        // planned tightest for this run only (an out-of-memory retry)
+        // too: the next launch asks for it by that key. A reel from
+        // before the ceiling found there is made again (see
+        // [tooHeavyToPlay]).
+        '${leanKey ? '_lx' : ''}';
     final out = File('${tmp.path}/ayah_reel_$key.mp4');
-    // Where the reel goes if the encode steps down to the tightest
-    // budget on the way (out of memory, a render-process death): it is
-    // then a lean reel, and the next Save, planned tightest from then
-    // on, asks for it by that key. Under [out] it was missed, and the
-    // whole reel was encoded again for a second My Reels entry.
-    final leanOut = planned == ExportBudget.tightest
-        ? out
-        : File('${tmp.path}/ayah_reel_${key}_lx.mp4');
+    // Where the reel goes if the phone is planned tightest for good by
+    // the time it is done (a render-process death in this save): the
+    // next Save asks for it by that key. Under [out] it was missed, and
+    // the whole reel was encoded again for a second My Reels entry. A
+    // step down for this run only stays under [out], which the next
+    // launch asks for.
+    final leanOut =
+        leanKey ? out : File('${tmp.path}/ayah_reel_${key}_lx.mp4');
     // FFmpeg writes here; [out] is claimed by a rename once the result
     // has been checked, so the cache below can only ever see finished,
     // verified reels.
@@ -1355,8 +1370,12 @@ abstract final class VideoRenderer {
     // the app with it, and the next launch has to know it was the
     // encoder (counted as a hardware loss, see [PhoneBudget.load])
     // rather than the cards drawn before it.
-    if (trusted && _hwOk == null) PhoneBudget.exportStage('hardware probe');
+    final probing = trusted && _hwOk == null;
+    if (probing) PhoneBudget.exportStage('hardware probe');
     var hardware = trusted && await _hardwareEncoderWorks(probeSrc, work);
+    // Past the probe: a death from here to the first encode is not the
+    // device encoder's.
+    if (probing) PhoneBudget.exportStage('planning');
     _checkCurrent(gen);
 
     // Where the picture may be cut in two, which is what decides how a
@@ -1679,7 +1698,10 @@ abstract final class VideoRenderer {
     // killed with the app (low memory, force quit) leaves a
     // half-written .part behind rather than a truncated mp4 that every
     // later export would serve as a finished reel.
-    final made = budget == ExportBudget.tightest ? leanOut : out;
+    final made = budget == ExportBudget.tightest &&
+            PhoneBudget.lasting == ExportBudget.tightest
+        ? leanOut
+        : out;
     _claim(part, made);
     rlog('render: done gen $gen -> ${made.path} '
         '(${(made.lengthSync() / 1024).round()} KB, '
@@ -1898,8 +1920,11 @@ abstract final class VideoRenderer {
       // record stays as it was. No limit: each run again needs its
       // owner to leave and come back.
       // Android's own record of the death, where it keeps one, says
-      // whether the app was in front for it.
-      final exit = session.died ? await RenderProcess.lastExit() : null;
+      // whether the app was in front for it. Not asked about an encode
+      // the watchdog gave up on: that is the encoder's, whatever it says.
+      final exit = session.died && givenUp == null
+          ? await RenderProcess.lastExit()
+          : null;
       if (exit != null) rlog('render: the render process ended: $exit');
       if (reclaimedAway(
           died: session.died,
@@ -1924,7 +1949,9 @@ abstract final class VideoRenderer {
             'the render process died under a '
             '${session.hardware ? "hardware" : "x264"} encode — going on');
         RenderProcess.noteDeath();
-        await PhoneBudget.renderDied(hardware: session.hardware);
+        await PhoneBudget.renderDied(
+            hardware: session.hardware,
+            crashed: exit?.crashed ?? false);
         return session;
       }
       if (progress != null &&

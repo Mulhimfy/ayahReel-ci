@@ -261,9 +261,37 @@ A review of the path from Save to the gallery, `code: 2026-10-15`:
 - **My Reels** copies to a `.part` and renames it; strays from cut-short
   copies are swept at the first save of a launch.
 
-Not fixed: a pre-2026-10-13 lean reel made on an out-of-memory retry
-has no `_lx` and can still be served to a phone now planned tight.
-Telling it apart would need every cached reel's key changed.
+A pre-2026-10-13 lean reel without `_lx` (made on an out-of-memory
+retry) is no longer served: any cached or My Reels reel heavier than
+18 Mbps on average, past a 2 MB allowance for what every reel carries,
+is made again (`VideoRenderer.tooHeavyToPlay`, `c67fc2a`, `b824c5b`).
+
+### Second pass over it, same day
+
+- **Save after a finished eager render** no longer "joins" it: that
+  left the scenery decoders released for the rest of the visit. Only a
+  render still running is joined or restarted, and one waiting for a
+  letterbox aspect simply becomes the foreground render. A render on
+  the device encoder is always joined (threads don't change its pace).
+- **`_lx`** answers to what lasts past the run (`PhoneBudget.lasting`):
+  an in-app out-of-memory step-down for this run only is cached under
+  the plain key, which the next launch asks for.
+- **Records.** The stage after a hardware probe becomes `planning`, so
+  a death before the first encode is not a hardware loss. A device
+  encoder that crashed in the eager render (Android's record says
+  `crashed`) is retired, without counting as a lost save. Leaving the
+  app writes the `hidden` mark at once, not behind a reading.
+- **Render process.** The pid is read at every encode (an idle unbind
+  and a reclaim gave a new process with the old pid). A wedged
+  cancelled encode's kill waits until the death is heard, and native
+  `restart` rebinds whenever the service isn't connected. Before
+  Android 11, `exitInfo` answers `unsupported` at once (it cost every
+  death a second), and a watchdog give-up isn't asked about. Builds
+  without `restart` (up to 1.0.9) wait 20 s for Android's restart, and
+  a second wait after one given up on is 5 s.
+- **My Reels.** The sweep keeps every `reel_*.mp4` named by the index
+  or by `library.json.bad`; entries a build can't read stay in the
+  index. Copies go through `copyWhole` (a `.tmp` beside the name).
 
 ## What a note says since 2026-10-08
 

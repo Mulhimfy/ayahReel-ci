@@ -140,25 +140,39 @@ abstract final class ReelLibrary {
   static Future<File> _indexFile() async =>
       File('${(await _dir()).path}/library.json');
 
+  /// Entries the last [load] could not read (a newer build's, say),
+  /// kept as they were: [_write] puts them back. Dropped from the index
+  /// by the next save, their reels were then taken for strays and
+  /// deleted by the sweep after it.
+  static List<Object?> _unread = const [];
+
   /// Newest first. Entries whose video file has vanished are dropped.
   static Future<List<SavedReel>> load() async {
     try {
       final index = await _indexFile();
-      if (!index.existsSync()) return [];
+      if (!index.existsSync()) {
+        _unread = const [];
+        return [];
+      }
       final dir = await _dir();
       final raw = jsonDecode(await index.readAsString()) as List;
       // One entry this build can't read costs only itself. Failing the
       // whole load answered "no reels", and the next save wrote that
       // back over every reel the user had.
       final out = <SavedReel>[];
+      final unread = <Object?>[];
       for (final e in raw) {
         try {
           final r = SavedReel.fromJson(e as Map<String, dynamic>);
           if (File('${dir.path}/${r.fileName}').existsSync()) out.add(r);
-        } catch (_) {}
+        } catch (_) {
+          unread.add(e);
+        }
       }
+      _unread = unread;
       return out;
     } catch (_) {
+      _unread = const [];
       // Corrupt as a whole: start fresh rather than crash, but keep the
       // old index aside first, since the next save writes over it.
       try {
@@ -217,16 +231,7 @@ abstract final class ReelLibrary {
     // (a phone out of room, the app killed) left a half reel under the
     // final name with no entry for it, holding exactly the room that
     // was missing, for good.
-    final part = File('${dir.path}/$fileName.part');
-    try {
-      await video.copy(part.path);
-      await part.rename('${dir.path}/$fileName');
-    } catch (_) {
-      try {
-        if (part.existsSync()) part.deleteSync();
-      } catch (_) {}
-      rethrow;
-    }
+    await copyWhole(video, File('${dir.path}/$fileName'));
     final reel = SavedReel(
       id: id,
       fileName: fileName,
@@ -249,17 +254,7 @@ abstract final class ReelLibrary {
   /// one, so the entry no longer counts as in the gallery, and the next
   /// Save puts the playable one there.
   static Future<SavedReel> replaceVideo(SavedReel reel, File video) async {
-    final dest = await videoFile(reel);
-    final part = File('${dest.path}.part');
-    try {
-      await video.copy(part.path);
-      await part.rename(dest.path);
-    } catch (_) {
-      try {
-        if (part.existsSync()) part.deleteSync();
-      } catch (_) {}
-      rethrow;
-    }
+    await copyWhole(video, await videoFile(reel));
     final updated = reel.copyWith(inGallery: false);
     final all = await load();
     await _write([
@@ -289,13 +284,24 @@ abstract final class ReelLibrary {
   }
 
   /// Deletes the reels no entry names: copies cut short by older builds
-  /// (made under their final name) and by this one (`.part`), which
-  /// nothing else would ever remove. Once per launch, from the first
-  /// [add], before its own copy starts: one save is copied at a time,
-  /// so no copy under way can be taken for a stray.
+  /// (made under their final name) and by this one (`.tmp`, `.part`
+  /// before it), which nothing else would ever remove. Once per launch,
+  /// from the first [add], before its own copy starts: one save is
+  /// copied at a time, so no copy under way can be taken for a stray.
+  ///
+  /// A name in the index set aside as unreadable (`library.json.bad`)
+  /// counts too, even where that file no longer parses: those are the
+  /// reels the index lost, and the only ones left to find again.
   @visibleForTesting
   static Future<void> sweepStrays() => _swept ??= _sweep();
   static Future<void>? _swept;
+
+  /// A new launch, as far as the library knows; tests only.
+  @visibleForTesting
+  static void debugReset() {
+    _swept = null;
+    _unread = const [];
+  }
 
   static Future<void> _sweep() async {
     try {
@@ -304,17 +310,19 @@ abstract final class ReelLibrary {
       // No index, or one this build can't read: nothing can be told
       // from a stray, so nothing is touched.
       if (!index.existsSync()) return;
-      final raw = jsonDecode(await index.readAsString()) as List;
-      final named = <String>{
-        for (final e in raw)
-          if (e is Map && e['fileName'] is String) e['fileName'] as String,
-      };
+      final text = await index.readAsString();
+      if (jsonDecode(text) is! List) return;
+      final bad = File('${index.path}.bad');
+      final setAside = bad.existsSync() ? await bad.readAsString() : '';
+      bool named(String name) =>
+          text.contains('"$name"') || setAside.contains(name);
       for (final f in dir.listSync().whereType<File>()) {
         final name = f.uri.pathSegments.last;
-        final stray = name.endsWith('.mp4.part') ||
+        final stray = name.endsWith('.mp4.tmp') ||
+            name.endsWith('.mp4.part') ||
             (name.startsWith('reel_') &&
                 name.endsWith('.mp4') &&
-                !named.contains(name));
+                !named(name));
         if (!stray) continue;
         try {
           f.deleteSync();
@@ -326,7 +334,7 @@ abstract final class ReelLibrary {
   static Future<void> _write(List<SavedReel> reels) async {
     final index = await _indexFile();
     await writeWhole(
-        index, jsonEncode(reels.map((r) => r.toJson()).toList()));
+        index, jsonEncode([for (final r in reels) r.toJson(), ..._unread]));
     revision.value++;
   }
 }

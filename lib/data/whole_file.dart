@@ -29,6 +29,12 @@ Future<void> writeWhole(File file, String contents) =>
 Future<void> writeWholeBytes(File file, List<int> bytes) =>
     _inTurn(file, (tmp) => tmp.writeAsBytes(bytes, flush: true));
 
+/// Copies [source] to [file] the same way: a copy cut short (a phone
+/// out of room, the app killed) leaves no half file under the final
+/// name, holding exactly the room that was missing, for good.
+Future<void> copyWhole(File source, File file) =>
+    _inTurn(file, (tmp) => source.copy(tmp.path));
+
 Future<void> _inTurn(File file, Future<void> Function(File tmp) write) {
   final path = file.path;
   final run = (_queue[path] ?? Future<void>.value())

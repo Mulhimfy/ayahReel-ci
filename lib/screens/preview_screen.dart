@@ -1029,18 +1029,28 @@ class _PreviewScreenState extends State<PreviewScreen>
   ///
   /// A Save tapped while the eager render runs used to join it as it
   /// was: two cores held back for the preview, and the preview's
-  /// decoders and pictures kept beside the encode. Barely started, it
-  /// is started again for the progress bar, which on most phones
-  /// finishes sooner than the rest of it at the eager pace would. Past
-  /// that, it is joined and takes everything a foreground render
-  /// takes from its next encode on.
+  /// decoders and pictures kept beside the encode. Barely started on
+  /// x264, it is started again for the progress bar, which on most
+  /// phones finishes sooner than the rest of it at the eager pace
+  /// would. Past that, or on the device encoder, whose pace the thread
+  /// count doesn't change, it is joined and takes everything a
+  /// foreground render takes from its next encode on. Only a render
+  /// still running is joined or started over: a finished one is a file,
+  /// handed out as it is.
   Future<File> _ensureRender({bool foreground = false}) {
     final job = _renderJob;
-    if (job != null && foreground && !_jobForeground) {
+    if (job != null && _jobLive && foreground && !_jobForeground) {
+      // Not encoding yet (a letterbox render waiting for the source's
+      // aspect): it starts as a foreground render, with nothing to lose.
+      if (!_encoding) {
+        rlog('render: Save takes the eager render before its encode');
+        _jobForeground = true;
+        return job;
+      }
       final n = Platform.numberOfProcessors;
       // The eager pace as a share of the foreground one, by threads.
       final pace = (n - 2).clamp(2, 6) / n.clamp(2, 16);
-      if (_jobProgress < 1 - pace) {
+      if (!VideoRenderer.encodingOnHardware && _jobProgress < 1 - pace) {
         rlog('render: Save during the eager render '
             '(${(_jobProgress * 100).round()}%) — starting it over for it');
         _dropRender(restart: false);
@@ -1057,8 +1067,10 @@ class _PreviewScreenState extends State<PreviewScreen>
     return _renderJob ??= _startRender(foreground);
   }
 
-  /// Whether the render in flight is one somebody waits on, and how far
-  /// it has got: an eager render reports its progress too, unseen.
+  /// Whether a render is still running, whether it is one somebody
+  /// waits on, and how far it has got: an eager render reports its
+  /// progress too, unseen.
+  bool _jobLive = false;
   bool _jobForeground = false;
   double _jobProgress = 0;
 
@@ -1095,22 +1107,27 @@ class _PreviewScreenState extends State<PreviewScreen>
   }
 
   Future<File> _startRender(bool foreground) async {
-    // A letterbox render is shaped by the source's aspect, so it waits
-    // for the probe rather than guessing and encoding the wrong card.
-    final aspect = _layout == ReelLayout.letterbox
-        ? (_srcAspect ??= await MediaAspect.of(_background))
-        : 16 / 9;
-    _encoding = true;
+    final gen = ++_jobGen;
+    _jobLive = true;
     _jobForeground = foreground;
     _jobProgress = 0;
-    // A foreground export puts a progress bar over the preview, so
-    // nobody is watching the scenery: it gives its decoders back for
-    // the length of the encode and takes them again after. An eager
-    // render happens while the user is still looking, so there the
-    // decoder cap above is the whole of it.
-    if (foreground) _takeForForeground();
-    final gen = ++_jobGen;
     try {
+      // A letterbox render is shaped by the source's aspect, so it waits
+      // for the probe rather than guessing and encoding the wrong card.
+      final aspect = _layout == ReelLayout.letterbox
+          ? (_srcAspect ??= await MediaAspect.of(_background))
+          : 16 / 9;
+      // Dropped while it waited, or another render started since: no
+      // encode of it is wanted.
+      if (_droppedGen == gen || gen != _jobGen) throw const RenderCancelled();
+      _encoding = true;
+      // A foreground export puts a progress bar over the preview, so
+      // nobody is watching the scenery: it gives its decoders back for
+      // the length of the encode and takes them again after. An eager
+      // render happens while the user is still looking, so there the
+      // decoder cap above is the whole of it. Read now, not from
+      // [foreground]: a Save may have taken this render while it waited.
+      if (_jobForeground) _takeForForeground();
       return await VideoRenderer.render(
         recitation: _recitation!,
         background: _background,
@@ -1144,7 +1161,7 @@ class _PreviewScreenState extends State<PreviewScreen>
         backdrop: _backdrop,
         backdropArgb: _backdropArgb,
         sourceAspect: aspect,
-        foreground: foreground,
+        foreground: _jobForeground,
         onProgress: (p) {
           if (gen == _jobGen) _jobProgress = p;
           if (mounted && _rendering) setState(() => _renderProgress = p);
@@ -1154,6 +1171,7 @@ class _PreviewScreenState extends State<PreviewScreen>
       // A render dropped for another one ends after that one started:
       // what it set belongs to the newer one now.
       if (gen == _jobGen) {
+        _jobLive = false;
         _encoding = false;
         final took = _jobForeground;
         _jobForeground = false;
@@ -1165,8 +1183,9 @@ class _PreviewScreenState extends State<PreviewScreen>
     }
   }
 
-  /// Which [_startRender] is the latest.
+  /// Which [_startRender] is the latest, and the last one dropped.
   int _jobGen = 0;
+  int _droppedGen = 0;
 
   Future<void> _playSegment() async {
     // Loop only the chosen ayah range: pause -> seek -> resume on the
@@ -1274,6 +1293,8 @@ class _PreviewScreenState extends State<PreviewScreen>
     _renderJob = null;
     if (old != null) {
       rlog('render: dropping in-flight render');
+      // One still waiting to start its encode stops there.
+      _droppedGen = _jobGen;
       VideoRenderer.cancelActive();
       // Nobody awaits an abandoned job; swallow its cancellation error.
       old.catchError((_) => File(''));

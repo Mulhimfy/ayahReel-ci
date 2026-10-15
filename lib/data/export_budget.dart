@@ -135,9 +135,12 @@ abstract final class PhoneBudget {
 
   /// The budget for the next export. Before [load] has finished it
   /// knows the phone but not its history, which can only err roomy.
-  static ExportBudget get now =>
-      budgetFor(hardware: _hardware ??= _readHardware(), losses: _losses)
-          .atLeast(_floor);
+  static ExportBudget get now => lasting.atLeast(_floor);
+
+  /// [now] without this run's own step-downs ([outOfMemory]): what the
+  /// next launch plans, so what a reel's cache key may answer to.
+  static ExportBudget get lasting =>
+      budgetFor(hardware: _hardware ??= _readHardware(), losses: _losses);
 
   /// Whether the device's own video encoder may take this phone's
   /// exports.
@@ -449,6 +452,13 @@ abstract final class PhoneBudget {
     _hidden = hidden;
     try {
       final f = await _file();
+      // Leaving is when Android kills an app: the mark goes down now,
+      // not behind a reading still on its way to a busy disk. That
+      // reading may land over it a moment later, and the queued write
+      // below puts it back after.
+      if (hidden && _running) {
+        _write(f, running: true, hidden: true, tmp: '${f.path}.hide');
+      }
       await _queue(() async {
         if (_running) _write(f, running: true, hidden: _hidden);
       });
@@ -471,17 +481,26 @@ abstract final class PhoneBudget {
   /// render runs beside the preview's decoders, the most memory the app
   /// asks for, and a death there is answered for the session (the
   /// retry plans smaller, which stops rendering ahead) rather than
-  /// slowing every later save on the phone for good.
-  static Future<void> renderDied({required bool hardware}) async {
+  /// slowing every later save on the phone for good. Except a device
+  /// encoder that [crashed] there (Android's record says so): that is
+  /// the encoder's doing wherever it ran, and it is retired as a save's
+  /// death would retire it, or every launch probes it, loses it and
+  /// encodes the reel again on x264.
+  static Future<void> renderDied({
+    required bool hardware,
+    bool crashed = false,
+  }) async {
     await load();
     _survived++;
     if (_running) {
       _losses++;
       if (hardware) _hwLosses++;
+    } else if (hardware && crashed) {
+      _hwLosses++;
     }
     rlog('budget: an encode died in the render process '
         '(${hardware ? "hardware" : "x264"}; $_survived so far)'
-        '${_running ? ' — planning smaller from now on' : ', not a save anyone waited on'}');
+        '${_running ? ' — planning smaller from now on' : hardware && crashed ? ', the device encoder crashed — x264 from now on' : ', not a save anyone waited on'}');
     try {
       final f = await _file();
       await _queue(() async => _write(f, running: _running, hidden: _hidden));
@@ -497,18 +516,25 @@ abstract final class PhoneBudget {
     _floor = at.tighter.atLeast(_floor);
   }
 
-  static Future<File> _file() async =>
-      File('${debugRoot ?? (await getApplicationSupportDirectory()).path}'
-          '/$fileName');
+  static Future<File> _file() async {
+    final root = debugRoot;
+    if (root != null) return File('$root/$fileName');
+    return _known ??=
+        File('${(await getApplicationSupportDirectory()).path}/$fileName');
+  }
+
+  static File? _known;
 
   /// Whole or not at all, and still at once: this is written as the app
   /// goes to the background, where a kill mid-write left an empty file,
   /// read at the next launch as no losses at all.
-  static void _write(File f, {required bool running, bool hidden = false}) {
-    final tmp = File('${f.path}.tmp');
-    tmp.writeAsStringSync(_json(running: running, hidden: hidden),
-        flush: true);
-    tmp.renameSync(f.path);
+  /// [tmp] names the file it is written to first, for a write made
+  /// outside the queue, beside one in it that may be writing its own.
+  static void _write(File f,
+      {required bool running, bool hidden = false, String? tmp}) {
+    final t = File('${tmp ?? f.path}.tmp');
+    t.writeAsStringSync(_json(running: running, hidden: hidden), flush: true);
+    t.renameSync(f.path);
   }
 
   static String _json({required bool running, bool hidden = false}) =>
@@ -522,6 +548,14 @@ abstract final class PhoneBudget {
           if (running) ..._mem,
           if (running && _peakIsSave) 'peakIsSave': true,
         });
+
+  /// Waits for every write asked for so far to land; tests only.
+  @visibleForTesting
+  static Future<void> debugFlush() async {
+    // A reading finds the file before it joins the queue.
+    await Future<void>.delayed(Duration.zero);
+    await _writes;
+  }
 
   /// Forgets everything; tests only.
   @visibleForTesting
@@ -545,6 +579,7 @@ abstract final class PhoneBudget {
     _mem = const {};
     _lostDetail = '';
     _writes = Future.value();
+    _known = null;
   }
 }
 

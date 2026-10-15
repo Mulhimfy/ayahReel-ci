@@ -197,6 +197,8 @@ abstract final class RenderProcess {
     _lateRestart = false;
     _late = 0;
     _cancelled = null;
+    cancelGrace = const Duration(seconds: 5);
+    restartSettle = const Duration(seconds: 2);
   }
 
   /// Starts [cmd] there; null when it can't take it, and the caller runs
@@ -209,10 +211,12 @@ abstract final class RenderProcess {
       if (id != null) {
         _lateRestart = false;
         _late = 0;
-        if (_pid == null) {
-          final p = await pid();
-          if (p != _deadPid) _pid = p;
-        }
+        // Read at every encode: the process can be let go when idle and
+        // reclaimed, and the next encode starts a new one with no death
+        // seen in between. The old pid then named a dead process, whose
+        // exit record [lastExit] would have read as this one's.
+        final p = await pid();
+        _pid = p == _deadPid ? null : p;
         return RemoteRun._(id, hardware: hardware);
       }
       // Android still holding the restart back after a death: this
@@ -265,8 +269,11 @@ abstract final class RenderProcess {
   /// service that died on its own clock: a second at first, then 4, 16
   /// and 64 s for one that keeps dying, longer when memory is short,
   /// and a binding made meanwhile waits with it. Builds from 1.0.10
-  /// bind it afresh ('restart'), which starts it at once. An encode
-  /// sent before then waits 4 s for the binding, then runs in the app.
+  /// bind it afresh ('restart'), which starts it at once. Builds up to
+  /// 1.0.9 can't, and wait 20 s at most: past that it is the long
+  /// backoff, and the app encodes sooner. After a restart given up on,
+  /// 5 s: the progress bar has stood still long enough. An encode sent
+  /// before then waits 4 s for the binding, then runs in the app.
   /// The dead process can still be listed for a moment, so only
   /// another pid counts. Stops early once [stillWanted] says the
   /// encode is no longer wanted.
@@ -275,11 +282,18 @@ abstract final class RenderProcess {
     Duration limit = const Duration(seconds: 60),
   }) async {
     if (_off || !_restarting) return;
+    var rebinds = true;
     try {
       await _channel.invokeMethod<void>('restart');
-    } catch (_) {
-      // Store builds up to 1.0.9 wait for Android's own restart.
-    }
+    } on MissingPluginException {
+      rebinds = false;
+    } catch (_) {}
+    final cap = _late > 0
+        ? const Duration(seconds: 5)
+        : rebinds
+            ? limit
+            : const Duration(seconds: 20);
+    final wait = cap < limit ? cap : limit;
     final clock = Stopwatch()..start();
     var waited = false;
     while (stillWanted?.call() ?? true) {
@@ -291,11 +305,11 @@ abstract final class RenderProcess {
         if (waited) await Future<void>.delayed(restartSettle);
         return;
       }
-      if (clock.elapsed >= limit) {
+      if (clock.elapsed >= wait) {
         _restarting = false;
         _lateRestart = true;
         rlogError('render', 'no new render process in '
-            '${limit.inSeconds}s after a death');
+            '${wait.inSeconds}s after a death');
         return;
       }
       waited = true;
@@ -319,7 +333,16 @@ abstract final class RenderProcess {
         rlogError('render', '${run.name} still running '
             '${cancelGrace.inSeconds}s after its cancel — '
             'ending its process');
-        if (await kill()) _restarting = true;
+        if (await kill()) {
+          _restarting = true;
+          // Until the binding hears of the death: a rebind before then
+          // ([awaitRestart]) reaches the dying process, or does nothing.
+          final heard = Stopwatch()..start();
+          while (await run.returnCode() == null &&
+              heard.elapsed < const Duration(seconds: 2)) {
+            await Future<void>.delayed(const Duration(milliseconds: 100));
+          }
+        }
         return;
       }
       await Future<void>.delayed(const Duration(milliseconds: 200));
@@ -380,7 +403,9 @@ abstract final class RenderProcess {
   /// last encode ran in: why it ended, and how much the system thought
   /// of it then. Null where it can't say (before Android 11, store
   /// builds up to 1.0.9, or not recorded yet). Asked before the death
-  /// is noted, while [knownPid] is still the dead process.
+  /// is noted, while [knownPid] is still the dead process. Only a
+  /// record not written yet is asked for again: before Android 11 the
+  /// answer is at once, or every death waited a second for nothing.
   static Future<RenderExit?> lastExit() async {
     final pid = _pid ?? _deadPid;
     if (pid == null) return null;
@@ -390,7 +415,9 @@ abstract final class RenderProcess {
       try {
         final r = await _channel
             .invokeMethod<Map<Object?, Object?>>('exitInfo', {'pid': pid});
-        if (r != null) return RenderExit.from(r);
+        if (r != null) {
+          return r['unsupported'] == true ? null : RenderExit.from(r);
+        }
       } on MissingPluginException {
         return null;
       } catch (_) {
