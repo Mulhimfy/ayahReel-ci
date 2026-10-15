@@ -26,6 +26,7 @@ import '../widgets/app_toast.dart';
 import '../widgets/card_canvas.dart';
 import '../widgets/card_dock.dart';
 import '../widgets/card_scene_sheet.dart';
+import '../widgets/telegram_invite.dart';
 import '../widgets/dedicate_sheet.dart';
 import '../widgets/direct_share_button.dart' show instagramMesh;
 import '../widgets/gallery_blocked_dialog.dart';
@@ -711,6 +712,7 @@ class _CardStudioScreenState extends State<CardStudioScreen> {
     await _keep(_deck);
     await _rememberLook(_deck);
     await RewardsService.recordCardMade();
+    unawaited(TelegramInvite.after(TelegramMoment.card));
   }
 
   /// The look and the shape a made card leaves behind, so the next one

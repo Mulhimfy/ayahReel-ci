@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show FramePhase;
 
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -38,6 +39,17 @@ abstract final class OnScreen {
   /// since the app last came back. True where nothing [watch]es (tests).
   static bool _drawn = true;
 
+  /// The engine's timestamp (microseconds) of the first frame asked for
+  /// since the app came back; null until one has begun. Frame timings
+  /// arrive in batches up to a second late in release builds, so a
+  /// batch heard after the return can still be frames drawn before the
+  /// app left: only a frame that began no earlier than this one counts.
+  static int? _since;
+
+  /// Room for that frame's own start, which comes one frame interval
+  /// before the timestamp it is handed (its vsync target).
+  static const _sinceSlackUs = 100000;
+
   static AppLifecycleListener? _away;
 
   /// How many times the app has gone out of sight since the launch:
@@ -64,7 +76,10 @@ abstract final class OnScreen {
     _drawn = false;
     _back.start();
     _away = AppLifecycleListener(onStateChange: (s) {
-      if (s != AppLifecycleState.resumed) _drawn = false;
+      if (s != AppLifecycleState.resumed) {
+        _drawn = false;
+        _since = null;
+      }
       final visible =
           s == AppLifecycleState.resumed || s == AppLifecycleState.inactive;
       if (_visible && !visible) _departures++;
@@ -72,7 +87,18 @@ abstract final class OnScreen {
       _visible = visible;
     });
     SchedulerBinding.instance.addTimingsCallback((timings) {
-      if (timings.isNotEmpty && now) _drawn = true;
+      if (!now) return;
+      final since = _since;
+      if (since == null) {
+        // No frame asked for since the return yet: only the launch's.
+        if (_departures == 0 && timings.isNotEmpty) _drawn = true;
+        return;
+      }
+      if (timings.any((t) =>
+          t.timestampInMicroseconds(FramePhase.vsyncStart) >=
+          since - _sinceSlackUs)) {
+        _drawn = true;
+      }
     });
   }
 
@@ -113,9 +139,17 @@ abstract final class OnScreen {
   /// second of drawing it; a phone that never reports them must not
   /// hold a save forever.
   static Future<void> _drawFrame() async {
-    final until = DateTime.now().add(const Duration(seconds: 3));
+    // A clock that can't be set: the wall clock is corrected the moment
+    // a phone wakes, which is when the app comes back.
+    final clock = Stopwatch()..start();
+    if (_since == null) {
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
+        _since ??=
+            SchedulerBinding.instance.currentSystemFrameTimeStamp.inMicroseconds;
+      });
+    }
     while (now && !_drawn) {
-      if (DateTime.now().isAfter(until)) {
+      if (clock.elapsed > const Duration(seconds: 3)) {
         rlog('on screen: no frame reported since the app came back');
         _drawn = true;
         return;

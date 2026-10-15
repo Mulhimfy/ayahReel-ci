@@ -181,8 +181,9 @@ void main() {
 
     test('an encode that died in the render process plans smaller, quietly',
         () async {
-      await PhoneBudget.load();
+      await PhoneBudget.exportStarted();
       await PhoneBudget.renderDied(hardware: true);
+      await PhoneBudget.exportEnded();
       expect(PhoneBudget.now, ExportBudget.tight);
       expect(PhoneBudget.hardwareTrusted, isFalse);
       expect(PhoneBudget.summary, contains('1 survived'));
@@ -195,12 +196,22 @@ void main() {
       expect(PhoneBudget.takeLostExport(), isFalse);
     });
 
-    test('a render death out of sight counts for nothing', () async {
-      await PhoneBudget.exportStarted();
-      await PhoneBudget.appHidden(true);
-      await PhoneBudget.renderDied(hardware: false);
+    test('a render death in the eager render costs the phone nothing',
+        () async {
+      await PhoneBudget.load();
+      await PhoneBudget.renderDied(hardware: true);
       expect(PhoneBudget.now, ExportBudget.roomy);
+      expect(PhoneBudget.hardwareTrusted, isTrue);
+      expect(PhoneBudget.summary, contains('1 survived'));
+    });
+
+    test('readings and marks land in order: an ended export stays ended',
+        () async {
+      await PhoneBudget.exportStarted();
+      PhoneBudget.exportStage('pass 1/2, 8 cards');
       await PhoneBudget.exportEnded();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(jsonDecode(history().readAsStringSync())['running'], isFalse);
     });
 
     test('a stage outside a foreground export records nothing', () async {

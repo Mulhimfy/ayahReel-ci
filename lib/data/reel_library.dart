@@ -209,10 +209,24 @@ abstract final class ReelLibrary {
   }) async {
     final existing = await findBySource(sourceKey);
     if (existing != null) return existing;
+    await sweepStrays();
     final dir = await _dir();
     final id = DateTime.now().millisecondsSinceEpoch.toString();
     final fileName = 'reel_$id.mp4';
-    await video.copy('${dir.path}/$fileName');
+    // Copied beside its name and renamed once whole. A copy cut short
+    // (a phone out of room, the app killed) left a half reel under the
+    // final name with no entry for it, holding exactly the room that
+    // was missing, for good.
+    final part = File('${dir.path}/$fileName.part');
+    try {
+      await video.copy(part.path);
+      await part.rename('${dir.path}/$fileName');
+    } catch (_) {
+      try {
+        if (part.existsSync()) part.deleteSync();
+      } catch (_) {}
+      rethrow;
+    }
     final reel = SavedReel(
       id: id,
       fileName: fileName,
@@ -247,6 +261,41 @@ abstract final class ReelLibrary {
     final poster = await posterFile(reel);
     if (poster.existsSync()) await poster.delete();
     await _write(all.where((r) => r.id != reel.id).toList());
+  }
+
+  /// Deletes the reels no entry names: copies cut short by older builds
+  /// (made under their final name) and by this one (`.part`), which
+  /// nothing else would ever remove. Once per launch, from the first
+  /// [add], before its own copy starts: one save is copied at a time,
+  /// so no copy under way can be taken for a stray.
+  @visibleForTesting
+  static Future<void> sweepStrays() => _swept ??= _sweep();
+  static Future<void>? _swept;
+
+  static Future<void> _sweep() async {
+    try {
+      final dir = await _dir();
+      final index = await _indexFile();
+      // No index, or one this build can't read: nothing can be told
+      // from a stray, so nothing is touched.
+      if (!index.existsSync()) return;
+      final raw = jsonDecode(await index.readAsString()) as List;
+      final named = <String>{
+        for (final e in raw)
+          if (e is Map && e['fileName'] is String) e['fileName'] as String,
+      };
+      for (final f in dir.listSync().whereType<File>()) {
+        final name = f.uri.pathSegments.last;
+        final stray = name.endsWith('.mp4.part') ||
+            (name.startsWith('reel_') &&
+                name.endsWith('.mp4') &&
+                !named.contains(name));
+        if (!stray) continue;
+        try {
+          f.deleteSync();
+        } catch (_) {}
+      }
+    } catch (_) {}
   }
 
   static Future<void> _write(List<SavedReel> reels) async {

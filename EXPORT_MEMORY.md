@@ -227,6 +227,44 @@ it going needs a foreground service with a notification around the
 render process: native, a store build, and a Play foreground-service
 declaration.
 
+## 2026-10-15: the save-flow review
+
+A review of the path from Save to the gallery, `code: 2026-10-15`:
+
+- **Reclaimed or not.** A pass that started with the app already away
+  now counts as away for the reclaim test (it was missed: no departure
+  during that encode). From the 1.0.10 store build, Android's own
+  record of the death (`ApplicationExitInfo`, Android 11+, via
+  `RenderProcess.lastExit`) decides instead of the timing: a crash or a
+  death with the app in front is the encode's, one out of sight is a
+  reclaim. The debug log says `render: the render process ended: …`.
+- **Restart.** `awaitRestart` waits up to 60 s, not 20, and a binding
+  that still fails after it sends that one encode to the app without
+  turning the render process off for the run (twice in a row does).
+  From 1.0.10 the app binds afresh after a death (`restart`), which
+  skips Android's restart backoff.
+- **Cancel.** A cancelled encode still running in the render process
+  gets 5 s to stop before the next encode is sent, then its process is
+  ended (`RenderProcess.settleCancelled`), so a new save never queues
+  behind a wedged one.
+- **Records.** The in-app hardware probe has its own stage, `hardware
+  probe`, and a death there counts as a hardware loss. A render-process
+  death in the eager render no longer counts as a lost save. The 3 s
+  memory reading is written without an fsync, queued behind the marks.
+- **Time.** A Save tapped during the eager render restarts it for the
+  progress bar when it is barely started, and otherwise joins it with
+  the decoders released and every core from its next encode. A save
+  that stepped down to tightest mid-run is cached under the `_lx` key,
+  so the next Save finds it instead of encoding it again.
+- **iOS** keeps the screen on during a save from the 1.0.10 store build
+  (`isIdleTimerDisabled`).
+- **My Reels** copies to a `.part` and renames it; strays from cut-short
+  copies are swept at the first save of a launch.
+
+Not fixed: a pre-2026-10-13 lean reel made on an out-of-memory retry
+has no `_lx` and can still be served to a phone now planned tight.
+Telling it apart would need every cached reel's key changed.
+
 ## What a note says since 2026-10-08
 
 While a foreground save runs, `PhoneBudget` writes its stage and the
@@ -236,7 +274,7 @@ stage. If the app dies, the next launch's note reads, for example:
     lost: the app closed while a reel was saving (pass 3/7, 8 cards; app 640 MB, 690 MB at most; phone 180 MB free)
 
 - **stage**: `starting`, `cards` (drawing the verse PNGs in Flutter),
-  `N cards in one pass`, `pass i/n, N cards`, `join`. `, hardware` means
+  `hardware probe` (from `2026-10-15` code), `N cards in one pass`, `pass i/n, N cards`, `join`. `, hardware` means
   the MediaCodec encoder was running.
 - **app … MB**: the process's resident memory (`VmRSS`) at the last
   reading, and its peak (`VmHWM`).

@@ -64,6 +64,7 @@ import '../widgets/reel_finish.dart';
 import '../widgets/reel_watermark.dart';
 import '../widgets/shimmer_text.dart';
 import '../widgets/step_dots.dart';
+import '../widgets/telegram_invite.dart';
 import '../widgets/verses_milestone.dart';
 import 'home_shell.dart';
 
@@ -1025,8 +1026,55 @@ class _PreviewScreenState extends State<PreviewScreen>
 
   /// [foreground] means the user is watching a progress bar rather than
   /// the preview, so the encode may take every core.
-  Future<File> _ensureRender({bool foreground = false}) =>
-      _renderJob ??= _startRender(foreground);
+  ///
+  /// A Save tapped while the eager render runs used to join it as it
+  /// was: two cores held back for the preview, and the preview's
+  /// decoders and pictures kept beside the encode. Barely started, it
+  /// is started again for the progress bar, which on most phones
+  /// finishes sooner than the rest of it at the eager pace would. Past
+  /// that, it is joined and takes everything a foreground render
+  /// takes from its next encode on.
+  Future<File> _ensureRender({bool foreground = false}) {
+    final job = _renderJob;
+    if (job != null && foreground && !_jobForeground) {
+      final n = Platform.numberOfProcessors;
+      // The eager pace as a share of the foreground one, by threads.
+      final pace = (n - 2).clamp(2, 6) / n.clamp(2, 16);
+      if (_jobProgress < 1 - pace) {
+        rlog('render: Save during the eager render '
+            '(${(_jobProgress * 100).round()}%) — starting it over for it');
+        _dropRender(restart: false);
+      } else {
+        rlog('render: Save joins the eager render '
+            '(${(_jobProgress * 100).round()}%)');
+        _jobForeground = true;
+        _renderProgress = _jobProgress;
+        _takeForForeground();
+        VideoRenderer.promote();
+        return job;
+      }
+    }
+    return _renderJob ??= _startRender(foreground);
+  }
+
+  /// Whether the render in flight is one somebody waits on, and how far
+  /// it has got: an eager render reports its progress too, unseen.
+  bool _jobForeground = false;
+  double _jobProgress = 0;
+
+  /// What a foreground render takes from the preview for its length.
+  void _takeForForeground() {
+    _decodersReleased = true;
+    _releaseSceneVideos();
+    // And the decoded pictures nothing on screen is showing: the image
+    // cache keeps every scenery and poster looked at this session, up
+    // to its limit, and a phone short of memory needs that room for
+    // the encode. What is on screen stays; the rest decodes again
+    // when it is next wanted.
+    if (PhoneBudget.now != ExportBudget.roomy) {
+      PaintingBinding.instance.imageCache.clear();
+    }
+  }
 
   /// Hands every scenery decoder back.
   ///
@@ -1053,23 +1101,15 @@ class _PreviewScreenState extends State<PreviewScreen>
         ? (_srcAspect ??= await MediaAspect.of(_background))
         : 16 / 9;
     _encoding = true;
+    _jobForeground = foreground;
+    _jobProgress = 0;
     // A foreground export puts a progress bar over the preview, so
     // nobody is watching the scenery: it gives its decoders back for
     // the length of the encode and takes them again after. An eager
     // render happens while the user is still looking, so there the
     // decoder cap above is the whole of it.
-    if (foreground) {
-      _decodersReleased = true;
-      _releaseSceneVideos();
-      // And the decoded pictures nothing on screen is showing: the image
-      // cache keeps every scenery and poster looked at this session, up
-      // to its limit, and a phone short of memory needs that room for
-      // the encode. What is on screen stays; the rest decodes again
-      // when it is next wanted.
-      if (PhoneBudget.now != ExportBudget.roomy) {
-        PaintingBinding.instance.imageCache.clear();
-      }
-    }
+    if (foreground) _takeForForeground();
+    final gen = ++_jobGen;
     try {
       return await VideoRenderer.render(
         recitation: _recitation!,
@@ -1106,15 +1146,27 @@ class _PreviewScreenState extends State<PreviewScreen>
         sourceAspect: aspect,
         foreground: foreground,
         onProgress: (p) {
+          if (gen == _jobGen) _jobProgress = p;
           if (mounted && _rendering) setState(() => _renderProgress = p);
         },
       );
     } finally {
-      _encoding = false;
-      if (foreground) _decodersReleased = false;
-      if (mounted && foreground) unawaited(_ensureSceneVideo(_sceneIndex));
+      // A render dropped for another one ends after that one started:
+      // what it set belongs to the newer one now.
+      if (gen == _jobGen) {
+        _encoding = false;
+        final took = _jobForeground;
+        _jobForeground = false;
+        if (took) {
+          _decodersReleased = false;
+          if (mounted) unawaited(_ensureSceneVideo(_sceneIndex));
+        }
+      }
     }
   }
+
+  /// Which [_startRender] is the latest.
+  int _jobGen = 0;
 
   Future<void> _playSegment() async {
     // Loop only the chosen ayah range: pause -> seek -> resume on the
@@ -1752,6 +1804,7 @@ class _PreviewScreenState extends State<PreviewScreen>
       // It is also the only moment worth spending a rating ask on:
       // see [_offerAfterExport] for how the two share it.
       if (mounted) _offerAfterExport(context);
+      unawaited(TelegramInvite.after(TelegramMoment.reel));
     } catch (e, s) {
       // The render already succeeded by here, so this is the share
       // sheet or the gallery write — say which, rather than blaming

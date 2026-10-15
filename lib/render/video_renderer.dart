@@ -579,6 +579,13 @@ abstract final class VideoRenderer {
       .replaceFirst('ayah_reel_', '')
       .replaceFirst(RegExp(r'\.mp4$'), '');
 
+  /// The render a Save or Share has joined while it ran as the eager
+  /// render: its later encodes (passes, the join) take every core, as
+  /// one started for the progress bar does. One already running keeps
+  /// the threads it started with.
+  static void promote() => _promoted = _generation;
+  static int? _promoted;
+
   /// Stops the in-flight render, if one exists — including one that
   /// hasn't reached FFmpeg yet. Safe to call when nothing is running.
   static Future<void> cancelActive() async {
@@ -927,6 +934,14 @@ abstract final class VideoRenderer {
         // has it already. Every other phone keeps the key it had.
         '${planned == ExportBudget.tightest ? '_lx' : ''}';
     final out = File('${tmp.path}/ayah_reel_$key.mp4');
+    // Where the reel goes if the encode steps down to the tightest
+    // budget on the way (out of memory, a render-process death): it is
+    // then a lean reel, and the next Save, planned tightest from then
+    // on, asks for it by that key. Under [out] it was missed, and the
+    // whole reel was encoded again for a second My Reels entry.
+    final leanOut = planned == ExportBudget.tightest
+        ? out
+        : File('${tmp.path}/ayah_reel_${key}_lx.mp4');
     // FFmpeg writes here; [out] is claimed by a rename once the result
     // has been checked, so the cache below can only ever see finished,
     // verified reels.
@@ -1285,10 +1300,13 @@ abstract final class VideoRenderer {
     // passes, from its very first encode; see [ExportBudget].
     var budget = planned;
     _lean = budget == ExportBudget.tightest;
-    var threads = (foreground
-            ? Platform.numberOfProcessors.clamp(2, 16)
-            : (Platform.numberOfProcessors - 2).clamp(2, 6))
-        .clamp(2, _threadsFor(budget));
+    // Read per encode: an eager render the user then taps Save on is
+    // waited on from that pass on ([promote]).
+    int threads() =>
+        (foreground || _promoted == gen
+                ? Platform.numberOfProcessors.clamp(2, 16)
+                : (Platform.numberOfProcessors - 2).clamp(2, 6))
+            .clamp(2, _threadsFor(budget));
     var sceneThreads = _sceneThreadsFor(budget);
 
     // The probe wants a full-size still with even dimensions: the scrim
@@ -1310,6 +1328,12 @@ abstract final class VideoRenderer {
       rlog('render: a save died in the hardware encoder here — x264 only');
       await _pictureCheckWorks(probeSrc, work);
     }
+    // The probe runs the device encoder in the app's own process, the
+    // one encode that does: a vendor encoder that crashes there takes
+    // the app with it, and the next launch has to know it was the
+    // encoder (counted as a hardware loss, see [PhoneBudget.load])
+    // rather than the cards drawn before it.
+    if (trusted && _hwOk == null) PhoneBudget.exportStage('hardware probe');
     var hardware = trusted && await _hardwareEncoderWorks(probeSrc, work);
     _checkCurrent(gen);
 
@@ -1377,7 +1401,7 @@ abstract final class VideoRenderer {
           effects: effects,
           outPath: part.path,
           hardware: hw,
-          threads: threads,
+          threads: threads(),
           sceneThreads: sceneThreads,
           reelMs: segMs,
           highQuality: highQuality,
@@ -1461,7 +1485,7 @@ abstract final class VideoRenderer {
             passStartMs: p.startMs - segStartMs,
             outPath: pf.path,
             hardware: hw,
-            threads: threads,
+            threads: threads(),
             sceneThreads: sceneThreads,
             reelMs: segMs,
             highQuality: highQuality,
@@ -1499,7 +1523,7 @@ abstract final class VideoRenderer {
         gen: gen,
         copyVideo: true,
         high: highQuality,
-        threads: threads,
+        threads: threads(),
         onProgress: onProgress,
       );
       if (joined == null) return null;
@@ -1517,7 +1541,7 @@ abstract final class VideoRenderer {
         gen: gen,
         copyVideo: false,
         high: highQuality,
-        threads: threads,
+        threads: threads(),
         onProgress: onProgress,
       );
     }
@@ -1586,7 +1610,6 @@ abstract final class VideoRenderer {
           _lean = budget == ExportBudget.tightest;
           passes = tighter;
           chunked = passes.length > 1;
-          threads = threads.clamp(2, _threadsFor(next));
           sceneThreads = _sceneThreadsFor(next);
           failure = await encode(hardware);
         }
@@ -1634,13 +1657,14 @@ abstract final class VideoRenderer {
     // killed with the app (low memory, force quit) leaves a
     // half-written .part behind rather than a truncated mp4 that every
     // later export would serve as a finished reel.
-    _claim(part, out);
-    rlog('render: done gen $gen -> ${out.path} '
-        '(${(out.lengthSync() / 1024).round()} KB, '
-        '${hardware ? "hardware" : "x264"}) — '
+    final made = budget == ExportBudget.tightest ? leanOut : out;
+    _claim(part, made);
+    rlog('render: done gen $gen -> ${made.path} '
+        '(${(made.lengthSync() / 1024).round()} KB, '
+        '${hardware ? "hardware" : "x264"}, ${budget.name}) — '
         'prep ${prepMs}ms + encode ${clock.elapsedMilliseconds - prepMs}ms '
         '= ${clock.elapsedMilliseconds}ms for a ${segMs}ms reel');
-    return out;
+    return made;
   }
 
   /// Whether [session] died for want of memory rather than for a
@@ -1732,6 +1756,9 @@ abstract final class VideoRenderer {
     void Function(double progress)? onProgress,
   }) async {
     final departures = OnScreen.departures;
+    // Already away as it starts: a pass begun with the app out of sight,
+    // whose trip away was counted before this encode existed.
+    final awayAtStart = OnScreen.away;
     // Progress comes off a file, not FFmpegKit's statistics events:
     // see FfmpegProgressFile for why those are switched off. The file
     // is also what makes the render process's progress the app's.
@@ -1848,12 +1875,17 @@ abstract final class VideoRenderer {
       // the same encode runs again once the app is back, and the phone's
       // record stays as it was. No limit: each run again needs its
       // owner to leave and come back.
+      // Android's own record of the death, where it keeps one, says
+      // whether the app was in front for it.
+      final exit = session.died ? await RenderProcess.lastExit() : null;
+      if (exit != null) rlog('render: the render process ended: $exit');
       if (reclaimedAway(
           died: session.died,
           givenUp: givenUp != null,
-          departed: OnScreen.departures != departures,
+          departed: awayAtStart || OnScreen.departures != departures,
           away: OnScreen.away,
-          backFor: OnScreen.backFor)) {
+          backFor: OnScreen.backFor,
+          exit: exit)) {
         rlogError('render: encode',
             'the render process died with the app out of sight — '
             'the same encode again once it is back');
@@ -1886,9 +1918,16 @@ abstract final class VideoRenderer {
   /// Whether an encode that died in the render process was reclaimed
   /// by Android with the app away, rather than ended by what it asked
   /// for: the app is away as the death is heard, or came back moments
-  /// before after leaving during the encode ([_awayGrace]). Not one the
-  /// stall watchdog had given up on ([givenUp]): that is a wedged
-  /// encoder, whether the watchdog's kill or something else ended it.
+  /// before after being away during the encode ([departed], which
+  /// includes an encode that started with the app away; [_awayGrace]).
+  /// Not one the stall watchdog had given up on ([givenUp]): that is a
+  /// wedged encoder, whether the watchdog's kill or something else
+  /// ended it.
+  ///
+  /// Where Android recorded the death ([exit], Android 11 and up, from
+  /// the 1.0.10 store build), its record decides instead of the
+  /// timing: a crash is the encode's, a death with the app in front is
+  /// the encode's, and one out of sight is a reclaim.
   @visibleForTesting
   static bool reclaimedAway({
     required bool died,
@@ -1896,17 +1935,27 @@ abstract final class VideoRenderer {
     required bool departed,
     required bool away,
     required Duration backFor,
-  }) =>
-      died && !givenUp && (away || (departed && backFor < _awayGrace));
+    RenderExit? exit,
+  }) {
+    if (!died || givenUp) return false;
+    if (exit != null) {
+      if (exit.reclaimed) return true;
+      if (exit.crashed || exit.inFront) return false;
+    }
+    return away || (departed && backFor < _awayGrace);
+  }
 
   /// Starts [cmd] in the render process where there is one (Android),
   /// and in the app where there isn't or it can't take it.
   ///
-  /// After a death there it first waits for Android to start the
-  /// process again, and a render superseded meanwhile ([gen]) stops
+  /// First it lets a cancelled encode there end, or ends its process
+  /// ([RenderProcess.settleCancelled]). After a death there it waits
+  /// for Android to start the process again, and a render superseded
+  /// meanwhile ([gen]) stops
   /// here: its encode would reach the process the next render runs in,
   /// where its cancel would end whatever is running.
   static Future<EncodeRun> _start(String cmd, int gen) async {
+    await RenderProcess.settleCancelled();
     await RenderProcess.awaitRestart(stillWanted: () => gen == _generation);
     if (gen != _generation) throw const RenderCancelled();
     final hw = cmd.contains('h264_mediacodec');

@@ -2,11 +2,13 @@ package com.ayahreel.app
 
 import android.app.Activity
 import android.app.ActivityManager
+import android.app.ApplicationExitInfo
 import android.app.Service
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
@@ -152,6 +154,9 @@ object RenderClient {
     private const val CONNECT_LIMIT_MS = 4000L
     private const val IDLE_UNBIND_MS = 30000L
 
+    /** An exit record older than this is some earlier process's. */
+    private const val EXIT_RECENT_MS = 120000L
+
     private lateinit var app: Context
     private var activity: WeakReference<Activity>? = null
     private val main = Handler(Looper.getMainLooper())
@@ -264,6 +269,19 @@ object RenderClient {
             // whole graph until the process ends: end it.
             "kill" -> result.success(killRenderProcess())
             "pid" -> result.success(renderPid())
+            // After a death, Android restarts a bound service on its own
+            // clock: 1, 4, 16, 64 s for one that keeps dying, longer when
+            // memory is short, and a bind meanwhile waits with it. Let go
+            // of the binding, which drops the pending restart, and bind
+            // afresh, which starts the service now.
+            "restart" -> {
+                if (bound && service == null) {
+                    unbind()
+                    whenConnected { }
+                }
+                result.success(null)
+            }
+            "exitInfo" -> result.success(exitInfo(call.argument<Int>("pid") ?: 0))
             // A save the user waits on keeps the screen on: a slow one
             // outlasts the timeout, and with the screen off the app is
             // in the background, where the render process is the first
@@ -330,6 +348,29 @@ object RenderClient {
         val am = app.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
         val name = "${app.packageName}:render"
         return am?.runningAppProcesses?.firstOrNull { it.processName == name }?.pid
+    }
+
+    /**
+     * Android's record of how the render process [pid] ended, if it
+     * keeps one (Android 11 and up) and it is recent: why, and how
+     * important the process was as it died, which says whether the app
+     * was in front.
+     */
+    private fun exitInfo(pid: Int): Map<String, Any>? {
+        if (pid <= 0 || Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return null
+        val am = app.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+            ?: return null
+        val info: ApplicationExitInfo = try {
+            am.getHistoricalProcessExitReasons(app.packageName, pid, 1).firstOrNull()
+        } catch (e: Exception) {
+            null
+        } ?: return null
+        if (System.currentTimeMillis() - info.timestamp > EXIT_RECENT_MS) return null
+        return mapOf(
+            "reason" to info.reason,
+            "importance" to info.importance,
+            "description" to (info.description ?: ""),
+        )
     }
 
     private fun killRenderProcess(): Boolean {

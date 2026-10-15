@@ -109,6 +109,9 @@ class RemoteRun implements EncodeRun {
 
   @override
   Future<void> cancel() async {
+    // Followed until it is over: the render process runs one encode at
+    // a time, so the next one waits behind this until it stops.
+    if (_code == null) RenderProcess._cancelled = this;
     try {
       await RenderProcess._channel.invokeMethod<void>('cancel');
     } catch (_) {}
@@ -160,6 +163,24 @@ abstract final class RenderProcess {
   @visibleForTesting
   static Duration restartSettle = const Duration(seconds: 2);
 
+  /// Set when [awaitRestart] gave up: the binding that fails after it
+  /// is a restart Android is still holding back, not a render process
+  /// the phone can't have, so it doesn't end the arrangement at once.
+  static bool _lateRestart = false;
+
+  /// Restarts given up on in a row.
+  static int _late = 0;
+
+  /// The last encode cancelled there while still running (see
+  /// [settleCancelled]).
+  static RemoteRun? _cancelled;
+
+  /// How long a cancelled encode gets to stop before the next one is
+  /// sent: FFmpeg stops x264 within a frame, but a device encoder can
+  /// wedge past any cancel.
+  @visibleForTesting
+  static Duration cancelGrace = const Duration(seconds: 5);
+
   /// The render process's pid, once an encode has started there: its
   /// memory goes into a lost save's note ([pid] fetches it).
   static int? get knownPid => _pid;
@@ -173,6 +194,9 @@ abstract final class RenderProcess {
     _pid = null;
     _restarting = false;
     _deadPid = null;
+    _lateRestart = false;
+    _late = 0;
+    _cancelled = null;
   }
 
   /// Starts [cmd] there; null when it can't take it, and the caller runs
@@ -183,8 +207,26 @@ abstract final class RenderProcess {
       final id = await _channel.invokeMethod<int>(
           'run', {'args': FFmpegKitConfig.parseArguments(cmd)});
       if (id != null) {
-        if (_pid == null) await pid();
+        _lateRestart = false;
+        _late = 0;
+        if (_pid == null) {
+          final p = await pid();
+          if (p != _deadPid) _pid = p;
+        }
         return RemoteRun._(id, hardware: hardware);
+      }
+      // Android still holding the restart back after a death: this
+      // encode runs in the app, and the next one waits for the process
+      // again. Twice in a row, and the process is taken for gone.
+      if (_lateRestart) {
+        _lateRestart = false;
+        _late++;
+        if (_late < 2) {
+          _restarting = true;
+          rlog('render: the render process is not back yet — '
+              'this encode runs in the app');
+          return null;
+        }
       }
       rlog('render: no render process to be had — encoding in the app');
     } on MissingPluginException {
@@ -212,34 +254,48 @@ abstract final class RenderProcess {
   static void noteAwayDeath() => _died();
 
   static void _died() {
-    _deadPid = _pid;
+    // A process [kill] ended is already the dead one.
+    if (_pid != null) _deadPid = _pid;
     _pid = null;
     _restarting = true;
   }
 
-  /// After a death there, waits up to [limit] for Android to start the
-  /// render process again, and returns at once otherwise. Android does
-  /// it by itself, a second or more later and longer when memory is
-  /// short. An encode sent before then waits 4 s for the binding, then
-  /// runs in the app for the rest of the run. The dead process can
-  /// still be listed for a moment, so only another pid counts. Stops
-  /// early once [stillWanted] says the encode is no longer wanted.
+  /// After a death there, waits up to [limit] for the render process
+  /// to start again, and returns at once otherwise. Android restarts a
+  /// service that died on its own clock: a second at first, then 4, 16
+  /// and 64 s for one that keeps dying, longer when memory is short,
+  /// and a binding made meanwhile waits with it. Builds from 1.0.10
+  /// bind it afresh ('restart'), which starts it at once. An encode
+  /// sent before then waits 4 s for the binding, then runs in the app.
+  /// The dead process can still be listed for a moment, so only
+  /// another pid counts. Stops early once [stillWanted] says the
+  /// encode is no longer wanted.
   static Future<void> awaitRestart({
     bool Function()? stillWanted,
-    Duration limit = const Duration(seconds: 20),
+    Duration limit = const Duration(seconds: 60),
   }) async {
     if (_off || !_restarting) return;
+    try {
+      await _channel.invokeMethod<void>('restart');
+    } catch (_) {
+      // Store builds up to 1.0.9 wait for Android's own restart.
+    }
     final clock = Stopwatch()..start();
     var waited = false;
     while (stillWanted?.call() ?? true) {
       final p = await pid();
       if (p != null && p != _deadPid) {
         _restarting = false;
+        _pid = p;
+        _late = 0;
         if (waited) await Future<void>.delayed(restartSettle);
         return;
       }
       if (clock.elapsed >= limit) {
         _restarting = false;
+        _lateRestart = true;
+        rlogError('render', 'no new render process in '
+            '${limit.inSeconds}s after a death');
         return;
       }
       waited = true;
@@ -247,13 +303,38 @@ abstract final class RenderProcess {
     }
   }
 
+  /// Before an encode goes there, lets the last cancelled one end:
+  /// the process runs one at a time, so a cancelled encode still
+  /// running holds the next behind it, a progress bar that never
+  /// moves. One that doesn't stop within [cancelGrace] is wedged past
+  /// its cancel, and its process is ended (not counted as a death:
+  /// nobody wanted that encode any more).
+  static Future<void> settleCancelled() async {
+    final run = _cancelled;
+    _cancelled = null;
+    if (run == null || _off) return;
+    final clock = Stopwatch()..start();
+    while (await run.returnCode() == null) {
+      if (clock.elapsed >= cancelGrace) {
+        rlogError('render', '${run.name} still running '
+            '${cancelGrace.inSeconds}s after its cancel — '
+            'ending its process');
+        if (await kill()) _restarting = true;
+        return;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }
+  }
+
   /// Keeps the screen on while a save the user waits on runs. A slow
   /// save outlasts the screen's timeout, and with the screen off the
   /// app is in the background, where Android reclaims the render
-  /// process first (2026-10-14). Store builds up to 1.0.9 don't know
-  /// the call, and the screen goes off as it always did.
+  /// process first (2026-10-14), and where iOS suspends an app mid-
+  /// encode and then ends it for the memory FFmpeg holds. Store builds
+  /// up to 1.0.9 don't know the call, and the screen goes off as it
+  /// always did.
   static Future<void> keepScreenOn(bool on) async {
-    if (!Platform.isAndroid) return;
+    if (!Platform.isAndroid && !Platform.isIOS) return;
     try {
       await _channel.invokeMethod<void>('keepScreenOn', {'on': on});
     } catch (_) {}
@@ -272,18 +353,110 @@ abstract final class RenderProcess {
   static Future<bool> kill() async {
     try {
       final killed = await _channel.invokeMethod<bool>('kill') ?? false;
-      if (killed) _pid = null;
+      if (killed) {
+        // The pid stays listed a moment after the kill: [awaitRestart]
+        // must not take it for the new process.
+        if (_pid != null) _deadPid = _pid;
+        _pid = null;
+      }
       return killed;
     } catch (_) {
       return false;
     }
   }
 
+  /// The render process's pid now, or null when none is running. Only
+  /// read: [knownPid] is the process the encodes went to, which this
+  /// may be the dead one of for a moment after a death.
   static Future<int?> pid() async {
     try {
-      return _pid = await _channel.invokeMethod<int>('pid');
+      return await _channel.invokeMethod<int>('pid');
     } catch (_) {
       return null;
     }
+  }
+
+  /// What Android recorded about the death of the render process the
+  /// last encode ran in: why it ended, and how much the system thought
+  /// of it then. Null where it can't say (before Android 11, store
+  /// builds up to 1.0.9, or not recorded yet). Asked before the death
+  /// is noted, while [knownPid] is still the dead process.
+  static Future<RenderExit?> lastExit() async {
+    final pid = _pid ?? _deadPid;
+    if (pid == null) return null;
+    // Android writes the record a moment after the binding hears of
+    // the death.
+    for (var i = 0; i < 4; i++) {
+      try {
+        final r = await _channel
+            .invokeMethod<Map<Object?, Object?>>('exitInfo', {'pid': pid});
+        if (r != null) return RenderExit.from(r);
+      } on MissingPluginException {
+        return null;
+      } catch (_) {
+        return null;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+    }
+    return null;
+  }
+}
+
+/// Android's own account of a render process's death
+/// (`ApplicationExitInfo`, Android 11 and up).
+class RenderExit {
+  const RenderExit({
+    required this.reason,
+    required this.importance,
+    this.description = '',
+  });
+
+  factory RenderExit.from(Map<Object?, Object?> m) => RenderExit(
+        reason: (m['reason'] as int?) ?? 0,
+        importance: (m['importance'] as int?) ?? 0,
+        description: (m['description'] as String?) ?? '',
+      );
+
+  /// `ApplicationExitInfo.REASON_*`.
+  final int reason;
+
+  /// `RunningAppProcessInfo.IMPORTANCE_*` as it died.
+  final int importance;
+
+  final String description;
+
+  static const _crash = 4;
+  static const _crashNative = 5;
+  static const _anr = 6;
+  static const _lowMemory = 3;
+
+  /// `IMPORTANCE_SERVICE`: below the app's own visible and perceptible
+  /// ranks, a process of an app out of sight.
+  static const _outOfSight = 300;
+
+  /// The encode's own doing: a crash in it (the device encoder's vendor
+  /// code), or the process stuck.
+  bool get crashed =>
+      reason == _crash || reason == _crashNative || reason == _anr;
+
+  /// Ended by Android with the app out of sight: reclaimed, which says
+  /// nothing about what the encode cost.
+  bool get reclaimed => !crashed && importance >= _outOfSight;
+
+  /// Ended with the app in front: the encode died for what it asked
+  /// (the low-memory killer) or what it ran.
+  bool get inFront => importance > 0 && importance < _outOfSight;
+
+  @override
+  String toString() {
+    final why = switch (reason) {
+      _lowMemory => 'low memory',
+      _crash => 'crash',
+      _crashNative => 'native crash',
+      _anr => 'not responding',
+      _ => 'reason $reason',
+    };
+    return '$why, importance $importance'
+        '${description.isEmpty ? '' : ' ($description)'}';
   }
 }

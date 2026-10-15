@@ -378,7 +378,8 @@ abstract final class PhoneBudget {
           const Duration(seconds: 3), (_) => unawaited(_sample()));
     }
     try {
-      _write(await _file(), running: true);
+      final f = await _file();
+      await _queue(() async => _write(f, running: true));
     } catch (e) {
       rlog('budget: could not mark the export: $e');
     }
@@ -394,14 +395,35 @@ abstract final class PhoneBudget {
     unawaited(_sample());
   }
 
+  /// A reading every few seconds, written without waiting on the disk:
+  /// an fsync on the UI thread every 3 s, on a budget phone's storage
+  /// already busy with the encode, stalled the progress bar. A process
+  /// kill loses nothing written without one; only the phone losing
+  /// power would, and then the save is lost anyway.
   static Future<void> _sample() async {
     if (!_running) return;
     _mem = _memoryNow();
     try {
       final f = await _file();
-      // Ended while the path was being found: the cleared mark stays.
-      if (_running) _write(f, running: true, hidden: _hidden);
+      // In turn with the marks, so an older reading can't land over the
+      // export's end and leave it running on disk.
+      await _queue(() async {
+        // Ended while it waited: the cleared mark stays.
+        if (!_running) return;
+        final tmp = File('${f.path}.tmp');
+        await tmp.writeAsString(_json(running: true, hidden: _hidden));
+        await tmp.rename(f.path);
+      });
     } catch (_) {}
+  }
+
+  static Future<void> _writes = Future.value();
+
+  /// Runs [write] after every write queued before it.
+  static Future<void> _queue(Future<void> Function() write) {
+    final next = _writes.then((_) => write());
+    _writes = next.catchError((_) {});
+    return next;
   }
 
   static Future<void> exportEnded() async {
@@ -412,7 +434,8 @@ abstract final class PhoneBudget {
     _stage = null;
     _mem = const {};
     try {
-      _write(await _file(), running: false);
+      final f = await _file();
+      await _queue(() async => _write(f, running: false));
     } catch (e) {
       rlog('budget: could not clear the mark: $e');
     }
@@ -425,7 +448,10 @@ abstract final class PhoneBudget {
     if (!_running || hidden == _hidden) return;
     _hidden = hidden;
     try {
-      _write(await _file(), running: true, hidden: hidden);
+      final f = await _file();
+      await _queue(() async {
+        if (_running) _write(f, running: true, hidden: _hidden);
+      });
     } catch (e) {
       rlog('budget: could not mark the export hidden: $e');
     }
@@ -437,19 +463,28 @@ abstract final class PhoneBudget {
   /// memory, or the device encoder crashing — except that the app is
   /// still here to plan the save again. The phone is planned as a lost
   /// save would plan it, from now on: the encode showed what this phone
-  /// can't afford. Out of sight it says nothing, as with a lost save:
-  /// Android reclaims processes in the background on any phone.
+  /// can't afford. The caller has already ruled out a death with the
+  /// app away (`VideoRenderer.reclaimedAway`), the one judge of that, so
+  /// it isn't judged again here by another account of the app's state.
+  ///
+  /// Only for a save the user waits on, as a lost save is: the eager
+  /// render runs beside the preview's decoders, the most memory the app
+  /// asks for, and a death there is answered for the session (the
+  /// retry plans smaller, which stops rendering ahead) rather than
+  /// slowing every later save on the phone for good.
   static Future<void> renderDied({required bool hardware}) async {
     await load();
-    if (_hidden) return;
-    _losses++;
-    if (hardware) _hwLosses++;
     _survived++;
+    if (_running) {
+      _losses++;
+      if (hardware) _hwLosses++;
+    }
     rlog('budget: an encode died in the render process '
-        '(${hardware ? "hardware" : "x264"}; $_survived so far) — '
-        'planning smaller from now on');
+        '(${hardware ? "hardware" : "x264"}; $_survived so far)'
+        '${_running ? ' — planning smaller from now on' : ', not a save anyone waited on'}');
     try {
-      _write(await _file(), running: _running, hidden: _hidden);
+      final f = await _file();
+      await _queue(() async => _write(f, running: _running, hidden: _hidden));
     } catch (e) {
       rlog('budget: could not record it: $e');
     }
@@ -471,8 +506,13 @@ abstract final class PhoneBudget {
   /// read at the next launch as no losses at all.
   static void _write(File f, {required bool running, bool hidden = false}) {
     final tmp = File('${f.path}.tmp');
-    tmp.writeAsStringSync(
-        jsonEncode({
+    tmp.writeAsStringSync(_json(running: running, hidden: hidden),
+        flush: true);
+    tmp.renameSync(f.path);
+  }
+
+  static String _json({required bool running, bool hidden = false}) =>
+      jsonEncode({
           'lost': _losses,
           if (_hwLosses > 0) 'hwLost': _hwLosses,
           if (_survived > 0) 'survived': _survived,
@@ -481,10 +521,7 @@ abstract final class PhoneBudget {
           if (running && _stage != null) 'stage': _stage,
           if (running) ..._mem,
           if (running && _peakIsSave) 'peakIsSave': true,
-        }),
-        flush: true);
-    tmp.renameSync(f.path);
-  }
+        });
 
   /// Forgets everything; tests only.
   @visibleForTesting
@@ -507,6 +544,7 @@ abstract final class PhoneBudget {
     _stage = null;
     _mem = const {};
     _lostDetail = '';
+    _writes = Future.value();
   }
 }
 

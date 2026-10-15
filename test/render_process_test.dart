@@ -208,4 +208,84 @@ void main() {
     expect(calls.last.method, 'kill');
     expect(RenderProcess.knownPid, isNull);
   });
+
+  test("Android's record of a death settles it, where there is one", () {
+    bool reclaimed(RenderExit exit, {bool away = false}) =>
+        VideoRenderer.reclaimedAway(
+            died: true,
+            givenUp: false,
+            departed: away,
+            away: away,
+            backFor: const Duration(seconds: 1),
+            exit: exit);
+    const cached = RenderExit(reason: 3, importance: 400);
+    const visible = RenderExit(reason: 3, importance: 200);
+    const crash = RenderExit(reason: 5, importance: 400);
+    expect(reclaimed(cached), isTrue,
+        reason: 'out of sight as it died, whatever the timing said');
+    expect(reclaimed(visible, away: true), isFalse,
+        reason: 'in front as it died: heard late, not reclaimed');
+    expect(reclaimed(crash, away: true), isFalse, reason: 'a crash');
+    expect(
+        VideoRenderer.reclaimedAway(
+            died: true,
+            givenUp: true,
+            departed: true,
+            away: true,
+            backFor: Duration.zero,
+            exit: cached),
+        isFalse,
+        reason: 'the watchdog had given up on it');
+  });
+
+  test('a cancelled encode that will not stop has its process ended',
+      () async {
+    RenderProcess.cancelGrace = const Duration(milliseconds: 300);
+    RenderProcess.restartSettle = Duration.zero;
+    answer();
+    final run = (await RenderProcess.start('-y o.mp4', hardware: true))!;
+    await run.cancel();
+    await RenderProcess.settleCancelled();
+    expect(calls.map((c) => c.method), contains('kill'));
+    // Nothing left to settle.
+    calls.clear();
+    await RenderProcess.settleCancelled();
+    expect(calls.where((c) => c.method == 'poll'), isEmpty);
+  });
+
+  test('a cancelled encode that stops is waited for, not killed', () async {
+    answer();
+    final run = (await RenderProcess.start('-y o.mp4', hardware: false))!;
+    polls = [
+      {'code': 255, 'logs': 'cancelled'}
+    ];
+    await run.cancel();
+    await RenderProcess.settleCancelled();
+    expect(calls.map((c) => c.method), isNot(contains('kill')));
+  });
+
+  test('a restart Android holds back sends one encode to the app, '
+      'not every encode after it', () async {
+    RenderProcess.restartSettle = Duration.zero;
+    int? run = 7;
+    messenger.setMockMethodCallHandler(channel, (call) async {
+      calls.add(call);
+      return switch (call.method) {
+        'run' => run,
+        'pid' => run == null ? null : 4321,
+        _ => null,
+      };
+    });
+    await RenderProcess.start('-y o.mp4', hardware: false);
+    RenderProcess.noteAwayDeath();
+    run = null;
+    await RenderProcess.awaitRestart(limit: const Duration(milliseconds: 600));
+    expect(calls.map((c) => c.method), contains('restart'));
+    expect(await RenderProcess.start('-y o.mp4', hardware: false), isNull);
+    expect(RenderProcess.enabled, isTrue, reason: 'still late, not gone');
+    // Late twice in a row: gone.
+    await RenderProcess.awaitRestart(limit: const Duration(milliseconds: 600));
+    expect(await RenderProcess.start('-y o.mp4', hardware: false), isNull);
+    expect(RenderProcess.enabled, isFalse);
+  });
 }

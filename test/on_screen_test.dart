@@ -11,13 +11,13 @@ import 'package:ayah_reels/render/on_screen.dart';
 /// there when a frame has been drawn on it, which is when Flutter
 /// reports that frame's timings.
 void main() {
-  FrameTiming drawn() => FrameTiming(
-        vsyncStart: 0,
-        buildStart: 1,
-        buildFinish: 2,
-        rasterStart: 3,
-        rasterFinish: 4,
-        rasterFinishWallTime: 4,
+  FrameTiming drawn({int at = 0}) => FrameTiming(
+        vsyncStart: at,
+        buildStart: at + 1,
+        buildFinish: at + 2,
+        rasterStart: at + 3,
+        rasterFinish: at + 4,
+        rasterFinishWallTime: at + 4,
       );
 
   testWidgets('after the app was away, a picture waits for a frame drawn '
@@ -71,7 +71,14 @@ void main() {
     expect(isBack, isTrue, reason: 'an encode needs no frame, only the app');
     expect(OnScreen.backFor, lessThan(const Duration(seconds: 10)));
 
+    // Timings arrive in batches, late: frames drawn before the app left
+    // are not a frame drawn since it came back.
     b.platformDispatcher.onReportTimings!([drawn()]);
+    await t.pump(const Duration(milliseconds: 200));
+    expect(done, isFalse, reason: 'a late batch from before the trip away');
+
+    b.platformDispatcher.onReportTimings!(
+        [drawn(at: b.currentSystemFrameTimeStamp.inMicroseconds)]);
     await t.pump(const Duration(milliseconds: 200));
     await t.pump(const Duration(milliseconds: 400));
     await waiting;
