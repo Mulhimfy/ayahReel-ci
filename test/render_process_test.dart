@@ -298,8 +298,8 @@ void main() {
     // 10 s at 26 Mbps, the lean reels of 2026-10-08 to 10-13.
     f.writeAsBytesSync(List.filled(26 * 1000 * 1000 * 10 ~/ 8, 0));
     expect(VideoRenderer.tooHeavyToPlay(f, 10000), isTrue);
-    // The same bytes over 30 s: under 9 Mbps, a reel made since.
-    expect(VideoRenderer.tooHeavyToPlay(f, 30000), isFalse);
+    // The same bytes over 20 s: 13 Mbps, a join of short passes now.
+    expect(VideoRenderer.tooHeavyToPlay(f, 20000), isFalse);
     expect(VideoRenderer.tooHeavyToPlay(File('${dir.path}/none'), 10000),
         isFalse);
   });

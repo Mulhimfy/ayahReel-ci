@@ -351,12 +351,18 @@ abstract final class VideoRenderer {
   /// not how good the reel looks.
   /// Whether [file], a reel [reelMs] long, is heavier than any reel
   /// made since the ceiling: a lean or grainy reel from before
-  /// 2026-10-13, which budget phones would not play. Every reel since
-  /// stays under 12 Mbps of picture plus the recitation.
+  /// 2026-10-13 (26 to 58 Mbps), which budget phones would not play.
+  /// Reels since average under the 12 Mbps ceiling; a join of short
+  /// passes peaks near 18, so 18 on average is past anything made now.
   static bool tooHeavyToPlay(File file, int reelMs) {
     if (reelMs <= 0 || !file.existsSync()) return false;
-    return file.lengthSync() * 8 * 1000 / reelMs > 13e6;
+    return file.lengthSync() * 8 * 1000 / reelMs > 18e6;
   }
+
+  /// Keys made again this run for being too heavy: once each, so a
+  /// reel that somehow comes out heavy again is served rather than
+  /// encoded at every Save.
+  static final _remade = <String>{};
 
   static String _x264CeilingFor(int reelMs) {
     final mbps = const [12, 8, 6, 4][_rung(reelMs)];
@@ -966,7 +972,7 @@ abstract final class VideoRenderer {
     // beside this, so they move with it.
     final part = File('${work.path}/${out.uri.pathSegments.last}.part');
     // One kept from before the ceiling is made again, not handed out.
-    if (out.existsSync() && tooHeavyToPlay(out, segMs)) {
+    if (out.existsSync() && tooHeavyToPlay(out, segMs) && _remade.add(key)) {
       rlog('render: cached $key is too heavy to play — making it again');
       try {
         out.deleteSync();
