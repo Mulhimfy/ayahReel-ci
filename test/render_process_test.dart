@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -287,5 +289,18 @@ void main() {
     await RenderProcess.awaitRestart(limit: const Duration(milliseconds: 600));
     expect(await RenderProcess.start('-y o.mp4', hardware: false), isNull);
     expect(RenderProcess.enabled, isFalse);
+  });
+
+  test('a reel heavier than any made since the ceiling is too heavy', () {
+    final dir = Directory.systemTemp.createTempSync('heavy');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final f = File('${dir.path}/r.mp4');
+    // 10 s at 26 Mbps, the lean reels of 2026-10-08 to 10-13.
+    f.writeAsBytesSync(List.filled(26 * 1000 * 1000 * 10 ~/ 8, 0));
+    expect(VideoRenderer.tooHeavyToPlay(f, 10000), isTrue);
+    // The same bytes over 30 s: under 9 Mbps, a reel made since.
+    expect(VideoRenderer.tooHeavyToPlay(f, 30000), isFalse);
+    expect(VideoRenderer.tooHeavyToPlay(File('${dir.path}/none'), 10000),
+        isFalse);
   });
 }

@@ -2004,7 +2004,17 @@ class _PreviewScreenState extends State<PreviewScreen>
       final sourceKey = VideoRenderer.sourceKeyOf(file);
       // Whether this reel is new has to be settled before the add,
       // which returns the existing entry for a repeat export.
-      final isNew = await ReelLibrary.findBySource(sourceKey) == null;
+      final existing = await ReelLibrary.findBySource(sourceKey);
+      final isNew = existing == null;
+      // Kept from before 2026-10-13 and too heavy to play: this render
+      // takes its place, and goes to the gallery again.
+      if (existing != null &&
+          VideoRenderer.tooHeavyToPlay(
+              await ReelLibrary.videoFile(existing), _reelMs) &&
+          !VideoRenderer.tooHeavyToPlay(file, _reelMs)) {
+        rlog('library: the kept reel is too heavy to play — replaced');
+        await ReelLibrary.replaceVideo(existing, file);
+      }
       final reel = await ReelLibrary.add(
         video: file,
         sourceKey: sourceKey,

@@ -243,6 +243,31 @@ abstract final class ReelLibrary {
     return reel;
   }
 
+  /// Puts [video] in place of [reel]'s file: the same reel made again
+  /// because the kept one would not play (see
+  /// `VideoRenderer.tooHeavyToPlay`). The gallery's copy is the old
+  /// one, so the entry no longer counts as in the gallery, and the next
+  /// Save puts the playable one there.
+  static Future<SavedReel> replaceVideo(SavedReel reel, File video) async {
+    final dest = await videoFile(reel);
+    final part = File('${dest.path}.part');
+    try {
+      await video.copy(part.path);
+      await part.rename(dest.path);
+    } catch (_) {
+      try {
+        if (part.existsSync()) part.deleteSync();
+      } catch (_) {}
+      rethrow;
+    }
+    final updated = reel.copyWith(inGallery: false);
+    final all = await load();
+    await _write([
+      for (final r in all) r.id == reel.id ? updated : r,
+    ]);
+    return updated;
+  }
+
   /// Records that [reel] now exists in the device gallery, so a later
   /// Save of the same reel can decline instead of writing a duplicate.
   static Future<SavedReel> markInGallery(SavedReel reel) async {

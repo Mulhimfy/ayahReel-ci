@@ -349,6 +349,15 @@ abstract final class VideoRenderer {
   /// level holds. A reel that never reaches the ceiling is unchanged.
   /// The same for both rungs of quality: it is what phones can play,
   /// not how good the reel looks.
+  /// Whether [file], a reel [reelMs] long, is heavier than any reel
+  /// made since the ceiling: a lean or grainy reel from before
+  /// 2026-10-13, which budget phones would not play. Every reel since
+  /// stays under 12 Mbps of picture plus the recitation.
+  static bool tooHeavyToPlay(File file, int reelMs) {
+    if (reelMs <= 0 || !file.existsSync()) return false;
+    return file.lengthSync() * 8 * 1000 / reelMs > 13e6;
+  }
+
   static String _x264CeilingFor(int reelMs) {
     final mbps = const [12, 8, 6, 4][_rung(reelMs)];
     return '-maxrate:v ${mbps}M -bufsize:v ${mbps}M ';
@@ -956,6 +965,13 @@ abstract final class VideoRenderer {
     // end is still a rename. The passes and the progress file are made
     // beside this, so they move with it.
     final part = File('${work.path}/${out.uri.pathSegments.last}.part');
+    // One kept from before the ceiling is made again, not handed out.
+    if (out.existsSync() && tooHeavyToPlay(out, segMs)) {
+      rlog('render: cached $key is too heavy to play — making it again');
+      try {
+        out.deleteSync();
+      } catch (_) {}
+    }
     if (out.existsSync() && out.lengthSync() > 0) {
       rlog('render: cache hit $key');
       // Used now, so it counts as the newest for [sweepCache].
