@@ -197,17 +197,38 @@ abstract final class RenderProcess {
     _lateRestart = false;
     _late = 0;
     _cancelled = null;
+    _waitedFirst = false;
     cancelGrace = const Duration(seconds: 5);
     restartSettle = const Duration(seconds: 2);
+    firstPatience = const Duration(seconds: 12);
   }
 
   /// Starts [cmd] there; null when it can't take it, and the caller runs
-  /// the encode in the app.
-  static Future<RemoteRun?> start(String cmd, {required bool hardware}) async {
+  /// the encode in the app. [stillWanted] ends a wait for the process
+  /// early once the encode is no longer wanted.
+  static Future<RemoteRun?> start(
+    String cmd, {
+    required bool hardware,
+    bool Function()? stillWanted,
+  }) async {
     if (_off) return null;
     try {
-      final id = await _channel.invokeMethod<int>(
-          'run', {'args': FFmpegKitConfig.parseArguments(cmd)});
+      final args = {'args': FFmpegKitConfig.parseArguments(cmd)};
+      var id = await _channel.invokeMethod<int>('run', args);
+      // The first binding of the run took longer than RenderClient's
+      // 4 s: a new process on a slow phone short of memory, where the
+      // save needs it most. The binding is still on its way, so the
+      // process is waited for once, and asked again, before the encode
+      // goes into the app for the rest of the run. Not after a death:
+      // [awaitRestart] has already waited for that one.
+      if (id == null && !_lateRestart && !_waitedFirst) {
+        _waitedFirst = true;
+        if (await _awaitFirst(stillWanted)) {
+          id = await _channel.invokeMethod<int>('run', args);
+        } else if (!(stillWanted?.call() ?? true)) {
+          return null;
+        }
+      }
       if (id != null) {
         _lateRestart = false;
         _late = 0;
@@ -240,6 +261,33 @@ abstract final class RenderProcess {
     }
     _off = true;
     return null;
+  }
+
+  /// Whether the first binding's wait ([start]) has been spent this run.
+  static bool _waitedFirst = false;
+
+  /// How long [start] waits for a render process that didn't answer the
+  /// first binding in time.
+  @visibleForTesting
+  static Duration firstPatience = const Duration(seconds: 12);
+
+  /// Waits up to [firstPatience] for a render process to be listed, and
+  /// a moment more for it to answer: whether one came.
+  static Future<bool> _awaitFirst(bool Function()? stillWanted) async {
+    final clock = Stopwatch()..start();
+    while (stillWanted?.call() ?? true) {
+      final p = await pid();
+      if (p != null && p != _deadPid) {
+        rlog('render: the render process came up '
+            '${clock.elapsed.inMilliseconds} ms after its first binding '
+            'was given up on');
+        await Future<void>.delayed(restartSettle);
+        return stillWanted?.call() ?? true;
+      }
+      if (clock.elapsed >= firstPatience) return false;
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    }
+    return false;
   }
 
   /// An encode died there and the app lived.

@@ -38,10 +38,26 @@ enum ExportBudget {
 
   /// A phone of 3 GB or less, or one that lost an export even when it
   /// was planned tight.
-  tightest;
+  tightest,
+
+  /// A phone that lost a save even on [tightest], on x264: the encoder
+  /// is handed 720x1280 instead of 1080x1920, and a pass holds half the
+  /// cards. Never what a phone starts on; only what a loss there earns
+  /// ([PhoneBudget.lasting]), or this run's step down from [tightest]
+  /// after an encode died there, which used to fail the save outright
+  /// (2026-10-15 and 10-16 notes: "tightest … the render process died",
+  /// and a 1.8 GB phone that died in a tightest pass).
+  smallest;
 
   /// One step smaller, for a phone that has just shown it needed it.
   ExportBudget get tighter => values[(index + 1).clamp(0, values.length - 1)];
+
+  /// Whether its software encodes run lean x264 (see
+  /// `VideoRenderer.leanX264`): [tightest] and [smallest].
+  bool get lean => index >= tightest.index;
+
+  /// Whether the encoder is handed 720x1280: [smallest] only.
+  bool get small => this == smallest;
 
   /// Whether the preview may encode the reel while the user is still
   /// looking at it.
@@ -98,6 +114,19 @@ abstract final class PhoneBudget {
   /// (MediaCodec) was running: see [hardwareTrusted].
   static int _hwLosses = 0;
 
+  /// Of [_losses], the ones lost inside an x264 encode on a lean budget
+  /// ([ExportBudget.lean]): the phone showed that even [ExportBudget.tightest]
+  /// asks for more than it has, so it plans [ExportBudget.smallest].
+  /// Counted only where the loss was told with its budget, or the budget
+  /// can be inferred (see [load]); a hardware death or one while the
+  /// cards were drawn says nothing about what an x264 encode costs.
+  static int _leanLosses = 0;
+
+  /// The budget the save under way encodes at, written beside its stage
+  /// so the next launch knows what a loss was lost at. Set by the
+  /// renderer when it plans and when it steps down.
+  static ExportBudget? _budget;
+
   /// Whether this run's peak memory reading was started over when the
   /// export began, so that a lost export's peak is its own.
   static bool _peakIsSave = false;
@@ -139,8 +168,10 @@ abstract final class PhoneBudget {
 
   /// [now] without this run's own step-downs ([outOfMemory]): what the
   /// next launch plans, so what a reel's cache key may answer to.
-  static ExportBudget get lasting =>
-      budgetFor(hardware: _hardware ??= _readHardware(), losses: _losses);
+  static ExportBudget get lasting => budgetFor(
+      hardware: _hardware ??= _readHardware(),
+      losses: _losses,
+      leanLosses: _leanLosses);
 
   /// Whether the device's own video encoder may take this phone's
   /// exports.
@@ -159,14 +190,30 @@ abstract final class PhoneBudget {
   static bool get hardwareTrusted => _hwLosses == 0 && _losses < 2;
 
   /// The budget a phone like this, with this many lost exports, gets.
+  /// Losses step it down as far as [ExportBudget.tightest]; only a loss
+  /// on a lean budget ([leanLosses]) takes it to
+  /// [ExportBudget.smallest]. An old loss, from before the render
+  /// process or in a hardware encode, doesn't make every reel softer.
   @visibleForTesting
   static ExportBudget budgetFor({
     required ExportBudget hardware,
     required int losses,
+    int leanLosses = 0,
   }) {
     final i = hardware.index + losses;
-    return ExportBudget.values[i.clamp(0, ExportBudget.values.length - 1)];
+    final b = ExportBudget.values[i.clamp(0, ExportBudget.tightest.index)];
+    return b == ExportBudget.tightest && leanLosses > 0
+        ? ExportBudget.smallest
+        : b;
   }
+
+  /// Whether a save's [stage] is inside an FFmpeg encode: a pass, the
+  /// one pass of a short reel, or the join. Not the cards, the hardware
+  /// probe or the planning before them.
+  @visibleForTesting
+  static bool inEncode(String? stage) =>
+      stage != null &&
+      (stage.contains('pass') || stage.startsWith('join'));
 
   /// What the phone itself allows, before anything has gone wrong on
   /// it. Memory that can't be read counts as plenty: an unknown phone
@@ -254,7 +301,11 @@ abstract final class PhoneBudget {
   /// The words a lost export's record comes to; see [lostDetail].
   @visibleForTesting
   static String describeLoss(Map<String, dynamic> j) {
-    final stage = j['stage'] as String?;
+    // Where it died, and on what budget (written since 2026-10-17).
+    final stage = [
+      if (j['stage'] is String) j['stage'] as String,
+      if (j['budget'] is String) j['budget'] as String,
+    ].join(', ');
     final rss = j['rssMb'] as int?;
     final peak = j['peakMb'] as int?;
     final free = j['freeMb'] as int?;
@@ -266,7 +317,7 @@ abstract final class PhoneBudget {
         '$peak MB at most${j['peakIsSave'] == true ? ' in the save' : ''}',
     ].join(', ');
     final parts = [
-      if (stage != null) stage,
+      if (stage.isNotEmpty) stage,
       if (app.isNotEmpty) app,
       if (render != null)
         'render $render MB'
@@ -321,6 +372,7 @@ abstract final class PhoneBudget {
       final j = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
       _losses = (j['lost'] as int?) ?? 0;
       _hwLosses = (j['hwLost'] as int?) ?? 0;
+      _leanLosses = (j['leanLost'] as int?) ?? 0;
       _survived = (j['survived'] as int?) ?? 0;
       if (j['running'] == true) {
         if (j['hidden'] == true) {
@@ -333,10 +385,15 @@ abstract final class PhoneBudget {
           rlog('budget: the last export died with the app out of sight '
               '— not counted');
         } else {
+          final stage = j['stage'] as String?;
+          final hardware = stage?.contains('hardware') ?? false;
+          // What the save ran at: told since 2026-10-17. Before that,
+          // at least what this phone was planned for good, since a save
+          // only ever runs at that or smaller.
+          final at = ExportBudget.values.asNameMap()[j['budget']] ?? lasting;
+          if (!hardware && inEncode(stage) && at.lean) _leanLosses++;
           _losses++;
-          if ((j['stage'] as String?)?.contains('hardware') ?? false) {
-            _hwLosses++;
-          }
+          if (hardware) _hwLosses++;
           _lostUntold = true;
           _lostDetail = describeLoss(j);
           rlogError('export', 'the last export died with the app '
@@ -398,6 +455,27 @@ abstract final class PhoneBudget {
     unawaited(_sample());
   }
 
+  /// The budget the save's encodes run at from here: set when the
+  /// renderer plans, and again when it steps down. Kept for a render
+  /// the user is not waiting on yet too, so a Save that joins it knows.
+  static void exportPlanned(ExportBudget budget) {
+    _budget = budget;
+    if (_running) unawaited(_sample());
+  }
+
+  /// The encode the save has just started runs in the app's own
+  /// process, not the render process: told in the stage (", in the
+  /// app"), since a lost save there is the app's own memory, and on a
+  /// phone whose render process works that should never happen.
+  static void encodeInApp() {
+    final stage = _stage;
+    if (!_running || stage == null || stage.endsWith(_inApp)) return;
+    _stage = '$stage$_inApp';
+    unawaited(_sample());
+  }
+
+  static const _inApp = ', in the app';
+
   /// A reading every few seconds, written without waiting on the disk:
   /// an fsync on the UI thread every 3 s, on a budget phone's storage
   /// already busy with the encode, stalled the progress bar. A process
@@ -435,6 +513,7 @@ abstract final class PhoneBudget {
     _sampler?.cancel();
     _sampler = null;
     _stage = null;
+    _budget = null;
     _mem = const {};
     try {
       final f = await _file();
@@ -495,6 +574,9 @@ abstract final class PhoneBudget {
     if (_running) {
       _losses++;
       if (hardware) _hwLosses++;
+      // An x264 encode that died on a lean budget: even tightest asks
+      // too much here (see [ExportBudget.smallest]).
+      if (!hardware && (_budget?.lean ?? false)) _leanLosses++;
     } else if (hardware && crashed) {
       _hwLosses++;
     }
@@ -541,10 +623,12 @@ abstract final class PhoneBudget {
       jsonEncode({
           'lost': _losses,
           if (_hwLosses > 0) 'hwLost': _hwLosses,
+          if (_leanLosses > 0) 'leanLost': _leanLosses,
           if (_survived > 0) 'survived': _survived,
           'running': running,
           if (hidden) 'hidden': true,
           if (running && _stage != null) 'stage': _stage,
+          if (running && _budget != null) 'budget': _budget!.name,
           if (running) ..._mem,
           if (running && _peakIsSave) 'peakIsSave': true,
         });
@@ -565,6 +649,8 @@ abstract final class PhoneBudget {
     _is32Bit = false;
     _losses = 0;
     _hwLosses = 0;
+    _leanLosses = 0;
+    _budget = null;
     _peakIsSave = false;
     _survived = 0;
     renderPid = null;

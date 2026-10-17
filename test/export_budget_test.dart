@@ -98,6 +98,119 @@ void main() {
       expect(after(ExportBudget.tightest, 5), ExportBudget.tightest);
     });
 
+    test('only a loss on a lean budget takes the phone to the smallest',
+        () {
+      ExportBudget after(ExportBudget hw, int n, int lean) =>
+          PhoneBudget.budgetFor(hardware: hw, losses: n, leanLosses: lean);
+      expect(after(ExportBudget.tightest, 3, 0), ExportBudget.tightest,
+          reason: 'old losses, hardware ones, the cards: not the encode');
+      expect(after(ExportBudget.tightest, 1, 1), ExportBudget.smallest);
+      expect(after(ExportBudget.tight, 2, 1), ExportBudget.smallest);
+      expect(after(ExportBudget.roomy, 1, 1), ExportBudget.tight,
+          reason: 'a phone not yet planned tightest tries tightest first');
+    });
+
+    test('an encode stage is a pass, the one pass, or the join', () {
+      expect(PhoneBudget.inEncode('5 cards in one pass'), isTrue);
+      expect(PhoneBudget.inEncode('pass 3/7, 8 cards, in the app'), isTrue);
+      expect(PhoneBudget.inEncode('join'), isTrue);
+      expect(PhoneBudget.inEncode('cards'), isFalse);
+      expect(PhoneBudget.inEncode('hardware probe'), isFalse);
+      expect(PhoneBudget.inEncode('planning'), isFalse);
+      expect(PhoneBudget.inEncode('starting'), isFalse);
+      expect(PhoneBudget.inEncode(null), isFalse);
+    });
+
+    test('an x264 encode that died on the tightest budget plans the phone '
+        'smallest; a hardware one does not', () async {
+      PhoneBudget.debugMemKb = (2.8 * gb).round();
+      await PhoneBudget.load();
+      expect(PhoneBudget.now, ExportBudget.tightest);
+      await PhoneBudget.exportStarted();
+      PhoneBudget.exportPlanned(ExportBudget.tightest);
+      await PhoneBudget.renderDied(hardware: true);
+      expect(PhoneBudget.lasting, ExportBudget.tightest,
+          reason: "the device encoder's death says nothing about x264");
+      await PhoneBudget.renderDied(hardware: false);
+      await PhoneBudget.exportEnded();
+      expect(PhoneBudget.lasting, ExportBudget.smallest);
+      expect(PhoneBudget.summary, startsWith('smallest, 2867 MB'));
+      expect(jsonDecode(history().readAsStringSync())['leanLost'], 1);
+      PhoneBudget.reset();
+      await PhoneBudget.load();
+      expect(PhoneBudget.now, ExportBudget.smallest, reason: 'for good');
+    });
+
+    test('a render death on the tightest budget outside a save costs nothing',
+        () async {
+      PhoneBudget.debugMemKb = (2.8 * gb).round();
+      await PhoneBudget.load();
+      PhoneBudget.exportPlanned(ExportBudget.tightest);
+      await PhoneBudget.renderDied(hardware: false);
+      expect(PhoneBudget.lasting, ExportBudget.tightest);
+    });
+
+    test('a save the app died in, inside a tightest encode, plans the phone '
+        'smallest and says what it ran at', () async {
+      PhoneBudget.debugMemKb = (1.8 * gb).round();
+      await PhoneBudget.exportStarted();
+      PhoneBudget.exportPlanned(ExportBudget.tightest);
+      PhoneBudget.exportStage('5 cards in one pass');
+      await PhoneBudget.debugFlush();
+      expect(jsonDecode(history().readAsStringSync())['budget'], 'tightest');
+      PhoneBudget.reset(); // the app dies here
+      await PhoneBudget.load();
+      expect(PhoneBudget.now, ExportBudget.smallest);
+      expect(PhoneBudget.lostDetail, ' (5 cards in one pass, tightest)');
+    });
+
+    test('a save the app died in while drawing the cards is no lean loss',
+        () async {
+      PhoneBudget.debugMemKb = (1.8 * gb).round();
+      await PhoneBudget.exportStarted();
+      PhoneBudget.exportPlanned(ExportBudget.tightest);
+      PhoneBudget.exportStage('cards');
+      await PhoneBudget.debugFlush();
+      PhoneBudget.reset();
+      await PhoneBudget.load();
+      expect(PhoneBudget.now, ExportBudget.tightest);
+    });
+
+    test('a record written before the budget was is read at the phone\'s '
+        'own budget', () async {
+      // As 2026-10-14 code leaves a save the app died in.
+      history().writeAsStringSync(jsonEncode({
+        'lost': 2,
+        'running': true,
+        'stage': '5 cards in one pass',
+        'rssMb': 91,
+      }));
+      PhoneBudget.debugMemKb = (1.8 * gb).round();
+      await PhoneBudget.load();
+      expect(PhoneBudget.now, ExportBudget.smallest);
+
+      // The same on a phone that was planned roomy is no lean loss.
+      PhoneBudget.reset();
+      history().writeAsStringSync(jsonEncode({
+        'lost': 0,
+        'running': true,
+        'stage': '5 cards in one pass',
+      }));
+      PhoneBudget.debugMemKb = 8 * gb;
+      await PhoneBudget.load();
+      expect(PhoneBudget.now, ExportBudget.tight);
+    });
+
+    test('an encode in the app says so in the stage, once', () async {
+      await PhoneBudget.exportStarted();
+      PhoneBudget.exportStage('pass 1/2, 4 cards');
+      PhoneBudget.encodeInApp();
+      PhoneBudget.encodeInApp();
+      await PhoneBudget.debugFlush();
+      expect(jsonDecode(history().readAsStringSync())['stage'],
+          'pass 1/2, 4 cards, in the app');
+    });
+
     test('an export that ended leaves nothing to count', () async {
       await PhoneBudget.exportStarted();
       expect(jsonDecode(history().readAsStringSync())['running'], isTrue);
@@ -326,6 +439,19 @@ void main() {
     expect(ExportBudget.tightest.rendersAhead, isFalse);
   });
 
+  test('the smallest budget: below tightest, lean, small, never ahead', () {
+    expect(ExportBudget.tightest.tighter, ExportBudget.smallest);
+    expect(ExportBudget.smallest.tighter, ExportBudget.smallest);
+    expect(ExportBudget.tight.lean, isFalse);
+    expect(ExportBudget.tightest.lean, isTrue);
+    expect(ExportBudget.smallest.lean, isTrue);
+    expect(ExportBudget.tightest.small, isFalse);
+    expect(ExportBudget.smallest.small, isTrue);
+    expect(ExportBudget.smallest.rendersAhead, isFalse);
+    expect(RenderPlan.clipsPerPassSmallest,
+        lessThan(RenderPlan.clipsPerPassLeast));
+  });
+
   test('the smallest plan holds fewer cards a pass than the low-memory one',
       () {
     expect(RenderPlan.clipsPerPassLeast,
@@ -366,6 +492,18 @@ void main() {
           background: 'bg.png', cards: cards, sceneThreads: 2);
       expect(cmd, contains('-t 40.000 -i "a.m4a"'));
       expect(cmd, isNot(contains('-threads 1 -ss')));
+    });
+
+    test('only the smallest budget hands the encoder 720x1280', () {
+      final small = VideoRenderer.stillReelCommand(
+          background: 'bg.png', cards: cards, small: true);
+      expect(small,
+          contains('scale=720:1280:flags=area:out_color_matrix=bt709'));
+      expect(small, isNot(contains('scale=1080:1920:out_color_matrix')));
+      final full = VideoRenderer.stillReelCommand(
+          background: 'bg.png', cards: cards);
+      expect(full, contains('scale=1080:1920:out_color_matrix=bt709'));
+      expect(full, isNot(contains('720:1280')));
     });
   });
 
@@ -417,6 +555,16 @@ void main() {
         }),
         ' (4 cards in one pass, hardware; app 305 MB, '
         '1079 MB at most in the save; phone 443 MB free)');
+    // And the budget it ran at, where it was written (since 2026-10-17).
+    expect(
+        PhoneBudget.describeLoss(const {
+          'stage': '5 cards in one pass, in the app',
+          'budget': 'tightest',
+          'rssMb': 91,
+          'freeMb': 352,
+        }),
+        ' (5 cards in one pass, in the app, tightest; app 91 MB; '
+        'phone 352 MB free)');
   });
 
   test('/proc lines read in kB', () {

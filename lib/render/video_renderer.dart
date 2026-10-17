@@ -231,11 +231,12 @@ abstract final class VideoRenderer {
         ExportBudget.roomy => null,
         ExportBudget.tight => RenderPlan.clipsPerPassLowMemory,
         ExportBudget.tightest => RenderPlan.clipsPerPassLeast,
+        ExportBudget.smallest => RenderPlan.clipsPerPassSmallest,
       };
   static int _threadsFor(ExportBudget budget) => switch (budget) {
         ExportBudget.roomy => 16,
         ExportBudget.tight => 4,
-        ExportBudget.tightest => 2,
+        ExportBudget.tightest || ExportBudget.smallest => 2,
       };
 
   /// The decoder threads a scenery input may take under [budget], or
@@ -931,7 +932,7 @@ abstract final class VideoRenderer {
     // answers to it. The key answers to what lasts past this run (see
     // the `_lx` below).
     final planned = PhoneBudget.now;
-    final leanKey = PhoneBudget.lasting == ExportBudget.tightest;
+    final leanKey = PhoneBudget.lasting.lean;
     final key = 'v13_${recitation.reciterId}_${sceneKey}_$layoutKey'
         '_${(overlayAlign * 100).round()}_${rasterKey}_fx${effects.key}'
         // A cut reel is a different file from the whole one, so it
@@ -1336,7 +1337,8 @@ abstract final class VideoRenderer {
     // And a phone short of memory gets fewer of them, and smaller
     // passes, from its very first encode; see [ExportBudget].
     var budget = planned;
-    _lean = budget == ExportBudget.tightest;
+    _lean = budget.lean;
+    PhoneBudget.exportPlanned(budget);
     // Read per encode: an eager render the user then taps Save on is
     // waited on from that pass on ([promote]).
     int threads() =>
@@ -1446,6 +1448,7 @@ abstract final class VideoRenderer {
           sceneThreads: sceneThreads,
           reelMs: segMs,
           highQuality: highQuality,
+          small: budget.small,
         );
 
     // The picture-only files a chunked render leaves behind between the
@@ -1530,6 +1533,7 @@ abstract final class VideoRenderer {
             sceneThreads: sceneThreads,
             reelMs: segMs,
             highQuality: highQuality,
+            small: budget.small,
             frames: p.frames,
             bgSeekS: sceneInputs != null || bgIsImage
                 ? 0
@@ -1640,20 +1644,24 @@ abstract final class VideoRenderer {
       // frame is still encoded exactly once — the pieces are joined
       // with a stream copy — so the retry costs launches, not quality.
       // Fewer threads go with it, each of which held frames of its own.
-      if (failure != null && await _outOfMemory(failure)) {
+      // Down to the smallest budget if need be, a step per death: one
+      // step and then a failure left a phone whose tightest encode died
+      // with no reel at all, at every Save (2026-10-15: "tightest, 7
+      // lost, 5 survived … the render process died during the encode").
+      while (failure != null && await _outOfMemory(failure)) {
         final next = budget.tighter;
-        if (next != budget) {
-          final tighter = planPasses(maxClips: _clipsFor(next));
-          rlog('render: out of memory on ${passes.length} pass(es) — '
-              'retrying on ${tighter.length}, ${next.name} budget');
-          PhoneBudget.outOfMemory(budget);
-          budget = next;
-          _lean = budget == ExportBudget.tightest;
-          passes = tighter;
-          chunked = passes.length > 1;
-          sceneThreads = _sceneThreadsFor(next);
-          failure = await encode(hardware);
-        }
+        if (next == budget) break;
+        final tighter = planPasses(maxClips: _clipsFor(next));
+        rlog('render: out of memory on ${passes.length} pass(es) — '
+            'retrying on ${tighter.length}, ${next.name} budget');
+        PhoneBudget.outOfMemory(budget);
+        budget = next;
+        _lean = budget.lean;
+        PhoneBudget.exportPlanned(budget);
+        passes = tighter;
+        chunked = passes.length > 1;
+        sceneThreads = _sceneThreadsFor(next);
+        failure = await encode(hardware);
       }
     } finally {
       dropPassParts();
@@ -1698,10 +1706,7 @@ abstract final class VideoRenderer {
     // killed with the app (low memory, force quit) leaves a
     // half-written .part behind rather than a truncated mp4 that every
     // later export would serve as a finished reel.
-    final made = budget == ExportBudget.tightest &&
-            PhoneBudget.lasting == ExportBudget.tightest
-        ? leanOut
-        : out;
+    final made = budget.lean && PhoneBudget.lasting.lean ? leanOut : out;
     _claim(part, made);
     rlog('render: done gen $gen -> ${made.path} '
         '(${(made.lengthSync() / 1024).round()} KB, '
@@ -2008,9 +2013,15 @@ abstract final class VideoRenderer {
     await RenderProcess.awaitRestart(stillWanted: () => gen == _generation);
     if (gen != _generation) throw const RenderCancelled();
     final hw = cmd.contains('h264_mediacodec');
-    final remote = await RenderProcess.start(cmd, hardware: hw);
+    final remote = await RenderProcess.start(cmd,
+        hardware: hw, stillWanted: () => gen == _generation);
     PhoneBudget.renderPid = remote == null ? null : RenderProcess.knownPid;
-    return remote ?? LocalRun(await FFmpegKit.executeAsync(cmd), hardware: hw);
+    if (remote != null) return remote;
+    // Superseded while the render process was waited for: no encode in
+    // the app for a render nobody wants.
+    if (gen != _generation) throw const RenderCancelled();
+    if (Platform.isAndroid) PhoneBudget.encodeInApp();
+    return LocalRun(await FFmpegKit.executeAsync(cmd), hardware: hw);
   }
 
   /// The verse cards one pass draws, with their windows clipped to it.
@@ -2386,6 +2397,10 @@ abstract final class VideoRenderer {
 
     /// The higher rung of the encoder ladder; see [_hwBitrateFor].
     bool highQuality = false,
+
+    /// Hands the encoder 720x1280 ([ExportBudget.smallest]); see
+    /// [outputScale].
+    bool small = false,
   }) {
     final durS = segMs / 1000;
     final dur = durS.toStringAsFixed(3);
@@ -2661,7 +2676,7 @@ abstract final class VideoRenderer {
     // Then explicit BT.709 conversion + tags: without them the RGB->YUV
     // step uses a mismatched matrix and players wash the colors out.
     f.write('[$prev]$grain${fadeChain(effects, wholeMs, passStartMs, segMs)}'
-        'scale=1080:1920:out_color_matrix=bt709:out_range=tv'
+        '${outputScale(small: small)}'
         '[vout];');
     // Fade the recitation in/out so range edges never hard-cut
     // mid-breath. A picture-only pass has none to fade: the recitation
@@ -2698,6 +2713,22 @@ abstract final class VideoRenderer {
         '-f mp4 '
         '-y "$outPath"';
   }
+
+  /// The last filter before the encoder: the frame to the size it is
+  /// encoded at, with an explicit BT.709 conversion and tags.
+  ///
+  /// 1080x1920, except on [ExportBudget.smallest], where the graph still
+  /// composes at 1080x1920 and only the encoder is handed 720x1280. The
+  /// encoder's frames are the bulk of what a pass costs, and 2.25 times
+  /// smaller there: desktop FFmpeg 8.0.1, the app's graph, lean x264 on
+  /// two threads, 150 frames, 4 cards: 299 MB at 1080x1920, 233 MB at
+  /// 720x1280, and 40% faster. Composing at 720 throughout would save
+  /// another 25 MB for a reworked graph. Area averaging keeps the verse's
+  /// thin strokes from shimmering as they shrink.
+  @visibleForTesting
+  static String outputScale({bool small = false}) => small
+      ? 'scale=720:1280:flags=area:out_color_matrix=bt709:out_range=tv'
+      : 'scale=1080:1920:out_color_matrix=bt709:out_range=tv';
 
   /// The reel opening out of black and closing back into it, as the
   /// filters for *this* pass of it.
@@ -2752,6 +2783,7 @@ abstract final class VideoRenderer {
     RenderPass? pass,
     int threads = 4,
     int? sceneThreads,
+    bool small = false,
   }) {
     final segMs = cards.length * cardMs;
     final clips = [
@@ -2782,6 +2814,7 @@ abstract final class VideoRenderer {
       threads: threads,
       sceneThreads: sceneThreads,
       reelMs: segMs,
+      small: small,
       frames: pass?.frames,
       bgSeekS: pass == null || bgIsImage
           ? 0

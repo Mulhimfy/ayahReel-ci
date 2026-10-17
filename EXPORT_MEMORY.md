@@ -38,6 +38,7 @@ Measured with desktop FFmpeg 8.0.1 and the app's own graph (2026-10-04):
 | tightest + lean x264 | same phones | 8 | 2, no lookahead or B-frames | 2026-10-08 |
 | tightest + lean, superfast | same phones | 8 | 2, x264 `superfast` | 2026-10-11 |
 | tightest + lean with mbtree | same phones | 8 | 2, `superfast`, 5-frame lookahead, mbtree on | 2026-10-13 |
+| smallest | a save lost in an x264 encode on tightest | 4 | 2, lean, the encoder handed 720x1280 | 2026-10-17 |
 
 And separately from the budget, since 2026-10-11 (`PhoneBudget.hardwareTrusted`):
 a phone where a save died inside a hardware encode (`, hardware` in the
@@ -293,6 +294,61 @@ is made again (`VideoRenderer.tooHeavyToPlay`, `c67fc2a`, `b824c5b`).
   or by `library.json.bad`; entries a build can't read stay in the
   index. Copies go through `copyWhole` (a `.tmp` beside the name).
 
+## 2026-10-17: a step below tightest
+
+Two notes from `version: 1.0.9`, `code: 2026-10-14`:
+
+    tightest, 3647 MB, 7 lost, 5 survived, x264 only · render: RenderFailed(outOfMemory): the render process died during the encode
+    tightest, 1831 MB, 32-bit, 2 lost, x264 only · lost: the app closed while a reel was saving (5 cards in one pass; app 91 MB, 261 MB at most; phone 352 MB free)
+
+The first is the 3647 MB phone of 2026-10-11 again ("2 lost" then).
+Its render process died five times with the app in front (from
+`2026-10-14` code a death with the app away is rerun, not counted), in
+lean x264 on the tightest budget. An x264 death is read as out of
+memory and answered one budget smaller, and below tightest there was
+nothing: every Save failed at its first death. The second phone's app
+itself died in a tightest pass, small (91 MB) and with no render
+process memory in the note, so either the encode ran in the app or
+the app died before the next reading.
+
+Play's vitals for 1.0.9 (28 days to 2026-10-17) have nothing on the
+save: one Impeller OpenGL crash in `glDrawArrays` on a MediaTek
+PowerVR phone (Oppo Reno2 Z) and one surface-creation ANR (Oppo
+CPH2269, PowerVR). Both native; see RELEASES.md on Skia for those GPUs.
+
+Done, Dart only:
+
+- **`ExportBudget.smallest`.** Four cards a pass, two threads, lean
+  x264, and the encoder handed 720x1280 (`VideoRenderer.outputScale`:
+  the graph still composes at 1080x1920, a `scale=720:1280:flags=area`
+  before the encoder). Desktop FFmpeg 8.0.1, the app's graph, lean x264
+  on two threads, 150 frames: tightest (8 cards, 1080x1920) peaks at
+  326 MB in 7.2 s; smallest at 233 MB in 4.3 s. Four cards at 1080x1920
+  is 299 MB; a graph composed at 720 throughout would be 208 MB.
+- **Down the whole ladder in one save.** The out-of-memory retry steps
+  a budget at a time until an encode finishes or there is nothing
+  smaller, where it used to step once and fail.
+- **Who plans smallest for good.** Losses still step a phone down only
+  as far as tightest. A loss inside an x264 encode on a lean budget
+  (`leanLost` in `export_budget.json`) takes it to smallest: a render
+  death in a save, or the app dying in a pass or the join. A hardware
+  death, the cards, an old loss: none of these, so a 3 GB phone that
+  lost a save in 1.0.8 doesn't make every reel softer. The running mark
+  now carries the save's `budget`; a mark from older code is read at the
+  phone's own budget then.
+- **The render process waited for once.** A first binding that takes
+  longer than RenderClient's 4 s (a new process on a slow phone short
+  of memory) used to send every encode of the run into the app. Now the
+  app waits up to 12 s for the process to be listed, asks once more, and
+  only then encodes in the app.
+- **The note says where.** `, in the app` after the stage when an
+  Android encode ran in the app's process, and the budget after it:
+  `lost: … (5 cards in one pass, in the app, tightest; app …)`.
+- `FeedbackService.codeDate` is `2026-10-17`.
+
+**Not device-tested.** Check on a phone planned smallest that a reel
+saves, plays, and that its passes join by stream copy at 720x1280.
+
 ## What a note says since 2026-10-08
 
 While a foreground save runs, `PhoneBudget` writes its stage and the
@@ -303,7 +359,9 @@ stage. If the app dies, the next launch's note reads, for example:
 
 - **stage**: `starting`, `cards` (drawing the verse PNGs in Flutter),
   `hardware probe` (from `2026-10-15` code), `N cards in one pass`, `pass i/n, N cards`, `join`. `, hardware` means
-  the MediaCodec encoder was running.
+  the MediaCodec encoder was running; `, in the app` (from `2026-10-17`
+  code) that the encode ran in the app's process, not the render
+  process. Then the budget it ran at (from `2026-10-17` code).
 - **app … MB**: the process's resident memory (`VmRSS`) at the last
   reading, and its peak (`VmHWM`).
 - **phone … MB free**: `MemAvailable` at that moment.
@@ -328,8 +386,8 @@ only says where the save was within about 3 seconds.
    constant-memory renderer below.
 4. **A modest peak (under about 450 MB) but little free memory** (under
    about 150 MB). The phone itself is full, and the system kills the
-   foreground app anyway. Only a smaller save (720p on the tightest
-   budget) or FFmpeg out of the app's process can help.
+   foreground app anyway. Only a smaller save (`smallest`, from
+   `2026-10-17` code) or FFmpeg out of the app's process can help.
 5. **`join`.** The join re-encodes only when the passes can't be stream
    copied (`copyVideo`). Find out why.
 6. **No more such notes from `2026-10-08` code.** Stop here.
@@ -342,12 +400,17 @@ only says where the save was within about 3 seconds.
    process took N deaths and the app lived. A *lost* save there (the
    app itself died) is something else: look at the app's own memory,
    the `cards` stage first, since FFmpeg is no longer in the app.
+9. **From `2026-10-17` code**, `smallest` in the summary means the phone
+   lost an x264 save on tightest. A `render process died` failure on
+   smallest has nothing smaller left: next is the constant-memory
+   renderer, or composing at 720 throughout. `, in the app` on a
+   lost save's stage means the render process wasn't to be had in time
+   even after 12 s: look at why it can't start on that phone.
 
 ## The bigger levers, in order of cost
 
-- **720p on the tightest budget.** Add `scale=720:1280` before the
-  encoder only. x264's frames shrink 2.25x. Dart only, so an OTA can
-  carry it, but every reel those phones make looks softer.
+- **720p on the tightest budget.** Done 2026-10-17 as its own step,
+  `smallest`, for the phones that lose a save on tightest (above).
 - **Constant-memory renderer.** Collapse the per-card PNG inputs into
   one stream: every card padded to a full 1080x1920 transparent PNG,
   fed through the concat demuxer with durations, and one overlay at

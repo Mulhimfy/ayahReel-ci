@@ -236,6 +236,60 @@ void main() {
     expect(RenderProcess.enabled, isFalse);
   });
 
+  test('a first binding slower than 4 s is waited for once, not sent to '
+      'the app for the rest of the run', () async {
+    RenderProcess.restartSettle = Duration.zero;
+    RenderProcess.firstPatience = const Duration(seconds: 5);
+    final runs = <int?>[null, 7];
+    final pids = <int?>[null, null, 4321];
+    messenger.setMockMethodCallHandler(channel, (call) async {
+      calls.add(call);
+      return switch (call.method) {
+        'run' => runs.removeAt(0),
+        'pid' => pids.isEmpty ? 4321 : pids.removeAt(0),
+        _ => null,
+      };
+    });
+    final run = await RenderProcess.start('-y o.mp4', hardware: false);
+    expect(run, isNotNull);
+    expect(RenderProcess.enabled, isTrue);
+    expect(calls.where((c) => c.method == 'run'), hasLength(2));
+    expect(RenderProcess.knownPid, 4321);
+  });
+
+  test('the first binding is waited for in time, and only once a run',
+      () async {
+    RenderProcess.restartSettle = Duration.zero;
+    RenderProcess.firstPatience = const Duration(milliseconds: 600);
+    messenger.setMockMethodCallHandler(channel, (call) async {
+      calls.add(call);
+      return null; // no binding, no process
+    });
+    final clock = Stopwatch()..start();
+    expect(await RenderProcess.start('-y o.mp4', hardware: false), isNull);
+    expect(clock.elapsed, lessThan(const Duration(seconds: 3)));
+    expect(RenderProcess.enabled, isFalse);
+    expect(calls.where((c) => c.method == 'run'), hasLength(1),
+        reason: 'no process came, so it is not asked again');
+  });
+
+  test('a render no longer wanted stops waiting and leaves the process on',
+      () async {
+    RenderProcess.firstPatience = const Duration(seconds: 5);
+    messenger.setMockMethodCallHandler(channel, (call) async {
+      calls.add(call);
+      return null;
+    });
+    final clock = Stopwatch()..start();
+    expect(
+        await RenderProcess.start('-y o.mp4',
+            hardware: false, stillWanted: () => false),
+        isNull);
+    expect(clock.elapsed, lessThan(const Duration(seconds: 2)));
+    expect(RenderProcess.enabled, isTrue,
+        reason: 'nothing was learned about the process');
+  });
+
   test('a wedged encode is ended with its process', () async {
     answer();
     final run = (await RenderProcess.start('-y o.mp4', hardware: true))!;
