@@ -24,6 +24,7 @@ void main() {
   setUp(() {
     root = Directory.systemTemp.createTempSync('reel_library_test');
     PathProviderPlatform.instance = _FakePathProvider(root.path);
+    ReelLibrary.debugReset();
   });
 
   tearDown(() {
@@ -121,6 +122,37 @@ void main() {
     // An empty key must never match another empty key, or every legacy
     // reel would look like a re-export of the first one.
     expect(await ReelLibrary.findBySource(''), isNull);
+  });
+
+  test('the sweep takes cut-short copies, never a reel an index names',
+      () async {
+    final dir = Directory('${root.path}/reels')..createSync(recursive: true);
+    for (final n in ['reel_1', 'reel_2', 'reel_3', 'reel_4.mp4.tmp']) {
+      File('${dir.path}/${n.contains('.') ? n : '$n.mp4'}')
+          .writeAsStringSync('mp4');
+    }
+    // reel_1: an entry this build can't read.
+    File('${dir.path}/library.json').writeAsStringSync(jsonEncode([
+      {'id': '1', 'fileName': 'reel_1.mp4'},
+    ]));
+    // reel_2: named only by an index set aside as unreadable.
+    File('${dir.path}/library.json.bad')
+        .writeAsStringSync('[{"id": "2", "fileName": "reel_2.mp4", "rec');
+
+    await add(render('a.mp4'), 'v5_key');
+    expect(File('${dir.path}/reel_3.mp4').existsSync(), isFalse,
+        reason: 'named nowhere: a copy an older build cut short');
+    expect(File('${dir.path}/reel_4.mp4.tmp').existsSync(), isFalse);
+
+    // The save kept the entry it couldn't read, so a launch later its
+    // reel is still named.
+    ReelLibrary.debugReset();
+    await ReelLibrary.sweepStrays();
+    expect(File('${dir.path}/reel_1.mp4').existsSync(), isTrue);
+    expect(File('${dir.path}/reel_2.mp4').existsSync(), isTrue);
+    expect((await ReelLibrary.load()).length, 1);
+    expect(File('${dir.path}/library.json').readAsStringSync(),
+        contains('reel_1.mp4'));
   });
 
   test('removing a reel takes its poster with it', () async {

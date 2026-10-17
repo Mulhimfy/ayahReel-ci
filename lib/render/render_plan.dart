@@ -144,6 +144,13 @@ abstract final class RenderPlan {
   /// little and add launches.
   static const clipsPerPassLeast = 8;
 
+  /// And half of that, for a phone that lost a save even at eight
+  /// (`ExportBudget.smallest`), where the encoder is handed 720x1280 as
+  /// well. Desktop FFmpeg 8.0.1, the app's graph, lean x264 on two
+  /// threads, 150 frames: 326 MB at the peak for eight cards at
+  /// 1080x1920, 233 MB for four at 720x1280, and 40% faster.
+  static const clipsPerPassSmallest = 4;
+
   /// The passes covering [segStartMs]..[segEndMs].
   ///
   /// [clips] are the overlay windows, in start order; a clip straddling

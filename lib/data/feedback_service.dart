@@ -309,7 +309,7 @@ abstract final class FeedbackService {
   /// 2026-10-06 could have come from either, so a note now says which
   /// code it was written from. Move it forward in every patch that
   /// changes how a save works.
-  static const codeDate = '2026-10-14';
+  static const codeDate = '2026-10-17';
 
   static String? _exportTrouble;
 
