@@ -9,10 +9,12 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.FlutterShellArgs
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.io.IOException
@@ -30,6 +32,30 @@ class MainActivity : FlutterActivity() {
 
     /** The pickAudio call waiting on the document picker. */
     private var pendingPick: MethodChannel.Result? = null
+
+    /** Whether this activity's engine was asked for Skia (RenderBackend). */
+    private var askedSkia = false
+
+    /**
+     * Skia instead of Impeller where Impeller would draw with OpenGL ES:
+     * see RenderBackend. Read by the first engine start of the process.
+     */
+    @Suppress("DEPRECATION")
+    override fun getFlutterShellArgs(): FlutterShellArgs {
+        val args = super.getFlutterShellArgs()
+        val reason = RenderBackend.skiaReason(this)
+        askedSkia = reason != null
+        if (reason != null) {
+            args.add(FlutterShellArgs.ARG_DISABLE_IMPELLER)
+            Log.i("AyahReel", "drawing with Skia: $reason")
+        }
+        return args
+    }
+
+    override fun onFlutterUiDisplayed() {
+        super.onFlutterUiDisplayed()
+        if (!askedSkia) RenderBackend.learn(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- Quran text + recitation audio are fetched on demand -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Daily create-a-reel reminder -->
@@ -12,14 +13,19 @@
          album on API 29 (Android 10), where it still goes through the
          legacy storage path: without it, getExternalStoragePublicDirectory
          is unwritable under scoped storage and Save fails on every
-         Android 10 phone. Ignored from API 30 up. -->
+         Android 10 phone. Ignored from API 30 up.
+         appComponentFactory (Android 9 up, in place of androidx.core's)
+         runs the notification plugin's alarm receiver off the main
+         thread: see AppComponents.kt. -->
     <application
         android:label="AyahReel"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:requestLegacyExternalStorage="true"
-        android:largeHeap="true">
+        android:largeHeap="true"
+        android:appComponentFactory="com.ayahreel.app.AppComponents"
+        tools:replace="android:appComponentFactory">
         <!-- A save's FFmpeg encodes run in a process of their own, so a
              crash or a low-memory kill takes the encode and not the app
              (RenderService.kt, EXPORT_MEMORY.md). -->

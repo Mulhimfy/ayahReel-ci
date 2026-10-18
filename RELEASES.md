@@ -149,6 +149,41 @@ Same workflow files, same secrets (copied from `/root/keys`).
 private commit (same tree and message, no history, noreply author) and
 tags it there; see `CLAUDE.md`. Record both commits.
 
+**2026-10-17, from the VPS via the public mirror: prepared, NOT
+published.** From two 1.0.9 notes (`code: 2026-10-14`): a 3647 MB phone
+whose render process died five times on tightest x264, failing every
+Save, and a 1831 MB phone whose app died in a tightest pass
+(`EXPORT_MEMORY.md`, 2026-10-17). `patch/1.0.9` = `28d26bd` (mirror
+`392d2a1`): Patch 2's code (`690ad56`) + the 2026-10-15 save-flow review
+and today's fix, cherry-picked `-x`; its `lib/` and `test/` are
+`feat/live-recitation`'s at `9d836b0` file for file, and nothing under
+`android/`, `ios/`, `assets/` or `pubspec.yaml` changed since `690ad56`.
+
+- `9ccf9e3`, `34b2f75`, `ca37a8a`, `34eb529`, `7ead2b2` (feat
+  `ea1560d`, `c67fc2a`, `b824c5b`, `a738b35`, `d9435bc`): the 2026-10-15
+  save-flow review and its second pass (reclaims, restarts, cancels,
+  records, Save's wait, reels too heavy to play made again, My Reels
+  copies). `d9435bc`'s `RenderService.kt` half is left out: it, and
+  `2ff5649`, wait for the 1.0.10 store build.
+- `28d26bd` (feat `9d836b0`) **A step below tightest.**
+  `ExportBudget.smallest` (4 cards a pass, the encoder handed 720x1280),
+  the out-of-memory retry going down the whole ladder, `leanLost`, a
+  12 s wait for a slow first render-process binding, and `, in the app`
+  plus the budget in a lost save's note. Feedback code date `2026-10-17`.
+  Android and iOS (the budget ladder runs on both).
+
+Checks: `feat/live-recitation` `9d836b0` (mirror `eed3216`): analyze
+clean, 971 passed, 143 skipped (run 39043721630). `patch/1.0.9` the same
+(run 39043976905). Dry run `gpatch-dry-1.0.9+23--5` (run 39043979586):
+"No issues detected", no native or asset diff. iOS dry run
+`gipatch-dry-1.0.9+11--3` (run 39043990186, Xcode 26.6, SDK `23F81a`):
+"No issues detected", no native or asset change. Both runs' artifacts
+checked for the values in `/root/keys`: none.
+
+To ship (the user's call): `tool/public_mirror.sh patch/1.0.9
+patch/1.0.9 gpatch-1.0.9+23--3` and `... gipatch-1.0.9+11--3`, then
+record them here. Not for 1.0.8: no render process there.
+
 **2026-10-14, from the VPS via the public mirror: saves reclaimed in
 the background, and the Telegram invitation. Dart only.** At the user's
 word ("fix it and comm push all", then "... then ota push it"). From a
