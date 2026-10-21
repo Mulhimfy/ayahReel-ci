@@ -27,7 +27,8 @@ import 'package:ayah_reels/widgets/verse_stage.dart';
 /// The export of a reel whose long verses go line by line and move,
 /// made by the real cards and the real command builder, for a desktop
 /// FFmpeg to run: Ayat al-Kursi and the verse after it, cut into lines,
-/// in four motions. Beside each command, the preview's own stage drawn
+/// in five motions, and once more as a new install makes it (a line at a
+/// time, the light, no surah name). Beside each command, the preview's own stage drawn
 /// at the same moments, so a frame of the file can be laid next to what
 /// the phone showed. Not a test of anything; skipped unless pointed
 /// somewhere:
@@ -152,6 +153,8 @@ void main() {
       surah: 2,
     );
     late VerseLinePlan plan;
+    // And as a new install makes it: a line at a time.
+    late VerseLinePlan single;
     await t.runAsync(() async {
       plan = await VersePlanner.plan(
         lines: 2,
@@ -162,14 +165,26 @@ void main() {
         look: look,
         words: spans,
       );
+      single = await VersePlanner.plan(
+        lines: 1,
+        ayahs: ayahs,
+        recitation: rec,
+        startAyah: 255,
+        endAyah: 256,
+        look: look,
+        words: spans,
+      );
     });
     final report = StringBuffer()
       ..writeln('highlight windows: ${windows?.values.fold<int>(0, (n, l) => n + l.length)}');
-    for (final e in plan.byAyah.entries) {
-      for (final p in e.value) {
-        report.writeln('${e.key}.${p.index}/${p.count} '
-            '${p.startMs}-${p.endMs} fit ${p.fit.toStringAsFixed(3)} '
-            'h ${p.height}\n  ${p.arabic}\n  ${p.translation}');
+    for (final (name, lp) in [('two lines', plan), ('one line', single)]) {
+      report.writeln('---- $name');
+      for (final e in lp.byAyah.entries) {
+        for (final p in e.value) {
+          report.writeln('${e.key}.${p.index}/${p.count} '
+              '${p.startMs}-${p.endMs} fit ${p.fit.toStringAsFixed(3)} '
+              'h ${p.height}\n  ${p.arabic}\n  ${p.translation}');
+        }
       }
     }
     File('$out/plan.txt').writeAsStringSync(report.toString());
@@ -181,19 +196,28 @@ void main() {
           .path;
     });
 
-    final scenarios = <String, VerseMotion>{
-      'still': VerseMotion.none,
-      'thread': MotionPreset.thread.motion,
-      'light': MotionPreset.light.motion,
-      'gilded': MotionPreset.gilded.motion,
-      'unveil': MotionPreset.unveil.motion,
+    // Each reel: its motion, its cut, and whether it carries the
+    // surah's name. 'defaults' is what a new install makes: a line at a
+    // time, the light, the highlight, no name.
+    final scenarios = <String, (VerseMotion, VerseLinePlan, bool)>{
+      'still': (VerseMotion.none, plan, true),
+      'thread': (MotionPreset.thread.motion, plan, true),
+      'light': (MotionPreset.light.motion, plan, true),
+      'gilded': (MotionPreset.gilded.motion, plan, true),
+      'unveil': (MotionPreset.unveil.motion, plan, true),
+      'defaults': (VerseMotion.standard, single, false),
+      // And as a reel was made before: whole verses, still, untitled.
+      'before': (VerseMotion.none, VerseLinePlan.empty, false),
     };
     // The preview's stage, at the same moments as the frames to pull.
     final clock = ValueNotifier<int>(0);
-    final units = VerseUnit.of(rec, 255, 256, plan);
     final key = GlobalKey();
     for (final s in scenarios.entries) {
-      if (s.key == 'still' || s.key == 'unveil') continue;
+      if (s.key == 'still' || s.key == 'unveil' || s.key == 'before') {
+        continue;
+      }
+      final (motion, cut, titled) = s.value;
+      final units = VerseUnit.of(rec, 255, 256, cut);
       await t.pumpWidget(MaterialApp(
         debugShowCheckedModeBanner: false,
         home: RepaintBoundary(
@@ -216,7 +240,7 @@ void main() {
                     units: units,
                     ayahs: ayahs,
                     recitation: rec,
-                    motion: s.value,
+                    motion: motion,
                     words: windows,
                     highlight: true,
                     wordTimes: times,
@@ -237,13 +261,14 @@ void main() {
                     onHeight: (_) {},
                   ),
                 ),
-                const Positioned.fill(
-                  child: ReelSurahTitle(
-                    width: 1080,
-                    surah: 2,
-                    edition: VerseTranslation.english,
+                if (titled)
+                  const Positioned.fill(
+                    child: ReelSurahTitle(
+                      width: 1080,
+                      surah: 2,
+                      edition: VerseTranslation.english,
+                    ),
                   ),
-                ),
               ],
             ),
           ),
@@ -271,6 +296,7 @@ void main() {
       ..writeln('cd "\$(dirname "\$0")"')
       ..writeln('HERE="\$(pwd)"');
     for (final s in scenarios.entries) {
+      final (motion, cut, titled) = s.value;
       late String cmd;
       await t.runAsync(() async {
         cmd = await VideoRenderer.unitReelCommand(
@@ -280,13 +306,14 @@ void main() {
           endAyah: 256,
           background: bg,
           out: '$out/reel_${s.key}.mp4',
-          lines: plan,
-          motion: s.value,
+          lines: cut,
+          motion: motion,
           highlight: windows,
           words: windows,
           wordTimes: times,
           numbering: VerseNumbering.mark,
-          surahTitle: true,
+          surahTitle: titled,
+          fileTag: 'tool_${s.key}_',
         );
       });
       File('$out/cmd_${s.key}.txt').writeAsStringSync(cmd);

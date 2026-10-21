@@ -940,6 +940,9 @@ abstract final class VideoRenderer {
         '_e${(edition ?? QuranTextService.edition).code}'
         '_h${_highlightFingerprint(highlight)}'
         '${onLight ? '_lt' : ''}'
+        // The recited word glows on a dark ground since 2026-10-21; a
+        // reel with lit words cached before then is drawn again.
+        '${!onLight && (highlight != null || motion.followsWords) ? '_gl' : ''}'
         // Only when set, so every reel cached before inks existed keeps
         // the key it was cached under. The bases alone would not tell
         // two inks that share one apart.
@@ -2635,6 +2638,10 @@ abstract final class VideoRenderer {
     VerseTranslation edition = VerseTranslation.english,
     VerseNumbering numbering = VerseNumbering.off,
     String? audio,
+
+    /// What the cards' files start with: one per reel, when a tool makes
+    /// several that cut the same verses differently.
+    String fileTag = 'tool_',
   }) async {
     final built = await _unitCards(
       recitation: recitation,
@@ -2660,7 +2667,7 @@ abstract final class VideoRenderer {
         edition: edition,
         numbering: numbering,
         surah: recitation.surah,
-        fileTag: 'tool_',
+        fileTag: fileTag,
       ),
     );
     final segStart = recitation.timing(startAyah).startMs;

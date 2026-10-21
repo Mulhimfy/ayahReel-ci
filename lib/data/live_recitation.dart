@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'audio_position.dart';
 import 'debug_log.dart';
 import 'models.dart';
+import 'qul_words.dart';
 import 'recitation_service.dart';
 import 'reel_duration.dart';
 import 'word_align_service.dart';
@@ -269,6 +270,11 @@ class LiveRecitation extends ChangeNotifier {
       return null;
     }
     final a = _ayah;
+    if (!spans.containsKey(a) && _reciter != null &&
+        QulWords.supports(_reciter!)) {
+      _clipWords(a, c);
+      return null;
+    }
     final w = _windows[a] ??= _windowsOf(a, c, spans);
     if (w.isEmpty) return null;
     final ms = _inAyah;
@@ -280,9 +286,48 @@ class LiveRecitation extends ChangeNotifier {
     return null;
   }
 
+  /// The ayahs whose words have been asked for, this session, and the
+  /// line they wait in: each placing measures a clip's loudness, and the
+  /// listen fetches a few clips ahead of the voice.
+  final _askedWords = <int>{};
+  Future<void> _wordsQueue = Future<void>.value();
+
+  /// Places a QUL-timed voice's words on the clip of ayah [a], once.
+  void _clipWords(int a, LiveClip c) {
+    final r = _reciter;
+    if (r == null || !_askedWords.add(a)) return;
+    final session = _session;
+    _wordsQueue = _wordsQueue.then((_) async {
+      if (session != _session) return;
+      final spans = await WordAlignService.loadClip(r, _surah, c, _text);
+      if (session != _session || spans == null || spans.isEmpty) return;
+      (_spans ??= {})[a] = spans;
+      _windows.remove(a);
+      notifyListeners();
+    }).catchError((Object e) {
+      rlog('live: words for $_surah:$a — $e');
+    });
+  }
+
+  /// An ayah's word [spans], which count from its own window, in the
+  /// time of the clip that plays it, which counts from where the clip
+  /// starts — past the silence at the head of a per-ayah file. Unmoved,
+  /// every word of such a voice was lit as late as that silence is long.
+  @visibleForTesting
+  static List<WordSpan> inClip(List<WordSpan> spans, LiveClip c) {
+    final shift = c.windowMs - c.fromMs;
+    if (shift == 0) return spans;
+    return [
+      for (final s in spans)
+        WordSpan(s.startWord, s.endWord, s.startMs + shift, s.endMs + shift),
+    ];
+  }
+
   List<HighlightSpan> _windowsOf(
       int a, LiveClip c, Map<int, List<WordSpan>> spans) {
-    if (!spans.containsKey(a) || _text.length < a) return const [];
+    final raw = spans[a];
+    if (raw == null || _text.length < a) return const [];
+    final placed = {a: inClip(raw, c)};
     final plan = WordAlignService.highlightPlan(
       recitation: Recitation(
         reciterId: _reciter?.id ?? '',
@@ -291,7 +336,7 @@ class LiveRecitation extends ChangeNotifier {
         timings: [AyahTiming(a, 0, c.durationMs)],
       ),
       ayahs: _text,
-      spansByAyah: spans,
+      spansByAyah: placed,
       startAyah: a,
       endAyah: a,
       // One ayah's words, however many: the cap is the export's.
@@ -319,6 +364,7 @@ class LiveRecitation extends ChangeNotifier {
     _clips.clear();
     _spans = null;
     _windows.clear();
+    _askedWords.clear();
     final n = text.length;
     _dur = [
       for (var a = 1; a <= n; a++)
@@ -344,7 +390,8 @@ class LiveRecitation extends ChangeNotifier {
         File(whole.audioPath).existsSync()) {
       for (final w in whole.timings) {
         if (w.ayah > n) break;
-        _clips[w.ayah] = LiveClip(w.ayah, whole.audioPath, w.startMs, w.endMs);
+        _clips[w.ayah] = LiveClip(w.ayah, whole.audioPath, w.startMs, w.endMs,
+            originMs: whole.originMs);
         _dur[w.ayah - 1] = w.durationMs;
         _exact[w.ayah - 1] = true;
       }
@@ -386,6 +433,7 @@ class LiveRecitation extends ChangeNotifier {
     _start = const [];
     _spans = null;
     _windows.clear();
+    _askedWords.clear();
     _ayah = 1;
     _status = LiveStatus.idle;
     notifyListeners();
@@ -578,6 +626,12 @@ class LiveRecitation extends ChangeNotifier {
   Future<void> _loadWords(int session) async {
     final r = _reciter;
     if (r == null || !WordAlignService.supports(r)) return;
+    if (QulWords.supports(r)) {
+      // Placed on each clip as it is heard: see [_clipWords].
+      _spans = {};
+      notifyListeners();
+      return;
+    }
     final spans = await WordAlignService.load(r, _surah);
     if (session != _session || spans == null) return;
     _spans = spans;

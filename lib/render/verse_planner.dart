@@ -148,17 +148,8 @@ abstract final class VersePlanner {
       // as it always was, rather than changing mid-word.
       if (bounds == null) continue;
 
-      final total = tokens.fold<int>(0, (n, k) => n + VerseText.letters(k));
-      var before = 0;
-      final shares = <double>[];
-      for (var c = 1; c < cuts.length - 1; c++) {
-        for (var k = cuts[c - 1]; k < cuts[c]; k++) {
-          before += VerseText.letters(tokens[k]);
-        }
-        shares.add(total == 0 ? c / (cuts.length - 1) : before / total);
-      }
       final pieces = look.showTranslation
-          ? TranslationSplit.split(ayah.translation, shares)
+          ? TranslationSplit.forCuts(ayah.translation, tokens, cuts)
           : List.filled(cuts.length - 1, '');
       final fit = look.showTranslation
           ? pieces
@@ -285,6 +276,110 @@ abstract final class VersePlanner {
           : estimateLines(ayahs, start, end, lines, look).length;
 
   static final _estimates = <String, List<String>>{};
+
+  /// [ayah] as if recited at an even pace — every letter as long as the
+  /// next, a breath before each line — and cut the way [plan] cuts it
+  /// from its text: what a demonstration plays to show what the line,
+  /// the motion and the highlight choices do, with nothing recorded.
+  ///
+  /// The units to show in turn, the words' highlight windows and each
+  /// token's recited window — both in the verse's own time, which
+  /// starts at 0 — and how long the verse runs.
+  static ({
+    List<VerseUnit> units,
+    List<HighlightSpan> spans,
+    List<(int, int)?> times,
+    int verseMs,
+  }) demo({
+    required Ayah ayah,
+    required int lines,
+    required VerseLook look,
+    int msPerLetter = 78,
+    int breathMs = 360,
+  }) {
+    final tokens = VerseText.tokens(ayah.arabic);
+    final letters = [for (final t in tokens) VerseText.letters(t)];
+    final cuts = (lines <= VerseLines.whole || tokens.length < 2
+            ? null
+            : VerseSplitter.split(tokens,
+                (s, e) => linesOf(tokens, s, e, look, ayah.number) <= lines)) ??
+        [0, tokens.length];
+    final times = List<(int, int)?>.filled(tokens.length, null);
+    final bounds = <int>[0];
+    var t = 0;
+    for (var c = 0; c < cuts.length - 1; c++) {
+      t += breathMs;
+      for (var k = cuts[c]; k < cuts[c + 1]; k++) {
+        if (letters[k] == 0) {
+          // A pause sign takes its word's window, as real timing does.
+          if (k > 0) times[k] = times[k - 1];
+          continue;
+        }
+        final len = letters[k] * msPerLetter;
+        times[k] = (t, t + (len * 0.88).round());
+        t += len;
+      }
+      bounds.add(t + (c == cuts.length - 2 ? breathMs : breathMs ~/ 2));
+    }
+    final verseMs = bounds.last;
+    // Gap-filled to the next word, as the highlight's windows are.
+    final words = [
+      for (var k = 0; k < tokens.length; k++)
+        if (letters[k] > 0) k,
+    ];
+    final spans = <HighlightSpan>[
+      for (var i = 0; i < words.length; i++)
+        HighlightSpan(
+          times[words[i]]!.$1,
+          i + 1 < words.length ? times[words[i + 1]]!.$1 : verseMs,
+          words[i],
+          i + 1 < words.length ? words[i + 1] : tokens.length,
+        ),
+    ];
+    if (cuts.length <= 2) {
+      return (
+        units: [VerseUnit(ayah.number, null, 0, verseMs)],
+        spans: spans,
+        times: times,
+        verseMs: verseMs,
+      );
+    }
+    final pieces = look.showTranslation
+        ? TranslationSplit.forCuts(ayah.translation, tokens, cuts)
+        : List.filled(cuts.length - 1, '');
+    final fit = look.showTranslation
+        ? pieces
+            .map((p) => AyahOverlay.translationFit(p.length))
+            .fold<double>(1, math.min)
+        : 1.0;
+    var parts = [
+      for (var i = 0; i < cuts.length - 1; i++)
+        VersePart(
+          ayah: ayah.number,
+          index: i,
+          count: cuts.length - 1,
+          tokenStart: cuts[i],
+          tokenEnd: cuts[i + 1],
+          startMs: bounds[i],
+          endMs: bounds[i + 1],
+          arabic: tokens.sublist(cuts[i], cuts[i + 1]).join(' '),
+          translation: pieces[i],
+          fit: fit,
+        ),
+    ];
+    var tallest = 0.0;
+    for (final p in parts) {
+      tallest =
+          math.max(tallest, AyahRasterizer.unitHeight(_card(ayah, p, look)));
+    }
+    parts = [for (final p in parts) p.withHeight(tallest.ceilToDouble())];
+    return (
+      units: [for (final p in parts) VerseUnit(ayah.number, p, p.startMs, p.endMs)],
+      spans: spans,
+      times: times,
+      verseMs: verseMs,
+    );
+  }
 
   /// Each verse's tokens' recited windows, from word timing: what the
   /// thread, the light and the follow cards are timed by.

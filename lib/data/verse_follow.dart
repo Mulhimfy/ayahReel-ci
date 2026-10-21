@@ -79,8 +79,12 @@ abstract final class VerseFollow {
     }
     if (inUnit.isEmpty) return whole;
 
+    // How far the reciter has reached: a reciter who goes back over a
+    // few words lights them again, but what the trail has filled and the
+    // unveil has shown stays filled and shown.
+    var reached = 0;
     ({int start, int end})? litFor(int s, int e) {
-      if (trail) return (start: 0, end: e);
+      if (trail) return (start: 0, end: reached);
       if (highlight) return (start: s, end: e);
       return null;
     }
@@ -109,7 +113,8 @@ abstract final class VerseFollow {
       // what the window before it showed rather than flashing the plain
       // card.
       final end = i + 1 < inUnit.length ? inUnit[i + 1].$1 : unit.endMs;
-      add(a, end > b ? end : b, litFor(s, e), unveil ? e : null);
+      if (e > reached) reached = e;
+      add(a, end > b ? end : b, litFor(s, e), unveil ? reached : null);
     }
     return out;
   }

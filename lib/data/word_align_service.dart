@@ -9,6 +9,9 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'debug_log.dart';
 import 'models.dart';
+import 'qul_words.dart';
+import 'recitation_service.dart' show LiveClip;
+import 'verse_lines.dart' show VerseText;
 
 /// Word-precise timing data from the quran-align project
 /// (github.com/cpfair/quran-align, CC BY 4.0): word timestamps computed
@@ -90,7 +93,16 @@ abstract final class WordAlignService {
     return _sha1ByFolder.containsKey(f) ? f : null;
   }
 
-  static bool supports(Reciter r) => _alignFolderFor(r) != null;
+  /// Whether [r] has word timing: quran-align's, or the Quranic
+  /// Universal Library's for a voice verified to be its recording (see
+  /// [QulWords]).
+  static bool supports(Reciter r) =>
+      _alignFolderFor(r) != null || QulWords.supports(r);
+
+  /// Whether quran-align's own release times [r] — for tests, which
+  /// keep it apart from the voices QUL times.
+  @visibleForTesting
+  static bool alignedByQuranAlign(Reciter r) => _alignFolderFor(r) != null;
 
   /// How many of [all] carry word timings — for tests, which pin the
   /// count so a table edit cannot silently drop a voice.
@@ -108,8 +120,33 @@ abstract final class WordAlignService {
   /// relative to each ayah's start in the recording. Null when the
   /// reciter has no alignment data or it couldn't be fetched — callers
   /// fall back to the whole-ayah card, never an error.
-  static Future<Map<int, List<WordSpan>>?> load(
-      Reciter reciter, int surah) async {
+  ///
+  /// A voice timed by QUL is timed against QUL's files, and its words are
+  /// placed on the app's own recording: [recitation] is that recording,
+  /// and [ayahs] the surah's text the words are counted in. Without both
+  /// such a voice has none; with them, only the verses of [recitation]
+  /// whose words could be placed are in the answer.
+  static Future<Map<int, List<WordSpan>>?> load(Reciter reciter, int surah,
+      {Recitation? recitation, List<Ayah>? ayahs}) async {
+    if (QulWords.supports(reciter)) {
+      if (recitation == null || ayahs == null) return null;
+      try {
+        final placed = await QulWords.forRecitation(reciter, recitation);
+        if (placed == null) return null;
+        final out = <int, List<WordSpan>>{};
+        for (final e in placed.entries) {
+          if (e.key < 1 || e.key > ayahs.length) continue;
+          final spans = fromMushafWords(ayahs[e.key - 1].arabic, e.value);
+          if (spans != null && spans.isNotEmpty) out[e.key] = spans;
+        }
+        rlog('align: ${reciter.id} words placed on ${out.length} of '
+            '${recitation.timings.length} verses');
+        return out.isEmpty ? null : out;
+      } catch (e) {
+        rlog('align: qul words for ${reciter.id} failed ($e)');
+        return null;
+      }
+    }
     final folder = _alignFolderFor(reciter);
     if (folder == null) return null;
     try {
@@ -279,6 +316,114 @@ abstract final class WordAlignService {
   static const _badaFatha = 'بَعْدَ';
   static const _maa = 'مَا';
 
+  /// One verse's word spans in a clip of the verse picker's listen,
+  /// counted from the verse's window in the clip's file — for a voice
+  /// timed by QUL, whose words are placed clip by clip as the listen
+  /// fetches them. Null for any other voice, which [load] answers for a
+  /// whole surah at once.
+  static Future<List<WordSpan>?> loadClip(
+      Reciter reciter, int surah, LiveClip clip, List<Ayah> ayahs) async {
+    if (!QulWords.supports(reciter) || clip.ayah > ayahs.length) return null;
+    try {
+      final placed = await QulWords.forClip(reciter, surah, clip);
+      if (placed == null) return null;
+      return fromMushafWords(ayahs[clip.ayah - 1].arabic, placed);
+    } catch (e) {
+      rlog('align: qul words for ${reciter.id} $surah:${clip.ayah} '
+          'failed ($e)');
+      return null;
+    }
+  }
+
+  /// For each letter-bearing token of [arabic], in order, the alignment
+  /// word it is part of: its own, but for the مَا that rides with
+  /// بَعْدَ (see [_badaFatha]). What a word count of the mushaf's own —
+  /// QUL's, which prints بَعْدَ مَا as two — is turned into before
+  /// [displayRange] reads it.
+  static List<int> alignWords(String arabic) {
+    final tokens = arabic.split(' ');
+    final out = <int>[];
+    var w = 0;
+    for (var i = 0; i < tokens.length; i++) {
+      if (!_isLetterToken(tokens[i])) continue;
+      out.add(w);
+      if (tokens[i] == _badaFatha &&
+          i + 1 < tokens.length &&
+          tokens[i + 1] == _maa) {
+        out.add(w);
+        i++;
+      }
+      w++;
+    }
+    return out;
+  }
+
+  /// A verse's words as QUL counts them — [placed]'s (position from 1,
+  /// start, end), out of its count of them — as the alignment spans the
+  /// rest of the app reads.
+  ///
+  /// QUL counts the words as the mushaf prints them, so one of its words
+  /// is one of the text's — except where a recitation counts a pair the
+  /// text keeps apart as one: بَعْدَ مَا (2:181, 8:6, 13:37, in some) or
+  /// إِلْ يَاسِينَ (37:130, in most). A count one short, with such a pair
+  /// in the verse, is read that way. Any other count means QUL timed
+  /// another text, and no word of it can be trusted to light the right
+  /// one: null.
+  static List<WordSpan>? fromMushafWords(String arabic, Placed placed) {
+    final tokens = arabic.split(' ');
+    final letters = [
+      for (var i = 0; i < tokens.length; i++)
+        if (_isLetterToken(tokens[i])) i,
+    ];
+    final align = alignWords(arabic);
+    // Each QUL position: the letter-bearing tokens it is, [from, to).
+    final List<(int, int)> byPosition;
+    if (placed.count == letters.length) {
+      byPosition = [for (var k = 0; k < letters.length; k++) (k, k + 1)];
+    } else if (placed.count == letters.length - 1) {
+      final j = _joinedPair(tokens, letters);
+      if (j == null) return null;
+      byPosition = [
+        for (var k = 0; k < letters.length; k++)
+          if (k != j + 1) (k, k == j ? k + 2 : k + 1),
+      ];
+    } else {
+      return null;
+    }
+    final out = <WordSpan>[];
+    for (final (p, s, e) in placed.words) {
+      if (p < 1 || p > byPosition.length) return null;
+      final (k0, k1) = byPosition[p - 1];
+      final a0 = align[k0];
+      final a1 = align[k1 - 1] + 1;
+      if (out.isNotEmpty &&
+          out.last.startWord == a0 &&
+          out.last.endWord == a1) {
+        // The second half of one alignment word: its end is the word's.
+        final last = out.removeLast();
+        out.add(WordSpan(a0, a1, last.startMs, e));
+      } else {
+        out.add(WordSpan(a0, a1, s, e));
+      }
+    }
+    return out;
+  }
+
+  /// Where in [letters] (the letter-bearing tokens' indices) a pair
+  /// begins that a recitation may count as one word, or null.
+  static int? _joinedPair(List<String> tokens, List<int> letters) {
+    for (var k = 0; k + 1 < letters.length; k++) {
+      final a = tokens[letters[k]];
+      final b = tokens[letters[k + 1]];
+      if (letters[k + 1] != letters[k] + 1) continue;
+      if (a == _badaFatha && b == _maa) return k;
+      if (VerseText.bare(a) == 'ال' && VerseText.bare(b) == 'ياسين') {
+        return k;
+      }
+    }
+    return null;
+  }
+
   /// Maps an align-word range onto display-token indices of [arabic]
   /// (split on spaces). Trailing marks attach to the preceding word.
   /// Null when the align indices don't fit the text — the caller drops
@@ -318,8 +463,11 @@ abstract final class WordAlignService {
     for (final s in spans) {
       final r = displayRange(arabic, s.startWord, s.endWord);
       if (r == null || s.endMs <= s.startMs) continue;
+      // The first time a word is recited: a reciter who takes words
+      // again after a breath has already reached them, and the thread,
+      // the light and the line's change go by where they were reached.
       for (var k = r.start; k < r.end && k < n; k++) {
-        times[k] = (s.startMs, s.endMs);
+        times[k] ??= (s.startMs, s.endMs);
       }
       for (var k = r.start + 1; k < r.end; k++) {
         held.add(k);

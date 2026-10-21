@@ -398,14 +398,7 @@ class AyahOverlay extends StatelessWidget {
   /// out but not drawn, so the lines break exactly where the card's do.
   Widget _glinted(double ts) {
     final style = AppTheme.quran(size: 64 * ts, color: glintColour, face: verseFace)
-        .copyWith(shadows: [
-      Shadow(
-          color: const Color(0xFFFFD27A).withValues(alpha: 0.85),
-          blurRadius: 12 * ts),
-      Shadow(
-          color: const Color(0xFFE8A93A).withValues(alpha: 0.5),
-          blurRadius: 30 * ts),
-    ]);
+        .copyWith(shadows: glintGlow(ts));
     final mark = endMark ? _markSpan(ts, style) : null;
     return Text.rich(
       TextSpan(children: [
@@ -430,10 +423,35 @@ class AyahOverlay extends StatelessWidget {
   TextStyle _litStyle(double ts, TextStyle style) {
     final lit =
         highlightColorFor(textColor, onLight: onLight, accent: accent);
-    if (accentInk.isNone || lit != _accent) return style.copyWith(color: lit);
+    if (accentInk.isNone || lit != _accent) {
+      // On a dark ground the word being recited glows a little in its
+      // own colour, as if lit from within; on a pale band a glow only
+      // muddies it, so there it is the colour alone.
+      if (onLight) return style.copyWith(color: lit);
+      return style.copyWith(color: lit, shadows: [
+        ...?style.shadows,
+        Shadow(color: lit.withValues(alpha: litGlowAlpha), blurRadius: 16 * ts),
+      ]);
+    }
     return style.copyWith(
         color: lit, shadows: [...?style.shadows, ...accentInk.accentGlow(ts)]);
   }
+
+  /// How strongly the recited word's glow shows on a dark ground.
+  static const litGlowAlpha = 0.5;
+
+  /// The glow the glint's letters are drawn with, at type scale [ts]:
+  /// close about each letter, so a band cut from the glint lights the
+  /// letters it crosses and not a box of haze around them. One
+  /// definition for the preview's light and the exported glint card.
+  static List<Shadow> glintGlow(double ts) => [
+        Shadow(
+            color: const Color(0xFFFFD27A).withValues(alpha: 0.8),
+            blurRadius: 10 * ts),
+        Shadow(
+            color: const Color(0xFFE8A93A).withValues(alpha: 0.3),
+            blurRadius: 20 * ts),
+      ];
 
   /// The verse in a luminous ink.
   ///

@@ -326,17 +326,25 @@ abstract final class VerseMotionGraph {
       final g = u.glintInput!;
       final rows = e.value;
       final w = motion.windowsFor(u.endMs - u.startMs);
-      f.write('[$g:v]format=rgba,split=2[qg${g}_b][qg${g}_d];'
-          '[qg${g}_d]colorchannelmixer=aa=${LightLook.softAlpha}[qg${g}_s];'
-          '[qg${g}_b]split=${rows.length}');
-      for (var k = 0; k < rows.length; k++) {
-        f.write('[qg${g}_b$k]');
-      }
-      f.write(';[qg${g}_s]split=${rows.length}');
-      for (var k = 0; k < rows.length; k++) {
-        f.write('[qg${g}_s$k]');
+      // One copy of the glint per layer, at the layer's strength — a
+      // still, so this runs once and not every frame — and each split
+      // between the unit's lines.
+      const layers = LightLook.layers;
+      f.write('[$g:v]format=rgba,split=${layers.length}');
+      for (var j = 0; j < layers.length; j++) {
+        f.write('[qg${g}_r$j]');
       }
       f.write(';');
+      for (var j = 0; j < layers.length; j++) {
+        final a = layers[j].$2;
+        f.write('[qg${g}_r$j]'
+            '${a >= 1 ? 'null' : 'colorchannelmixer=aa=${a.toStringAsFixed(2)}'}'
+            ',split=${rows.length}');
+        for (var k = 0; k < rows.length; k++) {
+          f.write('[qg${g}_l${j}_$k]');
+        }
+        f.write(';');
+      }
       final tu = _unitT(u.startMs, passStartMs);
       final off = motion.offsetExpr(tu, u.endMs - u.startMs);
       for (var k = 0; k < rows.length; k++) {
@@ -344,11 +352,9 @@ abstract final class VerseMotionGraph {
         final top = r.top.floor().clamp(0, math.max(0, u.cardH.floor() - 2));
         final h = math.max(2, math.min(r.bottom.ceil(), u.cardH.floor()) - top);
         final lightEnd = u.startMs + r.progress.endMs;
-        for (final (band, src) in [
-          (LightLook.soft, 'qg${g}_s$k'),
-          (LightLook.bright, 'qg${g}_b$k'),
-        ]) {
-          final bw = band.round();
+        for (var j = 0; j < layers.length; j++) {
+          final src = 'qg${g}_l${j}_$k';
+          final bw = layers[j].$1.round();
           String x(String t) =>
               'max(0,min(${cardW - bw},${r.right.toStringAsFixed(1)}'
               '-(${r.progress.expr(t)})-${(bw / 2).toStringAsFixed(1)}))';

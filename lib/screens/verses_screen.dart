@@ -130,7 +130,11 @@ class _VersesScreenState extends State<VersesScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if (widget.preselect) {
+    // The verses the last reel was made of, when the screen opens on
+    // their surah: a reel begun again starts where the last one was,
+    // and a tap anywhere else starts a new run (with an undo).
+    if (widget.preselect ||
+        (creationState.rangeChosen && _surah == creationState.surah)) {
       _start = creationState.startAyah;
       _end = creationState.endAyah;
       _revealPending = true;

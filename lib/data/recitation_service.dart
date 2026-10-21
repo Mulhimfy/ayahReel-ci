@@ -501,6 +501,10 @@ abstract final class RecitationService {
         onProgress:
             onProgress == null ? null : (v) => onProgress(0.9 + v * 0.1),
       );
+      // Where the cut starts in the surah's own file, kept beside it:
+      // what places words timed against that file on this one.
+      final origin = (originMs + plan.cutStart).round();
+      await File('$stem.origin').writeAsString('$origin');
       await File('$stem.json').writeAsString(jsonEncode([
         for (final w in plan.timings)
           {'a': w.ayah, 's': w.startMs, 'e': w.endMs},
@@ -511,6 +515,7 @@ abstract final class RecitationService {
         surah: surah,
         audioPath: audio.path,
         timings: plan.timings,
+        originMs: origin,
       );
     } finally {
       client.close();
@@ -574,22 +579,27 @@ abstract final class RecitationService {
   /// The loudness of a whole recording, in 10 ms steps (see
   /// [SurahSlice.envelopeOf]): where its pauses are, which is what a
   /// verse cut into lines is timed by when the voice has no word
-  /// timing. Kept for the file it was measured from, while the file
-  /// stays the same; null when it could not be decoded.
+  /// timing, and where each verse's sound begins, which is what places
+  /// QUL's words on it (see `QulWords`). Kept for the file it was
+  /// measured from, while the file stays the same; null when it could
+  /// not be decoded.
   static Future<List<double>?> loudness(String audioPath) async {
     final f = File(audioPath);
     if (!f.existsSync()) return null;
     final stamp = '$audioPath|${f.lengthSync()}|'
         '${f.lastModifiedSync().millisecondsSinceEpoch}';
-    final kept = _loudness;
-    if (kept != null && kept.$1 == stamp) return kept.$2;
+    final kept = _loudness.remove(stamp);
+    if (kept != null) return _loudness[stamp] = kept;
     final pcm = File('${(await getTemporaryDirectory()).path}/'
         'loudness_${stamp.hashCode.toUnsigned(32).toRadixString(36)}.pcm');
     try {
       if (debugFfmpeg == null) await configureFfmpeg();
       await _decodeMono(f, pcm);
       final env = await compute(SurahSlice.envelopeOf, pcm.path);
-      _loudness = (stamp, env);
+      _loudness[stamp] = env;
+      while (_loudness.length > 4) {
+        _loudness.remove(_loudness.keys.first);
+      }
       return env;
     } catch (e) {
       rlog('rec: loudness of $audioPath failed ($e)');
@@ -601,7 +611,10 @@ abstract final class RecitationService {
     }
   }
 
-  static (String, List<double>)? _loudness;
+  /// The last few recordings measured, by file and version, oldest
+  /// first: a reel's own, and the verses the picker's listen has just
+  /// placed words on, without one pushing the other out.
+  static final _loudness = <String, List<double>>{};
 
   /// [audio] decoded to raw mono 16-bit samples at [SurahSlice.envRate],
   /// for [SurahSlice.envelopeOf]. On this isolate: FFmpeg is a plugin,
@@ -816,11 +829,16 @@ abstract final class RecitationService {
     Recitation? tryPair(File audio, File meta) {
       if (!audio.existsSync() || !meta.existsSync()) return null;
       try {
+        final origin = File(
+            '${meta.path.substring(0, meta.path.length - 5)}.origin');
         final rec = Recitation(
           reciterId: reciter.id,
           surah: surah,
           audioPath: audio.path,
           timings: _decodeTimings(meta.readAsStringSync()),
+          originMs: origin.existsSync()
+              ? int.tryParse(origin.readAsStringSync().trim())
+              : null,
         );
         return _serves(rec, start, end, maxMs) ? rec : null;
       } catch (_) {
@@ -1137,7 +1155,7 @@ abstract final class RecitationService {
       final known = _liveMeasured[_surahKey(reciter.id, surah)]?[ayah];
       if (known != null && f.existsSync() && f.lengthSync() > 0) {
         final (from, to) = await _liveTrim(reciter, dir, surah, ayah, f, known);
-        return LiveClip(ayah, f.path, from, to);
+        return LiveClip(ayah, f.path, from, to, windowMs: 0);
       }
       final client = http.Client();
       try {
@@ -1157,7 +1175,7 @@ abstract final class RecitationService {
       }
       (_liveMeasured[_surahKey(reciter.id, surah)] ??= {})[ayah] = ms;
       final (from, to) = await _liveTrim(reciter, dir, surah, ayah, f, ms);
-      return LiveClip(ayah, f.path, from, to);
+      return LiveClip(ayah, f.path, from, to, windowMs: 0);
     }
     if (source is SurahFiles) {
       final live = Directory('${dir.path}/live_$surah')
@@ -1169,7 +1187,8 @@ abstract final class RecitationService {
       if (out.existsSync() && note.existsSync()) {
         try {
           final m = jsonDecode(note.readAsStringSync()) as Map<String, dynamic>;
-          return LiveClip(ayah, out.path, m['f'] as int, m['t'] as int);
+          return LiveClip(ayah, out.path, m['f'] as int, m['t'] as int,
+              originMs: m['o'] as int?);
         } catch (_) {
           // Unreadable: fetched again below.
         }
@@ -1182,9 +1201,10 @@ abstract final class RecitationService {
             fromMs: w.startMs, toMs: w.endMs);
         final from = (w.startMs - at).round();
         final clip = LiveClip(
-            ayah, out.path, from < 0 ? 0 : from, (w.endMs - at).round());
-        await note.writeAsString(
-            jsonEncode({'f': clip.fromMs, 't': clip.toMs}));
+            ayah, out.path, from < 0 ? 0 : from, (w.endMs - at).round(),
+            originMs: at.round());
+        await note.writeAsString(jsonEncode(
+            {'f': clip.fromMs, 't': clip.toMs, 'o': clip.originMs}));
         return clip;
       } finally {
         client.close();
@@ -1399,7 +1419,20 @@ class LiveClip {
   final String path;
   final int fromMs;
   final int toMs;
-  const LiveClip(this.ayah, this.path, this.fromMs, this.toMs);
+
+  /// Where in [path] the ayah's own window begins: what its word timings
+  /// count from. [fromMs] for a window cut out of a longer file; 0 for a
+  /// per-ayah file, whose window is the whole file though the clip plays
+  /// it without the silence at its head.
+  final int windowMs;
+
+  /// Where [path]'s first moment sits in the voice's whole-surah file,
+  /// when the clip was cut out of one; see [Recitation.originMs].
+  final int? originMs;
+
+  const LiveClip(this.ayah, this.path, this.fromMs, this.toMs,
+      {int? windowMs, this.originMs})
+      : windowMs = windowMs ?? fromMs;
 
   int get durationMs => toMs - fromMs;
 }

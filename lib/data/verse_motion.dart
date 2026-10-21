@@ -53,6 +53,13 @@ class VerseMotion {
 
   static const none = VerseMotion();
 
+  /// What a reel moves with until the user picks otherwise: each verse
+  /// or line fades on, and a band of light passes through its words as
+  /// they are recited — [MotionPreset.light]. It needs no word timing
+  /// (without it the light crosses each line at an even pace), so every
+  /// voice has it.
+  static const standard = VerseMotion(arrival: VerseArrival.fade, light: true);
+
   bool get isNone =>
       arrival == VerseArrival.none && !thread && !light && !trail && !unveil;
 
@@ -67,7 +74,9 @@ class VerseMotion {
   /// [none], so every reel cached before motion existed keeps its key.
   String get key {
     if (isNone) return '';
-    return 'm${arrival.index}${thread ? 't' : ''}${light ? 'l' : ''}'
+    // 'L': the light in four soft layers since 2026-10-21; a reel cached
+    // with the two-band light ('l') is made again.
+    return 'm${arrival.index}${thread ? 't' : ''}${light ? 'L' : ''}'
         '${trail ? 'g' : ''}${unveil ? 'u' : ''}';
   }
 
@@ -90,6 +99,19 @@ class VerseMotion {
   /// has word timing or not: the trail and the unveil need it.
   VerseMotion forVoice({required bool hasWords}) =>
       hasWords ? this : copyWith(trail: false, unveil: false);
+
+  /// The most units — verses, and lines of cut ones — a reel lights: the
+  /// light is a card of its own for each, and past this many a long
+  /// reel's save would spend more on drawing them than on the rest of
+  /// it. About ten minutes of recitation a line at a time; the fade
+  /// stays on past it.
+  static const lightMostUnits = 160;
+
+  /// What a reel of [units] units runs: the light off past
+  /// [lightMostUnits]. The preview and the export both ask, so they
+  /// agree.
+  VerseMotion forUnits(int units) =>
+      light && units > lightMostUnits ? copyWith(light: false) : this;
 
   Map<String, dynamic> toJson() => {
         'arrival': arrival.name,
@@ -209,7 +231,7 @@ enum MotionPreset {
   breathe(VerseMotion(arrival: VerseArrival.fade)),
   rise(VerseMotion(arrival: VerseArrival.rise)),
   thread(VerseMotion(arrival: VerseArrival.fade, thread: true)),
-  light(VerseMotion(arrival: VerseArrival.fade, light: true)),
+  light(VerseMotion.standard),
   unveil(VerseMotion(arrival: VerseArrival.fade, unveil: true)),
   gilded(VerseMotion(arrival: VerseArrival.rise, trail: true, thread: true));
 

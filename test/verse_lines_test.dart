@@ -67,11 +67,66 @@ void main() {
       }
     });
 
-    test('fewer parts win over prettier cuts', () {
+    test('no more parts than the pause signs need', () {
       final tokens = VerseText.tokens(kursi);
       final cuts = VerseSplitter.split(tokens, fitsLetters(tokens, 90))!;
       // 155 letters in all: two parts can hold them, and do.
       expect(cuts.length - 1, lessThanOrEqualTo(3));
+    });
+
+    test('one more line rather than a phrase cut in two', () {
+      final tokens = VerseText.tokens(kursi);
+      // Room for "لَّهُۥ مَا فِى ٱلسَّمَـٰوَٰتِ وَمَا فِى ٱلْأَرْضِ ۗ" and a
+      // little more: a cut after its وَمَا would save a part, and must
+      // not be taken.
+      final cuts = VerseSplitter.split(tokens, fitsLetters(tokens, 50))!;
+      final parts = [
+        for (var i = 0; i < cuts.length - 1; i++)
+          tokens.sublist(cuts[i], cuts[i + 1]).join(' '),
+      ];
+      for (var i = 1; i < cuts.length - 1; i++) {
+        expect(VerseText.pauseAfter(tokens[cuts[i] - 1]), isNotNull,
+            reason: 'cut $i is not on a pause sign: $parts');
+      }
+      expect(parts, contains('لَّهُۥ مَا فِى ٱلسَّمَـٰوَٰتِ وَمَا فِى ٱلْأَرْضِ ۗ'));
+    });
+
+    test('a cut with no sign falls before the فَ that opens a clause', () {
+      // 2:256, too long a phrase to go whole between its signs.
+      const verse = 'لَآ إِكْرَاهَ فِى ٱلدِّينِ ۖ قَد تَّبَيَّنَ ٱلرُّشْدُ مِنَ '
+          'ٱلْغَىِّ ۚ فَمَن يَكْفُرْ بِٱلطَّـٰغُوتِ وَيُؤْمِنۢ بِٱللَّهِ فَقَدِ '
+          'ٱسْتَمْسَكَ بِٱلْعُرْوَةِ ٱلْوُثْقَىٰ لَا ٱنفِصَامَ لَهَا ۗ '
+          'وَٱللَّهُ سَمِيعٌ عَلِيمٌ';
+      final tokens = VerseText.tokens(verse);
+      final cuts = VerseSplitter.split(tokens, fitsLetters(tokens, 46))!;
+      final plain = [
+        for (final c in cuts.sublist(1, cuts.length - 1))
+          if (VerseText.pauseAfter(tokens[c - 1]) == null) c,
+      ];
+      expect(plain, hasLength(1));
+      expect(tokens[plain.single], 'فَقَدِ');
+      // And no line ends on a particle waiting for its next word.
+      for (final c in cuts.sublist(1, cuts.length - 1)) {
+        expect(VerseText.bindsToNext(tokens[c - 1]), isFalse,
+            reason: 'a line ends on ${tokens[c - 1]}');
+      }
+    });
+
+    test('particles that wait for the next word, and what opens a clause',
+        () {
+      for (final w in ['فِى', 'وَمَا', 'مِنَ', 'عَلَىٰ', 'إِلَّا', 'وَلَا',
+          'ٱلَّذِى', 'يَـٰٓأَيُّهَا', 'لَـٰكِنَّ']) {
+        expect(VerseText.bindsToNext(w), isTrue, reason: w);
+      }
+      for (final w in ['ٱلْأَرْضِ', 'وَهُوَ', 'نَوْمٌ', 'فِيهِ', 'رَيْبَ']) {
+        expect(VerseText.bindsToNext(w), isFalse, reason: w);
+      }
+      expect(VerseText.opensClause('فَمَن'), isTrue);
+      expect(VerseText.opensClause('ثُمَّ'), isTrue);
+      // وَ as often joins two things as it opens a clause; فِى is "in".
+      expect(VerseText.opensClause('وَمَا'), isFalse);
+      expect(VerseText.opensClause('فِى'), isFalse);
+      expect(VerseText.bare('ٱلسَّمَـٰوَٰتِ'), 'السموت');
     });
 
     test('never cuts inside a group of words recited as one', () {
@@ -184,6 +239,55 @@ void main() {
   });
 
   group('TranslationSplit', () {
+    // 2:256 as the app carries it, and Saheeh International's English.
+    const v256 = 'لَآ إِكْرَاهَ فِى ٱلدِّينِ ۖ قَد تَّبَيَّنَ ٱلرُّشْدُ مِنَ '
+        'ٱلْغَىِّ ۚ فَمَن يَكْفُرْ بِٱلطَّـٰغُوتِ وَيُؤْمِنۢ بِٱللَّهِ فَقَدِ '
+        'ٱسْتَمْسَكَ بِٱلْعُرْوَةِ ٱلْوُثْقَىٰ لَا ٱنفِصَامَ لَهَا ۗ '
+        'وَٱللَّهُ سَمِيعٌ عَلِيمٌ';
+    const e256 = 'There shall be no compulsion in [acceptance of] the '
+        'religion. The right course has become distinct from the wrong. So '
+        'whoever disbelieves in ṭāghūt and believes in Allāh has grasped the '
+        'most trustworthy handhold with no break in it. And Allāh is Hearing '
+        'and Knowing.';
+
+    test('a sentence for each stretch between the signs, when there is one',
+        () {
+      final tokens = VerseText.tokens(v256);
+      final cuts = [
+        0,
+        tokens.indexOf('فَمَن'),
+        tokens.indexOf('فَقَدِ'),
+        tokens.indexOf('وَٱللَّهُ'),
+        tokens.length,
+      ];
+      expect(TranslationSplit.forCuts(e256, tokens, cuts), [
+        // The line that recites "the right course has become distinct"
+        // carries it, not the line after.
+        'There shall be no compulsion in [acceptance of] the religion. '
+            'The right course has become distinct from the wrong.',
+        // Inside a sentence: by the share of its own stretch, and not on
+        // the "in" that waits for its word.
+        'So whoever disbelieves in ṭāghūt and believes in Allāh',
+        'has grasped the most trustworthy handhold with no break in it.',
+        'And Allāh is Hearing and Knowing.',
+      ]);
+    });
+
+    test('by shares of the verse when the sentences are not one a stretch',
+        () {
+      final tokens = VerseText.tokens(v256);
+      final cuts = [0, tokens.indexOf('فَمَن'), tokens.length];
+      // One sentence fewer than the verse has stretches.
+      const merged = 'There shall be no compulsion in [acceptance of] the '
+          'religion; the right course has become distinct from the wrong, so '
+          'whoever disbelieves in ṭāghūt and believes in Allāh has grasped '
+          'the most trustworthy handhold with no break in it. And Allāh is '
+          'Hearing and Knowing.';
+      final pieces = TranslationSplit.forCuts(merged, tokens, cuts);
+      expect(pieces, hasLength(2));
+      expect(pieces.join(' '), merged);
+    });
+
     test('cuts at punctuation near each share', () {
       const t = 'Allah - there is no deity except Him, the Ever-Living, the '
           'Sustainer of existence. Neither drowsiness overtakes Him nor sleep.';

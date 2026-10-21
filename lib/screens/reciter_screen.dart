@@ -75,6 +75,12 @@ class _ReciterScreenState extends State<ReciterScreen>
   final _search = TextEditingController();
   String _query = '';
 
+  /// The list, and the card of the voice chosen when the screen opened,
+  /// so a voice kept from the last reel is on screen rather than forty
+  /// cards down with Continue lit for no visible reason.
+  final _list = ScrollController();
+  final _chosenKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -100,8 +106,54 @@ class _ReciterScreenState extends State<ReciterScreen>
           break;
         }
       }
+    } else {
+      // The voice the last reel was made with — this session's, or
+      // the last launch's (see LastChoices) — is where a new reel
+      // starts. Continue is one tap away; any other voice is one tap.
+      final last = creationState.reciter;
+      if (last != null && !last.isUserAudio && _has(last)) {
+        for (final r in reciters) {
+          if (r.id == last.id) {
+            _selected = r;
+            WidgetsBinding.instance.addPostFrameCallback((_) => _reveal());
+            break;
+          }
+        }
+      }
     }
     _restoreUpload();
+  }
+
+  /// Scrolls the chosen voice's card into view. The list is built
+  /// lazily, so a card far down does not exist until it is near: each
+  /// frame jumps to where the cards laid out so far say it is, until it
+  /// has been built, and the card itself is then brought to a third of
+  /// the way down.
+  void _reveal([int tries = 0]) {
+    if (!mounted || !_list.hasClients) return;
+    final card = _chosenKey.currentContext;
+    if (card != null) {
+      final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+      Scrollable.ensureVisible(
+        card,
+        alignment: 0.35,
+        duration: still ? Duration.zero : const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+      return;
+    }
+    final i = reciters.indexWhere((r) => r.id == _selected?.id);
+    if (i < 0 || tries >= 8) return;
+    final pos = _list.position;
+    // The upload card leads the list; the extent the list estimates for
+    // all of it comes from the cards it has measured.
+    final count = reciters.length + 1;
+    final each = (pos.maxScrollExtent + pos.viewportDimension) / count;
+    final guess = (i + 1) * each - pos.viewportDimension * 0.35;
+    _list.jumpTo(guess.clamp(0.0, pos.maxScrollExtent));
+    WidgetsBinding.instance
+      ..addPostFrameCallback((_) => _reveal(tries + 1))
+      ..scheduleFrame();
   }
 
   /// Whether [r] has the surah this screen was opened for, if any.
@@ -113,7 +165,19 @@ class _ReciterScreenState extends State<ReciterScreen>
   Future<void> _restoreUpload() async {
     final a = await UserAudioService.restore();
     if (!mounted || a == null) return;
-    setState(() => _upload = a);
+    setState(() {
+      _upload = a;
+      // The last reel was made on this very upload: it is the choice
+      // the screen opens on, as a voice would be.
+      final last = creationState.reciter;
+      if (_selected == null &&
+          widget.initialReciterId == null &&
+          last != null &&
+          last.isUserAudio &&
+          UserAudioService.reciterFor(a).id == last.id) {
+        _selected = last;
+      }
+    });
   }
 
   /// The sample stops when the app does. With audio focus off (see
@@ -133,6 +197,7 @@ class _ReciterScreenState extends State<ReciterScreen>
     WidgetsBinding.instance.removeObserver(this);
     _player.dispose();
     _search.dispose();
+    _list.dispose();
     super.dispose();
   }
 
@@ -390,6 +455,7 @@ class _ReciterScreenState extends State<ReciterScreen>
                         child: Text(l.noReciterMatch, style: t.bodyMedium),
                       )
                     : ListView.separated(
+                      controller: _list,
                       keyboardDismissBehavior:
                           ScrollViewKeyboardDismissBehavior.onDrag,
                       itemCount: shown.length + head,
@@ -409,6 +475,7 @@ class _ReciterScreenState extends State<ReciterScreen>
                         final r = shown[i - head];
                         final s = widget.surah;
                         return _ReciterCard(
+                          key: _selected?.id == r.id ? _chosenKey : null,
                           reciter: r,
                           selected: _selected?.id == r.id,
                           onTap: () => _pick(r),
@@ -694,7 +761,8 @@ class _ReciterCard extends StatelessWidget {
   final String? lacking;
 
   const _ReciterCard(
-      {required this.reciter,
+      {super.key,
+      required this.reciter,
       required this.selected,
       required this.onTap,
       this.lacking});

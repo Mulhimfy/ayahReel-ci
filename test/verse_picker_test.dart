@@ -28,6 +28,10 @@ void main() {
   setUp(() {
     creationState.selectReciter(reciters.first);
     creationState.selectSurah(1);
+    // Each test opens the picker on nothing chosen; the run the last
+    // test left is what a later reel would reopen on (see the test of
+    // that below).
+    creationState.debugForgetRange();
   });
 
   Widget host() => MaterialApp(
@@ -155,6 +159,25 @@ void main() {
     await t.pump(const Duration(milliseconds: 300));
     expect(live.positionMs, 0);
     h.dispose();
+  });
+
+  testWidgets('a reel begun again opens on the verses of the last',
+      (t) async {
+    sizeTallPhone(t);
+    // The run the last reel was made of: this session's, or the last
+    // launch's, put back by LastChoices.
+    creationState.selectRange(3, 5);
+    await t.pumpWidget(host());
+    await t.pump(const Duration(milliseconds: 300));
+    expect(cta(t).label, lengthOf(3, 5));
+    expect(find.text(l.ayahRange(3, 5)), findsOneWidget);
+
+    // A far verse starts again from it, as from any run. The list was
+    // scrolled to the run, so the first verse is brought back first.
+    await t.ensureVisible(ayah(1));
+    await t.pump(const Duration(milliseconds: 300));
+    await tapAyah(t, 1);
+    expect((creationState.startAyah, creationState.endAyah), (1, 1));
   });
 
   testWidgets('every tap extends the run, and the third keeps it',

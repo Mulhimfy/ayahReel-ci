@@ -154,10 +154,15 @@ void main() {
 
   test('the light is cut from the glint card at the recitation', () {
     final g = write(const VerseMotion(light: true), glint: 9);
-    expect(g, contains('[9:v]format=rgba,split=2'));
+    // A copy of the glint for each layer of the band, faint and wide to
+    // bright and narrow.
+    expect(g, contains('[9:v]format=rgba,split=4'));
+    expect(g, contains('colorchannelmixer=aa=0.14'));
     expect(g, contains('colorchannelmixer=aa=0.45'));
-    expect(g, contains('crop=w=168:h=90:'));
-    expect(g, contains('crop=w=64:h=90:'));
+    expect(g, contains('[qg9_r3]null,split=1'));
+    for (final w in [216, 140, 88, 48]) {
+      expect(g, contains('crop=w=$w:h=90:'));
+    }
     // And fades out once the line is crossed.
     expect(g, contains('fade=t=out:st=2.600:d=0.220:alpha=1'));
   });

@@ -448,8 +448,11 @@ class _PreviewScreenState extends State<PreviewScreen>
   late VerseMotion _motionChoice = creationState.motion;
 
   /// The motion this reel can run: the trail and the unveil need word
-  /// windows, which not every voice has.
-  VerseMotion get _motion => _motionChoice.forVoice(hasWords: _hlPlan != null);
+  /// windows, which not every voice has, and a long reel goes without
+  /// the light ([VerseMotion.forUnits]).
+  VerseMotion get _motion => _motionChoice
+      .forVoice(hasWords: _hlPlan != null)
+      .forUnits(_units.length);
 
   /// Where the recitation is, every frame: what the verse on screen and
   /// its motion are drawn at. The position events alone come every
@@ -796,9 +799,10 @@ class _PreviewScreenState extends State<PreviewScreen>
         endAyah: _endAyah,
         look: _look,
         words: _spans,
-        loudness: _spans == null
-            ? () => RecitationService.loudness(rec.audioPath)
-            : null,
+        // Asked for only when a verse that needs cutting has no word
+        // timing — every verse of a voice without it, and the few a
+        // voice timed by QUL has none for.
+        loudness: () => RecitationService.loudness(rec.audioPath),
         keepGoing: () => mounted && gen == _planGen,
       );
     } catch (e, st) {
@@ -1709,7 +1713,8 @@ class _PreviewScreenState extends State<PreviewScreen>
   /// Best-effort: any failure just leaves the whole-ayah card.
   Future<void> _loadHighlight() async {
     if (!WordAlignService.supports(_reciter)) return;
-    final spans = await WordAlignService.load(_reciter, _surah);
+    final spans = await WordAlignService.load(_reciter, _surah,
+        recitation: _recitation, ayahs: _ayahs);
     if (!mounted || _recitation == null) return;
     if (spans == null) {
       // No word timing after all: long verses are cut on the pauses.

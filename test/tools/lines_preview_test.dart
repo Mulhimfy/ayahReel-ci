@@ -18,6 +18,7 @@ import 'package:ayah_reels/data/verse_motion.dart';
 import 'package:ayah_reels/data/verse_translation.dart';
 import 'package:ayah_reels/l10n/l10n.dart';
 import 'package:ayah_reels/render/letterbox_layout.dart';
+import 'package:ayah_reels/screens/customize_screen.dart';
 import 'package:ayah_reels/screens/settings_screen.dart';
 import 'package:ayah_reels/screens/style_screen.dart';
 import 'package:ayah_reels/state/creation_state.dart';
@@ -27,7 +28,7 @@ import 'package:ayah_reels/widgets/surah_title.dart';
 import '../arena_screens_test.dart' show plainTheme;
 
 /// Draws the new surfaces on a desk, so they can be looked at without a
-/// phone: Settings' Customize panel open (English and Arabic), the style
+/// phone: Settings' Customize page (English and Arabic), the style
 /// step's Motion tab mid-loop, the motion sheet, and the surah's name on
 /// a full frame and over a pale letterbox band. Skipped unless pointed
 /// somewhere:
@@ -110,10 +111,18 @@ void main() {
       }
     }
 
-    // ---- Settings: the Customize panel, open ------------------------
+    // ---- Settings → Customize, its own page ---------------------------
+    const still = ReelBackground.still(
+      id: 'sky_pexels_01',
+      name: 'Sky 1',
+      imageAsset: 'assets/backgrounds/sky_pexels_01.jpg',
+      gradientArgb: [0xFF10203A, 0xFF6E8CB0],
+    );
+    // The page plays its reel over the scenery the user last chose.
+    creationState.selectBackground(still);
     for (final lang in [AppLang.en, AppLang.ar]) {
-      SettingsService.state.value =
-          AppSettings.defaults.copyWith(lang: lang, verseLines: 2);
+      SettingsService.state.value = AppSettings.defaults.copyWith(lang: lang);
+      creationState.setMotion(VerseMotion.standard);
       await t.pumpWidget(const SizedBox());
       await t.pumpWidget(app(
           lang,
@@ -126,25 +135,45 @@ void main() {
       await settle();
       final row = find.text(L10n(lang).customizeTitle);
       await t.scrollUntilVisible(row, 200);
+      await t.pump(const Duration(milliseconds: 300));
+      await shoot('settings_row_${lang.code}');
       await t.tap(row);
       await t.pump();
-      await t.pump(const Duration(milliseconds: 400));
-      await t.drag(find.byType(ListView).first, const Offset(0, -260));
-      await t.pump(const Duration(milliseconds: 400));
+      await t.pump(const Duration(milliseconds: 500));
+      // Into the first line, its light partway across.
+      await t.pump(const Duration(milliseconds: 1400));
       await shoot('customize_${lang.code}');
-      await t.drag(find.byType(ListView).first, const Offset(0, -420));
+      final page = find
+          .descendant(
+              of: find.byType(CustomizeScreen),
+              matching: find.byType(Scrollable))
+          .first;
+      await t.drag(page, const Offset(0, -520));
+      await t.pump(const Duration(milliseconds: 400));
+      await shoot('customize_${lang.code}_middle');
+      await t.drag(page, const Offset(0, -900));
       await t.pump(const Duration(milliseconds: 400));
       await shoot('customize_${lang.code}_lower');
+    }
+    // The page with the surah's name on and two lines at a time, then
+    // with whole verses.
+    for (final (name, settings) in [
+      (
+        'customize_title_two_lines',
+        AppSettings.defaults.copyWith(surahTitle: true, verseLines: 2),
+      ),
+      ('customize_whole', AppSettings.defaults.copyWith(verseLines: 0)),
+    ]) {
+      SettingsService.state.value = settings;
+      await t.pumpWidget(const SizedBox());
+      await t.pumpWidget(app(AppLang.en, const CustomizeScreen()));
+      await settle();
+      await t.pump(const Duration(milliseconds: 1500));
+      await shoot(name);
     }
     SettingsService.state.value = AppSettings.defaults;
 
     // ---- the style step's Motion tab, mid-loop -----------------------
-    const still = ReelBackground.still(
-      id: 'sky_pexels_01',
-      name: 'Sky 1',
-      imageAsset: 'assets/backgrounds/sky_pexels_01.jpg',
-      gradientArgb: [0xFF10203A, 0xFF6E8CB0],
-    );
     creationState
       ..startNewReel()
       ..selectReciter(reciters.first)

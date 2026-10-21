@@ -3,10 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ayah_reels/data/settings_service.dart';
 import 'package:ayah_reels/render/video_renderer.dart';
+import 'package:ayah_reels/screens/customize_screen.dart';
 import 'package:ayah_reels/screens/settings_screen.dart';
 import 'package:ayah_reels/theme/app_theme.dart';
 
-/// High-quality video: a switch in Settings' Customize menu that moves
+/// High-quality video: a switch on Settings' Customize page that moves
 /// every export up the encoder's bitrate ladder, at the cost of larger
 /// files — and so off unless the user turns it on.
 void main() {
@@ -104,7 +105,7 @@ void main() {
     });
   });
 
-  testWidgets('the switch sits in the Customize panel, and stays open',
+  testWidgets('the switch is on the Customize page, which stays open',
       (t) async {
     t.view.physicalSize = const Size(390 * 3, 844 * 3);
     t.view.devicePixelRatio = 3;
@@ -112,6 +113,11 @@ void main() {
     addTearDown(t.view.resetDevicePixelRatio);
     await t.pumpWidget(MaterialApp(
       theme: AppTheme.dark(),
+      // The page's reel plays on a loop; held still, the page settles.
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(disableAnimations: true),
+        child: child!,
+      ),
       home: Scaffold(
         body: SettingsScreen(permissionCheck: () async => true),
       ),
@@ -122,16 +128,21 @@ void main() {
     await t.scrollUntilVisible(find.text('Customize'), 200);
     await t.tap(find.text('Customize'));
     await t.pumpAndSettle();
-    expect(find.text('High-quality video'), findsOneWidget);
+    expect(find.byType(CustomizeScreen), findsOneWidget);
+    final page = find
+        .descendant(
+            of: find.byType(CustomizeScreen),
+            matching: find.byType(Scrollable))
+        .first;
+    await t.scrollUntilVisible(find.text('High-quality video'), 200,
+        scrollable: page);
+    await t.pumpAndSettle();
     expect(find.text('Sharper, larger files'), findsOneWidget);
 
-    // The panel opens in place, under the row: the switch is at its foot.
-    await t.ensureVisible(find.text('High-quality video'));
-    await t.pumpAndSettle();
     await t.tap(find.text('High-quality video'));
     await t.pumpAndSettle();
     expect(SettingsService.state.value.highQualityVideo, isTrue);
-    // Still open, so the switch is seen to move.
+    // Still on the page, so the switch is seen to move.
     expect(find.text('High-quality video'), findsOneWidget);
 
     await t.tap(find.text('High-quality video'));

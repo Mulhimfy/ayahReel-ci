@@ -9,10 +9,12 @@ import '../data/instagram_share.dart';
 import '../data/reminder_service.dart';
 import '../data/rewards_service.dart';
 import '../data/settings_service.dart';
+import '../data/verse_lines.dart';
+import '../data/verse_motion.dart';
 import '../l10n/l10n.dart';
+import '../state/creation_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/a11y.dart';
-import '../widgets/customize_panel.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/language_sheet.dart';
 import '../widgets/ambient_motion.dart';
@@ -25,6 +27,7 @@ import '../widgets/rate_sheet.dart';
 import '../widgets/reminder_time_picker.dart';
 import '../widgets/storage_sheet.dart';
 import '../widgets/widget_sheet.dart';
+import 'customize_screen.dart';
 
 /// Both stores require a reachable privacy policy URL in the listing.
 /// The EULA row is not required while the app is free — guideline 3.1.2 only
@@ -318,11 +321,26 @@ class _SettingsScreenState extends State<SettingsScreen>
                 },
               ),
               // Last in the card of switches: set-it-once choices about
-              // the reels themselves, opened in place under the row. Its
-              // icons are ones the app already draws: Flutter subsets
+              // the reels themselves, on a page of their own with a reel
+              // playing them (see CustomizeScreen). The line after the
+              // name says the two that shape a reel most. Its icons are
+              // ones the app already draws: Flutter subsets
               // MaterialIcons to the glyphs in use, so a new one changes
               // the font and Shorebird refuses the patch.
-              CustomizeRow(settings: s),
+              ListenableBuilder(
+                listenable: creationState,
+                builder: (context, _) => _NavRow(
+                  icon: Icons.tune_rounded,
+                  title: l.customizeTitle,
+                  trailing: _customizeSummary(l, s),
+                  hint: l.a11yCustomizeHint,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const CustomizeScreen()));
+                  },
+                ),
+              ),
               const SizedBox(height: 6),
             ]),
             const SizedBox(height: 14),
@@ -363,6 +381,20 @@ class _SettingsScreenState extends State<SettingsScreen>
     if (motion == null) return body;
     // Scrolling Settings pushes the shell's sky exactly as Home does.
     return AmbientScrollSensor(motion: motion, child: body);
+  }
+
+  /// "1 line · Light": how a long verse appears, and how the verse
+  /// moves — the two choices on the Customize page a reel shows most.
+  static String _customizeSummary(L10n l, AppSettings s) {
+    final lines = s.verseLines > VerseLines.whole
+        ? l.linesCount(s.verseLines)
+        : l.versesWhole;
+    final m = creationState.motion;
+    final preset = MotionPreset.of(m);
+    final motion = preset != null
+        ? l.motionPresetName(preset.name)
+        : l.motionCustom;
+    return '$lines · $motion';
   }
 
   /// Asks for the name the home screen greets them with. Saving an

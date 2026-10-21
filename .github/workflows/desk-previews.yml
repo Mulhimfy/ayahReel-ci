@@ -20,6 +20,10 @@ on:
       tools:
         description: 'test/tools files to run, without _test.dart, space-separated'
         default: 'batch_preview arena_preview card_preview notification_art_preview'
+      encode:
+        description: 'Encode the reels export_motion_tool writes, and measure them'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -63,6 +67,34 @@ jobs:
               || echo "::warning::$tool did not finish"
           done
           find previews -name '*.png' | wc -l
+      # The export tool's commands, run by a desktop FFmpeg on a machine
+      # with room: each reel's peak memory and time, and a frame of it.
+      # What a save costs is the cards it holds (EXPORT_MEMORY.md); this
+      # is the one-pass figure, every card at once.
+      - name: Encode the export tool's reels
+        if: ${{ inputs.encode }}
+        run: |
+          dir=previews/export_motion_tool
+          [ -d "$dir" ] || exit 0
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg >/dev/null
+          ffmpeg -version | head -1 | tee "$dir/encode_report.txt"
+          for c in "$dir"/cmd_*.txt; do
+            name=$(basename "$c" .txt); name=${name#cmd_}
+            inputs=$(grep -o ' -i ' "$c" | wc -l)
+            # shellcheck disable=SC2046
+            /usr/bin/time -v ffmpeg -hide_banner -v error -y \
+              $(sed 's/"//g' "$c") 2> "$dir/time_$name.txt" \
+              || echo "::warning::$name did not encode"
+            peak=$(awk '/Maximum resident/ {print int($6/1024)}' "$dir/time_$name.txt")
+            wall=$(awk -F': ' '/Elapsed \(wall clock\)/ {print $2}' "$dir/time_$name.txt")
+            echo "$name: $inputs inputs, ${peak} MB peak, $wall" | tee -a "$dir/encode_report.txt"
+            for at in 2 9 36; do
+              ffmpeg -v error -y -ss "$at" -i "$dir/reel_$name.mp4" -frames:v 1 \
+                "$dir/frame_${name}_${at}s.png" || true
+            done
+            rm -f "$dir/reel_$name.mp4"
+          done
       - uses: actions/upload-artifact@v4
         with:
           name: desk-previews

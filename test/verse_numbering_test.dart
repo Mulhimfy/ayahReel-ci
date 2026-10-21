@@ -6,13 +6,14 @@ import 'package:ayah_reels/data/settings_service.dart';
 import 'package:ayah_reels/data/verse_font.dart';
 import 'package:ayah_reels/data/verse_numbering.dart';
 import 'package:ayah_reels/data/verse_translation.dart';
+import 'package:ayah_reels/screens/customize_screen.dart';
 import 'package:ayah_reels/screens/settings_screen.dart';
 import 'package:ayah_reels/theme/app_theme.dart';
 import 'package:ayah_reels/widgets/ayah_overlay.dart';
 
 /// Verse numbers on a reel: the numbered end-of-verse sign after the
 /// Arabic, the reference line under the translation, either or both —
-/// and neither unless the user asks, from a dropdown in Settings.
+/// and neither unless the user asks, on Settings' Customize page.
 void main() {
   tearDown(() => SettingsService.state.value = AppSettings.defaults);
 
@@ -179,23 +180,29 @@ void main() {
     });
   });
 
-  testWidgets('Settings sets it from the Customize panel', (t) async {
+  testWidgets('Settings sets it on the Customize page', (t) async {
     t.view.physicalSize = const Size(390 * 3, 844 * 3);
     t.view.devicePixelRatio = 3;
     addTearDown(t.view.resetPhysicalSize);
     addTearDown(t.view.resetDevicePixelRatio);
     await t.pumpWidget(MaterialApp(
       theme: AppTheme.dark(),
+      // The page's reel plays on a loop; held still, the page settles.
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(disableAnimations: true),
+        child: child!,
+      ),
       home: Scaffold(
         body: SettingsScreen(permissionCheck: () async => true),
       ),
     ));
     await t.pump();
 
-    // The row names none of what it holds.
+    // The row names none of what it holds, only how a reel comes out.
     expect(find.text('Verse numbers'), findsNothing);
     expect(find.text('Off'), findsNothing);
     await t.scrollUntilVisible(find.text('Customize'), 200);
+    expect(find.text('1 line · Light'), findsOneWidget);
     // At the foot of the card of switches: the next row down from the
     // last of them.
     final row = t.getRect(find.text('Customize'));
@@ -203,7 +210,15 @@ void main() {
     expect(row.top, greaterThan(series.bottom));
     expect(row.top - series.top, lessThan(80));
 
+    Finder page() => find
+        .descendant(
+            of: find.byType(CustomizeScreen),
+            matching: find.byType(Scrollable))
+        .first;
     await t.tap(find.text('Customize'));
+    await t.pumpAndSettle();
+    await t.scrollUntilVisible(find.text('Mark and reference'), 200,
+        scrollable: page());
     await t.pumpAndSettle();
     for (final label in [
       'Verse numbers',
@@ -218,13 +233,11 @@ void main() {
     // Says where the choice ends up.
     expect(find.text('Shown on your reels'), findsOneWidget);
 
-    await t.ensureVisible(find.text('Mark and reference'));
-    await t.pumpAndSettle();
     await t.tap(find.text('Mark and reference'));
     await t.pumpAndSettle();
     expect(SettingsService.state.value.verseNumbering, VerseNumbering.both);
-    // The panel stays open, marking the new choice, so the next one can
-    // be tried without reopening it.
+    // The page stays, marking the new choice, so the next one can be
+    // tried at once.
     var picked = t.widget<Text>(find.text('Mark and reference'));
     expect(picked.style?.fontWeight, FontWeight.w600);
     await t.tap(find.text('Verse-end mark'));
@@ -235,13 +248,15 @@ void main() {
     expect(t.widget<Text>(find.text('Mark and reference')).style?.fontWeight,
         FontWeight.w400);
 
-    // Shut, then opened again, it marks the last choice.
-    await t.ensureVisible(find.text('Customize'));
+    // Left, then opened again, it marks the last choice.
+    await t.pageBack();
     await t.pumpAndSettle();
-    await t.tap(find.text('Customize'));
-    await t.pumpAndSettle();
+    expect(find.byType(CustomizeScreen), findsNothing);
     expect(find.text('Verse-end mark'), findsNothing);
     await t.tap(find.text('Customize'));
+    await t.pumpAndSettle();
+    await t.scrollUntilVisible(find.text('Verse-end mark'), 200,
+        scrollable: page());
     await t.pumpAndSettle();
     picked = t.widget<Text>(find.text('Verse-end mark'));
     expect(picked.style?.fontWeight, FontWeight.w600);

@@ -195,7 +195,7 @@ class _StyleScreenState extends State<StyleScreen> {
       case _Panel.effects:
         s.setEffects(ReelEffects.off);
       case _Panel.motion:
-        s.setMotion(VerseMotion.none);
+        s.setMotion(VerseMotion.standard);
     }
   }
 

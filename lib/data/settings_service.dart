@@ -186,14 +186,17 @@ class AppSettings {
   /// How a new reel shows a verse too long for the frame: 0 is the whole
   /// verse at once, shrunk to fit, as reels always were; 1–3 is that
   /// many lines at a time, each while it is recited. See [VerseLines].
+  /// One line at a time until the user picks otherwise.
   final int verseLines;
 
   /// Whether a reel whose long verses are cut into lines changes its
   /// scenery with each line rather than with each verse. Only read
-  /// while [verseLines] cuts anything.
+  /// while [verseLines] cuts anything. On until the user picks each
+  /// verse.
   final bool scenesFollowLines;
 
-  /// Whether a new reel carries the surah's name at its head.
+  /// Whether a new reel carries the surah's name at its head. Off until
+  /// the user turns it on.
   final bool surahTitle;
 
   const AppSettings({
@@ -231,9 +234,9 @@ class AppSettings {
     this.verseNumbering = VerseNumbering.off,
     this.verseTranslationOff = false,
     this.highQualityVideo = false,
-    this.verseLines = 0,
+    this.verseLines = 1,
     this.scenesFollowLines = true,
-    this.surahTitle = true,
+    this.surahTitle = false,
   });
 
   static const defaults = AppSettings(
@@ -368,9 +371,13 @@ class AppSettings {
         'verseNumbering': verseNumbering.code,
         'verseTranslationOff': verseTranslationOff,
         'highQualityVideo': highQualityVideo,
-        'verseLines': verseLines,
+        // Not 'verseLines' and 'surahTitle': the 2026-10-21 preview
+        // builds wrote those keys with the defaults of the day (whole
+        // verses, the name on), and a phone that ran one would keep
+        // them over these. No store build ever wrote either.
+        'linesAtOnce': verseLines,
         'scenesFollowLines': scenesFollowLines,
-        'surahTitle': surahTitle,
+        'surahName': surahTitle,
       };
 
   factory AppSettings.fromJson(Map<String, dynamic> j) => AppSettings(
@@ -436,11 +443,11 @@ class AppSettings {
         // have always carried a translation.
         verseTranslationOff: j['verseTranslationOff'] as bool? ?? false,
         highQualityVideo: j['highQualityVideo'] as bool? ?? false,
-        // Absent on every install that predates lines: their reels have
-        // always shown each verse whole.
-        verseLines: ((j['verseLines'] as num?)?.toInt() ?? 0).clamp(0, 3),
+        // One line at a time, and no surah name, until chosen; see
+        // [toJson] for why these two keys are new ones.
+        verseLines: ((j['linesAtOnce'] as num?)?.toInt() ?? 1).clamp(0, 3),
         scenesFollowLines: j['scenesFollowLines'] as bool? ?? true,
-        surahTitle: j['surahTitle'] as bool? ?? true,
+        surahTitle: j['surahName'] as bool? ?? false,
       );
 }
 

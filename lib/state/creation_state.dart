@@ -249,8 +249,10 @@ class CreationState extends ChangeNotifier {
   int _verseLines = SettingsService.state.value.verseLines;
 
   /// What the verse does as it is recited. A preference, like the
-  /// faces and the grade: kept from one reel to the next.
-  VerseMotion _motion = VerseMotion.none;
+  /// faces and the grade: kept from one reel to the next, and from one
+  /// launch to the next (see `LastChoices`). The light through the
+  /// words until the user picks otherwise.
+  VerseMotion _motion = VerseMotion.standard;
 
   /// Whether this reel carries the surah's name, and where it was
   /// dragged to (null for its place at the head of the frame).
@@ -850,7 +852,24 @@ class CreationState extends ChangeNotifier {
     assert(start >= 1 && end >= start);
     _startAyah = start;
     _endAyah = end;
+    _rangeChosen = true;
     notifyListeners();
+  }
+
+  /// Whether [startAyah]..[endAyah] were ever chosen — in this session,
+  /// or in an earlier one and put back by `LastChoices` — rather than
+  /// being the Al-Fatiha a fresh install starts on. The verse picker
+  /// opens on a chosen run, selected; on nothing otherwise.
+  bool get rangeChosen => _rangeChosen;
+  bool _rangeChosen = false;
+
+  /// Back to no verses chosen, as on a fresh install — for tests of the
+  /// picker, which share one state between them.
+  @visibleForTesting
+  void debugForgetRange() {
+    _startAyah = 1;
+    _endAyah = 7;
+    _rangeChosen = false;
   }
 }
 

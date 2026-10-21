@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ayah_reels/data/fatiha_data.dart';
 import 'package:ayah_reels/data/models.dart';
+import 'package:ayah_reels/data/qul_words.dart';
 import 'package:ayah_reels/data/word_align_service.dart';
 
 void main() {
@@ -173,9 +174,18 @@ Crashed Command '['./align', '../quran-uthmani.mod.txt']' blah
   group('which voices have word timings', () {
     Reciter byId(String id) => reciters.firstWhere((r) => r.id == id);
 
-    test('eleven of the app\'s voices: nine exact folders and two same '
-        'recordings at a lower bitrate', () {
-      expect(WordAlignService.supportedCount(reciters), 11);
+    test('eleven of the app\'s voices from quran-align: nine exact folders '
+        'and two same recordings at a lower bitrate', () {
+      expect(reciters.where(WordAlignService.alignedByQuranAlign).length, 11);
+    });
+
+    test('and the voices QUL times besides, none of them twice', () {
+      for (final id in QulWords.sources.keys) {
+        final r = reciters.firstWhere((r) => r.id == id);
+        expect(WordAlignService.alignedByQuranAlign(r), isFalse, reason: id);
+      }
+      expect(WordAlignService.supportedCount(reciters),
+          11 + QulWords.sources.length);
     });
 
     test('Husary and Abdul Basit murattal are covered by the 64kbps files',
@@ -195,7 +205,10 @@ Crashed Command '['./align', '../quran-uthmani.mod.txt']' blah
       for (final r in reciters) {
         expect(r.everyAyahFolder, isNot('Husary_Muallim_128kbps'));
       }
-      expect(WordAlignService.supports(byId('husary_mujawwad')), isFalse);
+      // Husary's mujawwad has words, but QUL's, for its own recording —
+      // never quran-align's teaching one.
+      expect(WordAlignService.alignedByQuranAlign(byId('husary_mujawwad')),
+          isFalse);
     });
 
     test('an upload never claims timings', () {

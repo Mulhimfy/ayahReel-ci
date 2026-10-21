@@ -5,7 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ayah_reels/data/fatiha_data.dart';
 import 'package:ayah_reels/l10n/l10n.dart';
 import 'package:ayah_reels/screens/reciter_screen.dart';
+import 'package:ayah_reels/state/creation_state.dart';
 import 'package:ayah_reels/theme/app_theme.dart';
+import 'package:ayah_reels/widgets/glow_button.dart';
 
 /// The voice list, once it is too long to scroll by eye, is searched.
 void main() {
@@ -89,5 +91,29 @@ void main() {
     expect(find.text(l.useYourOwnAudio), findsOneWidget);
     expect(find.text('Mishary Alafasy'), findsOneWidget);
     expect(t.widget<TextField>(field()).controller!.text, isEmpty);
+  });
+
+  testWidgets('the last voice is the one the screen opens on, in view',
+      (t) async {
+    // Far down the list: the voice the last reel was made with.
+    final last = reciters[60];
+    creationState.selectReciter(last);
+    addTearDown(() => creationState.selectReciter(reciters.first));
+    await open(t);
+    // The jumps towards it, a frame each, then the glide into place.
+    for (var i = 0; i < 8; i++) {
+      await t.pump(const Duration(milliseconds: 50));
+    }
+    await t.pump(const Duration(milliseconds: 400));
+    // Continue is lit, for the voice it names.
+    expect(t.widget<GlowButton>(find.byType(GlowButton)).onPressed, isNotNull);
+    expect(creationState.reciter?.id, last.id);
+    // And its card is on screen, not sixty cards down.
+    final card = find.text(l.reciterName(last));
+    expect(card, findsOneWidget);
+    final box = t.getRect(card);
+    final screen = t.getRect(find.byType(ListView));
+    expect(box.top, greaterThanOrEqualTo(screen.top));
+    expect(box.bottom, lessThanOrEqualTo(screen.bottom));
   });
 }

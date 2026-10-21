@@ -9,6 +9,7 @@ import 'data/export_budget.dart';
 import 'data/ffmpeg_setup.dart';
 import 'data/home_widget_service.dart';
 import 'data/install_date.dart';
+import 'data/last_choices.dart';
 import 'data/quran_verses.dart';
 import 'data/reminder_service.dart';
 import 'data/rewards_service.dart';
@@ -18,6 +19,7 @@ import 'l10n/l10n.dart';
 import 'render/on_screen.dart';
 import 'screens/home_shell.dart';
 import 'screens/onboarding_screen.dart';
+import 'state/creation_state.dart';
 import 'theme/app_theme.dart';
 import 'widgets/telegram_invite.dart';
 import 'widgets/cinematic_hero.dart';
@@ -166,14 +168,23 @@ class _RootState extends State<_Root> {
   StreamSubscription<QuranVerse>? _widgetTaps;
   StreamSubscription<String>? _notificationTaps;
 
+  /// Writes the reel's last choices down as the app leaves the screen,
+  /// rather than leaving the last of them to a timer the system may
+  /// never let fire.
+  late final AppLifecycleListener _life;
+
   @override
   void initState() {
     super.initState();
+    _life = AppLifecycleListener(
+      onHide: () => unawaited(LastChoices.flush()),
+    );
     _boot();
   }
 
   @override
   void dispose() {
+    _life.dispose();
     _widgetTaps?.cancel();
     _notificationTaps?.cancel();
     super.dispose();
@@ -181,6 +192,9 @@ class _RootState extends State<_Root> {
 
   Future<void> _boot() async {
     await SettingsService.init();
+    // The voice, the verses and the style the last reel was made with,
+    // before anything can open the reel flow on the app's defaults.
+    await LastChoices.init(creationState);
     // Straight after the settings: on the first run of this code their
     // onboarding flag is what tells a new install from an old one.
     unawaited(InstallDate.init());

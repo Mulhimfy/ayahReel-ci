@@ -152,4 +152,40 @@ void main() {
     });
     expect(plan.isEmpty, isTrue);
   });
+
+  testWidgets('a stand-in recitation plays the cut a reel would make',
+      (t) async {
+    final one = VersePlanner.demo(ayah: kursi, lines: 1, look: look);
+    final cuts = VersePlanner.estimateLines(ayahs, 255, 255, 1, look);
+    // The same lines the text alone would cut, in order, end to end.
+    expect(one.units.map((u) => u.part!.arabic).toList(), cuts);
+    expect(one.units.first.startMs, 0);
+    expect(one.units.last.endMs, one.verseMs);
+    for (var i = 1; i < one.units.length; i++) {
+      expect(one.units[i].startMs, one.units[i - 1].endMs);
+    }
+    // One height for every part, as a real plan has.
+    expect(one.units.map((u) => u.part!.height).toSet(), hasLength(1));
+    // Every word lit in turn, each window running to the next, and each
+    // inside its own line's time.
+    final words = VerseText.tokens(kursi.arabic).where(VerseText.isWord);
+    expect(one.spans, hasLength(words.length));
+    for (var i = 1; i < one.spans.length; i++) {
+      expect(one.spans[i].startMs, one.spans[i - 1].endMs);
+    }
+    for (final u in one.units) {
+      for (var k = u.part!.tokenStart; k < u.part!.tokenEnd; k++) {
+        final w = one.times[k];
+        expect(w, isNotNull);
+        expect(w!.$1, greaterThanOrEqualTo(u.startMs));
+        expect(w.$2, lessThanOrEqualTo(u.endMs));
+      }
+    }
+
+    // Whole: one unit, the verse.
+    final whole = VersePlanner.demo(ayah: kursi, lines: 0, look: look);
+    expect(whole.units, hasLength(1));
+    expect(whole.units.single.part, isNull);
+    expect(whole.units.single.endMs, whole.verseMs);
+  });
 }

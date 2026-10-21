@@ -333,4 +333,15 @@ void main() {
           [(start: 0, end: 1), (start: 1, end: 2)]);
     });
   });
+
+  test('a long reel goes without the light, and keeps the rest', () {
+    const m = VerseMotion.standard;
+    expect(m.forUnits(VerseMotion.lightMostUnits), m);
+    final long = m.forUnits(VerseMotion.lightMostUnits + 1);
+    expect(long.light, isFalse);
+    expect(long.arrival, m.arrival);
+    // Nothing to take off a motion without it.
+    const thread = VerseMotion(arrival: VerseArrival.rise, thread: true);
+    expect(thread.forUnits(1000), thread);
+  });
 }

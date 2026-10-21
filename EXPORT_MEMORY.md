@@ -437,6 +437,50 @@ save a reel with long verses line by line and each motion preset on a
 real phone (the preview APK installs beside the store app), and check
 that the lines change where the reciter ends them and the file plays.
 
+## 2026-10-21 (evening): lines and the light by default
+
+Not a report: the defaults changed. A new install makes every reel one
+line at a time, the scenery changing with each line, the light passing
+through the words (fade + light, `VerseMotion.standard`), the word
+highlight on, and no surah name. Before, a new reel showed each verse
+whole and still. So `_unitCards` and `VerseMotionGraph` are now the path
+most reels take, not the opt-in one; a reel with lines off and motion
+set to Still still takes the old one.
+
+- **What a default reel holds over the old default.** Per unit (a line,
+  or a verse shown whole): its base card and its glint card. The word
+  windows are the same cards either way (`highlightPlan`'s cap of 120 is
+  unchanged), and parts are smaller cards than whole verses.
+- **The light** is four layered crops of the glint card now (216, 140,
+  88 and 48 px wide at 0.14, 0.26, 0.45 and full strength,
+  `LightLook.layers`), not two, so its edges don't read as a box. Each
+  layer's copy of the glint is made once, from the still, and held for
+  the pass: three small copies a unit (about 1.2 MB each for a one-line
+  card), where it was one.
+- **Measured** on the GitHub runner (the desk-previews workflow's
+  `encode` input), FFmpeg 6.1.1, x264, one pass holding every card of
+  2:255-256 (44 s, word timing):
+
+  | reel | inputs | peak | time |
+  |---|---|---|---|
+  | before: whole verses, still | 78 | 1122 MB | 29.3 s |
+  | now: one line, light, highlight | 100 | 1293 MB | 32.8 s |
+  | two lines, still, surah name | 83 | 1152 MB | 29.5 s |
+  | two lines, light, surah name | 89 | 1303 MB | 33.9 s |
+  | two lines, thread | 85 | 1307 MB | 31.9 s |
+  | two lines, gilded | 85 | 1294 MB | 32.2 s |
+  | two lines, unveil | 83 | 1223 MB | 30.2 s |
+
+  So a default reel costs about 15% more memory and 12% more time than
+  it did, held in one pass. On this FFmpeg the moving pieces (thread or
+  light, and the fades) come to about 150 MB a pass whatever the motion;
+  the 2026-10-21 morning figures on FFmpeg 8.0.1 put them near nothing.
+  `RenderPlan` counts glint cards as cards and the passes of a tight
+  phone hold 16, 8 or 4 cards, so the motion's share shrinks with the
+  pass. If notes start showing `cards`-stage or pass losses on 3 GB
+  phones from builds after this, the first lever is to turn the light's
+  layers down to two on `tight` and below.
+
 ## What a note says since 2026-10-08
 
 While a foreground save runs, `PhoneBudget` writes its stage and the

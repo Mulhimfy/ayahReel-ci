@@ -85,12 +85,17 @@ abstract final class SparkLook {
 
 /// The band of light that passes through the letters.
 abstract final class LightLook {
-  /// The band's two widths at 1080 wide: a bright core inside a softer
-  /// one, which is as close to a soft-edged light as two crops of one
-  /// picture get.
-  static const bright = 64.0;
-  static const soft = 168.0;
-  static const softAlpha = 0.45;
+  /// The band's layers at 1080 wide, widest and faintest first, as
+  /// (width, alpha): each a crop of the glint card laid over the ones
+  /// before it, which is as close to a light with soft edges as crops of
+  /// one picture get. Four steps, so no edge of the band reads as a box
+  /// around the word; the core is the glint at full strength.
+  static const layers = <(double, double)>[
+    (216, 0.14),
+    (140, 0.26),
+    (88, 0.45),
+    (48, 1.0),
+  ];
 
   /// After a line is crossed, the light fades out over this long.
   static const tailMs = 220;
@@ -260,10 +265,8 @@ class RenderVerseFlourish extends RenderProxyBox {
       if (ms < pr.startMs || ms > pr.endMs + LightLook.tailMs) continue;
       final tail = LightLook.tailAt(ms, pr.endMs);
       final cx = r.right - pr.at(ms);
-      for (final (w, a) in [
-        (LightLook.soft * s, LightLook.softAlpha),
-        (LightLook.bright * s, 1.0),
-      ]) {
+      for (final (width, a) in LightLook.layers) {
+        final w = width * s;
         final left = LightLook.leftOf(cx, w, cardW);
         final band = Rect.fromLTRB(left, r.top, left + w, r.bottom);
         canvas.save();
@@ -284,15 +287,7 @@ class RenderVerseFlourish extends RenderProxyBox {
   TextPainter? _glintPainter() {
     final p = RenderVerseAnchor.find(this)?.paragraph;
     if (p == null) return null;
-    final ts = _w.ts;
-    final glow = [
-      Shadow(
-          color: const Color(0xFFFFD27A).withValues(alpha: 0.85),
-          blurRadius: 12 * ts),
-      Shadow(
-          color: const Color(0xFFE8A93A).withValues(alpha: 0.5),
-          blurRadius: 30 * ts),
-    ];
+    final glow = AyahOverlay.glintGlow(_w.ts);
     InlineSpan lit(InlineSpan span) {
       if (span is! TextSpan) return span;
       final mark = (span.text ?? '').startsWith(' ');

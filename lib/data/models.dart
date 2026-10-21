@@ -261,11 +261,19 @@ class Recitation {
   /// Contiguous, ascending by ayah number.
   final List<AyahTiming> timings;
 
+  /// Where this recording's first moment sits in the voice's whole-surah
+  /// file, in milliseconds, when it was cut out of one — what puts times
+  /// taken against that file (QUL's words) on this recording exactly.
+  /// Null for one assembled from per-ayah files, or cut by a build that
+  /// did not keep it.
+  final int? originMs;
+
   const Recitation({
     required this.reciterId,
     required this.surah,
     required this.audioPath,
     required this.timings,
+    this.originMs,
   });
 
   int get firstAyah => timings.first.ayah;

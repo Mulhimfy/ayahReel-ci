@@ -19,8 +19,9 @@ abstract final class VerseLines {
   /// The choices offered, after [whole].
   static const choices = [1, 2, 3];
 
-  /// What "line by line" starts on.
-  static const preferred = 2;
+  /// What "line by line" starts on, and what a new install has: one
+  /// line at a time, the largest the verse is ever set.
+  static const preferred = 1;
 
   static int clamp(int v) => v < 0 ? 0 : (v > 3 ? 3 : v);
 }
@@ -53,8 +54,9 @@ enum PauseMark {
   /// س — a brief pause without a breath.
   saktah(0x06DC, 30),
 
-  /// لا — do not stop here.
-  never(0x06D9, 90);
+  /// لا — do not stop here. Dearer than a phrase cut in two: the
+  /// reciter carries straight on, and the meaning with them.
+  never(0x06D9, 300);
 
   const PauseMark(this.codePoint, this.cutCost);
 
@@ -105,6 +107,49 @@ abstract final class VerseText {
   /// Arabic letters in [token]: what a part's share of the recitation is
   /// estimated from when no word timing says otherwise.
   static int letters(String token) => token.runes.where(_isLetter).length;
+
+  /// [token]'s letters alone, spelled plainly: the hamza seats and the
+  /// wasla as alif, the alif maqsura as ya, every mark and tatweel gone.
+  static String bare(String token) {
+    final out = StringBuffer();
+    for (final r in token.runes) {
+      // Tatweel and the dagger alif sit inside the letter ranges.
+      if (!_isLetter(r) || r == 0x0640 || r == 0x0670) continue;
+      out.writeCharCode(switch (r) {
+        0x0622 || 0x0623 || 0x0625 || 0x0671 => 0x0627,
+        0x0649 => 0x064A,
+        _ => r,
+      });
+    }
+    return out.toString();
+  }
+
+  /// The particles that belong to the word after them, spelled [bare].
+  static const _binding = {
+    'لا', 'ما', 'من', 'في', 'علي', 'الي', 'الا', 'ان', 'قد', 'لم', 'لن', //
+    'يا', 'عن', 'او', 'ثم', 'بل', 'كي', 'لكن', 'اذا', 'اذ', 'حتي', 'يايها',
+    'لما', 'كما', 'مما', 'ممن', 'عما', 'بما', 'لمن', 'فيما', 'الذي',
+    'الذين', 'التي', 'لو', 'ليس', 'كل', 'هل',
+  };
+
+  /// Whether [token] is a particle — with or without the و or ف before
+  /// it — that a line should not end on.
+  static bool bindsToNext(String token) {
+    final b = bare(token);
+    if (_binding.contains(b)) return true;
+    return b.length > 2 &&
+        (b.startsWith('و') || b.startsWith('ف')) &&
+        _binding.contains(b.substring(1));
+  }
+
+  /// Whether [token] opens a clause: فَ before its word — "then", "so",
+  /// the answer to a condition — or ثُمَّ. Not وَ, which as often joins
+  /// "the heavens and the earth" as it opens anything.
+  static bool opensClause(String token) {
+    final r = token.runes.toList();
+    if (r.length >= 2 && r[0] == 0x0641 && r[1] == 0x064E) return true;
+    return bare(token) == 'ثم';
+  }
 }
 
 /// Where a long verse is cut.
@@ -117,10 +162,21 @@ abstract final class VerseSplitter {
   /// cuts they force are bad ones.
   static const partCost = 100.0;
 
-  /// A cut between two words with no pause sign over them: half a part.
-  /// A phrase cut in two reads worse than one more part does, and where
-  /// a voice has no word timing such a cut has no breath to be timed to.
-  static const plainCutCost = 50.0;
+  /// A cut between two words with no pause sign over them: more than a
+  /// part. A line that holds half a phrase says half a thing — with one
+  /// line at a time it is alone on the screen — and a verse reads better
+  /// in one more line cut at its pause signs. Where a voice has no word
+  /// timing such a cut has no breath to be timed to, either. When there
+  /// is no avoiding one, [cutCost] picks where it hurts least.
+  static const plainCutCost = 180.0;
+
+  /// What a cut with no sign costs, as a share of [plainCutCost], before
+  /// the فَ or ثُمَّ that opens a clause — a phrase boundary the mushaf
+  /// does not mark, cheaper than one more part — and after a particle
+  /// that belongs to the word after it, which leaves a line waiting
+  /// for its next word.
+  static const clauseShare = 0.3;
+  static const particleShare = 2.5;
 
   /// A part of a single word, in a verse of more than two.
   static const orphanCost = 60.0;
@@ -142,8 +198,16 @@ abstract final class VerseSplitter {
   }
 
   static double cutCost(List<String> tokens, int at,
-          {double plain = plainCutCost}) =>
-      VerseText.pauseAfter(tokens[at - 1])?.cutCost ?? plain;
+      {double plain = plainCutCost}) {
+    final mark = VerseText.pauseAfter(tokens[at - 1]);
+    if (mark != null) return mark.cutCost;
+    // No sign: least bad before the فَ or ثُمَّ that opens a clause, worst
+    // after a particle that belongs to the word after it — a line that
+    // ends on "and what" or "in" is waiting for its next word.
+    if (VerseText.bindsToNext(tokens[at - 1])) return plain * particleShare;
+    if (VerseText.opensClause(tokens[at])) return plain * clauseShare;
+    return plain;
+  }
 
   /// The cut positions — 0, then each token a new part opens on, then
   /// [tokens].length — or null when the verse fits whole.
@@ -442,12 +506,161 @@ abstract final class TranslationSplit {
     '”', '’', '»',
   };
 
+  /// What ends a sentence, in every edition's script.
+  static const _sentenceEnders = {'.', '!', '?', ';', '؛', '۔', '؟'};
+
+  /// Words a piece should not end on, in the editions' languages: the
+  /// articles, prepositions, conjunctions and auxiliaries that belong to
+  /// the word after them.
+  static const _dangling = {
+    // English
+    'a', 'an', 'the', 'of', 'in', 'on', 'at', 'to', 'by', 'for', 'from',
+    'with', 'and', 'or', 'but', 'as', 'that', 'than', 'into', 'upon',
+    'over', 'his', 'her', 'their', 'its', 'our', 'your', 'my', 'is', 'are',
+    'was', 'were', 'be', 'has', 'have', 'had', 'who', 'which', 'whom',
+    'whose', 'not', 'no', 'will', 'shall',
+    // German
+    'der', 'die', 'das', 'den', 'dem', 'des', 'ein', 'eine', 'einen',
+    'einem', 'einer', 'und', 'oder', 'zu', 'im', 'mit', 'von', 'vom',
+    'auf', 'am', 'für', 'aus', 'bei', 'nach', 'über', 'unter', 'ist',
+    'sind', 'hat', 'haben', 'wer', 'nicht', 'kein', 'keine',
+    // Indonesian
+    'di', 'ke', 'dari', 'yang', 'dan', 'atau', 'dengan', 'untuk', 'pada',
+    'kepada', 'dalam', 'tidak', 'adalah',
+    // Urdu
+    'کے', 'کی', 'کا', 'میں', 'سے', 'اور', 'کو', 'پر', 'نے', 'جو', 'یا',
+  };
+
+  /// Whether the word before the space at [i] in [t] is [_dangling].
+  static bool _dangles(String t, int i) {
+    final start = t.lastIndexOf(' ', i - 1) + 1;
+    final w = t.substring(start, i).toLowerCase();
+    return _dangling.contains(w);
+  }
+
+  /// [text] in pieces for a verse cut at [cuts] — token positions of
+  /// [tokens], 0 and the end included.
+  ///
+  /// An edition usually renders the verse clause by clause, a sentence
+  /// for each stretch between the pause signs. When it has exactly as
+  /// many sentences as the verse has such stretches, each is the other's:
+  /// a cut at a sign is a cut at the end of its sentence, and a cut
+  /// inside a stretch goes where its share of that stretch's letters
+  /// falls in that sentence. Shares of the whole verse alone ([split])
+  /// put 2:256's "The right course has become distinct from the wrong"
+  /// under the line after the one that recites it, English sentences
+  /// being of other lengths than the Arabic phrases. Otherwise, shares.
+  static List<String> forCuts(
+      String text, List<String> tokens, List<int> cuts) {
+    final t = text.trim();
+    final n = tokens.length;
+    final inner = cuts.length > 2 ? cuts.sublist(1, cuts.length - 1) : <int>[];
+    if (inner.isEmpty) return [t];
+    final letters = [for (final k in tokens) VerseText.letters(k)];
+    double shareOf(int from, int to, int at) {
+      var a = 0, all = 0;
+      for (var k = from; k < to; k++) {
+        all += letters[k];
+        if (k < at) a += letters[k];
+      }
+      return all == 0 ? 0.5 : a / all;
+    }
+
+    final whole = [for (final c in inner) shareOf(0, n, c)];
+    final phrases = [
+      for (var p = 1; p < n; p++)
+        if (_endsPhrase(tokens[p - 1])) p,
+    ];
+    final sentences = _sentenceEnds(t);
+    if (phrases.isEmpty || phrases.length != sentences.length) {
+      return split(t, whole);
+    }
+    final pa = [0, ...phrases, n];
+    final se = [0, ...sentences, t.length];
+    final picks = <int>[];
+    for (var k = 0; k < pa.length - 1; k++) {
+      final inside = [
+        for (final c in inner)
+          if (c > pa[k] && c < pa[k + 1]) c,
+      ];
+      if (inside.isNotEmpty) {
+        final piece = t.substring(se[k], se[k + 1]);
+        final at = _cutPositions(piece,
+            [for (final c in inside) shareOf(pa[k], pa[k + 1], c)]);
+        if (at.length != inside.length) return split(t, whole);
+        picks.addAll([for (final a in at) se[k] + a]);
+      }
+      if (k < pa.length - 2 && inner.contains(pa[k + 1])) picks.add(se[k + 1]);
+    }
+    if (picks.length != inner.length) return split(t, whole);
+    final out = <String>[];
+    var from = 0;
+    for (final p in picks) {
+      out.add(t.substring(from, p).trim());
+      from = p;
+    }
+    out.add(t.substring(from).trim());
+    if (out.any((p) => p.isEmpty)) return split(t, whole);
+    return out;
+  }
+
+  /// Whether a stretch of the verse ends at [token]: a sign that stops
+  /// or allows a stop — not ∴, whose pair is one pause between them, nor
+  /// the brief breathless one, nor "do not stop".
+  static bool _endsPhrase(String token) => switch (VerseText.pauseAfter(token)) {
+        PauseMark.mustStop ||
+        PauseMark.better ||
+        PauseMark.allowed ||
+        PauseMark.carryOn =>
+          true,
+        _ => false,
+      };
+
+  /// Where each sentence of [t] but the last ends: the space after its
+  /// full stop (or after the quote or bracket that closes on one),
+  /// outside brackets.
+  static List<int> _sentenceEnds(String t) {
+    final out = <int>[];
+    var depth = 0;
+    for (var i = 0; i < t.length; i++) {
+      final ch = t[i];
+      if (ch == '(' || ch == '[') depth++;
+      if ((ch == ')' || ch == ']') && depth > 0) depth--;
+      if (ch != ' ' || depth > 0 || i < 1) continue;
+      final before = t[i - 1];
+      final ends = _sentenceEnders.contains(before) ||
+          (i > 1 &&
+              '"”’»)]'.contains(before) &&
+              _sentenceEnders.contains(t[i - 2]));
+      if (ends) out.add(i);
+    }
+    return out;
+  }
+
   /// [text] in `at.length + 1` pieces; [at] are the cumulative shares
   /// of the verse where each new part begins, ascending in (0, 1).
   static List<String> split(String text, List<double> at) {
     final t = text.trim();
     if (at.isEmpty) return [t];
     if (t.isEmpty) return List.filled(at.length + 1, '');
+    final picks = _cutPositions(t, at);
+    final out = <String>[];
+    var from = 0;
+    for (final p in picks) {
+      out.add(t.substring(from, p).trim());
+      from = p;
+    }
+    out.add(t.substring(from).trim());
+    while (out.length < at.length + 1) {
+      out.add('');
+    }
+    return out;
+  }
+
+  /// Where in [t] each piece after the first begins, for the shares [at]:
+  /// at punctuation within reach of each share, else the nearest space;
+  /// never inside brackets. Fewer than [at] when [t] runs out of spaces.
+  static List<int> _cutPositions(String t, List<double> at) {
     // Every space outside brackets is somewhere a piece may end.
     final spaces = <int>[];
     final strong = <int>{};
@@ -461,9 +674,7 @@ abstract final class TranslationSplit {
         if (_stops.contains(t[i - 1])) strong.add(i);
       }
     }
-    if (spaces.isEmpty) {
-      return [t, for (var i = 0; i < at.length; i++) ''];
-    }
+    if (spaces.isEmpty) return const [];
     final reach = (t.length / (at.length + 1) * 0.3).clamp(12.0, 80.0);
     final picks = <int>[];
     var floor = 0;
@@ -483,7 +694,9 @@ abstract final class TranslationSplit {
       if (best == null) {
         for (final s in spaces) {
           if (s <= floor) continue;
-          final d = (s - target).abs();
+          // A piece that ends on "in" or "the" is waiting for the word
+          // it belongs to: another space is taken unless much further.
+          final d = (s - target).abs() + (_dangles(t, s) ? 30 : 0);
           if (d < bestD) {
             best = s;
             bestD = d;
@@ -494,17 +707,7 @@ abstract final class TranslationSplit {
       picks.add(best);
       floor = best;
     }
-    final out = <String>[];
-    var from = 0;
-    for (final p in picks) {
-      out.add(t.substring(from, p).trim());
-      from = p;
-    }
-    out.add(t.substring(from).trim());
-    while (out.length < at.length + 1) {
-      out.add('');
-    }
-    return out;
+    return picks;
   }
 }
 

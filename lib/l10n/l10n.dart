@@ -1537,11 +1537,16 @@ class L10n {
   /// The row's title says nothing of what it holds, so a screen reader
   /// is told.
   String get a11yCustomizeHint => _t(
-      'Opens long verses, scenes, the surah name, verse numbers and video quality',
-      'يفتح الآيات الطويلة والمشاهد واسم السورة وأرقام الآيات وجودة الفيديو',
-      'لمبی آیات، مناظر، سورت کا نام، آیات کے نمبر اور ویڈیو کا معیار کھولتا ہے',
-      'Membuka ayat panjang, adegan, nama surah, nomor ayat, dan kualitas video',
-      'Öffnet lange Verse, Szenen, Surenname, Versnummern und Videoqualität');
+      'Opens long verses, scenes, verse motion, the word highlight, the '
+          'surah name, verse numbers and video quality',
+      'يفتح الآيات الطويلة والمشاهد وحركة الآية وإبراز الكلمات واسم السورة '
+          'وأرقام الآيات وجودة الفيديو',
+      'لمبی آیات، مناظر، آیت کی حرکت، الفاظ کی نمایاں کاری، سورت کا نام، '
+          'آیات کے نمبر اور ویڈیو کا معیار کھولتا ہے',
+      'Membuka ayat panjang, adegan, gerak ayat, sorot kata, nama surah, '
+          'nomor ayat, dan kualitas video',
+      'Öffnet lange Verse, Szenen, Versbewegung, Worthervorhebung, '
+          'Surenname, Versnummern und Videoqualität');
 
   String get highQualityVideo => _t(
       'High-quality video',
@@ -6028,6 +6033,10 @@ class L10n {
           _t('Gilded', 'مُذهَّب', 'سنہرا', 'Berlapis emas', 'Vergoldet'),
         _ => key,
       };
+  /// A motion mixed by hand, matching none of the designed looks: what
+  /// the Customize row says after the lines.
+  String get motionCustom => _t('Your mix', 'مزيجك الخاص', 'آپ کا امتزاج',
+      'Campuran Anda', 'Eigene Mischung');
   String get motionArrival => _t('Arrives and leaves', 'الظهور والاختفاء',
       'آنا اور جانا', 'Muncul dan hilang', 'Kommen und Gehen');
   String get arrivalCut => _t('Cut', 'قطع', 'کٹ', 'Potong', 'Schnitt');
@@ -6076,6 +6085,74 @@ class L10n {
       'آیت کی حرکت کھولتا ہے',
       'Membuka gerak ayat',
       'Öffnet die Versbewegung');
+
+  // ---- Settings → Customize, the page ---------------------------------
+
+  /// Under the page's title: what the page is for, and that a reel can
+  /// still differ.
+  String get customizeIntro => _t(
+      'Set once for every reel you make. Any reel can still change them.',
+      'تُضبط مرة واحدة لكل مقاطعك، ويبقى بإمكان أي مقطع تغييرها.',
+      'ایک بار طے کریں، ہر ریل کے لیے۔ کوئی بھی ریل انہیں پھر بھی بدل سکتی ہے۔',
+      'Atur sekali untuk setiap reel Anda. Tiap reel tetap bisa mengubahnya.',
+      'Einmal festlegen, für jedes Reel. Jedes Reel kann sie trotzdem ändern.');
+
+  /// Under the reel playing at the head of the page.
+  String get customizePreviewCaption => _t(
+      'Ayat al-Kursi, as your reels show it',
+      'آية الكرسي كما تظهر في مقاطعك',
+      'آیت الکرسی، جیسے آپ کی ریلز میں نظر آتی ہے',
+      'Ayat Kursi, seperti tampil di reel Anda',
+      'Ajat al-Kursi, so wie deine Reels ihn zeigen');
+  String get a11yCustomizePreview => _t(
+      'A reel playing Ayat al-Kursi with these choices',
+      'مقطع يعرض آية الكرسي بهذه الاختيارات',
+      'ان انتخابات کے ساتھ آیت الکرسی دکھاتی ریل',
+      'Reel yang memutar Ayat Kursi dengan pilihan ini',
+      'Ein Reel, das Ajat al-Kursi mit diesen Einstellungen zeigt');
+
+  /// Under the motion's heading on the page: it is where every reel
+  /// starts, not a lock on every reel.
+  String get customizeMotionNote => _t(
+      'Every new reel starts with this. Any reel can change it while you '
+          'style it.',
+      'يبدأ بها كل مقطع جديد، ويمكن تغييرها لأي مقطع أثناء تنسيقه.',
+      'ہر نئی ریل اسی سے شروع ہوتی ہے۔ کسی بھی ریل کو سجاتے وقت اسے بدل سکتے ہیں۔',
+      'Setiap reel baru dimulai dengan ini. Reel mana pun bisa mengubahnya '
+          'saat Anda menatanya.',
+      'Jedes neue Reel beginnt damit. Beim Gestalten kann jedes Reel es '
+          'ändern.');
+
+  /// Under the word highlight's switch.
+  String get wordHighlightNote => _t(
+      'Each word lights as the reciter says it, with every voice that has '
+          'word timing',
+      'تضيء كل كلمة حين ينطقها القارئ، مع كل صوت له توقيت للكلمات',
+      'ہر لفظ قاری کے پڑھتے ہی روشن ہوتا ہے، ہر اُس آواز کے ساتھ جس کا '
+          'لفظی وقت موجود ہو',
+      'Setiap kata menyala saat qari mengucapkannya, pada setiap suara yang '
+          'punya waktu per kata',
+      'Jedes Wort leuchtet auf, wenn der Rezitator es spricht – bei jeder '
+          'Stimme mit Wort-Timing');
+  String get customizeOnReel =>
+      _t('On the reel', 'على المقطع', 'ریل پر', 'Di reel', 'Im Reel');
+  String get customizeVideo =>
+      _t('Video', 'الفيديو', 'ویڈیو', 'Video', 'Video');
+
+  /// The page's last button: its own choices back to the app's, and
+  /// nothing else in Settings.
+  String get customizeReset => _t(
+      'Back to the defaults',
+      'العودة إلى الإعدادات الأصلية',
+      'اصل ترتیبات پر واپس',
+      'Kembali ke bawaan',
+      'Zurück zu den Standardwerten');
+  String get customizeResetDone => _t(
+      'Defaults restored',
+      'عادت الإعدادات الأصلية',
+      'اصل ترتیبات بحال ہو گئیں',
+      'Kembali ke bawaan',
+      'Standardwerte wiederhergestellt');
 
   /// '12 Mar 2026' / '12 مارس 2026'.
   String formatDate(DateTime d) {

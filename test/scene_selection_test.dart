@@ -152,7 +152,9 @@ void main() {
 
     creationState.startNewReel();
 
-    expect(creationState.pacing, ScenePacing.perAyah);
+    // What a new reel starts on: with Settings' default of one line at
+    // a time and the scenery following the lines, per line.
+    expect(creationState.pacing, ScenePacing.perLine);
     expect(creationState.transition, SceneTransition.fade);
     expect(creationState.multiScene, isFalse);
     // Collapsed, never emptied: the reel still opens on the scenery it
