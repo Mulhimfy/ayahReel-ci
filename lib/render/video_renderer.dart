@@ -2949,18 +2949,15 @@ abstract final class VideoRenderer {
       }
       colourIdx = nextIdx++;
     }
-    // A luminous band in a run of sceneries: its picture once for each
-    // scene, read for as long as that scene is on screen. One input per
-    // scene rather than one split between them: the scenes are joined
-    // end to end, and a split ahead of a join holds every frame of the
-    // later branches while the first is still being read.
-    List<int>? bandIdxs;
+    // A luminous band in a run of sceneries: its one picture, split to
+    // every scene before it is held for that scene's turn. Split while it
+    // is still a single frame, so each scene holds a reference to the
+    // same picture rather than a queue of frames waiting for the join to
+    // reach it.
+    int? bandIdx;
     if (needsCard && glowBand && sceneInputs != null) {
-      bandIdxs = [];
-      for (var i = 0; i < sceneInputs.length; i++) {
-        inputs.write('$still-framerate 30 -i "$bandPath" ');
-        bandIdxs.add(nextIdx++);
-      }
+      inputs.write('$still-framerate 30 -i "$bandPath" ');
+      bandIdx = nextIdx++;
     }
     // The verse's flourishes, for the units this pass shows: each one's
     // glint card when its light is on, and the thread's strip and spark.
@@ -3042,7 +3039,7 @@ abstract final class VideoRenderer {
         letterbox: letterbox,
         colourBackdrop: colourBackdrop,
         backdropArgb: backdropArgb,
-        bandIdxs: bandIdxs,
+        bandIdx: bandIdx,
         maskIdx: maskIdx,
         scrimIdx: scrimIdx,
         grade: grade,
@@ -3402,7 +3399,7 @@ abstract final class VideoRenderer {
     LetterboxGeometry? letterbox,
     bool colourBackdrop = true,
     int backdropArgb = 0xFF000000,
-    List<int>? bandIdxs,
+    int? bandIdx,
     int? maskIdx,
     int? scrimIdx,
     String grade = '',
@@ -3417,7 +3414,7 @@ abstract final class VideoRenderer {
       letterbox: letterbox,
       colourBackdrop: colourBackdrop,
       backdropArgb: backdropArgb,
-      bandIdxs: bandIdxs,
+      bandIdx: bandIdx,
       maskIdx: maskIdx,
       scrimIdx: scrimIdx,
       grade: grade,
@@ -3448,13 +3445,20 @@ abstract final class VideoRenderer {
     required bool colourBackdrop,
     required int backdropArgb,
 
-    /// Each scene's luminous band input, when the band is one.
-    List<int>? bandIdxs,
+    /// The luminous band's input, when the band is one.
+    int? bandIdx,
     required int? maskIdx,
     required int? scrimIdx,
     String grade = '',
   }) {
     final n = scenes.length;
+    if (letterbox != null && bandIdx != null) {
+      f.write('[$bandIdx:v]split=$n');
+      for (var i = 0; i < n; i++) {
+        f.write('[band$i]');
+      }
+      f.write(';');
+    }
     // One mask, one card per scene: a filter input can only be
     // consumed once, so it is split as many ways as there are cards.
     if (letterbox != null && maskIdx != null) {
@@ -3468,8 +3472,8 @@ abstract final class VideoRenderer {
       final len = scenes[i].seconds.toStringAsFixed(3);
       final source = '$i:v';
       if (letterbox != null) {
-        if (bandIdxs != null) {
-          f.write('[${bandIdxs[i]}:v]${_bandLoop(len)}[bgc$i];');
+        if (bandIdx != null) {
+          f.write('[band$i]${_bandLoop(len)}[bgc$i];');
         } else if (colourBackdrop) {
           // In-graph rather than an input per scene: a flat colour is
           // free to generate and costs the command line nothing.

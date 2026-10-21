@@ -164,21 +164,22 @@ void main() {
     expect(g, isNot(contains('color=c=')));
   });
 
-  test('a luminous band is each scene\'s own picture: no split ahead of '
-      'the join, no colour generated', () {
+  test('a luminous band is one picture, split while it is one frame and '
+      'held for each scene\'s turn: no colour generated', () {
     final g = VideoRenderer.sceneRunGraph(
       lengths: lengths(0),
       cuts: cuts,
       fadeMs: 0,
       segStartMs: 0,
       letterbox: LetterboxGeometry.of(16 / 9),
-      bandIdxs: const [11, 12, 13],
+      bandIdx: 11,
       scrimIdx: null,
     );
+    expect(g, contains('[11:v]split=3[band0][band1][band2];'));
     for (var i = 0; i < 3; i++) {
       expect(
           g,
-          contains('[${11 + i}:v]loop=loop=-1:size=1:start=0,'
+          contains('[band$i]loop=loop=-1:size=1:start=0,'
               'trim=duration=${lengths(0)[i].toStringAsFixed(3)}[bgc$i];'));
       expect(g, contains('[bgc$i]null[bgbases$i];'));
     }
