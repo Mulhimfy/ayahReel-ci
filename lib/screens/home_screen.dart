@@ -16,6 +16,7 @@ import '../widgets/arena_history.dart';
 import '../widgets/badges_sheet.dart';
 import '../widgets/cinematic_hero.dart';
 import '../widgets/day_verse_card.dart';
+import '../widgets/gilded_writing.dart';
 import '../widgets/glow_button.dart';
 import '../widgets/illumination.dart';
 import '../widgets/night_sky.dart';
@@ -637,6 +638,12 @@ class _HungToEdge extends StatelessWidget {
 /// part of the ornament and was missed. The name is a name in both
 /// languages — it is not translated, for the same reason a platform's
 /// is not.
+///
+/// It is written in as the app opens: the letters are there from the
+/// first frame in a dim gold, and a point of light runs along them
+/// laying the leaf in behind it, then lifts off the last letter in a
+/// glint — a second and a half, see [GildedWriting]. After that the
+/// light only passes over it now and then, as it always has.
 class _Wordmark extends StatelessWidget {
   const _Wordmark();
 
@@ -645,11 +652,13 @@ class _Wordmark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
+    // The first pass of the sheen comes four and a half seconds in,
+    // well after the writing is done.
     return Sheen(
       period: const Duration(milliseconds: 9000),
       strength: 0.34,
       phase: 0.5,
-      child: GildedText(
+      child: GildedWriting(
         wordmark,
         maxLines: 1,
         style: t.labelSmall!.copyWith(

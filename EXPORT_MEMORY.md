@@ -481,6 +481,37 @@ set to Still still takes the old one.
   phones from builds after this, the first lever is to turn the light's
   layers down to two on `tight` and below.
 
+## 2026-10-21 (night): luminous bands, a light in any colour, and a held picture
+
+What this round added to a save, measured as before: the export tool's
+reels, one pass, FFmpeg 6.1.1 on the runner (`desk-previews.yml`,
+`encode=true`).
+
+| Reel | Inputs | Peak | Time |
+| --- | ---: | ---: | ---: |
+| defaults (full frame, a line at a time, the light) | 100 | 1320 MB | 19.6 s |
+| sky (Gilded in sky blue, the name pinched to 1.4) | 91 | 1273 MB | 18.2 s |
+| band (wide card over a luminous band, PNG re-read per frame) | 102 | 1371 MB | 43.2 s |
+| band (the same, the band decoded once and held) | 102 | 1272–1289 MB | 35.0–35.6 s |
+
+- **A light in another colour** costs nothing: the glint and the thread
+  are drawn in it instead of gold (`AyahOverlay.glintColourFor`,
+  `rasterizeThreadStrip(accentArgb)`), the same cards as before.
+- **A luminous band** (`BandGlow`) is one 1080x1920 PNG. A still
+  scenery folds it into the flattened base frame once
+  (`_flattenLetterbox`), so only a video scenery feeds it per frame.
+  Read as a looped image input it was decoded again for every frame;
+  it is now one input decoded once and repeated by the `loop` filter
+  (`_bandLoop`): 8 s and about 80 MB less on the tool's band reel.
+- **The same for a still scenery's base frame was tried and taken
+  back.** Holding it with `loop` instead of `-loop 1` cut the peak by
+  60–80 MB on every reel but made them a third slower on FFmpeg 6.1
+  (26.3–26.9 s against 19.6 s for `defaults`, two runs), where the
+  looped input's PNG decode runs on spare decoder threads. On FFmpeg 8
+  on two busy cores it was 2.8 times faster. Worth trying again for the
+  tightest budgets only (`sceneThreads` set), where that decode has one
+  or two threads and memory is what runs out; measure on a phone first.
+
 ## What a note says since 2026-10-08
 
 While a foreground save runs, `PhoneBudget` writes its stage and the

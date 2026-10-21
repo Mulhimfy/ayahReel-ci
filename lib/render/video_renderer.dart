@@ -6,6 +6,7 @@ import 'package:ffmpeg_kit_flutter_new_min_gpl/return_code.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+import '../data/band_glow.dart';
 import '../data/debug_log.dart';
 import '../data/export_budget.dart';
 import '../data/ffmpeg_progress.dart';
@@ -29,6 +30,7 @@ import '../state/creation_state.dart'
         LetterboxBackdrop,
         SceneTransition,
         isLightGround;
+import '../widgets/ayah_overlay.dart' show AyahOverlay;
 import '../widgets/reel_watermark.dart' show ReelDedication;
 import '../widgets/surah_title.dart';
 import '../widgets/verse_geometry.dart';
@@ -742,7 +744,8 @@ abstract final class VideoRenderer {
       // A unit's cards — a whole verse, or one part of a cut one — in
       // each state a follow card draws, and its glint.
       r'|-?[0-9a-f]+_\d+(?:_p\d+)?_(?:base|glint|w(?:x|\d+_\d+)_d(?:x|\d+))'
-      r'|bgflat_.+|lbflat_.+|ded_v1_.+|title_v1_.+|thread_v1_.+|spark_v1_.+'
+      r'|bgflat_.+|lbflat_.+|band_v1_.+|ded_v1_.+|title_v1_.+|thread_v1_.+'
+      r'|spark_v1_.+'
       r'|still_.+)\.png$');
 
   static DateTime _mtime(File f) {
@@ -873,10 +876,17 @@ abstract final class VideoRenderer {
     /// was dragged to (null for its place at the top).
     bool surahTitle = false,
     Offset? surahTitleAt,
+
+    /// How far the surah's name was pinched from its own size.
+    double surahTitleScale = 1.0,
     ReelLayout layout = ReelLayout.fullFrame,
     bool roundedCorners = true,
     LetterboxBackdrop backdrop = LetterboxBackdrop.colour,
     int backdropArgb = 0xFF000000,
+
+    /// The luminous ground drawn behind a wide card when [backdrop] is
+    /// [LetterboxBackdrop.glow].
+    BandGlow bandGlow = BandGlow.midnight,
     double sourceAspect = 16 / 9,
 
     /// Where the reel is cut short, absolute in the recording's clock.
@@ -957,6 +967,9 @@ abstract final class VideoRenderer {
         // reason again.
         '${lines == null || lines.isEmpty ? '' : '_L${lines.fingerprint}'}'
         '${motion.isNone ? '' : '_M${motion.key}${_wordTimesFingerprint(wordTimes)}'}'
+        // The light takes the accent's colour since 2026-10-21; a glint
+        // cached in gold under another accent is drawn again.
+        '${motion.light && !AyahOverlay.isHouseGold(AyahOverlay.lightTintOf(Color(accentArgb), accentInk)) ? '_gc' : ''}'
         '${motion.followsWords ? '_w${_highlightFingerprint(words)}' : ''}';
     // The letterbox card's shape, corners and backdrop all change the
     // finished picture, so they all belong in the key; full-frame
@@ -967,7 +980,7 @@ abstract final class VideoRenderer {
     final layoutKey = letterbox == null
         ? 'f'
         : 'l${letterbox.key}_${roundedCorners ? 'r' : 's'}_'
-            '${backdrop == LetterboxBackdrop.blur ? 'blur' : backdropArgb.toRadixString(16)}';
+            '${_bandKey(backdrop, backdropArgb, bandGlow)}';
     // _v13: bump whenever the render pipeline or bundled background
     // assets change look, so stale cached reels aren't served.
     // (v3: AyahReel watermark added. v4: hardware encoder. v5: cropped
@@ -1022,6 +1035,8 @@ abstract final class VideoRenderer {
         // The surah's name, and where it was put. Absent without it, so
         // every reel rendered before the title existed keeps its key.
         '${surahTitle ? '_st${surahTitleAt == null ? '' : '${(surahTitleAt.dx * 1000).round()}_${(surahTitleAt.dy * 1000).round()}'}' : ''}'
+        // And its size, once pinched from its own.
+        '${surahTitle && (surahTitleScale * 100).round() != 100 ? '_sz${(surahTitleScale * 100).round()}' : ''}'
         // A phone on the tightest budget encodes lean (see [leanX264]),
         // and the lean reels made before 2026-10-13 were too heavy to
         // play. Keyed as they were, a Save of the same reel would be
@@ -1113,6 +1128,11 @@ abstract final class VideoRenderer {
     // frames of the encode. [bgReady] says the graph can use input 0
     // untouched.
     final hasRealBg = bg != null && bg.existsSync();
+    // A luminous band is one picture for the whole reel, drawn by the
+    // painter the preview draws it with.
+    final bandPath = letterbox != null && backdrop == LetterboxBackdrop.glow
+        ? (await AyahRasterizer.rasterizeBandGlow(bandGlow, letterbox)).path
+        : null;
     // Not final: a run of stills has its scenes folded into finished
     // base frames below, which replaces the first of them.
     String bgPath;
@@ -1214,6 +1234,8 @@ abstract final class VideoRenderer {
           backdropArgb,
           work,
           grade,
+          bandGlow: bandGlow,
+          bandPath: bandPath,
         );
         bgIsImage = true;
         if (flat != null) {
@@ -1468,7 +1490,8 @@ abstract final class VideoRenderer {
         ? (await AyahRasterizer.rasterizeSurahTitle(recitation.surah,
                 edition: edition ?? QuranTextService.edition,
                 onLight: ReelDedication.onLightAt(titleCentre,
-                    onLightGround: onLight, letterbox: letterbox)))
+                    onLightGround: onLight, letterbox: letterbox),
+                scale: surahTitleScale))
             .path
         : null;
     _checkCurrent(gen);
@@ -1597,6 +1620,7 @@ abstract final class VideoRenderer {
           letterbox: letterbox,
           backdrop: backdrop,
           backdropArgb: backdropArgb,
+          bandPath: bandPath,
           grade: grade,
           effects: effects,
           outPath: part.path,
@@ -1683,6 +1707,7 @@ abstract final class VideoRenderer {
             letterbox: letterbox,
             backdrop: backdrop,
             backdropArgb: backdropArgb,
+            bandPath: bandPath,
             grade: grade,
             effects: effects,
             // Where this pass sits in the whole reel, which is the
@@ -2642,7 +2667,17 @@ abstract final class VideoRenderer {
     /// What the cards' files start with: one per reel, when a tool makes
     /// several that cut the same verses differently.
     String fileTag = 'tool_',
+
+    /// The surah's name pinched to this size (see [render]).
+    double surahTitleScale = 1.0,
+
+    /// A wide card of this shape over a luminous band, instead of the
+    /// full frame: the graph a wide-card reel on a video scenery runs.
+    double? letterboxAspect,
+    BandGlow? band,
   }) async {
+    final box =
+        letterboxAspect == null ? null : LetterboxGeometry.of(letterboxAspect);
     final built = await _unitCards(
       recitation: recitation,
       ayahs: ayahs,
@@ -2677,7 +2712,7 @@ abstract final class VideoRenderer {
       audioPath: audio,
       bgPath: background,
       bgIsImage: true,
-      bgReady: true,
+      bgReady: box == null,
       sceneInputs: null,
       cuts: const [],
       fadeMs: 0,
@@ -2695,16 +2730,19 @@ abstract final class VideoRenderer {
           : null,
       titlePath: surahTitle
           ? (await AyahRasterizer.rasterizeSurahTitle(recitation.surah,
-                  edition: edition))
+                  edition: edition, scale: surahTitleScale))
               .path
           : null,
-      titleAt: surahTitle ? ReelSurahTitle.defaultCentre(null) : null,
+      titleAt: surahTitle ? ReelSurahTitle.defaultCentre(box) : null,
       segStartMs: segStart,
       segMs: segMs,
       overlayAlign: overlayAlign,
-      letterbox: null,
-      backdrop: LetterboxBackdrop.colour,
-      backdropArgb: 0xFF000000,
+      letterbox: box,
+      backdrop: band == null ? LetterboxBackdrop.colour : LetterboxBackdrop.glow,
+      backdropArgb: band?.base ?? 0xFF000000,
+      bandPath: band == null || box == null
+          ? null
+          : (await AyahRasterizer.rasterizeBandGlow(band, box)).path,
       outPath: out,
       hardware: false,
       threads: 2,
@@ -2760,6 +2798,9 @@ abstract final class VideoRenderer {
     required LetterboxBackdrop backdrop,
     required int backdropArgb,
 
+    /// The luminous band's picture, for [LetterboxBackdrop.glow].
+    String? bandPath,
+
     /// The colour grade as a filter chain, with a trailing comma, or
     /// empty. Spliced in wherever the scenery is read — and nowhere
     /// else: the scrim over it is legibility, a letterbox band is a
@@ -2807,7 +2848,10 @@ abstract final class VideoRenderer {
     // only needs a colour source, when the base frame wasn't already
     // flattened into one PNG upstream.
     final needsCard = letterbox != null && !bgReady;
-    final colourBackdrop = backdrop == LetterboxBackdrop.colour;
+    // A band that is a picture of its own rather than the scenery
+    // blurred: a flat colour, or a luminous ground's PNG.
+    final glowBand = backdrop == LetterboxBackdrop.glow && bandPath != null;
+    final colourBackdrop = backdrop == LetterboxBackdrop.colour || glowBand;
 
     final inputs = StringBuffer();
     final scene = sceneThreads == null ? '' : '-threads $sceneThreads ';
@@ -2833,6 +2877,11 @@ abstract final class VideoRenderer {
       }
     } else if (bgIsImage) {
       // Still image: emit it as a constant 30fps stream; output -t trims.
+      //
+      // Decoded afresh for every frame, which held in the graph instead
+      // (as a luminous band is, [_bandLoop]) was 60 MB lighter at its
+      // peak but a third slower on FFmpeg 6.1 with decoder threads to
+      // spare (2026-10-21, EXPORT_MEMORY.md): kept as it was.
       inputs.write('$scene-loop 1 -framerate 30 -i "$bgPath" ');
     } else if (bgSeekS > 0) {
       inputs.write('$scene-ss ${bgSeekS.toStringAsFixed(3)} -i "$bgPath" ');
@@ -2889,9 +2938,29 @@ abstract final class VideoRenderer {
     // once per scene, rather than off one input every scene would have
     // to share.
     if (needsCard && colourBackdrop && sceneInputs == null) {
-      inputs.write('-f lavfi -t $dur -i '
-          '"color=c=${_ffColor(backdropArgb)}:s=1080x1920:r=30" ');
+      if (glowBand) {
+        // One picture, decoded once and repeated in the graph (see
+        // [_bandLoop]) rather than read off the disk and decoded again
+        // for every frame: on two cores that was 40 ms a frame.
+        inputs.write('$still-framerate 30 -i "$bandPath" ');
+      } else {
+        inputs.write('-f lavfi -t $dur -i '
+            '"color=c=${_ffColor(backdropArgb)}:s=1080x1920:r=30" ');
+      }
       colourIdx = nextIdx++;
+    }
+    // A luminous band in a run of sceneries: its picture once for each
+    // scene, read for as long as that scene is on screen. One input per
+    // scene rather than one split between them: the scenes are joined
+    // end to end, and a split ahead of a join holds every frame of the
+    // later branches while the first is still being read.
+    List<int>? bandIdxs;
+    if (needsCard && glowBand && sceneInputs != null) {
+      bandIdxs = [];
+      for (var i = 0; i < sceneInputs.length; i++) {
+        inputs.write('$still-framerate 30 -i "$bandPath" ');
+        bandIdxs.add(nextIdx++);
+      }
     }
     // The verse's flourishes, for the units this pass shows: each one's
     // glint card when its light is on, and the thread's strip and spark.
@@ -2973,6 +3042,7 @@ abstract final class VideoRenderer {
         letterbox: letterbox,
         colourBackdrop: colourBackdrop,
         backdropArgb: backdropArgb,
+        bandIdxs: bandIdxs,
         maskIdx: maskIdx,
         scrimIdx: scrimIdx,
         grade: grade,
@@ -2983,11 +3053,18 @@ abstract final class VideoRenderer {
       // the per-frame path, so the base frame arrives ready.
       f.write('[0:v]null[v0];');
     } else if (letterbox != null) {
+      if (glowBand && colourIdx != null) {
+        f.write('[$colourIdx:v]${_bandLoop(dur)}[bandloop];');
+      }
       _writeLetterboxBase(
         f,
         letterbox,
         source: src,
-        backdrop: colourBackdrop ? '$colourIdx:v' : null,
+        backdrop: !colourBackdrop
+            ? null
+            : glowBand
+                ? 'bandloop'
+                : '$colourIdx:v',
         mask: maskIdx == null ? null : '$maskIdx:v',
         out: 'v0',
         grade: grade,
@@ -3325,6 +3402,7 @@ abstract final class VideoRenderer {
     LetterboxGeometry? letterbox,
     bool colourBackdrop = true,
     int backdropArgb = 0xFF000000,
+    List<int>? bandIdxs,
     int? maskIdx,
     int? scrimIdx,
     String grade = '',
@@ -3339,6 +3417,7 @@ abstract final class VideoRenderer {
       letterbox: letterbox,
       colourBackdrop: colourBackdrop,
       backdropArgb: backdropArgb,
+      bandIdxs: bandIdxs,
       maskIdx: maskIdx,
       scrimIdx: scrimIdx,
       grade: grade,
@@ -3368,6 +3447,9 @@ abstract final class VideoRenderer {
     required LetterboxGeometry? letterbox,
     required bool colourBackdrop,
     required int backdropArgb,
+
+    /// Each scene's luminous band input, when the band is one.
+    List<int>? bandIdxs,
     required int? maskIdx,
     required int? scrimIdx,
     String grade = '',
@@ -3384,8 +3466,11 @@ abstract final class VideoRenderer {
     }
     for (var i = 0; i < n; i++) {
       final len = scenes[i].seconds.toStringAsFixed(3);
+      final source = '$i:v';
       if (letterbox != null) {
-        if (colourBackdrop) {
+        if (bandIdxs != null) {
+          f.write('[${bandIdxs[i]}:v]${_bandLoop(len)}[bgc$i];');
+        } else if (colourBackdrop) {
           // In-graph rather than an input per scene: a flat colour is
           // free to generate and costs the command line nothing.
           f.write('color=c=${_ffColor(backdropArgb)}:s=1080x1920:r=30:'
@@ -3394,7 +3479,7 @@ abstract final class VideoRenderer {
         _writeLetterboxBase(
           f,
           letterbox,
-          source: '$i:v',
+          source: source,
           backdrop: colourBackdrop ? 'bgc$i' : null,
           mask: maskIdx == null ? null : 'm$i',
           out: 'raw$i',
@@ -3409,9 +3494,9 @@ abstract final class VideoRenderer {
         // Already the finished 1080x1920 base frame — see the flatten
         // in [render]. Nothing to scale, nothing to crop, no scrim to
         // lay on: the graph reads it and moves on.
-        f.write('[$i:v]null[raw$i];');
+        f.write('[$source]null[raw$i];');
       } else {
-        f.write('[$i:v]scale=1080:1920:force_original_aspect_ratio=increase,'
+        f.write('[$source]scale=1080:1920:force_original_aspect_ratio=increase,'
             'crop=1080:1920,${grade}null[raw$i];');
       }
       // Same size, same rate, same pixel format, square pixels,
@@ -3529,6 +3614,24 @@ abstract final class VideoRenderer {
 
   /// An ARGB int as an FFmpeg colour literal. Alpha is dropped: the
   /// backdrop is the bottom of the frame and has nothing to blend with.
+  /// A luminous band's one decoded frame, held and repeated for [seconds]
+  /// (a fixed-point string) at the input's 30 fps. The filter keeps that
+  /// one frame; read as a looped input, the PNG was decoded afresh for
+  /// every frame — the band reel's encode went from 43 s to 35 s on the
+  /// runner, and 80 MB lighter at its peak (2026-10-21).
+  static String _bandLoop(String seconds) =>
+      'loop=loop=-1:size=1:start=0,trim=duration=$seconds';
+
+  /// What a band behind a wide card is, for a cache key: the blur, a
+  /// luminous ground by name, or a flat colour by its value.
+  static String _bandKey(
+          LetterboxBackdrop backdrop, int backdropArgb, BandGlow glow) =>
+      switch (backdrop) {
+        LetterboxBackdrop.blur => 'blur',
+        LetterboxBackdrop.glow => 'g${glow.key}',
+        LetterboxBackdrop.colour => backdropArgb.toRadixString(16),
+      };
+
   static String _ffColor(int argb) =>
       '0x${(argb & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
 
@@ -3547,8 +3650,10 @@ abstract final class VideoRenderer {
     LetterboxBackdrop backdrop,
     int backdropArgb,
     Directory tmp,
-    String grade,
-  ) async {
+    String grade, {
+    BandGlow bandGlow = BandGlow.midnight,
+    String? bandPath,
+  }) async {
     File? out;
     File? part;
     try {
@@ -3559,7 +3664,7 @@ abstract final class VideoRenderer {
       final key = 'v3_${src.path.hashCode.toRadixString(16)}_'
           '${stat.size}_${stat.modified.millisecondsSinceEpoch}_'
           '${box.key}_${maskPath != null ? 'r' : 's'}_'
-          '${backdrop == LetterboxBackdrop.blur ? 'blur' : backdropArgb.toRadixString(16)}'
+          '${_bandKey(backdrop, backdropArgb, bandGlow)}'
           // A base frame graded one way must never be served for a reel
           // graded another.
           '${grade.isEmpty ? '' : '_g${grade.hashCode.toRadixString(16)}'}';
@@ -3575,7 +3680,10 @@ abstract final class VideoRenderer {
         maskIdx = 1;
       }
       int? colourIdx;
-      if (backdrop == LetterboxBackdrop.colour) {
+      if (backdrop == LetterboxBackdrop.glow && bandPath != null) {
+        inputs.write('-i "$bandPath" ');
+        colourIdx = maskIdx == null ? 1 : 2;
+      } else if (backdrop == LetterboxBackdrop.colour) {
         inputs.write('-f lavfi -i '
             '"color=c=${_ffColor(backdropArgb)}:s=1080x1920:d=1" ');
         colourIdx = maskIdx == null ? 1 : 2;

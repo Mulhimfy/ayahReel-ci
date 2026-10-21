@@ -238,6 +238,113 @@ void main() {
     });
   });
 
+  group('PartTiming.fromBreaths, for a voice with no word timing', () {
+    // A verse 6 s long, loud throughout but for what each test puts in.
+    List<double> loud() => List.filled(600, 70.0);
+
+    test('a breath in an echoing hall — never quiet, but a deep dip — is '
+        'heard and cut at', () {
+      final env = loud();
+      for (var k = 300; k < 318; k++) {
+        env[k] = 55; // 15 dB under the stretch round it, 180 ms long
+      }
+      final dips = PartTiming.dipsIn(env, 0, 6000);
+      expect(dips, [(3000, 3180)]);
+      // Nothing in it goes quiet, so the pauses alone found nothing.
+      expect(PartTiming.pausesIn(env, 20, 0, 6000).pauses, isEmpty);
+      final b = PartTiming.fromBreaths(
+        cuts: [0, 1, 2],
+        letters: [10, 10],
+        verseStartMs: 0,
+        verseEndMs: 6000,
+        breaths: PartTiming.breathsIn(env, 20, 0, 6000),
+        env: env,
+        voicedStartMs: 0,
+        voicedEndMs: 6000,
+      )!;
+      expect(b.bounds, [0, 3090, 6000]);
+      expect(b.guessed, 0);
+    });
+
+    test('a syllable\'s brief dip is not a breath', () {
+      final env = loud();
+      for (var k = 300; k < 305; k++) {
+        env[k] = 50; // 50 ms
+      }
+      expect(PartTiming.dipsIn(env, 0, 6000), isEmpty);
+    });
+
+    test('with no breath near it, a cut lands on the quietest moment '
+        'around where its letters put it, and says it was guessed', () {
+      final env = loud();
+      // The quietest frame near the 3 s estimate, a little after it.
+      env[325] = 64;
+      final b = PartTiming.fromBreaths(
+        cuts: [0, 1, 2],
+        letters: [10, 10],
+        verseStartMs: 0,
+        verseEndMs: 6000,
+        breaths: const [],
+        env: env,
+        voicedStartMs: 0,
+        voicedEndMs: 6000,
+      )!;
+      expect(b.bounds, [0, 3250, 6000]);
+      expect(b.guessed, 1);
+    });
+
+    test('a part too short to read still leaves the verse whole', () {
+      expect(
+        PartTiming.fromBreaths(
+          cuts: [0, 1, 2],
+          letters: [1, 30],
+          verseStartMs: 0,
+          verseEndMs: 1000,
+          breaths: const [],
+          env: List.filled(100, 70.0),
+        ),
+        isNull,
+      );
+    });
+
+    test('breaths become the cuts the splitter prefers', () {
+      // Four words of 10 letters over 8 s: a breath at 4 s is at the
+      // second word's end.
+      final at = PartTiming.cutsAtBreaths(
+        letters: [10, 10, 10, 10],
+        breaths: [(3900, 4100)],
+        voicedStartMs: 0,
+        voicedEndMs: 8000,
+      );
+      expect(at, {2});
+      // Far from any word's end, nothing is claimed.
+      expect(
+        PartTiming.cutsAtBreaths(
+          letters: [40, 40],
+          breaths: [(1000, 1200)],
+          voicedStartMs: 0,
+          voicedEndMs: 8000,
+        ),
+        isEmpty,
+      );
+    });
+  });
+
+  group('VerseSplitter breaths', () {
+    test('a cut where the reciter breathes costs less than one where '
+        'they do not', () {
+      final tokens = VerseText.tokens('ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ '
+          'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ');
+      expect(tokens, hasLength(6));
+      // Up to four words a part fit; the whole does not.
+      bool fits(int s, int e) => e - s <= 4;
+      final plain = VerseSplitter.split(tokens, fits)!;
+      final heard = VerseSplitter.split(tokens, fits, breaths: {2})!;
+      expect(heard, [0, 2, 6]);
+      expect(plain, isNot(heard));
+    });
+  });
+
   group('TranslationSplit', () {
     // 2:256 as the app carries it, and Saheeh International's English.
     const v256 = 'لَآ إِكْرَاهَ فِى ٱلدِّينِ ۖ قَد تَّبَيَّنَ ٱلرُّشْدُ مِنَ '

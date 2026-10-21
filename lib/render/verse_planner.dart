@@ -85,6 +85,7 @@ abstract final class VersePlanner {
     final segStart = recitation.timing(startAyah).startMs;
     final segEnd = recitation.timing(endAyah).endMs;
 
+    var whole = 0;
     for (var a = startAyah; a <= endAyah; a++) {
       if (keepGoing != null && !keepGoing()) break;
       if (a - 1 >= ayahs.length) break;
@@ -95,10 +96,11 @@ abstract final class VersePlanner {
       final timed = spans == null || spans.isEmpty
           ? null
           : WordAlignService.tokenWindows(ayah.arabic, spans);
+      bool fits(int s, int e) => linesOf(tokens, s, e, look, a) <= lines;
 
-      final cuts = VerseSplitter.split(
+      final textCuts = VerseSplitter.split(
         tokens,
-        (s, e) => linesOf(tokens, s, e, look, a) <= lines,
+        fits,
         held: timed?.held ?? const {},
         // Without word timing a cut is timed by the reciter's breath,
         // which a phrase cut in two rarely has.
@@ -106,7 +108,8 @@ abstract final class VersePlanner {
             ? VerseSplitter.plainCutCost
             : VerseSplitter.plainCutCost * 1.6,
       );
-      if (cuts == null) continue;
+      if (textCuts == null) continue;
+      List<int> cuts = textCuts;
 
       final t = recitation.timing(a);
       List<int>? bounds;
@@ -132,21 +135,47 @@ abstract final class VersePlanner {
         final e = env;
         final q = quiet;
         if (e != null && q != null) {
+          final letters = [for (final k in tokens) VerseText.letters(k)];
           final p = PartTiming.pausesIn(e, q, t.startMs, t.endMs);
-          bounds = PartTiming.fromPauses(
+          final breaths = PartTiming.breathsIn(e, q, t.startMs, t.endMs);
+          // Cut again, now that the breaths are known, preferring the
+          // cuts the reciter can be heard to breathe at.
+          final heard = p.voicedStart == null || p.voicedEnd == null
+              ? const <int>{}
+              : PartTiming.cutsAtBreaths(
+                  letters: letters,
+                  breaths: breaths,
+                  voicedStartMs: p.voicedStart!,
+                  voicedEndMs: p.voicedEnd!,
+                );
+          if (heard.isNotEmpty) {
+            cuts = VerseSplitter.split(
+                  tokens,
+                  fits,
+                  plainCost: VerseSplitter.plainCutCost * 1.6,
+                  breaths: heard,
+                ) ??
+                cuts;
+          }
+          final placed = PartTiming.fromBreaths(
             cuts: cuts,
-            letters: [for (final k in tokens) VerseText.letters(k)],
+            letters: letters,
             verseStartMs: t.startMs,
             verseEndMs: t.endMs,
-            pauses: p.pauses,
+            breaths: breaths,
+            env: e,
             voicedStartMs: p.voicedStart,
             voicedEndMs: p.voicedEnd,
           );
+          bounds = placed?.bounds;
         }
       }
       // Neither timing could place the cuts: the verse is shown whole,
-      // as it always was, rather than changing mid-word.
-      if (bounds == null) continue;
+      // as it always was, and the lines control says some verses are.
+      if (bounds == null) {
+        whole++;
+        continue;
+      }
 
       final pieces = look.showTranslation
           ? TranslationSplit.forCuts(ayah.translation, tokens, cuts)
@@ -181,7 +210,7 @@ abstract final class VersePlanner {
       // layouts, and none of them should be felt.
       await Future<void>.delayed(Duration.zero);
     }
-    return VerseLinePlan(lines, byAyah);
+    return VerseLinePlan(lines, byAyah, whole: whole);
   }
 
   static Widget _card(Ayah ayah, VersePart part, VerseLook look) =>

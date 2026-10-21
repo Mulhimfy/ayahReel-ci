@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 import '../data/audio_position.dart';
+import '../data/band_glow.dart';
 import '../data/debug_log.dart';
 import '../data/dedication.dart';
 import '../data/export_budget.dart';
@@ -53,15 +54,15 @@ import '../state/creation_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/a11y.dart';
 import '../widgets/app_toast.dart';
+import '../widgets/ayah_overlay.dart' show AyahOverlay;
+import '../widgets/band_glow_ground.dart';
 import '../widgets/feedback_sheet.dart';
 import '../widgets/rate_sheet.dart';
-import '../widgets/colour_picker.dart';
 import '../widgets/dedicate_sheet.dart';
 import '../widgets/direct_share_button.dart';
 import '../widgets/glow_button.dart';
 import '../widgets/hashtags_sheet.dart';
 import '../widgets/instagram_choice.dart';
-import '../widgets/ink_swatch.dart';
 import '../widgets/measure_height.dart';
 import '../widgets/motion_picker.dart';
 import '../widgets/reel_finish.dart';
@@ -246,14 +247,13 @@ class _PreviewScreenState extends State<PreviewScreen>
   double? _overlayHeight;
   bool _hasDragged = false;
 
-  int _textArgb = creationState.textArgb;
-
-  /// The luminous ink the verse is in, if any. Changeable here, from
-  /// the swatch row, as the flat colour is: a tap on a flat swatch
-  /// takes the verse out of it, and the ink's own disc puts it back.
-  VerseInk _verseInk = creationState.verseInk;
+  /// The verse's colour and luminous ink, and its card's look: the
+  /// style step's, one screen back, where they are set against the
+  /// scenery rather than over a playing reel.
+  final int _textArgb = creationState.textArgb;
+  final VerseInk _verseInk = creationState.verseInk;
   double _textScale = creationState.textScale;
-  TextPreset _preset = creationState.textPreset;
+  final TextPreset _preset = creationState.textPreset;
 
   /// Everything the style step settled, fixed for this visit — going
   /// back a screen is how you change any of it, exactly as it is for
@@ -394,6 +394,7 @@ class _PreviewScreenState extends State<PreviewScreen>
   late final bool _rounded = creationState.roundedCorners;
   late final LetterboxBackdrop _backdrop = creationState.backdrop;
   late final int _backdropArgb = creationState.backdropArgb;
+  late final BandGlow _bandGlow = creationState.bandGlow;
 
   /// Whether the verse and the watermark are landing on a pale band
   /// rather than on darkened scenery. Fixed for the visit, like the
@@ -516,45 +517,6 @@ class _PreviewScreenState extends State<PreviewScreen>
   /// A tenth reel just made (the twentieth, the thirtieth…): its card is
   /// offered once the save is over, in place of the usual asks.
   int? _milestone;
-
-  /// Verse colors that stay legible on darkened video.
-  static const _tintSwatches = [
-    0xFFEEC96B, // gold
-    0xFF9FE8C9, // mint
-    0xFF9CC7F5, // sky
-    0xFFF5A8B8, // rose
-    0xFFC9B8F5, // lavender
-  ];
-
-  /// The swatches on offer, default first. That default is the ink that
-  /// reads on the ground the verse actually sits on — near-black on a
-  /// pale letterbox band, white everywhere else. Offering white over
-  /// ivory would be offering the user a way to lose the verse.
-  ///
-  /// A colour chosen from the style step's full palette joins the row
-  /// when it is not already in it, so this quick fine-tune always
-  /// shows which colour the verse is actually in rather than showing
-  /// nothing selected.
-  ///
-  /// Seated once, on the way in, rather than recomputed from the
-  /// current colour: a row that grew and shrank as the user tapped
-  /// along it would move the swatch under their finger between one tap
-  /// and the next.
-  late final int? _chosenSwatch =
-      !_verseInk.isNone || _swatchBase.contains(_textArgb) ? null : _textArgb;
-
-  /// An ink chosen on the style step, seated at the head of the row for
-  /// the same reason as [_chosenSwatch]: the row shows what the verse
-  /// is in, and a tap on a flat colour can be taken back.
-  late final VerseInk _chosenInk = _verseInk;
-
-  List<int> get _swatchBase =>
-      [if (_onLight) inkOnLight else inkOnDark, ..._tintSwatches];
-
-  List<int> get _swatches {
-    final chosen = _chosenSwatch;
-    return [if (chosen != null) chosen, ..._swatchBase];
-  }
 
   @override
   void initState() {
@@ -783,6 +745,7 @@ class _PreviewScreenState extends State<PreviewScreen>
     final gen = ++_planGen;
     final lines = creationState.verseLines;
     if (lines == VerseLines.whole) {
+      _planned.value = (0, 0);
       _applyPlan(null);
       return;
     }
@@ -813,7 +776,8 @@ class _PreviewScreenState extends State<PreviewScreen>
     }
     if (!mounted || gen != _planGen) return;
     rlog('lines: ${plan.byAyah.length} verse(s) cut into '
-        '${plan.partCount} lines');
+        '${plan.partCount} lines, ${plan.whole} left whole');
+    _planned.value = (plan.whole, plan.byAyah.length);
     _applyPlan(plan.isEmpty ? null : plan);
   }
 
@@ -865,15 +829,33 @@ class _PreviewScreenState extends State<PreviewScreen>
         ));
   }
 
+  /// How far two fingers have sized the title from its own size.
+  double _titleScale = creationState.surahTitleScale;
+
+  void _resizeTitle(double scale) {
+    final v = scale.clamp(
+        CreationState.surahTitleScales.min, CreationState.surahTitleScales.max);
+    if (v == _titleScale) return;
+    // A tick at its own size on the way through, so a pinch can find it
+    // again by feel.
+    if ((_titleScale - 1).sign != (v - 1).sign) HapticFeedback.selectionClick();
+    setState(() => _titleScale = v);
+  }
+
   void _settleTitle() {
-    creationState.setSurahTitleAt(_titleAt);
+    creationState
+      ..setSurahTitleAt(_titleAt)
+      ..setSurahTitleScale(_titleScale);
     _restyled();
   }
 
   void _resetTitle() {
-    if (_titleAt == null) return;
+    if (_titleAt == null && _titleScale == 1.0) return;
     HapticFeedback.selectionClick();
-    setState(() => _titleAt = null);
+    setState(() {
+      _titleAt = null;
+      _titleScale = 1.0;
+    });
     _settleTitle();
   }
 
@@ -881,11 +863,15 @@ class _PreviewScreenState extends State<PreviewScreen>
     HapticFeedback.selectionClick();
     setState(() {
       _titleOn = !_titleOn;
-      if (!_titleOn) _titleAt = null;
+      if (!_titleOn) {
+        _titleAt = null;
+        _titleScale = 1.0;
+      }
     });
     creationState
       ..setSurahTitle(_titleOn)
-      ..setSurahTitleAt(_titleAt);
+      ..setSurahTitleAt(_titleAt)
+      ..setSurahTitleScale(_titleScale);
     _restyled();
   }
 
@@ -906,7 +892,13 @@ class _PreviewScreenState extends State<PreviewScreen>
         onChanged: _setMotion,
         lines: creationState.verseLines,
         onLines: _setLines,
+        planned: _planned,
+        tint: AyahOverlay.lightTintOf(Color(_accentArgb), _accentInk),
       );
+
+  /// How this reel's long verses came out, as (shown whole, cut): what
+  /// the lines choice in the motion sheet says something about.
+  final _planned = ValueNotifier<(int, int)>((0, 0));
 
   /// Long verses whole or line by line, for this reel. The scenery
   /// follows the lines when Settings says it should and the reel is on
@@ -1379,10 +1371,12 @@ class _PreviewScreenState extends State<PreviewScreen>
         motion: _motion,
         surahTitle: _titleOn,
         surahTitleAt: _titleAt,
+        surahTitleScale: _titleScale,
         layout: _layout,
         roundedCorners: _rounded,
         backdrop: _backdrop,
         backdropArgb: _backdropArgb,
+        bandGlow: _bandGlow,
         sourceAspect: aspect,
         foreground: _jobForeground,
         onProgress: (p) {
@@ -1615,30 +1609,6 @@ class _PreviewScreenState extends State<PreviewScreen>
     _onDragEnd();
   }
 
-  void _setTextColor(int argb) {
-    final inked = !_verseInk.isNone;
-    setState(() {
-      _textArgb = argb;
-      _verseInk = VerseInk.none;
-    });
-    creationState.setTextColor(argb);
-    _restyled(); // same reason as _onDragEnd
-    // An ink gives the card room above its first line for its light;
-    // the cut verses' parts are held to heights measured with it.
-    if (inked) unawaited(_replanLines());
-  }
-
-  void _setVerseInk(VerseInk ink) {
-    final relaid = _verseInk.isNone != ink.isNone;
-    setState(() {
-      _verseInk = ink;
-      _textArgb = ink.base;
-    });
-    creationState.setVerseInk(ink);
-    _restyled();
-    if (relaid) unawaited(_replanLines());
-  }
-
   void _setTextScale(double v, {required bool done}) {
     setState(() => _textScale = v);
     if (done) {
@@ -1647,13 +1617,6 @@ class _PreviewScreenState extends State<PreviewScreen>
       // Bigger type is more lines: the long verses are cut again.
       unawaited(_replanLines());
     }
-  }
-
-  void _setPreset(TextPreset p) {
-    setState(() => _preset = p);
-    creationState.setTextPreset(p);
-    _restyled();
-    unawaited(_replanLines());
   }
 
   /// Drives [_fadeLevel] while the reel fades at its edges.
@@ -2328,6 +2291,7 @@ class _PreviewScreenState extends State<PreviewScreen>
     _clock.dispose();
     _fadeTicker?.cancel();
     _fadeLevel.dispose();
+    _planned.dispose();
     _audio.stop().catchError((_) {});
     for (final c in _sceneVideo.values) {
       c.dispose();
@@ -2420,6 +2384,8 @@ class _PreviewScreenState extends State<PreviewScreen>
     return [
       if (_backdrop == LetterboxBackdrop.colour)
         ColoredBox(color: Color(_backdropArgb))
+      else if (_backdrop == LetterboxBackdrop.glow)
+        BandGlowGround(glow: _bandGlow, box: geo)
       else
         // The exporter blurs at a twelfth scale and lets the upscale
         // smooth the rest, which lands around this radius in full-frame
@@ -2667,10 +2633,12 @@ class _PreviewScreenState extends State<PreviewScreen>
                                   onLight: _titleOnLight,
                                   at: _titleAt,
                                   letterbox: _box,
+                                  scale: _titleScale,
                                   onSize: (size) => _titleSize = size,
                                   onDrag: _busy
                                       ? null
                                       : (d) => _moveTitle(d, box),
+                                  onResize: _busy ? null : _resizeTitle,
                                   onDragEnd: _settleTitle,
                                   onReset: _resetTitle,
                                 ),
@@ -2769,9 +2737,41 @@ class _PreviewScreenState extends State<PreviewScreen>
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 6, 24, 12),
+              padding: const EdgeInsets.fromLTRB(24, 10, 24, 12),
               child: Column(
                 children: [
+                  // What you do to a finished reel, right under its
+                  // edge: the tags it is posted with, the surah's name
+                  // on it, how its verses move, and who it was made
+                  // for. They wrap on a narrow phone rather than
+                  // squeezing. The colours and the type are the style
+                  // step's, one screen back, where they are set against
+                  // the scenery rather than over a playing reel.
+                  Center(
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        HashtagsButton(surahName: _surahName),
+                        _TitlePill(
+                          on: _titleOn,
+                          onTap: ready ? _toggleTitle : null,
+                        ),
+                        _MotionPill(
+                          motion: _motionChoice,
+                          onTap: ready ? _pickMotion : null,
+                        ),
+                        _DedicatePill(
+                          dedication: _dedication,
+                          line: _dedicationLine,
+                          onTap: ready ? _dedicate : null,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   // The scene run: one line that says what it does,
                   // and opens onto the two things that can be said
                   // about it. Absent entirely from a reel with one
@@ -2805,35 +2805,6 @@ class _PreviewScreenState extends State<PreviewScreen>
                     ),
                     const SizedBox(height: 8),
                   ],
-                  // Nothing here for a reel with one scenery. The
-                  // handle used to appear there too, on the grounds
-                  // that the reel could be cut either way — but on a
-                  // screen with no scene run it reads as a stray gold
-                  // slider under the picture, and the length of a
-                  // single-scene reel is the length of the passage the
-                  // user already chose.
-                  // Text styling: designed presets, then size slider +
-                  // color swatches for fine-tuning. Changes show live
-                  // and re-render the export on next Share/Save.
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (final p in TextPreset.values) ...[
-                        _PresetChip(
-                          label: switch (p) {
-                            TextPreset.classic => l.presetClassic,
-                            TextPreset.glow => l.presetGlow,
-                            TextPreset.minimal => l.presetMinimal,
-                          },
-                          selected: _preset == p,
-                          onTap: ready ? () => _setPreset(p) : null,
-                        ),
-                        if (p != TextPreset.values.last)
-                          const SizedBox(width: 8),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 4),
                   Row(
                     children: [
                       // The two "Aa" are the slider's ends, not words
@@ -2883,93 +2854,6 @@ class _PreviewScreenState extends State<PreviewScreen>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 2),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (!_chosenInk.isNone)
-                        A11yTap(
-                          label: l.a11yInkSwatch(_chosenInk),
-                          selected: _verseInk == _chosenInk,
-                          enabled: ready,
-                          onTap:
-                              ready ? () => _setVerseInk(_chosenInk) : null,
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: ready
-                                ? () => _setVerseInk(_chosenInk)
-                                : null,
-                            child: SizedBox(
-                              width: 32,
-                              height: 32,
-                              child: Center(
-                                child: InkDisc(
-                                  ink: _chosenInk,
-                                  size: 18,
-                                  selected: _verseInk == _chosenInk,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      for (final argb in _swatches)
-                        // A disc of colour, named for the reader and
-                        // given a finger's worth of target around it.
-                        A11yTap(
-                          label: l.a11yColourSwatch(argb),
-                          selected: _verseInk.isNone && _textArgb == argb,
-                          enabled: ready,
-                          onTap: ready ? () => _setTextColor(argb) : null,
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: ready
-                                ? () => _setTextColor(argb)
-                                : null,
-                            child: SizedBox(
-                              width: 32,
-                              height: 32,
-                              child: Center(
-                                child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 180),
-                              width: 18,
-                              height: 18,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(argb),
-                                border: Border.all(
-                                  color: _verseInk.isNone && _textArgb == argb
-                                      ? AppColors.gold
-                                      : AppColors.stroke,
-                                  width:
-                                      _verseInk.isNone && _textArgb == argb
-                                          ? 2
-                                          : 1,
-                                ),
-                              ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      // Any other colour, mixed — and kept, for the
-                      // next reel and the next card.
-                      SizedBox(
-                        width: 32,
-                        height: 32,
-                        child: Center(
-                          child: CustomColourCircle(
-                            size: 18,
-                            current: _textArgb,
-                            chosen: _verseInk.isNone &&
-                                !_swatches.contains(_textArgb),
-                            onPick: (argb) {
-                              if (ready) _setTextColor(argb);
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                   if (_hlPlan != null) ...[
                     const SizedBox(height: 2),
                     // One switch, named by the line beside it.
@@ -3003,38 +2887,6 @@ class _PreviewScreenState extends State<PreviewScreen>
                       ),
                     ),
                   ],
-                  const SizedBox(height: 6),
-                  // The caption's tags, last thing before the share
-                  // stack: whichever button below gets tapped, the
-                  // next screen is a caption box, and the tags for it
-                  // are one small glowing tap on the way there.
-                  // Two things you do to a finished reel: the tags it
-                  // is posted with, and who it was made for. They wrap
-                  // on a narrow phone rather than squeezing.
-                  Center(
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        HashtagsButton(surahName: _surahName),
-                        _TitlePill(
-                          on: _titleOn,
-                          onTap: ready ? _toggleTitle : null,
-                        ),
-                        _MotionPill(
-                          motion: _motionChoice,
-                          onTap: ready ? _pickMotion : null,
-                        ),
-                        _DedicatePill(
-                          dedication: _dedication,
-                          line: _dedicationLine,
-                          onTap: ready ? _dedicate : null,
-                        ),
-                      ],
-                    ),
-                  ),
                   const SizedBox(height: 8),
                   if (_rendering) ...[
                     // The encode is the one unavoidable wait in the app.

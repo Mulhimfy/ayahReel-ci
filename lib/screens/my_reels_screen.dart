@@ -23,6 +23,7 @@ import '../state/creation_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/direct_share_button.dart';
+import '../widgets/glass_tile.dart';
 import '../widgets/glow_button.dart';
 import '../widgets/tanafus_button.dart';
 import '../widgets/a11y.dart';
@@ -466,11 +467,18 @@ class _ReelCard extends StatelessWidget {
     // The card is one button to a screen reader — the reel's name,
     // voice and date, then what a tap does — with the menu as its own
     // control after it, named rather than the stock "Show menu".
+    // Under the same glass as the sceneries the reel was made from: it
+    // leans to the finger and the light runs across it. The glass is
+    // the touch's answer here, so the ink ripple is left out — a grey
+    // ring spreading over a picture is the one thing glass would not
+    // do.
     return Semantics(
       container: true,
       button: true,
       hint: l.a11yPlaysReel,
-      child: ClipRRect(
+      child: GlassTile(
+        radius: 20,
+        child: ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: Material(
         color: Colors.transparent,
@@ -484,10 +492,12 @@ class _ReelCard extends StatelessWidget {
           ),
           child: InkWell(
             onTap: onTap,
+            splashFactory: NoSplash.splashFactory,
+            highlightColor: Colors.transparent,
             child: Stack(
               fit: StackFit.expand,
               children: [
-                ReelThumb(reel: reel),
+                GlassDepth(child: ReelThumb(reel: reel)),
                 const Center(
                   child: Icon(Icons.play_arrow_rounded,
                       size: 44, color: Colors.white70),
@@ -580,6 +590,7 @@ class _ReelCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
       ),
       ),
     );

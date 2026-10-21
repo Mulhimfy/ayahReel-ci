@@ -226,12 +226,16 @@ class VerseMotion {
 }
 
 /// The designed looks the style step offers, each a whole [VerseMotion].
+///
+/// Five, each of which visibly does something to the words. A plain fade
+/// ("Breathe") and a fade that rose a few pixels ("Rise") were looks of
+/// their own until 2026-10-21, and users could not see what either did;
+/// every look below arrives with the fade anyway. A reel saved with one
+/// of them still plays as it was saved — [of] just names no card for it.
 enum MotionPreset {
   still(VerseMotion.none),
-  breathe(VerseMotion(arrival: VerseArrival.fade)),
-  rise(VerseMotion(arrival: VerseArrival.rise)),
-  thread(VerseMotion(arrival: VerseArrival.fade, thread: true)),
   light(VerseMotion.standard),
+  thread(VerseMotion(arrival: VerseArrival.fade, thread: true)),
   unveil(VerseMotion(arrival: VerseArrival.fade, unveil: true)),
   gilded(VerseMotion(arrival: VerseArrival.rise, trail: true, thread: true));
 

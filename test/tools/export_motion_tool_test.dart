@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+import 'package:ayah_reels/data/band_glow.dart';
 import 'package:ayah_reels/data/models.dart';
 import 'package:ayah_reels/data/verse_font.dart';
 import 'package:ayah_reels/data/verse_ink.dart';
@@ -319,6 +320,53 @@ void main() {
       File('$out/cmd_${s.key}.txt').writeAsStringSync(cmd);
       run.writeln("ffmpeg -hide_banner -v error \$(sed \"s#$out#\$HERE#g\" "
           "cmd_${s.key}.txt | sed 's/\"//g')");
+    }
+    // The wide card over a luminous band, and a light in another
+    // colour with the name pinched larger: the graphs those add.
+    final extras = <String, Future<String> Function()>{
+      'band': () => VideoRenderer.unitReelCommand(
+            recitation: rec,
+            ayahs: ayahs,
+            startAyah: 255,
+            endAyah: 256,
+            background: bg,
+            out: '$out/reel_band.mp4',
+            lines: single,
+            motion: VerseMotion.standard,
+            highlight: windows,
+            words: windows,
+            wordTimes: times,
+            numbering: VerseNumbering.mark,
+            surahTitle: true,
+            letterboxAspect: 16 / 9,
+            band: BandGlow.aurora,
+            fileTag: 'tool_band_',
+          ),
+      'sky': () => VideoRenderer.unitReelCommand(
+            recitation: rec,
+            ayahs: ayahs,
+            startAyah: 255,
+            endAyah: 256,
+            background: bg,
+            out: '$out/reel_sky.mp4',
+            lines: single,
+            motion: MotionPreset.gilded.motion,
+            highlight: windows,
+            words: windows,
+            wordTimes: times,
+            accentArgb: 0xFF9CC7F5,
+            numbering: VerseNumbering.mark,
+            surahTitle: true,
+            surahTitleScale: 1.4,
+            fileTag: 'tool_sky_',
+          ),
+    };
+    for (final e in extras.entries) {
+      late String cmd;
+      await t.runAsync(() async => cmd = await e.value());
+      File('$out/cmd_${e.key}.txt').writeAsStringSync(cmd);
+      run.writeln("ffmpeg -hide_banner -v error \$(sed \"s#$out#\$HERE#g\" "
+          "cmd_${e.key}.txt | sed 's/\"//g')");
     }
     File('$out/run.sh').writeAsStringSync(run.toString());
 

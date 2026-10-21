@@ -125,10 +125,10 @@ void main() {
   testWidgets('a motion picked here is the one the reel plays and keeps',
       (t) async {
     await open(t);
-    await reach(t, find.text('Rise'));
-    await t.tap(find.text('Rise'));
+    await reach(t, find.text('Golden thread'));
+    await t.tap(find.text('Golden thread'));
     await t.pumpAndSettle();
-    expect(creationState.motion, MotionPreset.rise.motion);
+    expect(creationState.motion, MotionPreset.thread.motion);
 
     await reach(t, find.text('Highlight recited word'));
     await t.tap(find.text('Highlight recited word'));
@@ -136,7 +136,7 @@ void main() {
     expect(creationState.wordHighlight, isFalse);
 
     await top(t);
-    expect(stage(t).motion, MotionPreset.rise.motion);
+    expect(stage(t).motion, MotionPreset.thread.motion);
     expect(stage(t).highlight, isFalse);
   });
 

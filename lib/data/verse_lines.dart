@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 
 import 'models.dart';
@@ -219,11 +221,17 @@ abstract final class VerseSplitter {
   ///
   /// [plainCost] is what a cut with no pause sign costs; a caller that
   /// can only time cuts by the reciter's breaths makes it dearer.
+  /// What a cut costs, as a share of what it would, where the reciter
+  /// was heard to breathe ([split]'s `breaths`): a cut a voice with no
+  /// word timing can actually be timed to.
+  static const breathShare = 0.4;
+
   static List<int>? split(
     List<String> tokens,
     bool Function(int start, int end) fits, {
     Set<int> held = const {},
     double plainCost = plainCutCost,
+    Set<int> breaths = const {},
   }) {
     final n = tokens.length;
     if (n < 2) return null;
@@ -299,7 +307,10 @@ abstract final class VerseSplitter {
         final rest = best[e];
         if (rest == null) continue;
         final c = partCostOf(s, e) +
-            (e < n ? cutCost(tokens, e, plain: plainCost) : 0) +
+            (e < n
+                ? cutCost(tokens, e, plain: plainCost) *
+                    (breaths.contains(e) ? breathShare : 1)
+                : 0) +
             rest;
         if (c < bestCost) {
           bestCost = c;
@@ -457,6 +468,183 @@ abstract final class PartTiming {
       if (b[i] - b[i - 1] < minPartMs) return null;
     }
     return b;
+  }
+
+  /// The same for a voice with no word timing, taking every breath the
+  /// recording shows ([breathsIn]) and, where a cut has none near it,
+  /// placing it all the same: at the quietest moment around where its
+  /// letters put it, which is the gap between two words far more often
+  /// than the middle of one. So a verse that needs cutting is cut, rather
+  /// than shown whole for want of a breath — the reciter's breath where
+  /// there is one, the best guess where there is not. [guessed] is how
+  /// many cuts had to be guessed.
+  ///
+  /// Null only when the verse can't be cut at all: no voice in it, or a
+  /// part that would be on screen for less than [minPartMs].
+  static ({List<int> bounds, int guessed})? fromBreaths({
+    required List<int> cuts,
+    required List<int> letters,
+    required int verseStartMs,
+    required int verseEndMs,
+    required List<(int, int)> breaths,
+    required List<double> env,
+    int? voicedStartMs,
+    int? voicedEndMs,
+  }) {
+    final v0 = voicedStartMs ?? verseStartMs;
+    final v1 = voicedEndMs ?? verseEndMs;
+    if (v1 <= v0) return null;
+    final total = letters.fold<int>(0, (a, b) => a + b);
+    if (total <= 0) return null;
+    final before = List<int>.filled(letters.length + 1, 0);
+    for (var k = 0; k < letters.length; k++) {
+      before[k + 1] = before[k] + letters[k];
+    }
+    double estimateAt(int cut) =>
+        v0 + (v1 - v0) * before[cut.clamp(0, letters.length)] / total;
+    final estimate = [for (final c in cuts) estimateAt(c)];
+    final out = [verseStartMs];
+    var guessed = 0;
+    for (var c = 1; c < cuts.length - 1; c++) {
+      final e = estimate[c];
+      final shortest = math.min(
+          estimate[c] - estimate[c - 1], estimate[c + 1] - estimate[c]);
+      final reachMs = (shortest * 0.35).clamp(500.0, 2200.0);
+      final floor = out.last + minPartMs;
+      final ceiling = verseEndMs - minPartMs;
+      (int, int)? pick;
+      var pickScore = double.infinity;
+      for (final p in breaths) {
+        final mid = (p.$1 + p.$2) / 2;
+        if ((mid - e).abs() > reachMs) continue;
+        final at = _cutIn(p);
+        if (at < floor || at > ceiling) continue;
+        final len = (p.$2 - p.$1).toDouble();
+        final score =
+            (mid - e).abs() / reachMs - 0.25 * (len / 700).clamp(0.0, 1.0);
+        if (score < pickScore) {
+          pickScore = score;
+          pick = p;
+        }
+      }
+      if (pick != null) {
+        out.add(_cutIn(pick));
+        continue;
+      }
+      // No breath near it: the quietest moment within a few hundred
+      // milliseconds of the estimate, inside what the parts allow.
+      final lo = math.max(floor, (e - quietReachMs).round());
+      final hi = math.min(ceiling, (e + quietReachMs).round());
+      if (hi < lo) return null;
+      var at = e.round().clamp(lo, hi);
+      var level = double.infinity;
+      for (var k = lo ~/ 10; k * 10 <= hi && k < env.length; k++) {
+        if (k * 10 < lo || k < 0) continue;
+        if (env[k] < level) {
+          level = env[k];
+          at = k * 10;
+        }
+      }
+      out.add(at);
+      guessed++;
+    }
+    out.add(verseEndMs);
+    final checked = _checked(out);
+    return checked == null ? null : (bounds: checked, guessed: guessed);
+  }
+
+  /// How far either side of a cut's estimate [fromBreaths] looks for the
+  /// quietest moment, when no breath is near enough to take.
+  static const quietReachMs = 420;
+
+  /// Every breath a reciter takes inside `[fromMs, toMs)`: the pauses,
+  /// where the recording goes quiet ([pausesIn]), and the dips, where in a
+  /// recording too reverberant to go quiet the level still falls well
+  /// under the stretch around it ([dipsIn]). Absolute windows, in order,
+  /// none overlapping a pause.
+  static List<(int, int)> breathsIn(
+      List<double> env, double quiet, int fromMs, int toMs) {
+    final pauses = pausesIn(env, quiet, fromMs, toMs).pauses;
+    final out = [...pauses];
+    for (final d in dipsIn(env, fromMs, toMs)) {
+      if (pauses.any((p) => d.$1 < p.$2 && p.$1 < d.$2)) continue;
+      out.add(d);
+    }
+    out.sort((a, b) => a.$1.compareTo(b.$1));
+    return out;
+  }
+
+  /// How far under the level around it a dip has to fall, in dB, and for
+  /// how long: a breath in an echoing hall, not the space between two
+  /// syllables. The level around it is the mean over [dipAroundMs] either
+  /// side.
+  static const dipDb = 9.0;
+  static const dipMs = 90;
+  static const dipAroundMs = 350;
+
+  /// The dips of [env] inside `[fromMs, toMs)`: see [breathsIn].
+  static List<(int, int)> dipsIn(List<double> env, int fromMs, int toMs) {
+    final lo = (fromMs / 10).floor().clamp(0, env.length);
+    final hi = (toMs / 10).ceil().clamp(lo, env.length);
+    const around = dipAroundMs ~/ 10;
+    if (hi - lo < 2 * around) return const [];
+    final sums = List<double>.filled(hi - lo + 1, 0);
+    for (var k = lo; k < hi; k++) {
+      sums[k - lo + 1] = sums[k - lo] + env[k];
+    }
+    final out = <(int, int)>[];
+    int? from;
+    for (var k = lo; k <= hi; k++) {
+      var low = false;
+      if (k < hi) {
+        final a = math.max(lo, k - around), b = math.min(hi, k + around + 1);
+        final mean = (sums[b - lo] - sums[a - lo]) / (b - a);
+        low = env[k] <= mean - dipDb;
+      }
+      if (low) {
+        from ??= k;
+      } else if (from != null) {
+        if ((k - from) * 10 >= dipMs) out.add((from * 10, k * 10));
+        from = null;
+      }
+    }
+    return out;
+  }
+
+  /// The token positions a cut could open on that fall at one of
+  /// [breaths], by where the letters before them put them inside the
+  /// voiced stretch `[voicedStartMs, voicedEndMs)`: what [VerseSplitter]
+  /// is told to prefer for a voice with no word timing, so its cuts land
+  /// where the reciter can be heard to breathe.
+  static Set<int> cutsAtBreaths({
+    required List<int> letters,
+    required List<(int, int)> breaths,
+    required int voicedStartMs,
+    required int voicedEndMs,
+  }) {
+    final total = letters.fold<int>(0, (a, b) => a + b);
+    final span = voicedEndMs - voicedStartMs;
+    if (total <= 0 || span <= 0) return const {};
+    final out = <int>{};
+    for (final p in breaths) {
+      final mid = (p.$1 + p.$2) / 2;
+      if (mid <= voicedStartMs || mid >= voicedEndMs) continue;
+      final want = (mid - voicedStartMs) / span * total;
+      var best = -1;
+      var bestGap = double.infinity;
+      var n = 0;
+      for (var k = 1; k < letters.length; k++) {
+        n += letters[k - 1];
+        final gap = (n - want).abs();
+        if (gap < bestGap) {
+          bestGap = gap;
+          best = k;
+        }
+      }
+      // Within an eighth of the verse's letters of where it was heard.
+      if (best > 0 && bestGap <= total / 8) out.add(best);
+    }
+    return out;
   }
 
   /// The quiet stretches inside `[fromMs, toMs)` of a loudness envelope
@@ -804,7 +992,13 @@ class VerseLinePlan {
   final int lines;
   final Map<int, List<VersePart>> byAyah;
 
-  const VerseLinePlan(this.lines, this.byAyah);
+  /// Verses that were too long for [lines] and still shown whole: no
+  /// cut in them could be timed. What the lines control says something
+  /// about, since a choice of one line that leaves some verses whole is
+  /// otherwise a choice that seems not to have worked.
+  final int whole;
+
+  const VerseLinePlan(this.lines, this.byAyah, {this.whole = 0});
 
   static const empty = VerseLinePlan(VerseLines.whole, {});
 

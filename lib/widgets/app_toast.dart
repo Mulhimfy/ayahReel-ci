@@ -1,7 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/app_theme.dart';
+import 'glass_tile.dart' show paintSparkle;
 import 'illumination.dart' show SealGlyph;
 
 /// What a toast is saying, which decides its mark: something finished
@@ -131,13 +134,29 @@ class _AppToastState extends State<AppToast>
                   12, 11, hasAction ? 8 : 18, 11),
               child: Row(
                 children: [
-                  AnimatedBuilder(
-                    animation: _in,
-                    builder: (context, child) => Transform.scale(
-                      scale: still ? 1 : _coin.transform(_in.value),
-                      child: child,
-                    ),
-                    child: _Mark(tone: widget.tone),
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      AnimatedBuilder(
+                        animation: _in,
+                        builder: (context, child) => Transform.scale(
+                          scale: still ? 1 : _coin.transform(_in.value),
+                          child: child,
+                        ),
+                        child: _Mark(tone: widget.tone),
+                      ),
+                      // Something finished — a reel in the gallery, a
+                      // card saved: the gold catches the light as it
+                      // lands, with the glass's own sparkle.
+                      if (widget.tone == ToastTone.done && !still)
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: CustomPaint(
+                              painter: _CoinGlints(_in),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -235,6 +254,45 @@ class _AppToastState extends State<AppToast>
       child: card,
     );
   }
+}
+
+/// Three glints round the gold coin of a toast that says something is
+/// done, catching as the coin settles: the glass tiles' sparkle, warm.
+class _CoinGlints extends CustomPainter {
+  final Animation<double> landing;
+  _CoinGlints(this.landing) : super(repaint: landing);
+
+  /// Where on the toast's 1.5 s they run: after the coin's pop.
+  static const _when = Interval(0.3, 0.8);
+
+  /// Around a 30-point coin: high on the trailing side, low on the
+  /// leading side, and a small one under it — never a ring, which
+  /// would read as a badge.
+  static const _at = [Offset(26, 3), Offset(1, 21), Offset(29, 27)];
+  static const _size = [1.0, 0.62, 0.5];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final p = _when.transform(landing.value);
+    if (p <= 0 || p >= 1) return;
+    for (var i = 0; i < _at.length; i++) {
+      final v = (p * 1.35 - i * 0.16).clamp(0.0, 1.0);
+      if (v <= 0 || v >= 1) continue;
+      final k = math.sin(math.pi * v);
+      paintSparkle(
+        canvas,
+        _at[i],
+        opacity: k,
+        scale: _size[i] * (0.4 + 0.75 * k),
+        rotation: v * 90,
+        color: const Color(0xFFFFF2CE),
+        glow: 0.6,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _CoinGlints old) => old.landing != landing;
 }
 
 /// The mark on the toast's leading edge.

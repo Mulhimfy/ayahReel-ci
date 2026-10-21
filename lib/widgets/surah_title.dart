@@ -188,11 +188,14 @@ class _RulePainter extends CustomPainter {
       old.colour != colour || old.diamondRight != diamondRight;
 }
 
-/// The title on a reel: where it starts, and the drag that moves it.
+/// The title on a reel: where it starts, the drag that moves it, and
+/// the pinch that sizes it.
 ///
 /// Placed the way the dedication is (see `ReelDedication`): its centre
 /// at a fraction of the frame, held inside it by the PNG's shadow
-/// margin, by the same arithmetic the exporter's overlay runs.
+/// margin, by the same arithmetic the exporter's overlay runs. [scale]
+/// lays the whole line out that much larger or smaller, as the exporter
+/// rasterizes it (see `AyahRasterizer.rasterizeSurahTitle`).
 class ReelSurahTitle extends StatelessWidget {
   final double width;
   final int surah;
@@ -204,10 +207,19 @@ class ReelSurahTitle extends StatelessWidget {
   final Offset? at;
   final LetterboxGeometry? letterbox;
 
+  /// Its size against its own: 1 until it is pinched.
+  final double scale;
+
+  /// One finger moving it, by this much.
   final ValueChanged<Offset>? onDrag;
+
+  /// Two fingers sizing it: the size they ask for, against its own.
+  final ValueChanged<double>? onResize;
+
+  /// The finger, or the fingers, lifted.
   final VoidCallback? onDragEnd;
 
-  /// A double tap: back to the head of the frame.
+  /// A double tap: back to the head of the frame, at its own size.
   final VoidCallback? onReset;
 
   /// The title's laid-out size, each time it changes.
@@ -221,14 +233,17 @@ class ReelSurahTitle extends StatelessWidget {
     this.onLight = false,
     this.at,
     this.letterbox,
+    this.scale = 1.0,
     this.onDrag,
+    this.onResize,
     this.onDragEnd,
     this.onReset,
     this.onSize,
   });
 
-  /// Extra room around the title for a finger, when it can be dragged.
-  static const touchPad = 10.0;
+  /// Extra room around the title for a finger, when it can be dragged:
+  /// enough for two of them to land on it for a pinch.
+  static const touchPad = 16.0;
 
   /// Where the title sits until it is moved: high in a full frame, clear
   /// of the feed's own header; in the middle of the band over a
@@ -244,36 +259,24 @@ class ReelSurahTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = width / SurahTitleLine.referenceWidth;
     final pad = onDrag == null ? 0.0 : touchPad;
+    // Rounded as the exporter rounds it, to the percent, so the line on
+    // screen and the one in the file are laid out at one size.
+    final sized = (scale * 100).round() / 100;
     Widget body = SurahTitleLine(
       surah: surah,
-      width: width,
+      width: width * sized,
       edition: edition,
       onLight: onLight,
     );
     final measure = onSize;
     if (measure != null) body = _ReportSize(onChange: measure, child: body);
     if (onDrag != null) {
-      body = RawGestureDetector(
-        behavior: HitTestBehavior.opaque,
-        gestures: {
-          PanGestureRecognizer:
-              GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-            PanGestureRecognizer.new,
-            (r) {
-              r
-                ..gestureSettings = const DeviceGestureSettings(touchSlop: 6)
-                ..onUpdate = ((d) => onDrag!(d.delta))
-                ..onEnd = (_) => onDragEnd?.call();
-            },
-          ),
-          if (onReset != null)
-            DoubleTapGestureRecognizer:
-                GestureRecognizerFactoryWithHandlers<
-                    DoubleTapGestureRecognizer>(
-              DoubleTapGestureRecognizer.new,
-              (r) => r.onDoubleTap = onReset,
-            ),
-        },
+      body = _TitleGestures(
+        scale: scale,
+        onDrag: onDrag!,
+        onResize: onResize,
+        onEnd: onDragEnd,
+        onReset: onReset,
         child: Padding(padding: EdgeInsets.all(pad), child: body),
       );
     }
@@ -293,6 +296,72 @@ class ReelSurahTitle extends StatelessWidget {
         ),
         child: body,
       ),
+    );
+  }
+}
+
+/// One finger moves the title, two size it, a double tap puts it back.
+///
+/// Stateful for one number: the size the title had when the fingers
+/// came down, which every step of a pinch is measured from. The title is
+/// rebuilt at every step, so a number kept in the build would be the
+/// size of the step before, and a pinch would compound itself.
+class _TitleGestures extends StatefulWidget {
+  final double scale;
+  final ValueChanged<Offset> onDrag;
+  final ValueChanged<double>? onResize;
+  final VoidCallback? onEnd;
+  final VoidCallback? onReset;
+  final Widget child;
+
+  const _TitleGestures({
+    required this.scale,
+    required this.onDrag,
+    required this.onResize,
+    required this.onEnd,
+    required this.onReset,
+    required this.child,
+  });
+
+  @override
+  State<_TitleGestures> createState() => _TitleGesturesState();
+}
+
+class _TitleGesturesState extends State<_TitleGestures> {
+  double _from = 1.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return RawGestureDetector(
+      behavior: HitTestBehavior.opaque,
+      gestures: {
+        // A scale recognizer is a pan recognizer too: one pointer is a
+        // drag, and a second one makes it a pinch, in one gesture.
+        ScaleGestureRecognizer:
+            GestureRecognizerFactoryWithHandlers<ScaleGestureRecognizer>(
+          ScaleGestureRecognizer.new,
+          (r) {
+            r
+              ..gestureSettings = const DeviceGestureSettings(touchSlop: 6)
+              ..onStart = ((_) => _from = widget.scale)
+              ..onUpdate = ((d) {
+                widget.onDrag(d.focalPointDelta);
+                final resize = widget.onResize;
+                if (resize != null && d.pointerCount > 1) {
+                  resize(_from * d.scale);
+                }
+              })
+              ..onEnd = (_) => widget.onEnd?.call();
+          },
+        ),
+        if (widget.onReset != null)
+          DoubleTapGestureRecognizer:
+              GestureRecognizerFactoryWithHandlers<DoubleTapGestureRecognizer>(
+            DoubleTapGestureRecognizer.new,
+            (r) => r.onDoubleTap = widget.onReset,
+          ),
+      },
+      child: widget.child,
     );
   }
 }

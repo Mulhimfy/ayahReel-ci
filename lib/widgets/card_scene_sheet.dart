@@ -5,6 +5,7 @@ import '../data/scene_catalog.dart';
 import '../l10n/l10n.dart';
 import '../theme/app_theme.dart';
 import 'a11y.dart';
+import 'glass_tile.dart';
 
 /// The scenery library, for a card.
 ///
@@ -243,29 +244,43 @@ class _Tile extends StatelessWidget {
       onTap: onTap,
       child: GestureDetector(
         onTap: onTap,
-        child: ClipRRect(
+        // The same glass as the reel's scenery picker: one library,
+        // one way of handling it.
+        child: GlassTile(
+          key: ValueKey(scene.id),
+          radius: 12,
+          selected: selected,
+          child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: Stack(
             fit: StackFit.expand,
             children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(scene.gradientArgb.first),
-                      Color(scene.gradientArgb.last),
-                    ],
-                  ),
+              GlassDepth(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(scene.gradientArgb.first),
+                            Color(scene.gradientArgb.last),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Image.asset(
+                      scene.thumbAsset,
+                      fit: BoxFit.cover,
+                      // A poster that is missing is a poster: the
+                      // gradient under it is measured from the scenery
+                      // itself.
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                  ],
                 ),
-              ),
-              Image.asset(
-                scene.thumbAsset,
-                fit: BoxFit.cover,
-                // A poster that is missing is a poster: the gradient
-                // under it is measured from the scenery itself.
-                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
               ),
               if (scene.isVideo)
                 const PositionedDirectional(
@@ -282,6 +297,7 @@ class _Tile extends StatelessWidget {
                   ),
                 ),
             ],
+          ),
           ),
         ),
       ),

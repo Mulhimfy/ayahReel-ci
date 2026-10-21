@@ -43,27 +43,31 @@ Future<void> openArena(BuildContext context) async {
   if (identical(_arenaRoute, route)) _arenaRoute = null;
 }
 
-/// The setup the lobby remembers, read from the arena's prefs.
-ArenaSetup rememberedArenaSetup(Map<String, String> p,
+/// The setup the lobby opens on: the scope last played, kept, and the
+/// gentlest round in it — the easiest question and the longest clock
+/// ([ArenaSetup.easiestGame], [ArenaSetup.longestSeconds]), whatever was
+/// picked last time.
+ArenaSetup landingArenaSetup(Map<String, String> p,
     {required bool askMeanings}) {
   final scope = ArenaScope.fromKey(p['scope'] ?? '') ?? const ArenaScope.juz(30);
-  var seconds = int.tryParse(p['seconds'] ?? '') ?? ArenaSetup.defaultSeconds;
-  if (!ArenaSetup.secondsOptions.contains(seconds)) {
-    seconds = ArenaSetup.defaultSeconds;
-  }
-  final games = (p['games'] ?? '')
-      .split(',')
-      .where((g) => g.isNotEmpty)
-      .map((g) => ArenaGame.values.firstWhere((x) => x.name == g,
-          orElse: () => ArenaGame.missingWord))
-      .toSet();
   return ArenaSetup(
     scope: scope,
-    games: games.isEmpty ? {...ArenaGame.values} : games,
-    seconds: seconds,
+    games: const {ArenaSetup.easiestGame},
+    seconds: ArenaSetup.longestSeconds,
     count: ArenaChallenge.questions,
     askMeanings: askMeanings,
   );
+}
+
+/// The easiest kind of question in [games] that [feasible] can ask, or
+/// the easiest it can ask at all: what a lobby whose choice can't be
+/// asked in a scope falls back to, rather than showing nothing chosen.
+Set<ArenaGame> askableGames(Set<ArenaGame> games, Set<ArenaGame> feasible) {
+  if (games.any(feasible.contains)) return games;
+  for (final g in ArenaSetup.byEase) {
+    if (feasible.contains(g)) return {g};
+  }
+  return games;
 }
 
 /// The name of a scope in the reader's language.
@@ -78,8 +82,10 @@ String arenaScopeLabel(L10n l, ArenaScope scope) => switch (scope.kind) {
 /// Tanafus's lobby: how you play, where, what is asked, how long a
 /// question has, and the rounds already played.
 ///
-/// Every choice is on one page and every one of them is remembered,
-/// so the second visit is a look and a tap. A code — pasted, typed, or
+/// Every choice is on one page. The scope is remembered; the questions
+/// and the clock open on the gentlest round every time (see
+/// [landingArenaSetup]), because the arena is meant to be played, and
+/// a first round that is too hard is the last one. A code — pasted, typed, or
 /// arriving through a link — takes over the page the moment it is
 /// recognised, because a friend's dare is the reason most people will
 /// ever open this screen.
@@ -93,8 +99,8 @@ class ArenaScreen extends StatefulWidget {
 class _ArenaScreenState extends State<ArenaScreen> {
   ArenaMode _mode = ArenaMode.solo;
   ArenaScope _scope = const ArenaScope.juz(30);
-  Set<ArenaGame> _games = {...ArenaGame.values};
-  int _seconds = ArenaSetup.defaultSeconds;
+  Set<ArenaGame> _games = const {ArenaSetup.easiestGame};
+  int _seconds = ArenaSetup.longestSeconds;
   final _code = TextEditingController();
   ArenaChallenge? _challenge;
   String _sender = '';
@@ -118,7 +124,7 @@ class _ArenaScreenState extends State<ArenaScreen> {
     await ArenaService.init();
     if (!mounted) return;
     final p = ArenaService.state.value.prefs;
-    final kept = rememberedArenaSetup(p, askMeanings: true);
+    final kept = landingArenaSetup(p, askMeanings: true);
     setState(() {
       _scope = kept.scope;
       _seconds = kept.seconds;
@@ -139,6 +145,7 @@ class _ArenaScreenState extends State<ArenaScreen> {
     setState(() {
       _corpus = corpus;
       _feasible = corpus.feasible(_scope);
+      _games = askableGames(_games, _feasible!);
     });
   }
 
@@ -191,6 +198,8 @@ class _ArenaScreenState extends State<ArenaScreen> {
     setState(() {
       _scope = s;
       _feasible = _corpus?.feasible(s);
+      final f = _feasible;
+      if (f != null) _games = askableGames(_games, f);
     });
   }
 
@@ -555,23 +564,49 @@ class _TopBar extends StatelessWidget {
               ),
             ),
           ),
-          const Spacer(),
-          const TanafusMark(size: 15, glow: false),
-          const SizedBox(width: 8),
-          A11yHeader(
-            child: Sheen(
-              strength: 0.5,
-              child: GildedText(
-                l.arenaTitle,
+          // The name, and under it what the arena is: a name alone ("a
+          // competition") left people guessing it was a quiz.
+          Expanded(
+            child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const TanafusMark(size: 15, glow: false),
+                  const SizedBox(width: 8),
+                  A11yHeader(
+                    child: Sheen(
+                      strength: 0.5,
+                      child: GildedText(
+                        l.arenaTitle,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: l.arabicScript ? 0 : 2.2,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                l.arenaWhat,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: l.arabicScript ? 0 : 2.2,
+                  fontSize: 11.5,
+                  height: 1.2,
+                  letterSpacing: l.arabicScript ? 0 : 0.3,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
                 ),
               ),
-            ),
+            ],
           ),
-          const Spacer(),
+          ),
           // How a round works, and where the code goes after it.
           A11yTap(
             label: l.arenaGuideTitle,

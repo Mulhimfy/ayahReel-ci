@@ -296,26 +296,35 @@ class GildedText extends StatelessWidget {
     this.overflow = TextOverflow.clip,
   });
 
+  /// The leaf itself, for anything else gilded the same way.
+  static const leaf = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFFFFF2CE),
+      Color(0xFFEEC96B),
+      Color(0xFFC9973B),
+      Color(0xFFF0D492),
+    ],
+  );
+
+  /// What the letters are under the leaf. The mask covers the text's
+  /// box and nothing past it, so whatever pokes out of a tight line —
+  /// the tail of a "y" set at height 1.0 — shows in this. It was white,
+  /// and the wordmark's "y" ended in a white tip.
+  static const _under = Color(0xFFE2BA62);
+
   @override
   Widget build(BuildContext context) {
     return ShaderMask(
       blendMode: BlendMode.srcIn,
-      shaderCallback: (rect) => const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          Color(0xFFFFF2CE),
-          Color(0xFFEEC96B),
-          Color(0xFFC9973B),
-          Color(0xFFF0D492),
-        ],
-      ).createShader(rect),
+      shaderCallback: leaf.createShader,
       child: Text(
         text,
         textAlign: textAlign,
         maxLines: maxLines,
         overflow: overflow,
-        style: style.copyWith(color: Colors.white),
+        style: style.copyWith(color: _under),
       ),
     );
   }

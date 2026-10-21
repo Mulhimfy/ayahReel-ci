@@ -214,6 +214,7 @@ class _VerseStageState extends State<VerseStage> {
         motion: m,
         times: _timesOf(i),
         accent: widget.accent,
+        lightTint: AyahOverlay.lightTintOf(widget.accent, widget.accentInk),
         child: card,
       );
     }

@@ -20,6 +20,7 @@ import 'package:ayah_reels/screens/cards_screen.dart';
 import 'package:ayah_reels/screens/home_shell.dart';
 import 'package:ayah_reels/screens/reciter_screen.dart';
 import 'package:ayah_reels/theme/app_theme.dart';
+import 'package:ayah_reels/widgets/a11y.dart';
 import 'package:ayah_reels/widgets/arena_constellation.dart';
 import 'package:ayah_reels/widgets/arena_history.dart';
 import 'package:ayah_reels/widgets/arena_portal.dart';
@@ -334,6 +335,53 @@ void main() {
     await scrollTo(t, find.text(l.arenaPlayCode));
     expect(find.text(l.arenaPlayCode), findsOneWidget);
     await io(t);
+  });
+
+  testWidgets('the lobby always opens on the gentlest round: the easiest '
+      'question and the longest clock, the scope as it was left, and a line '
+      'that says it is a Quran quiz', (t) async {
+    phone(t);
+    await t.runAsync(() => ArenaService.remember({
+          'intro': '1',
+          'scope': 's112',
+          'seconds': '10',
+          'games': 'whichSurah,nextVerse,surahFacts',
+        }));
+    await t.pumpWidget(host(const ArenaScreen()));
+    await io(t);
+    await t.pump(const Duration(milliseconds: 900));
+    expect(find.text(l.arenaWhat), findsOneWidget);
+    bool lit(String label) => t
+        .widget<A11yTap>(find
+            .ancestor(of: find.text(label), matching: find.byType(A11yTap))
+            .first)
+        .selected!;
+    await scrollTo(t, find.text(l.arenaSecondsTitle));
+    for (final g in ArenaGame.values) {
+      expect(lit(l.arenaGameName(g)), g == ArenaSetup.easiestGame,
+          reason: '$g');
+    }
+    for (final s in ArenaSetup.secondsOptions) {
+      expect(lit(l.arenaSecondsValue(s)), s == ArenaSetup.longestSeconds,
+          reason: '$s s');
+    }
+    expect(ArenaSetup.longestSeconds, ArenaSetup.secondsOptions.last);
+    expect(ArenaSetup.byEase.toSet(), ArenaGame.values.toSet());
+    expect(ArenaSetup.byEase.first, ArenaSetup.easiestGame);
+    // The scope is kept: Al-Ikhlas, as it was left.
+    expect(find.text(l.localizedSurahName('Al-Ikhlas')), findsWidgets);
+    await io(t);
+  });
+
+  test('a choice the scope cannot ask falls back to the easiest it can', () {
+    expect(askableGames({ArenaGame.whichSurah}, {ArenaGame.missingWord}),
+        {ArenaGame.missingWord});
+    expect(
+        askableGames({ArenaGame.whichSurah, ArenaGame.nextVerse},
+            {ArenaGame.nextVerse, ArenaGame.surahFacts}),
+        {ArenaGame.whichSurah, ArenaGame.nextVerse});
+    expect(askableGames({ArenaGame.whichSurah}, {ArenaGame.surahFacts}),
+        {ArenaGame.surahFacts});
   });
 
   testWidgets('a link the app was opened with is a challenge on the page',

@@ -10,6 +10,7 @@ import 'data/ffmpeg_setup.dart';
 import 'data/home_widget_service.dart';
 import 'data/install_date.dart';
 import 'data/last_choices.dart';
+import 'data/own_words.dart';
 import 'data/quran_verses.dart';
 import 'data/reminder_service.dart';
 import 'data/rewards_service.dart';
@@ -195,6 +196,9 @@ class _RootState extends State<_Root> {
     // The voice, the verses and the style the last reel was made with,
     // before anything can open the reel flow on the app's defaults.
     await LastChoices.init(creationState);
+    // Which voices the app times word by word itself: off the phone if
+    // it was read in the last day, else asked for, in the background.
+    unawaited(OwnWords.init());
     // Straight after the settings: on the first run of this code their
     // onboarding flag is what tells a new install from an old one.
     unawaited(InstallDate.init());

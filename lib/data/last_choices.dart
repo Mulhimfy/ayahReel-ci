@@ -12,6 +12,7 @@ import 'models.dart';
 import 'quran_repository.dart';
 import 'reel_recipe.dart';
 import 'scene_catalog.dart';
+import 'verse_motion.dart';
 import 'whole_file.dart';
 
 /// The choices the last reel was made with, kept from one launch to the
@@ -56,7 +57,7 @@ abstract final class LastChoices {
         final j = jsonDecode(await f.readAsString());
         if (j is Map<String, dynamic>) {
           final r = ReelRecipe.fromJson(j);
-          apply(r, s);
+          apply(r, s, band: (j['lc'] as int? ?? 1) >= version);
           _written = jsonEncode(j);
           unawaited(_seatScenery(r, s));
         }
@@ -72,8 +73,14 @@ abstract final class LastChoices {
   /// colours, since a backdrop re-derives the colours nobody chose, and
   /// the flat colours before the inks, since a flat colour takes an ink
   /// off.
+  /// What [snapshot] writes as `lc`. 2 since the wide card's band
+  /// started on the blur (2026-10-21): a file written before that holds
+  /// the old default (black) whether or not anybody chose it, so its
+  /// band is not put back.
+  static const version = 2;
+
   @visibleForTesting
-  static void apply(ReelRecipe r, CreationState s) {
+  static void apply(ReelRecipe r, CreationState s, {bool band = true}) {
     for (final v in reciters) {
       if (v.id == r.reciterId) {
         s.selectReciter(v);
@@ -87,10 +94,14 @@ abstract final class LastChoices {
       ..selectSurah(surah)
       ..selectRange(start, r.endAyah.clamp(start, count))
       ..setLayout(r.layout)
-      ..setRoundedCorners(r.roundedCorners)
-      ..setBackdrop(r.backdrop);
-    if (r.backdrop == LetterboxBackdrop.colour) {
-      s.setBackdropColor(r.backdropArgb);
+      ..setRoundedCorners(r.roundedCorners);
+    if (band) {
+      s.setBackdrop(r.backdrop);
+      if (r.backdrop == LetterboxBackdrop.colour) {
+        s.setBackdropColor(r.backdropArgb);
+      } else if (r.backdrop == LetterboxBackdrop.glow) {
+        s.setBandGlow(r.bandGlow);
+      }
     }
     s
       ..setTextPreset(r.preset)
@@ -101,11 +112,22 @@ abstract final class LastChoices {
       ..setTranslationFace(r.latinFace)
       ..setTranslationFace(r.arabicScriptFace)
       ..setEffects(r.effects)
-      ..setMotion(r.motion)
+      ..setMotion(_offered(r.motion))
       ..restoreColours(r.textArgb, r.accentArgb)
       ..setVerseInk(r.verseInk)
       ..setAccentInk(r.accentInk);
   }
+
+  /// [m], unless it is one of the two looks the motion panel no longer
+  /// offers — a plain fade ("Breathe") and a rise ("Rise"), which users
+  /// could not see do anything — which a new reel starts on the light
+  /// instead. A reel saved with one still plays it; only the next reel
+  /// is not made with it.
+  static VerseMotion _offered(VerseMotion m) =>
+      m == const VerseMotion(arrival: VerseArrival.fade) ||
+              m == const VerseMotion(arrival: VerseArrival.rise)
+          ? VerseMotion.standard
+          : m;
 
   /// The last scenery back in place, when it is still on the device and
   /// nothing has been picked since launch: a library scene that has
@@ -158,6 +180,7 @@ abstract final class LastChoices {
       'verseLines',
       'surahTitle',
       'surahTitleAt',
+      'surahTitleScale',
     ]) {
       j.remove(k);
     }
@@ -165,6 +188,7 @@ abstract final class LastChoices {
     j['scenes'] = scenes.isEmpty ? const <String>[] : [scenes.first];
     // An upload's stand-in voice can't be found again by its id.
     if (s.reciter?.isUserAudio ?? false) j['reciterId'] = '';
+    j['lc'] = version;
     return j;
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:video_player/video_player.dart';
 
+import 'package:ayah_reels/data/band_glow.dart';
 import 'package:ayah_reels/data/fatiha_data.dart';
 import 'package:ayah_reels/data/models.dart';
 import 'package:ayah_reels/data/reel_effects.dart';
@@ -10,6 +11,7 @@ import 'package:ayah_reels/data/scene_catalog.dart';
 import 'package:ayah_reels/data/settings_service.dart';
 import 'package:ayah_reels/data/verse_font.dart';
 import 'package:ayah_reels/data/verse_ink.dart';
+import 'package:ayah_reels/data/verse_motion.dart';
 import 'package:ayah_reels/data/verse_translation.dart';
 import 'package:ayah_reels/l10n/l10n.dart';
 import 'package:ayah_reels/screens/style_screen.dart';
@@ -71,19 +73,22 @@ void main() {
     await t.pump(const Duration(milliseconds: 300));
   }
 
-  /// The panel scrolls inside its own height — that is the whole point
-  /// of it — so anything below the fold has to be brought up before it
-  /// can be tapped, exactly as a finger would.
-  Future<void> scrollPanel(WidgetTester t, double dy) async {
-    await t.drag(find.byType(ListView).first, Offset(0, dy));
-    await settle(t);
-  }
-
-  /// The switch on the effects row named [label].
-  Finder switchOf(String label) => find.descendant(
+  /// The switch on the effect named [label].
+  Finder switchOf(String label) => find
+      .descendant(
         of: find.ancestor(of: find.text(label), matching: find.byType(Row)),
         matching: find.byType(Switch),
-      );
+      )
+      .first;
+
+  /// The panel's own vertical scroll view: a net for screens smaller
+  /// than the app is laid out for, which must have nothing to scroll.
+  ScrollPosition panelScroll(WidgetTester t) => t
+      .state<ScrollableState>(find
+          .byWidgetPredicate(
+              (w) => w is Scrollable && w.axisDirection == AxisDirection.down)
+          .first)
+      .position;
 
   Future<void> openTab(WidgetTester t, String tab) async {
     await t.tap(find.text(tab).first);
@@ -125,15 +130,55 @@ void main() {
     expect(find.byType(AyahOverlay), findsWidgets);
   });
 
-  testWidgets('it lays out on a small phone and a large one', (t) async {
-    for (final size in [const Size(360, 640), const Size(430, 932)]) {
-      for (final tab in [l.styleTabType, l.styleTabColour, l.styleTabEffects]) {
-        await open(t, size: size);
-        await openTab(t, tab);
-        expect(t.takeException(), isNull,
-            reason: '$tab overflowed at $size');
+  testWidgets('every panel fits whole, with nothing to scroll, on a small '
+      'phone and a large one — full frame and wide card', (t) async {
+    for (final wide in [false, true]) {
+      creationState.setLayout(wide ? ReelLayout.letterbox : ReelLayout.fullFrame);
+      for (final size in [
+        const Size(360, 640),
+        const Size(390, 844),
+        const Size(430, 932),
+      ]) {
+        for (final tab in [
+          l.styleTabType,
+          l.styleTabColour,
+          l.styleTabEffects,
+          l.styleTabMotion,
+        ]) {
+          // Where an overflow comes from, should one: the widget that
+          // made it, out of the error's own report.
+          final reports = <String>[];
+          final prior = FlutterError.onError;
+          FlutterError.onError = (d) {
+            reports.add([
+              d.exceptionAsString(),
+              ...?d.informationCollector?.call().map((n) => '$n'),
+            ].join('\n'));
+            prior?.call(d);
+          };
+          try {
+            await open(t, size: size);
+            await openTab(t, tab);
+          } finally {
+            FlutterError.onError = prior;
+          }
+          final e = t.takeException();
+          expect(e, isNull,
+              reason: '$tab overflowed at $size'
+                  '${wide ? ', wide card' : ''}: ${reports.join('\n')}');
+          expect(panelScroll(t).maxScrollExtent, 0,
+              reason: '$tab scrolls at $size${wide ? ', wide card' : ''}');
+          if (wide && tab == l.styleTabColour) {
+            // And the band's colours, behind their half of the switch.
+            await t.tap(find.text(l.styleBackdropColour));
+            await settle(t);
+            expect(panelScroll(t).maxScrollExtent, 0,
+                reason: 'the band\'s colours scroll at $size');
+          }
+        }
       }
     }
+    creationState.setLayout(ReelLayout.fullFrame);
   });
 
   testWidgets('the type panel sets the verse face and the size', (t) async {
@@ -148,7 +193,6 @@ void main() {
     final card = t.widget<AyahOverlay>(find.byType(AyahOverlay).first);
     expect(card.verseFace, VerseFace.scheherazade);
 
-    await scrollPanel(t, -220);
     await t.drag(find.byType(Slider).first, const Offset(-60, 0));
     await settle(t);
     expect(creationState.textScale, lessThan(1.0));
@@ -171,38 +215,63 @@ void main() {
     expect(creationState.typography.translation, TranslationFace.nastaliq);
   });
 
-  testWidgets('the colour panel sets the verse, then the accent',
-      (t) async {
+  testWidgets('the colour panel sets the verse; the motion panel sets the '
+      'accent, which is the motion\'s colour', (t) async {
     final h = t.ensureSemantics();
     await open(t);
     await openTab(t, l.styleTabColour);
 
-    // The label names the target as well as the colour: the two grids
-    // are otherwise identical to a reader. The flat colours sit under
-    // the luminous ones, below the fold of the panel.
+    // The label names the target as well as the colour. Every colour is
+    // in view: nothing to scroll to.
     const mint = 0xFF9FE8C9;
-    await scrollPanel(t, -400);
     await t.tap(find.bySemanticsLabel(
         '${l.styleVerseColour}${l.comma} ${l.a11yColourSwatch(mint)}'));
     await settle(t);
     expect(creationState.textArgb, mint);
     expect(creationState.accentArgb, accentOnDark, reason: 'accent untouched');
+    // The accent is no longer a colour target of its own here: one
+    // control for one colour.
+    expect(find.text(l.styleAccentColour), findsNothing);
 
-    await scrollPanel(t, 400);
-    await t.tap(find.text(l.styleAccentColour));
-    await settle(t);
-    const teal = 0xFF5BC0C6;
-    await scrollPanel(t, -400);
+    await openTab(t, l.styleTabMotion);
+    const sky = 0xFF9CC7F5;
     await t.tap(find.bySemanticsLabel(
-        '${l.styleAccentColour}${l.comma} ${l.a11yColourSwatch(teal)}'));
+        '${l.motionColour}${l.comma} ${l.a11yColourSwatch(sky)}'));
     await settle(t);
-    expect(creationState.accentArgb, teal);
+    expect(creationState.accentArgb, sky);
     expect(creationState.textArgb, mint, reason: 'verse untouched');
 
     final card = t.widget<AyahOverlay>(find.byType(AyahOverlay).first);
     expect(card.textColor.toARGB32(), mint);
-    expect(card.accent!.toARGB32(), teal);
+    expect(card.accent!.toARGB32(), sky);
+
+    // An ink lights the motion too; the house gold puts it back.
+    await t.tap(find.bySemanticsLabel(
+        '${l.motionColour}${l.comma} ${l.a11yInkSwatch(VerseInk.ember)}'));
+    await settle(t);
+    expect(creationState.accentInk, VerseInk.ember);
+    await t.tap(find.bySemanticsLabel(
+        '${l.motionColour}${l.comma} ${l.colourName(accentOnDark)}'));
+    await settle(t);
+    expect(creationState.accentInk, VerseInk.none);
+    expect(creationState.accentArgb, accentOnDark);
     h.dispose();
+  });
+
+  testWidgets('the motion panel offers the five looks, all in view, and '
+      'no switches that repeat them', (t) async {
+    await open(t);
+    await openTab(t, l.styleTabMotion);
+    for (final p in MotionPreset.values) {
+      expect(find.text(l.motionPresetName(p.name)), findsOneWidget,
+          reason: p.name);
+    }
+    expect(find.text('Breathe'), findsNothing);
+    expect(find.text('Rise'), findsNothing);
+    expect(find.byType(Switch), findsNothing);
+    await t.tap(find.text(l.motionPresetName(MotionPreset.thread.name)));
+    await settle(t);
+    expect(creationState.motion, MotionPreset.thread.motion);
   });
 
   testWidgets('a luminous ink draws the verse, and a flat colour takes it off',
@@ -220,11 +289,10 @@ void main() {
     var card = t.widget<AyahOverlay>(find.byType(AyahOverlay).first);
     expect(card.ink, VerseInk.iris);
     expect(card.textColor.toARGB32(), VerseInk.iris.base);
-    // And the switch at the top names it.
-    expect(find.text(l.inkName(VerseInk.iris)), findsWidgets);
+    // And the heading names it.
+    expect(find.textContaining(l.inkName(VerseInk.iris)), findsWidgets);
 
     const mint = 0xFF9FE8C9;
-    await scrollPanel(t, -400);
     await t.tap(find.bySemanticsLabel(
         '${l.styleVerseColour}${l.comma} ${l.a11yColourSwatch(mint)}'));
     await settle(t);
@@ -286,8 +354,8 @@ void main() {
     expect(warmthOn(), isFalse);
   });
 
-  testWidgets('a wide card adds its band to the colours and its corners to '
-      'the effects', (t) async {
+  testWidgets('a wide card adds its band to the colours — blurred, '
+      'luminous or flat — and its corners to the effects', (t) async {
     final h = t.ensureSemantics();
     creationState
       ..setLayout(ReelLayout.letterbox)
@@ -297,7 +365,12 @@ void main() {
     await openTab(t, l.styleTabColour);
     await t.tap(find.text(l.styleBackdropColour));
     await settle(t);
-    expect(find.text(l.styleBackdropBody), findsOneWidget);
+    await t.tap(find.bySemanticsLabel(
+        '${l.styleBackdropColour}${l.comma} ${l.bandGlowName(BandGlow.aurora)}'));
+    await settle(t);
+    expect(creationState.backdrop, LetterboxBackdrop.glow);
+    expect(creationState.bandGlow, BandGlow.aurora);
+    expect(creationState.backdropArgb, BandGlow.aurora.base);
     const ivory = 0xFFF3EADA;
     await t.tap(find.bySemanticsLabel(
         '${l.styleBackdropColour}${l.comma} ${l.a11yColourSwatch(ivory)}'));
@@ -313,7 +386,30 @@ void main() {
     await t.tap(switchOf(l.roundedCorners));
     await settle(t);
     expect(creationState.roundedCorners, isTrue);
+    creationState.setLayout(ReelLayout.fullFrame);
     h.dispose();
+  });
+
+  test('every luminous ground has a name in every language, and the pale '
+      'ones are the ones that take dark ink', () {
+    for (final lang in AppLang.values) {
+      final ll = L10n(lang);
+      final names = {for (final g in BandGlow.values) ll.bandGlowName(g)};
+      expect(names.length, BandGlow.values.length,
+          reason: 'two grounds share a name in ${lang.code}');
+    }
+    for (final g in BandGlow.values) {
+      expect(g.light, isLightSurface(g.base), reason: g.name);
+      expect(
+          isLightGround(
+              layout: ReelLayout.letterbox,
+              backdrop: LetterboxBackdrop.glow,
+              backdropArgb: g.base),
+          g.light,
+          reason: g.name);
+    }
+    expect({for (final g in BandGlow.values) if (g.light) g},
+        {BandGlow.pearl, BandGlow.dawn});
   });
 
   testWidgets('a full frame has no band to colour and no corners', (t) async {
@@ -330,8 +426,8 @@ void main() {
     // At the head of the list, where a short panel still shows it
     // without a scroll.
     expect(t.widget<Switch>(find.byType(Switch).first),
-        t.widget<Switch>(switchOf(l.effectFade)));
-    await t.tap(switchOf(l.effectFade));
+        t.widget<Switch>(switchOf(l.effectFadeShort)));
+    await t.tap(switchOf(l.effectFadeShort));
     await settle(t);
     expect(creationState.effects.fade, isTrue);
   });

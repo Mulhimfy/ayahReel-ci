@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -35,7 +36,7 @@ void main() {
       ..selectRange(255, 257)
       ..setVerseFace(VerseFace.values.last)
       ..setTextScale(1.3)
-      ..setMotion(MotionPreset.rise.motion)
+      ..setMotion(MotionPreset.gilded.motion)
       ..setWordHighlight(false)
       ..setDedication(
           const Dedication(kind: DedicationKind.sadaqah, name: 'Fatima'))
@@ -63,7 +64,7 @@ void main() {
     expect(back.rangeChosen, isTrue);
     expect(back.verseFace, VerseFace.values.last);
     expect(back.textScale, 1.3);
-    expect(back.motion, MotionPreset.rise.motion);
+    expect(back.motion, MotionPreset.gilded.motion);
     expect(back.wordHighlight, isFalse);
     expect(back.dedication.isEmpty, isTrue);
   });
@@ -74,6 +75,51 @@ void main() {
     expect(back.motion, VerseMotion.standard);
     LastChoices.apply(ReelRecipe.fromJson(LastChoices.snapshot(s)), back);
     expect(back.motion, VerseMotion.none);
+  });
+
+  test('the wide card\'s band comes back once it was chosen; a file from '
+      'before the blur became its default does not put black back', () async {
+    final s = CreationState()
+      ..setLayout(ReelLayout.letterbox)
+      ..setBackdropColor(0xFFF3EADA);
+    final j = LastChoices.snapshot(s);
+    expect(j['lc'], LastChoices.version);
+    File('${dir.path}/last_choices.json')
+        .writeAsStringSync(jsonEncode(j));
+    final next = CreationState();
+    expect(next.backdrop, LetterboxBackdrop.blur, reason: 'the default');
+    await LastChoices.init(next);
+    expect(next.layout, ReelLayout.letterbox);
+    expect(next.backdrop, LetterboxBackdrop.colour);
+    expect(next.backdropArgb, 0xFFF3EADA);
+
+    // A file the preview build of the morning wrote: the old default,
+    // black, which nobody may have chosen.
+    LastChoices.debugReset();
+    LastChoices.debugDir = dir;
+    final old = Map<String, dynamic>.of(j)
+      ..remove('lc')
+      ..['backdrop'] = 'colour'
+      ..['backdropArgb'] = 0xFF000000;
+    File('${dir.path}/last_choices.json')
+        .writeAsStringSync(jsonEncode(old));
+    final later = CreationState();
+    await LastChoices.init(later);
+    expect(later.layout, ReelLayout.letterbox);
+    expect(later.backdrop, LetterboxBackdrop.blur);
+  });
+
+  test('a look the motion panel no longer offers starts the next reel on '
+      'the light', () {
+    for (final old in const [
+      VerseMotion(arrival: VerseArrival.fade),
+      VerseMotion(arrival: VerseArrival.rise),
+    ]) {
+      final s = CreationState()..setMotion(old);
+      final back = CreationState()..setMotion(VerseMotion.none);
+      LastChoices.apply(ReelRecipe.fromJson(LastChoices.snapshot(s)), back);
+      expect(back.motion, VerseMotion.standard, reason: '$old');
+    }
   });
 
   test('verses past the end of the surah are held inside it', () {

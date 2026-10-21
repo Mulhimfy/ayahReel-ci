@@ -177,11 +177,29 @@ void main() {
 
     test('presets are what they say', () {
       expect(MotionPreset.still.motion, VerseMotion.none);
-      expect(MotionPreset.of(const VerseMotion(arrival: VerseArrival.fade)),
-          MotionPreset.breathe);
+      expect(MotionPreset.light.motion, VerseMotion.standard);
       expect(MotionPreset.unveil.needsWords, isTrue);
+      expect(MotionPreset.gilded.needsWords, isTrue);
       expect(MotionPreset.thread.needsWords, isFalse);
       expect(MotionPreset.of(const VerseMotion(light: true)), isNull);
+    });
+
+    test('every look but Still does something to the words, and a plain '
+        'fade or rise is no longer one of them', () {
+      expect(MotionPreset.values.map((p) => p.name),
+          ['still', 'light', 'thread', 'unveil', 'gilded']);
+      for (final p in MotionPreset.values) {
+        if (p == MotionPreset.still) continue;
+        final m = p.motion;
+        expect(m.thread || m.light || m.trail || m.unveil, isTrue,
+            reason: '${p.name} only arrives');
+      }
+      // A reel saved with one of the old looks still plays as it was
+      // saved; it just has no card.
+      expect(MotionPreset.of(const VerseMotion(arrival: VerseArrival.fade)),
+          isNull);
+      expect(MotionPreset.of(const VerseMotion(arrival: VerseArrival.rise)),
+          isNull);
     });
   });
 

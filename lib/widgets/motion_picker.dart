@@ -3,15 +3,27 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../data/verse_ink.dart';
 import '../data/verse_motion.dart';
 import '../l10n/l10n.dart';
+import '../state/creation_state.dart' show accentOnDark, accentOnLight;
 import '../theme/app_theme.dart';
 import 'a11y.dart';
+import 'colour_picker.dart';
+import 'ink_swatch.dart';
 
-/// Everything about how the verse moves, in one place: the designed
-/// looks as cards that each play what they do, then the parts of a look
-/// to mix by hand. The style step shows it in a panel under its frame;
-/// the reel screen in a sheet under the playing reel.
+/// How the verse moves, in one place: the designed looks, each a card
+/// that plays what it does, side by side and all in view.
+///
+/// Only the cards. The parts of a look (its arrival, the thread, the
+/// light, the trail, the unveil) used to sit under them as switches of
+/// their own, which made two controls for every choice; and two of the
+/// looks (a plain fade, and a fade that rose a few pixels) did too little
+/// to see. What is left is five looks that each visibly do something.
+///
+/// The style step shows it in a panel under its frame, with the motion's
+/// colour under it ([MotionColourRow]); the reel screen in a sheet under
+/// the playing reel.
 class MotionPicker extends StatelessWidget {
   final VerseMotion motion;
 
@@ -23,12 +35,21 @@ class MotionPicker extends StatelessWidget {
   /// Leaves the heading off, for a caller that has its own.
   final bool heading;
 
+  /// The colour the cards play in: the reel's accent.
+  final Color tint;
+
+  /// What stands between the cards and the note: the colour row, on the
+  /// style step.
+  final Widget? below;
+
   const MotionPicker({
     super.key,
     required this.motion,
     required this.hasWords,
     required this.onChanged,
     this.heading = true,
+    this.tint = AppColors.goldBright,
+    this.below,
   });
 
   void _set(VerseMotion m) {
@@ -40,13 +61,14 @@ class MotionPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L10n.of(context);
     final t = Theme.of(context).textTheme;
+    final chosen = MotionPreset.of(motion);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
         if (heading)
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 14, 24, 8),
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -72,88 +94,232 @@ class MotionPicker extends StatelessWidget {
               ],
             ),
           ),
-        SizedBox(
-          height: 112,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: MotionPreset.values.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 10),
-            itemBuilder: (_, i) {
-              final p = MotionPreset.values[i];
-              final usable = !p.needsWords || hasWords;
-              return MotionPresetCard(
-                preset: p,
-                selected: MotionPreset.of(motion) == p,
-                enabled: usable,
-                onTap: usable ? () => _set(p.motion) : null,
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l.motionArrival,
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
+        LayoutBuilder(
+          builder: (context, box) {
+            const pad = 16.0, gap = 8.0;
+            final n = MotionPreset.values.length;
+            // Every look in view at once, on the narrowest phone too:
+            // the cards narrow rather than scroll.
+            final w = ((box.maxWidth - 2 * pad - gap * (n - 1)) / n)
+                .clamp(52.0, 88.0);
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: pad),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (var i = 0; i < n; i++) ...[
+                    if (i > 0) const SizedBox(width: gap),
+                    () {
+                      final p = MotionPreset.values[i];
+                      final usable = !p.needsWords || hasWords;
+                      return MotionPresetCard(
+                        preset: p,
+                        width: w,
+                        tint: tint,
+                        selected: chosen == p,
+                        enabled: usable,
+                        onTap: usable ? () => _set(p.motion) : null,
+                      );
+                    }(),
+                  ],
+                ],
               ),
-              _Segments<VerseArrival>(
-                values: VerseArrival.values,
-                chosen: motion.arrival,
-                label: (a) => switch (a) {
-                  VerseArrival.none => l.arrivalCut,
-                  VerseArrival.fade => l.arrivalFade,
-                  VerseArrival.rise => l.arrivalRise,
-                },
-                onPick: (a) => _set(motion.copyWith(arrival: a)),
-              ),
-            ],
-          ),
+            );
+          },
         ),
-        const SizedBox(height: 6),
-        MotionSwitchRow(
-          icon: Icons.gradient_rounded,
-          label: l.motionThread,
-          on: motion.thread,
-          onToggle: (on) => _set(motion.copyWith(thread: on)),
-        ),
-        MotionSwitchRow(
-          icon: Icons.wb_sunny_outlined,
-          label: l.motionLight,
-          on: motion.light,
-          onToggle: (on) => _set(motion.copyWith(light: on)),
-        ),
-        MotionSwitchRow(
-          icon: Icons.brush_rounded,
-          label: l.motionTrail,
-          on: motion.trail && hasWords,
-          onToggle: hasWords ? (on) => _set(motion.copyWith(trail: on)) : null,
-        ),
-        MotionSwitchRow(
-          icon: Icons.blur_on_rounded,
-          label: l.motionUnveil,
-          on: motion.unveil && hasWords,
-          onToggle:
-              hasWords ? (on) => _set(motion.copyWith(unveil: on)) : null,
-        ),
+        if (below != null) below!,
         Padding(
-          padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
+          padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
           child: Text(
             hasWords ? l.motionFollowsWords : l.motionNeedsWords,
+            textAlign: TextAlign.center,
             style: const TextStyle(
                 fontSize: 10.5, height: 1.3, color: AppColors.textSecondary),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// The motion's colour: the light passing through the words, the thread
+/// under them, the recited word and the words the trail leaves lit. One
+/// colour, the reel's accent, gold until another is chosen — offered here
+/// because this is where what it colours can be seen moving.
+///
+/// One row, all of it in view: the house gold first, a few colours that
+/// read as light, three of the luminous inks, and any colour mixed.
+class MotionColourRow extends StatelessWidget {
+  final int accentArgb;
+  final VerseInk accentInk;
+
+  /// Whether the verse sits on a pale band, where the house gold is the
+  /// deeper one and white would not show.
+  final bool onLight;
+  final ValueChanged<int> onColour;
+  final ValueChanged<VerseInk> onInk;
+
+  /// Back to the house gold, free to follow the ground again.
+  final VoidCallback onGold;
+
+  const MotionColourRow({
+    super.key,
+    required this.accentArgb,
+    required this.accentInk,
+    required this.onLight,
+    required this.onColour,
+    required this.onInk,
+    required this.onGold,
+  });
+
+  /// The flat colours after the gold: each one a colour light can be.
+  static const flats = [
+    0xFFFFFFFF, // white
+    0xFFF5A8B8, // rose
+    0xFF9FE8C9, // mint
+    0xFF9CC7F5, // sky
+    0xFFC9B8F5, // lavender
+  ];
+
+  /// And the inks: gold leaf, fire, and an iridescence.
+  static const inks = [VerseInk.gilded, VerseInk.ember, VerseInk.iris];
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    final gold = onLight ? accentOnLight : accentOnDark;
+    final flat = [for (final c in flats) if (!(onLight && c == 0xFFFFFFFF)) c];
+    final isGold = accentInk.isNone && accentArgb == gold;
+    final known = isGold ||
+        (accentInk.isNone && flat.contains(accentArgb)) ||
+        inks.contains(accentInk);
+    final named =
+        accentInk.isNone ? l.colourName(accentArgb) : l.inkName(accentInk);
+    final name = named.isEmpty
+        ? named
+        : named[0].toUpperCase() + named.substring(1);
+    final section = l.motionColour;
+    Widget cell(Widget child) => SizedBox(width: 34, height: 34, child: Center(child: child));
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ExcludeSemantics(
+            child: Text(
+              '${section.toUpperCase()} · $name',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                cell(_Disc(
+                  label: '$section${l.comma} ${l.colourName(gold)}',
+                  selected: isGold,
+                  onTap: onGold,
+                  child: _flatDisc(gold),
+                )),
+                for (final c in flat)
+                  cell(_Disc(
+                    label: '$section${l.comma} ${l.a11yColourSwatch(c)}',
+                    selected: accentInk.isNone && accentArgb == c,
+                    onTap: () => onColour(c),
+                    child: _flatDisc(c),
+                  )),
+                for (final ink in inks)
+                  cell(_Disc(
+                    label: '$section${l.comma} ${l.a11yInkSwatch(ink)}',
+                    selected: accentInk == ink,
+                    onTap: () => onInk(ink),
+                    child: InkDisc(ink: ink, size: 24),
+                  )),
+                cell(CustomColourCircle(
+                  size: 24,
+                  current: accentArgb,
+                  chosen: !known,
+                  onPick: onColour,
+                )),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Widget _flatDisc(int argb) => Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            center: const Alignment(-0.35, -0.45),
+            radius: 0.95,
+            colors: [
+              Color.alphaBlend(
+                  Colors.white.withValues(alpha: 0.3), Color(argb)),
+              Color(argb),
+            ],
+          ),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+          boxShadow: [
+            BoxShadow(
+                color: Color(argb).withValues(alpha: 0.35), blurRadius: 8),
+          ],
+        ),
+      );
+}
+
+/// A colour in [MotionColourRow], ringed in gold when it is the one.
+class _Disc extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final Widget child;
+
+  const _Disc({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return A11yTap(
+      label: label,
+      selected: selected,
+      onTap: onTap,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.all(2.5),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: selected ? AppColors.gold : Colors.transparent,
+              width: 1.8,
+            ),
+          ),
+          child: child,
+        ),
+      ),
     );
   }
 }
@@ -165,12 +331,20 @@ class MotionPresetCard extends StatelessWidget {
   final bool enabled;
   final VoidCallback? onTap;
 
+  /// How wide the card is; its frame keeps the reel's proportions.
+  final double width;
+
+  /// The colour it plays in: the reel's accent.
+  final Color tint;
+
   const MotionPresetCard({
     super.key,
     required this.preset,
     required this.selected,
     required this.enabled,
     required this.onTap,
+    this.width = 84,
+    this.tint = AppColors.goldBright,
   });
 
   @override
@@ -188,29 +362,34 @@ class MotionPresetCard extends StatelessWidget {
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 180),
           opacity: enabled ? 1 : 0.4,
-          child: AnimatedContainer(
+          // Sized outright, the look alone animated: a width that eased
+          // to a new screen's share ran the row off its edge meanwhile.
+          child: SizedBox(
+            width: width,
+            child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
-            width: 84,
-            padding: const EdgeInsets.all(6),
+            padding: const EdgeInsets.all(5),
             decoration: BoxDecoration(
               color: selected
                   ? AppColors.gold.withValues(alpha: 0.12)
                   : AppColors.surface,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(13),
               border: Border.all(
                 color: selected ? AppColors.gold : AppColors.stroke,
                 width: selected ? 1.5 : 1,
               ),
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
+                SizedBox(
+                  height: (width - 10) * 1.12,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(9),
-                    child: MotionDemo(motion: preset.motion),
+                    child: MotionDemo(motion: preset.motion, tint: tint),
                   ),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 4),
                 // Shrunk rather than cut: "Golden thread" in German or
                 // Indonesian is longer than the card is wide.
                 FittedBox(
@@ -230,6 +409,7 @@ class MotionPresetCard extends StatelessWidget {
               ],
             ),
           ),
+          ),
         ),
       ),
     );
@@ -242,7 +422,11 @@ class MotionPresetCard extends StatelessWidget {
 class MotionDemo extends StatefulWidget {
   final VerseMotion motion;
 
-  const MotionDemo({super.key, required this.motion});
+  /// The colour the light, the thread and the lit words play in.
+  final Color tint;
+
+  const MotionDemo(
+      {super.key, required this.motion, this.tint = AppColors.goldBright});
 
   /// One loop: on, recited, off.
   static const loop = Duration(milliseconds: 3400);
@@ -278,7 +462,7 @@ class _MotionDemoState extends State<MotionDemo>
   @override
   Widget build(BuildContext context) => RepaintBoundary(
         child: CustomPaint(
-          painter: _DemoPainter(_c, widget.motion),
+          painter: _DemoPainter(_c, widget.motion, widget.tint),
           size: Size.infinite,
         ),
       );
@@ -287,8 +471,9 @@ class _MotionDemoState extends State<MotionDemo>
 class _DemoPainter extends CustomPainter {
   final Animation<double> t;
   final VerseMotion motion;
+  final Color tint;
 
-  _DemoPainter(this.t, this.motion) : super(repaint: t);
+  _DemoPainter(this.t, this.motion, this.tint) : super(repaint: t);
 
   /// The words of the two lines, as shares of the frame's width, right
   /// to left.
@@ -326,7 +511,8 @@ class _DemoPainter extends CustomPainter {
 
     final barH = h * 0.085;
     final gap = w * 0.035;
-    const gold = AppColors.goldBright;
+    final gold = tint;
+    final core = Color.lerp(tint, Colors.white, 0.8)!;
     var index = 0;
     for (var li = 0; li < _lines.length; li++) {
       final line = _lines[li];
@@ -360,7 +546,7 @@ class _DemoPainter extends CustomPainter {
             Paint()
               ..shader = LinearGradient(colors: [
                 gold.withValues(alpha: 0),
-                const Color(0xFFFFF6DC).withValues(alpha: alpha),
+                core.withValues(alpha: alpha),
                 gold.withValues(alpha: 0),
               ]).createShader(
                   Rect.fromLTWH(cx - w * 0.06, y, w * 0.12, 1)),
@@ -397,7 +583,7 @@ class _DemoPainter extends CustomPainter {
               Offset(right - len, ty),
               h * 0.035,
               Paint()
-                ..color = const Color(0xFFFFF6DC).withValues(alpha: alpha)
+                ..color = core.withValues(alpha: alpha)
                 ..maskFilter = MaskFilter.blur(BlurStyle.normal, h * 0.02),
             );
           }
@@ -407,66 +593,8 @@ class _DemoPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _DemoPainter old) => old.motion != motion;
-}
-
-/// An on/off part of a motion, in the style step's row shape: an icon,
-/// a name, and a small switch, dimmed when it cannot be had.
-class MotionSwitchRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool on;
-
-  /// Null when the row cannot be switched.
-  final ValueChanged<bool>? onToggle;
-
-  const MotionSwitchRow({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.on,
-    required this.onToggle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final enabled = onToggle != null;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 12, 0),
-      child: MergeSemantics(
-        child: Opacity(
-          opacity: enabled ? 1 : 0.45,
-          child: Row(
-            children: [
-              Icon(icon,
-                  size: 17,
-                  color: on ? AppColors.goldBright : AppColors.textSecondary),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w600,
-                    color: on ? AppColors.textPrimary : AppColors.textSecondary,
-                  ),
-                ),
-              ),
-              Transform.scale(
-                scale: 0.78,
-                child: Switch(
-                  value: on,
-                  activeThumbColor: AppColors.gold,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  onChanged: onToggle,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  bool shouldRepaint(covariant _DemoPainter old) =>
+      old.motion != motion || old.tint != tint;
 }
 
 /// How a reel shows its long verses: whole, or one, two or three lines
@@ -476,7 +604,13 @@ class LinesChooser extends StatelessWidget {
   final int lines;
   final ValueChanged<int> onPick;
 
-  const LinesChooser({super.key, required this.lines, required this.onPick});
+  /// How this reel's long verses came out, as (shown whole, cut): what
+  /// the note under the choice says, when some of them could not be cut.
+  /// Null for a chooser with no reel under it.
+  final ValueNotifier<(int, int)>? planned;
+
+  const LinesChooser(
+      {super.key, required this.lines, required this.onPick, this.planned});
 
   @override
   Widget build(BuildContext context) {
@@ -508,16 +642,35 @@ class LinesChooser extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            lines == 0 ? l.versesWholeNote : l.linesTimingNote,
-            style: const TextStyle(
-                fontSize: 10.5, height: 1.3, color: AppColors.textSecondary),
-          ),
+          if (lines == 0 || planned == null)
+            _note(lines == 0 ? l.versesWholeNote : l.linesTimingNote)
+          else
+            ValueListenableBuilder<(int, int)>(
+              valueListenable: planned!,
+              builder: (_, p, __) => _note(
+                p.$1 == 0
+                    ? l.linesTimingNote
+                    : p.$2 == 0
+                        ? l.linesAllWhole
+                        : l.linesSomeWhole,
+                warn: p.$1 > 0,
+              ),
+            ),
         ],
       ),
     );
   }
 }
+
+Widget _note(String text, {bool warn = false}) => Text(
+      text,
+      style: TextStyle(
+        fontSize: 10.5,
+        height: 1.3,
+        fontWeight: warn ? FontWeight.w600 : FontWeight.w400,
+        color: warn ? AppColors.goldBright : AppColors.textSecondary,
+      ),
+    );
 
 /// A row of pill choices, one of them chosen.
 class _Segments<T> extends StatelessWidget {
@@ -596,6 +749,8 @@ Future<void> showMotionSheet(
   required ValueChanged<VerseMotion> onChanged,
   int lines = 0,
   ValueChanged<int>? onLines,
+  ValueNotifier<(int, int)>? planned,
+  Color tint = AppColors.goldBright,
 }) {
   var current = motion;
   var currentLines = lines;
@@ -619,6 +774,7 @@ Future<void> showMotionSheet(
               if (onLines != null)
                 LinesChooser(
                   lines: currentLines,
+                  planned: planned,
                   onPick: (n) {
                     HapticFeedback.selectionClick();
                     set(() => currentLines = n);
@@ -628,6 +784,7 @@ Future<void> showMotionSheet(
               MotionPicker(
                 motion: current,
                 hasWords: hasWords,
+                tint: tint,
                 onChanged: (m) {
                   set(() => current = m);
                   onChanged(m);

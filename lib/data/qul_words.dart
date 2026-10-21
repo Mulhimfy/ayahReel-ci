@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'debug_log.dart';
 import 'download.dart';
 import 'models.dart';
+import 'own_words.dart';
 import 'recitation_service.dart';
 import 'surah_index.dart';
 import 'surah_slice.dart';
@@ -86,9 +87,15 @@ class QulSource {
   /// sound would throw it out by a second and more.
   final bool onsetFallback;
 
+  /// For a voice the app times itself (see [QulWords.owned]): its id on
+  /// the app's own host, where its words are published already placed on
+  /// the audio the app plays. Null for a recitation of QUL's.
+  final String? own;
+
   const QulSource(
     this.recitation,
     this.fit, {
+    this.own,
     this.biasMs = 0,
     this.verseOne = QulVerseOne.shift,
     this.verseOneBiasMs = 0,
@@ -314,9 +321,17 @@ abstract final class QulWords {
     ),
   };
 
-  static QulSource? sourceOf(Reciter r) => sources[r.id];
+  /// QUL's verified recitation for [r], or else the app's own timing of
+  /// it (see [OwnWords]).
+  static QulSource? sourceOf(Reciter r) =>
+      sources[r.id] ?? OwnWords.sources[r.id];
 
-  static bool supports(Reciter r) => sources.containsKey(r.id);
+  static bool supports(Reciter r) => sourceOf(r) != null;
+
+  /// Where the app's own word timing is published: one file per voice
+  /// and surah, `<own>/<surah>.json`, in the shape [encodeCompact]
+  /// writes, and the index of what is there (see [OwnWords]).
+  static const ownHost = 'https://mulhimfy.github.io/ayahreel-words/v1';
 
   // ---- placing, shared by every voice it times -------------------------
 
@@ -520,7 +535,9 @@ abstract final class QulWords {
   /// then from disk, then from QUL. Null when it can't be had or can't
   /// be read; callers then have no words for the surah.
   static Future<Map<int, QulVerse>?> versesOf(QulSource src, int surah) async {
-    final key = '${src.fit == QulFit.ayahFiles ? 'a' : 's'}${src.recitation}_$surah';
+    final key = src.own != null
+        ? 'o${src.own}_$surah'
+        : '${src.fit == QulFit.ayahFiles ? 'a' : 's'}${src.recitation}_$surah';
     final hit = _memory.remove(key);
     if (hit != null) return _memory[key] = hit;
     Map<int, QulVerse>? verses;
@@ -536,9 +553,11 @@ abstract final class QulWords {
       if (verses == null) {
         final count = surahIndex[surah - 1].ayahCount;
         final json = await _fetch(src, surah, count);
-        verses = src.fit == QulFit.ayahFiles
-            ? parseAyahSpans(json, surah)
-            : parse(json, surah);
+        verses = src.own != null
+            ? decodeCompact(json)
+            : src.fit == QulFit.ayahFiles
+                ? parseAyahSpans(json, surah)
+                : parse(json, surah);
         await writeWhole(f, jsonEncode(encodeCompact(verses)));
       }
     } catch (e) {
@@ -556,7 +575,10 @@ abstract final class QulWords {
 
   static Future<Object?> _fetch(QulSource src, int surah, int count) async {
     // A page holds ten verses unless asked for the whole surah.
-    final url = src.fit == QulFit.ayahFiles
+    final own = src.own;
+    final url = own != null
+        ? Uri.parse('$ownHost/$own/$surah.json')
+        : src.fit == QulFit.ayahFiles
         ? Uri.parse('$_api/ayah_segments/${src.recitation}'
             '?surah=$surah&per_page=$count')
         : Uri.parse('$_api/surah_segments/${src.recitation}'

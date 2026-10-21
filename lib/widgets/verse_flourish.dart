@@ -136,7 +136,13 @@ class VerseFlourish extends SingleChildRenderObjectWidget {
   /// Each token's recited window, in ms into the unit; null to cross
   /// each line at an even pace.
   final List<(int, int)?>? times;
+
+  /// The thread's and the spark's colour: the reel's accent.
   final Color accent;
+
+  /// The light's colour (see [AyahOverlay.lightTintOf]); the accent
+  /// when not given.
+  final Color? lightTint;
 
   const VerseFlourish({
     super.key,
@@ -148,6 +154,7 @@ class VerseFlourish extends SingleChildRenderObjectWidget {
     required this.motion,
     required this.times,
     required this.accent,
+    this.lightTint,
     required Widget super.child,
   });
 
@@ -175,8 +182,14 @@ class RenderVerseFlourish extends RenderProxyBox {
         w.ts != _w.ts ||
         !identical(w.times, _w.times) ||
         w.unitMs != _w.unitMs;
+    final retinted = (w.lightTint ?? w.accent) != (_w.lightTint ?? _w.accent);
     _w = w;
-    if (relaid) _forget();
+    if (relaid) {
+      _forget();
+    } else if (retinted) {
+      _glint?.dispose();
+      _glint = null;
+    }
     markNeedsPaint();
   }
 
@@ -287,14 +300,16 @@ class RenderVerseFlourish extends RenderProxyBox {
   TextPainter? _glintPainter() {
     final p = RenderVerseAnchor.find(this)?.paragraph;
     if (p == null) return null;
-    final glow = AyahOverlay.glintGlow(_w.ts);
+    final tint = _w.lightTint ?? _w.accent;
+    final glow = AyahOverlay.glintGlowFor(_w.ts, tint);
+    final colour = AyahOverlay.glintColourFor(tint);
     InlineSpan lit(InlineSpan span) {
       if (span is! TextSpan) return span;
       final mark = (span.text ?? '').startsWith(' ');
       return TextSpan(
         text: span.text,
         style: (span.style ?? const TextStyle()).copyWith(
-          color: mark ? const Color(0x00000000) : AyahOverlay.glintColour,
+          color: mark ? const Color(0x00000000) : colour,
           shadows: mark ? const [] : glow,
         ),
         children: span.children?.map(lit).toList(),

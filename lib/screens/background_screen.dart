@@ -24,7 +24,7 @@ import '../theme/app_theme.dart';
 import '../widgets/a11y.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/coach_marks.dart';
-import '../widgets/colour_picker.dart';
+import '../widgets/glass_tile.dart';
 import '../widgets/glow_button.dart';
 import '../widgets/how_to_sheet.dart';
 import '../widgets/step_dots.dart';
@@ -221,7 +221,6 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
   final _railKey = GlobalKey();
   final _multiKey = GlobalKey();
   final _frameKey = GlobalKey();
-  final _frameExtrasKey = GlobalKey();
 
   /// Whether the walkthrough is on screen. Held back until the catalog
   /// has landed: the tab rail is empty — and so has nothing to point
@@ -867,12 +866,10 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
           title: l.tourFrameTitle,
           body: l.tourFrameBody,
         ),
+        // What the wide card opens up is set on the next screen; this
+        // says so, standing by the pills that open it.
         CoachStep(
-          target: _frameExtrasKey,
-          // Corners and backdrop only exist once the wide card is on;
-          // until then the step stands next to the frame pills that
-          // open them.
-          fallback: _frameKey,
+          target: _frameKey,
           title: l.tourFinishTitle,
           body: l.tourFinishBody,
         ),
@@ -1027,8 +1024,6 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
           // horizontal video, the full frame an upright one.
           _FormatPanel(
             pillsKey: _frameKey,
-            extrasKey: _frameExtrasKey,
-            onChanged: () => setState(() {}),
             onLayout: _setFrame,
           ),
           const SizedBox(height: 6),
@@ -1787,7 +1782,14 @@ class _SceneTile extends StatelessWidget {
       child: GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: AnimatedContainer(
+      // Each poster behind a pane of glass that leans to the finger
+      // and catches the light; the tap above it is untouched. Keyed by
+      // the scenery, so a tab switch hands no tile another's glass.
+      child: GlassTile(
+        key: ValueKey(scene.id),
+        radius: 14,
+        selected: selected,
+        child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
@@ -1808,19 +1810,27 @@ class _SceneTile extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // The measured gradient stands in for the poster for the
-              // one frame before it decodes, so tiles never flash white.
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(g[0]), Color(g[1])],
-                  ),
+              GlassDepth(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // The measured gradient stands in for the poster
+                    // for the one frame before it decodes, so tiles
+                    // never flash white.
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Color(g[0]), Color(g[1])],
+                        ),
+                      ),
+                    ),
+                    Image.asset(scene.thumbAsset,
+                        fit: BoxFit.cover, excludeFromSemantics: true),
+                  ],
                 ),
               ),
-              Image.asset(scene.thumbAsset,
-                  fit: BoxFit.cover, excludeFromSemantics: true),
               if (downloading)
                 Container(
                   color: Colors.black.withValues(alpha: 0.45),
@@ -1860,6 +1870,7 @@ class _SceneTile extends StatelessWidget {
             ],
           ),
         ),
+        ),
       ),
       ),
     );
@@ -1884,41 +1895,28 @@ class _Glyph extends StatelessWidget {
   }
 }
 
-/// How the scenery sits in the frame, and — only once the wide card is
-/// chosen — the two things that decision opens up: corners, and what
-/// fills the space above and below.
+/// How the scenery sits in the frame: full, or as a wide card.
+///
+/// Only the frame is chosen here. What the wide card opens up — its
+/// corners, and what fills the band above and below it — is set on the
+/// style step, against the verse it frames; until then the band is the
+/// scenery itself, blurred.
 ///
 /// Deliberately one small panel rather than a fifth wizard step: this
 /// is a look, not a decision worth a screen of its own, and it belongs
 /// next to the scenery it reshapes.
 class _FormatPanel extends StatelessWidget {
-  final VoidCallback onChanged;
-
-  /// Fired only by the two frame pills. Separate from [onChanged]
-  /// because the frame also decides which family of sceneries the grid
-  /// should be showing, where corners and backdrop decide nothing
-  /// outside this panel — and re-deciding the grid on a backdrop tap
-  /// would yank the user out of a tab they had chosen for themselves.
+  /// Fired by the two frame pills: the frame also decides which family
+  /// of sceneries the grid should be showing.
   final ValueChanged<ReelLayout> onLayout;
 
-  /// Handles for the first-run walkthrough: the two frame pills, and
-  /// the corners/backdrop block the wide card opens up. [extrasKey] is
-  /// only attached while that block exists.
+  /// The first-run walkthrough's handle on the two frame pills.
   final GlobalKey? pillsKey;
-  final GlobalKey? extrasKey;
 
   const _FormatPanel({
-    required this.onChanged,
     required this.onLayout,
     this.pillsKey,
-    this.extrasKey,
   });
-
-  void _set(VoidCallback change) {
-    HapticFeedback.selectionClick();
-    change();
-    onChanged();
-  }
 
   void _setLayout(ReelLayout l) {
     HapticFeedback.selectionClick();
@@ -1930,144 +1928,34 @@ class _FormatPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L10n.of(context);
     final wide = creationState.layout == ReelLayout.letterbox;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // The two frames as two whole buttons, side by side: the one
-        // chosen is gold to its edges. A reader hears the pair as the
-        // frame, and each by its own name.
-        Semantics(
-          container: true,
-          header: true,
-          label: l.frameFormat,
-          child: Row(
-            key: pillsKey,
-            children: [
-              Expanded(
-                child: _FormatPill(
-                  icon: Icons.crop_portrait_rounded,
-                  label: l.frameFull,
-                  selected: !wide,
-                  onTap: () => _setLayout(ReelLayout.fullFrame),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _FormatPill(
-                  icon: Icons.crop_16_9_rounded,
-                  label: l.frameLetterbox,
-                  selected: wide,
-                  onTap: () => _setLayout(ReelLayout.letterbox),
-                ),
-              ),
-            ],
-          ),
-        ),
-        // AnimatedSize rather than a conditional child alone: the grid
-        // below slides instead of jumping when the options appear.
-        AnimatedSize(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOut,
-          alignment: Alignment.topCenter,
-          child: wide
-              // The wide card's two finishes in one slim row: its
-              // corners, and what fills the band above and below it.
-              ? Padding(
-                  key: extrasKey,
-                  padding: const EdgeInsets.only(top: 10),
-                  child: _BackdropRow(
-                    onChanged: onChanged,
-                    leading: _CornersToggle(
-                      label: l.roundedCorners,
-                      on: creationState.roundedCorners,
-                      onTap: () => _set(() => creationState
-                          .setRoundedCorners(!creationState.roundedCorners)),
-                    ),
-                  ),
-                )
-              : const SizedBox(width: double.infinity),
-        ),
-      ],
-    );
-  }
-}
-
-/// The wide card's corners, as a small pill that is either on or off.
-class _CornersToggle extends StatelessWidget {
-  final String label;
-  final bool on;
-  final VoidCallback onTap;
-
-  const _CornersToggle(
-      {required this.label, required this.on, required this.onTap});
-
-  static const _ease = Duration(milliseconds: 180);
-
-  @override
-  Widget build(BuildContext context) {
-    return A11yTap(
-      label: label,
-      toggled: on,
-      button: false,
-      onTap: onTap,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: _ease,
-          height: 30,
-          padding: const EdgeInsetsDirectional.fromSTEB(8, 0, 11, 0),
-          decoration: BoxDecoration(
-            color: on
-                ? AppColors.gold.withValues(alpha: 0.12)
-                : AppColors.surface,
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(
-              color: on ? AppColors.gold.withValues(alpha: 0.7) : AppColors.stroke,
+    // The two frames as two whole buttons, side by side: the one chosen
+    // is gold to its edges. A reader hears the pair as the frame, and
+    // each by its own name.
+    return Semantics(
+      container: true,
+      header: true,
+      label: l.frameFormat,
+      child: Row(
+        key: pillsKey,
+        children: [
+          Expanded(
+            child: _FormatPill(
+              icon: Icons.crop_portrait_rounded,
+              label: l.frameFull,
+              selected: !wide,
+              onTap: () => _setLayout(ReelLayout.fullFrame),
             ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedContainer(
-                duration: _ease,
-                width: 22,
-                height: 13,
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: on
-                      ? AppColors.gold.withValues(alpha: 0.6)
-                      : AppColors.stroke,
-                  borderRadius: BorderRadius.circular(7),
-                ),
-                child: AnimatedAlign(
-                  duration: _ease,
-                  curve: Curves.easeOutBack,
-                  alignment: on
-                      ? AlignmentDirectional.centerEnd
-                      : AlignmentDirectional.centerStart,
-                  child: Container(
-                    width: 9,
-                    height: 9,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: on ? AppColors.goldBright : AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 7),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: on ? AppColors.textPrimary : AppColors.textSecondary,
-                    ),
-              ),
-            ],
+          const SizedBox(width: 10),
+          Expanded(
+            child: _FormatPill(
+              icon: Icons.crop_16_9_rounded,
+              label: l.frameLetterbox,
+              selected: wide,
+              onTap: () => _setLayout(ReelLayout.letterbox),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -2137,154 +2025,6 @@ class _FormatPill extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// What fills the band above and below the card: the blur, or one flat
-/// colour. One row, one selection — the whole decision is visible at
-/// once rather than hidden behind a mode switch.
-class _BackdropRow extends StatelessWidget {
-  final VoidCallback onChanged;
-
-  /// Stands at the head of the row, set off by a hairline: the
-  /// corners, so the wide card's finishes are one row, not two.
-  final Widget? leading;
-  const _BackdropRow({required this.onChanged, this.leading});
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L10n.of(context);
-    final blurred = creationState.backdrop == LetterboxBackdrop.blur;
-    return SizedBox(
-      height: 30,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: [
-          if (leading != null) ...[
-            leading!,
-            Center(
-              child: Container(
-                width: 1,
-                height: 18,
-                margin: const EdgeInsets.symmetric(horizontal: 10),
-                color: AppColors.stroke,
-              ),
-            ),
-          ],
-          A11yTap(
-            selected: blurred,
-            child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              HapticFeedback.selectionClick();
-              creationState.setBackdrop(LetterboxBackdrop.blur);
-              onChanged();
-            },
-            child: Container(
-              height: 30,
-              padding: const EdgeInsets.symmetric(horizontal: 11),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(
-                  color: blurred ? AppColors.gold : AppColors.stroke,
-                  width: blurred ? 1.4 : 1,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.blur_on_rounded,
-                      size: 13,
-                      color: blurred
-                          ? AppColors.goldBright
-                          : AppColors.textSecondary),
-                  const SizedBox(width: 6),
-                  Text(
-                    l.backdropBlur,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: blurred
-                              ? AppColors.textPrimary
-                              : AppColors.textSecondary,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            ),
-          ),
-          for (final argb in letterboxBackdropSwatches) ...[
-            const SizedBox(width: 8),
-            _BackdropSwatch(
-              argb: argb,
-              selected:
-                  !blurred && creationState.backdropArgb == argb,
-              onTap: () {
-                HapticFeedback.selectionClick();
-                creationState.setBackdropColor(argb);
-                onChanged();
-              },
-            ),
-          ],
-          // Any other colour for the band, mixed.
-          const SizedBox(width: 8),
-          CustomColourCircle(
-            size: 26,
-            current: creationState.backdropArgb,
-            chosen: !blurred &&
-                !letterboxBackdropSwatches
-                    .contains(creationState.backdropArgb),
-            onPick: (argb) {
-              creationState.setBackdropColor(argb);
-              onChanged();
-            },
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
-    );
-  }
-}
-
-class _BackdropSwatch extends StatelessWidget {
-  final int argb;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _BackdropSwatch({
-    required this.argb,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    // A disc of colour says nothing aloud; the colour's name does.
-    return A11yTap(
-      label: L10n.of(context).a11yColourSwatch(argb),
-      selected: selected,
-      onTap: onTap,
-      child: GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 26,
-        height: 26,
-        margin: const EdgeInsets.symmetric(vertical: 2),
-        decoration: BoxDecoration(
-          color: Color(argb),
-          shape: BoxShape.circle,
-          border: Border.all(
-            // Every swatch keeps a visible rim: without one, black
-            // disappears into the sheet and white into nothing.
-            color: selected
-                ? AppColors.gold
-                : AppColors.stroke.withValues(alpha: 0.9),
-            width: selected ? 2.4 : 1,
-          ),
-        ),
-      ),
       ),
     );
   }
@@ -2470,6 +2210,10 @@ class _UploadTileState extends State<_UploadTile> {
       selected: widget.selected,
       order: widget.order,
       onTap: widget.onTap,
+      // Before a photo is chosen the tile is a plain panel with a
+      // glyph on it, which takes the glass's light in full; a photo
+      // keeps the light low, like every poster beside it.
+      surface: custom == null ? GlassSurface.flat : GlassSurface.picture,
       label: custom == null
           ? l.useYourOwn
           : (custom.fileIsImage ? l.yourPhoto : l.yourVideo),
@@ -2534,7 +2278,8 @@ class _UploadTileState extends State<_UploadTile> {
   }
 }
 
-/// Shared card chrome: rounded clip, gold selection ring, name strip.
+/// Shared card chrome: rounded clip, gold selection ring, name strip,
+/// all of it under the same glass as the posters beside it.
 class _TileFrame extends StatelessWidget {
   final bool selected;
 
@@ -2545,6 +2290,9 @@ class _TileFrame extends StatelessWidget {
   final Widget child;
   final Widget? trailing;
 
+  /// What the glass is over: a photo, or the bare panel.
+  final GlassSurface surface;
+
   const _TileFrame({
     required this.selected,
     required this.onTap,
@@ -2552,6 +2300,7 @@ class _TileFrame extends StatelessWidget {
     required this.child,
     this.order = 0,
     this.trailing,
+    this.surface = GlassSurface.picture,
   });
 
   @override
@@ -2566,7 +2315,11 @@ class _TileFrame extends StatelessWidget {
       selected: selected,
       value: order > 0 ? l.a11ySceneOrder(order) : null,
       hint: trailing == null ? l.a11yOpensGallery : null,
-      child: AnimatedContainer(
+      child: GlassTile(
+        radius: 20,
+        selected: selected,
+        surface: surface,
+        child: AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -2590,7 +2343,7 @@ class _TileFrame extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              child,
+              GlassDepth(child: child),
               Positioned(
                 left: 0,
                 right: 0,
@@ -2634,6 +2387,7 @@ class _TileFrame extends StatelessWidget {
           ),
         ),
       ),
+        ),
       ),
     );
   }

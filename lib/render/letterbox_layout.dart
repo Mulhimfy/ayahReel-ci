@@ -1,3 +1,5 @@
+import 'dart:ui' show Offset;
+
 import 'package:flutter/foundation.dart';
 
 /// How the blurred backdrop is toned down, so the card stays the
@@ -164,4 +166,10 @@ class LetterboxGeometry {
 
   /// Identity of this geometry for a render cache key.
   String get key => '${cardW.round()}x${cardH.round()}';
+
+  /// Where a luminous band's two blooms of light sit, as fractions of
+  /// the frame (see `BandGlow.paint`): behind the card, and in the middle
+  /// of the band the verse sits in.
+  Offset get cardCentre => Offset(0.5, (cardY + cardH / 2) / frameH);
+  Offset get bandCentre => Offset(0.5, (bandTop + bandHeight / 2) / frameH);
 }

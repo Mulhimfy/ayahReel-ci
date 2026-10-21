@@ -126,9 +126,31 @@ class ArenaSetup {
     this.askMeanings = true,
   });
 
-  /// The clocks a round can be set to, and the one it starts on.
+  /// The clocks a round can be set to, and the one a round read back
+  /// without one was played on.
   static const secondsOptions = [10, 15, 20, 30];
   static const defaultSeconds = 20;
+
+  /// What the lobby opens on, every time: the longest clock, and the
+  /// easiest question there is to answer. People found the arena hard
+  /// on its old opening (every kind of question, twenty seconds each),
+  /// so a first round is now the gentlest one, and anything harder is
+  /// one tap away.
+  static const longestSeconds = 30;
+  static const easiestGame = ArenaGame.missingWord;
+
+  /// The kinds of question from the easiest to answer to the hardest:
+  /// a verse missing one word, its end to complete, its words to put in
+  /// order, its surah to name, the verse that follows it, and facts about
+  /// the surah itself.
+  static const byEase = [
+    ArenaGame.missingWord,
+    ArenaGame.completeVerse,
+    ArenaGame.orderWords,
+    ArenaGame.whichSurah,
+    ArenaGame.nextVerse,
+    ArenaGame.surahFacts,
+  ];
 
   /// [seconds] as the index a code carries, 0..3; anything the list
   /// does not hold rounds to the nearest it does.

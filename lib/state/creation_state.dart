@@ -1,6 +1,7 @@
 import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
+import '../data/band_glow.dart';
 import '../data/dedication.dart';
 import '../data/models.dart';
 import '../data/reel_effects.dart';
@@ -63,13 +64,16 @@ const sceneFadeMs = 500;
 
 /// What fills the band above and below a letterbox card.
 enum LetterboxBackdrop {
-  /// A flat colour — black by default, which is what the format looks
-  /// like in the wild.
+  /// A flat colour, picked on the style step.
   colour,
 
   /// The scenery again, filled to the frame and blurred, so the card
-  /// sits in its own light rather than in a void.
+  /// sits in its own light rather than in a void. The default.
   blur,
+
+  /// A luminous ground: a deep gradient with a bloom of light behind
+  /// the card — see [BandGlow].
+  glow,
 }
 
 /// Backdrop colours offered for [LetterboxBackdrop.colour]. Black
@@ -160,7 +164,9 @@ bool isLightGround({
   required int backdropArgb,
 }) =>
     layout == ReelLayout.letterbox &&
-    backdrop == LetterboxBackdrop.colour &&
+    // A luminous ground holds its base in [backdropArgb], as an ink
+    // holds its base in the verse colour.
+    backdrop != LetterboxBackdrop.blur &&
     isLightSurface(backdropArgb);
 
 /// Which reel of which series the wizard is making, when it is making
@@ -258,9 +264,20 @@ class CreationState extends ChangeNotifier {
   /// dragged to (null for its place at the head of the frame).
   bool _surahTitle = SettingsService.state.value.surahTitle;
   Offset? _surahTitleAt;
+
+  /// How much bigger or smaller than its own size the surah's name is
+  /// drawn: pinched on the reel screen, 1 until then.
+  double _surahTitleScale = 1.0;
   ReelLayout _layout = ReelLayout.fullFrame;
   bool _roundedCorners = true;
-  LetterboxBackdrop _backdrop = LetterboxBackdrop.colour;
+  // The band around a wide card starts as the scenery itself, blurred:
+  // the card then sits in its own light, which is what the format looks
+  // best in, and its colours are a choice on the style step.
+  LetterboxBackdrop _backdrop = LetterboxBackdrop.blur;
+
+  /// The luminous ground last chosen for the band; drawn while
+  /// [backdrop] is [LetterboxBackdrop.glow].
+  BandGlow _bandGlow = BandGlow.midnight;
   int _backdropArgb = 0xFF000000;
 
   Reciter? get reciter => _reciter;
@@ -404,6 +421,26 @@ class CreationState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// The accent — the motion's colour, the lit word's — back to the
+  /// house gold for the ground it is on, and free to follow the ground
+  /// again. The verse's colour is left as it is.
+  void resetAccent() {
+    _accentInk = VerseInk.none;
+    _accentChosen = false;
+    _accentArgb = onLightGround ? accentOnLight : accentOnDark;
+    notifyListeners();
+  }
+
+  /// The verse's colour back to what the ground gives it, and free to
+  /// follow it again. The accent is left as it is: it is the motion's
+  /// colour now, and has its own reset there.
+  void resetVerseColour() {
+    _verseInk = VerseInk.none;
+    _inkChosen = false;
+    _ensureLegibleInk();
+    notifyListeners();
+  }
+
   /// Both colours back to what the ground gives them, and free to
   /// follow it again — the reset, which is not a choice of white.
   void resetColours() {
@@ -532,6 +569,20 @@ class CreationState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// The surah's name's size against its own: see [surahTitleScales].
+  double get surahTitleScale => _surahTitleScale;
+
+  /// How far a pinch may take the surah's name: from half its size to
+  /// twice it.
+  static const surahTitleScales = (min: 0.5, max: 2.0);
+
+  void setSurahTitleScale(double scale) {
+    final v = scale.clamp(surahTitleScales.min, surahTitleScales.max);
+    if (_surahTitleScale == v) return;
+    _surahTitleScale = v;
+    notifyListeners();
+  }
+
   /// How the scenery fills the frame. See [ReelLayout].
   ReelLayout get layout => _layout;
 
@@ -543,8 +594,13 @@ class CreationState extends ChangeNotifier {
   LetterboxBackdrop get backdrop => _backdrop;
 
   /// The flat backdrop colour, when [backdrop] is
-  /// [LetterboxBackdrop.colour].
+  /// [LetterboxBackdrop.colour]; the luminous ground's base, when it is
+  /// [LetterboxBackdrop.glow].
   int get backdropArgb => _backdropArgb;
+
+  /// The luminous ground the band is drawn in while [backdrop] is
+  /// [LetterboxBackdrop.glow] (and the one it would be, otherwise).
+  BandGlow get bandGlow => _bandGlow;
 
   /// Whether the verse and watermark currently sit on a pale band.
   /// See [isLightGround].
@@ -578,6 +634,16 @@ class CreationState extends ChangeNotifier {
   void setBackdropColor(int argb) {
     _backdropArgb = argb;
     _backdrop = LetterboxBackdrop.colour;
+    _ensureLegibleInk();
+    notifyListeners();
+  }
+
+  /// The band in a luminous ground; its base stands in for it wherever
+  /// one colour is asked for (see [BandGlow.base]).
+  void setBandGlow(BandGlow g) {
+    _bandGlow = g;
+    _backdropArgb = g.base;
+    _backdrop = LetterboxBackdrop.glow;
     _ensureLegibleInk();
     notifyListeners();
   }
@@ -816,6 +882,7 @@ class CreationState extends ChangeNotifier {
     _verseLines = VerseLines.clamp(prefs.verseLines);
     _surahTitle = prefs.surahTitle;
     _surahTitleAt = null;
+    _surahTitleScale = 1.0;
     // With lines, the scenery follows them unless Settings says each
     // verse; the per-verse pacing is what the app has always started on.
     _pacing = _verseLines > VerseLines.whole && prefs.scenesFollowLines

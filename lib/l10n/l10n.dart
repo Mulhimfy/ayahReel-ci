@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart'
 import 'package:flutter/widgets.dart';
 
 import '../data/arena_engine.dart';
+import '../data/band_glow.dart';
 import '../data/dedication.dart';
 import '../data/fatiha_data.dart';
 import '../data/models.dart';
@@ -642,18 +643,19 @@ class L10n {
   String get tourFinishTitle => _t('Corners and edges', 'الزوايا والحواف',
       'کونے اور کنارے', 'Sudut dan tepi', 'Ecken und Kanten');
   String get tourFinishBody => _t(
-      "With the wide card you also get rounded corners, and a blur "
-          "or a flat colour above and below. You'll see what they do "
-          "on the next screen.",
-      'مع البطاقة العريضة تحصل على زوايا دائرية، وخلفية ضبابية أو '
-          'لون ثابت أعلى وأسفل. سترى أثرها في الشاشة التالية.',
-      'چوڑے کارڈ کے ساتھ گول کونے بھی ملتے ہیں، اور اوپر نیچے دھندلاہٹ '
-          'یا سادہ رنگ۔ اگلی سکرین پر ان کا اثر نظر آ جائے گا۔',
-      'Dengan kartu lebar Anda juga mendapat sudut membulat, dan buram '
-          'atau warna polos di atas dan bawah. Efeknya tampak di layar berikutnya.',
-      'Mit der breiten Karte bekommst du auch abgerundete Ecken und '
-          'oben und unten eine Unschärfe oder eine einfarbige Fläche. '
-          'Was sie bewirken, siehst du auf dem nächsten Bildschirm.');
+      "With the wide card, the space above and below it is your "
+          "scenery, blurred. Its colours and rounded corners are on the "
+          "next screen.",
+      'مع البطاقة العريضة يملأ مشهدك نفسه، مضبَّبًا، ما فوقها وما تحتها. '
+          'ألوانها وزواياها الدائرية في الشاشة التالية.',
+      'چوڑے کارڈ کے ساتھ اوپر نیچے کی جگہ آپ کا منظر ہی دھندلا ہو کر بھرتا '
+          'ہے۔ اس کے رنگ اور گول کونے اگلی سکرین پر ہیں۔',
+      'Dengan kartu lebar, ruang di atas dan bawahnya diisi pemandangan '
+          'Anda yang diburamkan. Warna dan sudut membulatnya ada di layar '
+          'berikutnya.',
+      'Mit der breiten Karte füllt deine Kulisse, unscharf, den Raum '
+          'darüber und darunter. Farben und abgerundete Ecken findest du '
+          'auf dem nächsten Bildschirm.');
 
   // ---- creation wizard: several sceneries ------------------------
   String get multipleScenes => _t('Multiple scenes', 'مشاهد متعددة',
@@ -944,14 +946,11 @@ class L10n {
   String get styleTitle => _t('Make it yours', 'اجعله على ذوقك',
       'اسے اپنا بنائیں', 'Jadikan milikmu', 'Mach es zu deinem');
   String get styleBody => _t(
-      'The type, the colour, the light and the motion. The frame holds '
-          'still, and moves only to show the motion.',
-      'الخط واللون والإضاءة والحركة. اللقطة ثابتة، ولا تتحرك إلا لتعرض الحركة.',
-      'خط، رنگ، روشنی اور حرکت۔ فریم ساکن رہتا ہے، اور صرف حرکت دکھانے کو چلتا ہے۔',
-      'Huruf, warna, cahaya, dan gerak. Bingkai ini diam, dan hanya bergerak '
-          'untuk menunjukkan gerak.',
-      'Schrift, Farbe, Licht und Bewegung. Das Bild steht still und bewegt '
-          'sich nur, um die Bewegung zu zeigen.');
+      'The type, the colour, the effects and the motion.',
+      'الخط واللون والتأثيرات والحركة.',
+      'خط، رنگ، ایفیکٹس اور حرکت۔',
+      'Huruf, warna, efek, dan gerak.',
+      'Schrift, Farbe, Effekte und Bewegung.');
   String get styleTabType =>
       _t('Type', 'الخط', 'خط', 'Huruf', 'Schrift');
   String get styleTabColour =>
@@ -968,70 +967,55 @@ class L10n {
       _t('The verse', 'الآية', 'آیت', 'Ayat', 'Der Vers');
   String get styleTranslationFace => _t('The translation', 'الترجمة',
       'ترجمہ', 'Terjemahan', 'Die Übersetzung');
-  String get styleSize => _t('Size', 'الحجم', 'سائز', 'Ukuran', 'Größe');
   String get styleVerseColour =>
       _t('Verse', 'الآية', 'آیت', 'Ayat', 'Vers');
-  String get styleVerseColourBody => _t(
-      'The Arabic, and the translation under it.',
-      'النص العربي والترجمة تحته.',
-      'عربی متن، اور اس کے نیچے ترجمہ۔',
-      'Teks Arab, dan terjemahan di bawahnya.',
-      'Der arabische Text und die Übersetzung darunter.');
-  /// The wide card's third colour: what fills the band above and below
-  /// it, set here as well as on the scenery screen.
+  /// The wide card's second colour: what fills the band above and below
+  /// it, set on the style step alone.
   String get styleBackdropColour =>
       _t('Background', 'الخلفية', 'پس منظر', 'Latar', 'Hintergrund');
-  String get styleBackdropBody => _t(
-      'What fills the band above and below the wide card: its scenery, '
-          'blurred, or one colour.',
-      'ما يملأ الشريط فوق البطاقة العريضة وتحتها: مشهدها مموّهًا، أو لون '
-          'واحد.',
-      'چوڑے کارڈ کے اوپر اور نیچے کی پٹی میں کیا ہو: اس کا منظر دھندلا، یا '
-          'ایک رنگ۔',
-      'Isi pita di atas dan di bawah kartu lebar: pemandangannya yang '
-          'diburamkan, atau satu warna.',
-      'Was das Band über und unter der breiten Karte füllt: ihre Kulisse, '
-          'verschwommen, oder eine Farbe.');
   String get styleAccentColour => _t('Accent', 'اللون المميّز',
       'نمایاں رنگ', 'Aksen', 'Akzent');
+
+  /// A luminous ground for the wide card's band, by name.
+  String bandGlowName(BandGlow g) => switch (g) {
+        BandGlow.midnight => _t('Midnight', 'منتصف الليل', 'آدھی رات',
+            'Tengah malam', 'Mitternacht'),
+        BandGlow.emerald =>
+          _t('Emerald', 'زمرّد', 'زمرد', 'Zamrud', 'Smaragd'),
+        BandGlow.amethyst =>
+          _t('Amethyst', 'جمشت', 'جمشت', 'Kecubung', 'Amethyst'),
+        BandGlow.aurora => _t('Aurora', 'الشفق القطبي', 'شفقِ قطبی',
+            'Aurora', 'Polarlicht'),
+        BandGlow.ember => _t('Ember', 'جمر', 'انگارہ', 'Bara', 'Glut'),
+        BandGlow.gold => _t('Gold leaf', 'ورق الذهب', 'سونے کا ورق',
+            'Daun emas', 'Blattgold'),
+        BandGlow.dusk =>
+          _t('Dusk', 'الغسق', 'شام', 'Senja', 'Abenddämmerung'),
+        BandGlow.ocean => _t('Deep sea', 'أعماق البحر', 'گہرا سمندر',
+            'Laut dalam', 'Tiefsee'),
+        BandGlow.rose => _t('Rose', 'وردي', 'گلابی', 'Mawar', 'Rosé'),
+        BandGlow.obsidian => _t('Obsidian', 'سَبَج', 'سنگِ سیاہ',
+            'Obsidian', 'Obsidian'),
+        BandGlow.pearl =>
+          _t('Pearl', 'لؤلؤ', 'موتی', 'Mutiara', 'Perlmutt'),
+        BandGlow.dawn =>
+          _t('Dawn', 'الفجر', 'صبح', 'Fajar', 'Morgenröte'),
+      };
+
+  /// Where the effects panel's one slider waits, until an effect that
+  /// has an amount is on.
+  String get styleEffectAmountHint => _t(
+      'Turn an effect on to set how much',
+      'فعّل تأثيرًا لتضبط مقداره',
+      'مقدار طے کرنے کے لیے کوئی ایفیکٹ آن کریں',
+      'Nyalakan efek untuk mengatur kadarnya',
+      'Schalte einen Effekt ein, um seine Stärke zu wählen');
 
   /// Headings over the colour panel's two rails: the inks that glow,
   /// and the flat colours.
   String get styleLuminous =>
       _t('Luminous', 'ألوان متوهجة', 'چمکدار رنگ', 'Bercahaya', 'Leuchtend');
-  String get styleSolid =>
-      _t('Solid', 'ألوان صافية', 'سادہ رنگ', 'Polos', 'Uni');
-  String get styleAccentBody => _t(
-      'The rule under the verse, and the word as it is recited.',
-      'الخط الفاصل تحت الآية، والكلمة أثناء تلاوتها.',
-      'آیت کے نیچے کی لکیر، اور تلاوت کے وقت لفظ۔',
-      'Garis di bawah ayat, dan kata saat dibacakan.',
-      'Die Linie unter dem Vers und das Wort, während es rezitiert wird.');
-  /// The accent panel's line for a voice the app cannot follow word by
-  /// word: there is no recited word to colour, only the rule.
-  String get styleAccentRuleBody => _t(
-      'The rule under the verse.',
-      'الخط الفاصل تحت الآية.',
-      'آیت کے نیچے کی لکیر۔',
-      'Garis di bawah ayat.',
-      'Die Linie unter dem Vers.');
   String get styleLook => _t('Look', 'المظهر', 'لُک', 'Tampilan', 'Look');
-  String get styleEffectsBody => _t(
-      'All of this is rendered into the reel itself, not laid over it '
-          'afterwards.',
-      'كل هذا يُدمج في المقطع نفسه، ولا يُضاف فوقه لاحقًا.',
-      'یہ سب ریل کے اندر ہی بنتا ہے، بعد میں اوپر نہیں چڑھایا جاتا۔',
-      'Semua ini menyatu ke dalam reel itu sendiri, bukan ditempel '
-          'belakangan.',
-      'All das wird in das Reel selbst gerendert und nicht nachträglich '
-          'darübergelegt.');
-  String get styleGrainNote => _t(
-      'In the reel the grain moves from frame to frame; here it holds '
-          'still.',
-      'في المقطع تتغيّر الحُبيبات مع كل إطار؛ هنا تبقى ثابتة.',
-      'ریل میں دانہ داری ہر فریم کے ساتھ بدلتی ہے؛ یہاں ساکن رہتی ہے۔',
-      'Di dalam reel butirannya berubah tiap bingkai; di sini diam.',
-      'Im Reel wandert das Korn von Bild zu Bild; hier steht es still.');
   String get effectWarmth =>
       _t('Warmth', 'الدفء', 'گرماہٹ', 'Kehangatan', 'Wärme');
   String get effectVibrance => _t('Vibrance', 'حيوية الألوان',
@@ -1043,6 +1027,11 @@ class L10n {
   String get effectFade => _t('Fade in and out', 'ظهور واختفاء تدريجي',
       'آہستہ ابھرنا اور معدوم ہونا', 'Muncul dan memudar',
       'Ein- und ausblenden');
+
+  /// The same, where a switch has half a row for its name; the reader
+  /// still hears [effectFade].
+  String get effectFadeShort =>
+      _t('Fade', 'تلاشٍ', 'فیڈ', 'Memudar', 'Blende');
 
   /// The designed grades, by name. Each is a whole look in one tap;
   /// the rows under them nudge it.
@@ -4137,6 +4126,13 @@ class L10n {
       'تنافُس کھولتا ہے، قرآن کا میدان',
       'Membuka Tanafus, arena Al-Qur’an',
       'Öffnet Tanafus, die Quran-Arena');
+  /// Under the arena's name: what it is, in a few words.
+  String get arenaWhat => _t(
+      'A Quran quiz · test what you know',
+      'مسابقة قرآنية · اختبر حفظك',
+      'قرآنی کوئز · اپنا علم آزمائیں',
+      'Kuis Al-Qur’an · uji hafalanmu',
+      'Ein Quran-Quiz · teste dein Wissen');
   String get arenaModeTitle => _t('How do you play?', 'كيف تلعب؟',
       'کیسے کھیلیں گے؟', 'Cara bermain?', 'Wie spielst du?');
   String get arenaSolo =>
@@ -5960,16 +5956,28 @@ class L10n {
   /// Under the choice: what timing the cuts follow, so nobody wonders
   /// whether a line can change in the middle of a word.
   String get linesTimingNote => _t(
-      'Each line changes as the reciter finishes it. A verse whose lines '
-          "can't be timed to the recitation stays whole.",
-      'يتغير كل سطر حين ينتهي القارئ منه. والآية التي لا يمكن ضبط أسطرها '
-          'على التلاوة تبقى كاملة.',
-      'ہر سطر قاری کے ختم کرتے ہی بدلتی ہے۔ جس آیت کی سطریں تلاوت کے '
-          'ساتھ نہ مل سکیں وہ پوری رہتی ہے۔',
-      'Setiap baris berganti saat qari selesai membacanya. Ayat yang '
-          'barisnya tidak bisa diselaraskan dengan bacaan tetap utuh.',
-      'Jede Zeile wechselt, wenn der Rezitator sie beendet. Ein Vers, '
-          'dessen Zeilen sich nicht zeitlich zuordnen lassen, bleibt ganz.');
+      'Each line changes as the reciter finishes it.',
+      'يتغير كل سطر حين ينتهي القارئ منه.',
+      'ہر سطر قاری کے ختم کرتے ہی بدلتی ہے۔',
+      'Setiap baris berganti saat qari selesai membacanya.',
+      'Jede Zeile wechselt, wenn der Rezitator sie beendet.');
+
+  /// Under the lines choice, when some of this reel's long verses could
+  /// not be cut to the recitation and are shown whole.
+  String get linesSomeWhole => _t(
+      'Some verses here stay whole.',
+      'بعض الآيات هنا تبقى كاملة.',
+      'یہاں کچھ آیات پوری رہتی ہیں۔',
+      'Beberapa ayat di sini tetap utuh.',
+      'Einige Verse bleiben hier ganz.');
+
+  /// And when none of them could.
+  String get linesAllWhole => _t(
+      'With this voice, these verses stay whole.',
+      'مع هذا الصوت تبقى هذه الآيات كاملة.',
+      'اس آواز کے ساتھ یہ آیات پوری رہتی ہیں۔',
+      'Dengan suara ini, ayat-ayat ini tetap utuh.',
+      'Mit dieser Stimme bleiben diese Verse ganz.');
   String get scenesChangeTitle => _t('Scenes change', 'تتغير المشاهد',
       'مناظر بدلتے ہیں', 'Adegan berganti', 'Szenen wechseln');
   String get scenesEveryLine => _t('Every line', 'مع كل سطر', 'ہر سطر پر',
@@ -5990,11 +5998,16 @@ class L10n {
   String get surahNameTitle =>
       _t('Surah name', 'اسم السورة', 'سورت کا نام', 'Nama surah', 'Surenname');
   String get surahNameNote => _t(
-      'At the top of new reels. Drag it anywhere on the preview.',
-      'أعلى المقاطع الجديدة. اسحبه إلى أي مكان في المعاينة.',
-      'نئی ریلز کے اوپر۔ پیش نظارہ میں اسے کہیں بھی گھسیٹیں۔',
-      'Di atas reel baru. Seret ke mana saja di pratinjau.',
-      'Oben in neuen Reels. Zieh ihn in der Vorschau, wohin du willst.');
+      'At the top of new reels. Drag it anywhere on the preview, and '
+          'pinch it to size.',
+      'أعلى المقاطع الجديدة. اسحبه إلى أي مكان في المعاينة، وقرّب '
+          'إصبعيك أو باعدهما لتغيير حجمه.',
+      'نئی ریلز کے اوپر۔ پیش نظارہ میں اسے کہیں بھی گھسیٹیں، اور دو '
+          'انگلیوں سے چھوٹا بڑا کریں۔',
+      'Di atas reel baru. Seret ke mana saja di pratinjau, dan cubit '
+          'untuk mengubah ukurannya.',
+      'Oben in neuen Reels. Zieh ihn in der Vorschau, wohin du willst, '
+          'und zieh ihn mit zwei Fingern größer oder kleiner.');
   String a11ySurahNamePill(bool on) => on
       ? _t('Surah name, shown', 'اسم السورة، ظاهر', 'سورت کا نام، دکھایا گیا',
           'Nama surah, ditampilkan', 'Surenname, sichtbar')
@@ -6022,8 +6035,6 @@ class L10n {
           'bewegt sich genauso.');
   String motionPresetName(String key) => switch (key) {
         'still' => _t('Still', 'ثابت', 'ساکن', 'Diam', 'Ruhig'),
-        'breathe' => _t('Breathe', 'تنفّس', 'سانس', 'Napas', 'Atem'),
-        'rise' => _t('Rise', 'صعود', 'ابھار', 'Naik', 'Aufstieg'),
         'thread' => _t('Golden thread', 'خيط ذهبي', 'سنہری دھاگا',
             'Benang emas', 'Goldener Faden'),
         'light' => _t('Light', 'نور', 'نور', 'Cahaya', 'Licht'),
@@ -6033,40 +6044,15 @@ class L10n {
           _t('Gilded', 'مُذهَّب', 'سنہرا', 'Berlapis emas', 'Vergoldet'),
         _ => key,
       };
+  /// The motion's colour, on the style step: the light, the thread and
+  /// the lit words all take it.
+  String get motionColour => _t('Motion colour', 'لون الحركة', 'حرکت کا رنگ',
+      'Warna gerak', 'Farbe der Bewegung');
+
   /// A motion mixed by hand, matching none of the designed looks: what
   /// the Customize row says after the lines.
   String get motionCustom => _t('Your mix', 'مزيجك الخاص', 'آپ کا امتزاج',
       'Campuran Anda', 'Eigene Mischung');
-  String get motionArrival => _t('Arrives and leaves', 'الظهور والاختفاء',
-      'آنا اور جانا', 'Muncul dan hilang', 'Kommen und Gehen');
-  String get arrivalCut => _t('Cut', 'قطع', 'کٹ', 'Potong', 'Schnitt');
-  String get arrivalFade =>
-      _t('Fade', 'تلاشٍ', 'دھیرے دھیرے', 'Pudar', 'Blende');
-  String get arrivalRise => _t('Rise', 'صعود', 'ابھار', 'Naik', 'Aufstieg');
-  String get motionThread => _t(
-      'Golden thread under the words',
-      'خيط ذهبي تحت الكلمات',
-      'الفاظ کے نیچے سنہری دھاگا',
-      'Benang emas di bawah kata',
-      'Goldener Faden unter den Worten');
-  String get motionLight => _t(
-      'Light passing through the letters',
-      'نور يمرّ عبر الحروف',
-      'حروف سے گزرتا نور',
-      'Cahaya melewati huruf',
-      'Licht, das durch die Buchstaben zieht');
-  String get motionTrail => _t(
-      'Recited words stay gold',
-      'الكلمات المتلوّة تبقى ذهبية',
-      'پڑھے گئے الفاظ سنہرے رہیں',
-      'Kata yang dibaca tetap emas',
-      'Rezitierte Worte bleiben golden');
-  String get motionUnveil => _t(
-      'Words wait faint until recited',
-      'تبقى الكلمات باهتة حتى تُتلى',
-      'الفاظ پڑھے جانے تک مدھم رہیں',
-      'Kata tetap samar hingga dibacakan',
-      'Worte bleiben blass, bis sie rezitiert werden');
   String get motionFollowsWords => _t(
       'Follows each word with voices that have word timing',
       'يتبع كل كلمة مع الأصوات التي لها توقيت للكلمات',

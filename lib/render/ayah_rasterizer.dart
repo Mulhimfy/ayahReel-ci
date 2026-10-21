@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../data/band_glow.dart';
 import '../data/models.dart';
 import '../data/quran_text_service.dart';
 import '../data/verse_lines.dart';
@@ -15,6 +16,7 @@ import '../data/verse_translation.dart';
 import '../data/whole_file.dart';
 import '../state/creation_state.dart' show TextPreset;
 import '../widgets/ayah_overlay.dart';
+import '../widgets/band_glow_ground.dart';
 import '../widgets/reel_watermark.dart';
 import '../widgets/surah_title.dart';
 import '../widgets/verse_flourish.dart';
@@ -379,17 +381,45 @@ abstract final class AyahRasterizer {
     return f;
   }
 
+  /// A luminous band behind a wide card, the whole frame of it: the
+  /// picture the exporter lays the card on, drawn by the painter the
+  /// preview draws the band with (see [BandGlow.paint]).
+  ///
+  /// The _v1 versions the design: bump it if the grounds ever change.
+  static Future<File> rasterizeBandGlow(
+      BandGlow glow, LetterboxGeometry box) async {
+    final dir = await renderDir();
+    final f = File('${dir.path}/ayah_band_v1_${glow.key}_${box.key}.png');
+    if (f.existsSync() && f.lengthSync() > 0) return f;
+    final bytes = await widgetToPng(
+      SizedBox(
+        width: exportWidth,
+        height: 1920,
+        child: BandGlowGround(glow: glow, box: box),
+      ),
+    );
+    await writeWholeBytes(f, bytes);
+    return f;
+  }
+
   /// The surah's name, shrink-wrapped to its glyphs plus the shadow
   /// margin, as [rasterizeDedication] does a dedication and for the
   /// same reason. The exporter centres it where [ReelSurahTitle] puts
   /// it on the preview; see `surahTitleOverlay`.
   ///
   /// The _v1 versions the design: bump it if the title ever changes.
+  ///
+  /// [scale] is how far it was pinched from its own size (see
+  /// `CreationState.surahTitleScale`): the whole line is laid out that
+  /// much larger or smaller, as [ReelSurahTitle] lays it out on screen.
   static Future<File> rasterizeSurahTitle(int surah,
-      {required VerseTranslation edition, bool onLight = false}) async {
+      {required VerseTranslation edition,
+      bool onLight = false,
+      double scale = 1.0}) async {
     final dir = await renderDir();
+    final sized = (scale * 100).round();
     final f = File('${dir.path}/ayah_title_v1_${surah}_${edition.code}'
-        '${onLight ? '_lt' : ''}.png');
+        '${onLight ? '_lt' : ''}${sized == 100 ? '' : '_z$sized'}.png');
     if (f.existsSync() && f.lengthSync() > 0) return f;
     final bytes = await widgetToPng(
       MediaQuery(
@@ -403,7 +433,7 @@ abstract final class AyahRasterizer {
             padding: const EdgeInsets.all(ReelWatermarkMark.shadowMargin),
             child: SurahTitleLine(
               surah: surah,
-              width: exportWidth,
+              width: exportWidth * sized / 100,
               edition: edition,
               onLight: onLight,
             ),

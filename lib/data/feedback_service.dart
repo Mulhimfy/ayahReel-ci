@@ -59,7 +59,7 @@ enum FeedbackSource {
 /// one that failed. No identifier, no file paths, and nothing at all
 /// unless a button was pressed. See [payload].
 ///
-/// **When it asks.** Twice — at the eighth render and the twentieth —
+/// **When it asks.** Twice — at the fifteenth render and the fortieth —
 /// and never again by itself; see [milestones] and [decide]. Unlike
 /// the rating ask there is no store quota here, which means the only
 /// thing stopping this from being a nag is the policy in this file.
@@ -119,21 +119,20 @@ abstract final class FeedbackService {
   /// costs one key, and it is what the inbox filters already match.
   static const _app = 'AyahReel';
 
-  /// Renders at which the prompt opens itself, in order: the eighth
-  /// reel, and the twentieth. Nothing after that.
+  /// Renders at which the prompt opens itself, in order: the fifteenth
+  /// reel, and the fortieth. Nothing after that.
   ///
-  /// Not early. The first few renders belong to the reminder invitation
-  /// and the store's rating sheet, and they are also the renders where
-  /// the user has the least to say — they have seen the app work a
-  /// handful of times. By the eighth reel they have a habit forming and
-  /// a list of things that got in its way; by the twentieth they are a
-  /// regular, and a regular's note is the one worth reading twice.
-  /// Asking at the second and fifth, as this used to, collected first
-  /// impressions from people who had not yet formed one.
+  /// Not early. The first renders belong to the reminder invitation and
+  /// the store's rating sheet, and they are also the renders where the
+  /// user has the least to say. By the fifteenth reel the app is a habit
+  /// and its frictions are known; by the fortieth they are a regular,
+  /// and a regular's note is the one worth reading twice. Asking at the
+  /// second and fifth, and then at the eighth, came too soon: users said
+  /// so (2026-10-21).
   ///
   /// Two entries, so a user who ignores both is left alone for good.
   /// The Settings row does not go anywhere.
-  static const milestones = <int>[8, 20];
+  static const milestones = <int>[15, 40];
 
   /// Longest note accepted. Generous — the whole point is the sentence
   /// — but bounded, so a pasted logfile cannot become the payload.
@@ -174,13 +173,13 @@ abstract final class FeedbackService {
   /// The whole policy, with no I/O in it: given what we know, should
   /// this render open the sheet?
   ///
-  ///     renders 1–7 ─▶ (the reminder and the rating own the early ones)
-  ///     render 8    ─▶ ask
-  ///     render 20   ─▶ ask, if the first one went unanswered
+  ///     renders 1–14 ─▶ (the reminder and the rating own the early ones)
+  ///     render 15    ─▶ ask
+  ///     render 40    ─▶ ask, if the first one went unanswered
   ///     after       ─▶ never, on its own
   ///
   /// Counts only — there is no elapsed-time gate, for the same reason
-  /// the rating ladder has none: a user who makes eight reels in one
+  /// the rating ladder has none: a user who makes fifteen reels in one
   /// sitting is exactly the user worth asking, and waiting a day to
   /// catch them means catching them somewhere they were not thinking
   /// about the app.

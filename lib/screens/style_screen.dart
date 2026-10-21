@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
+import '../data/band_glow.dart';
 import '../data/media_aspect.dart';
 import '../data/models.dart';
 import '../data/quran_repository.dart';
@@ -25,6 +26,7 @@ import '../state/creation_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/a11y.dart';
 import '../widgets/ayah_overlay.dart';
+import '../widgets/band_glow_ground.dart';
 import '../widgets/colour_picker.dart';
 import '../widgets/glow_button.dart';
 import '../widgets/ink_swatch.dart';
@@ -89,9 +91,10 @@ class StyleScreen extends StatefulWidget {
 /// Which panel is open under the frame.
 enum _Panel { type, colour, effects, motion }
 
-/// Which of the reel's colours the palette is setting: the verse's, the
-/// accent's, and — on a wide card — the band's around it.
-enum _Target { verse, accent, backdrop }
+/// Which of the reel's colours the palette is setting: the verse's, and
+/// — on a wide card — the band's around it. The accent is the motion's
+/// colour, set on the motion panel.
+enum _Target { verse, backdrop }
 
 class _StyleScreenState extends State<StyleScreen> {
   _Panel _panel = _Panel.type;
@@ -191,11 +194,17 @@ class _StyleScreenState extends State<StyleScreen> {
           ..setTextScale(1.0)
           ..setTextPreset(TextPreset.classic);
       case _Panel.colour:
-        s.resetColours();
+        // The verse's colour, and the band back to the scenery blurred.
+        s.resetVerseColour();
+        if (s.layout == ReelLayout.letterbox) {
+          s.setBackdrop(LetterboxBackdrop.blur);
+        }
       case _Panel.effects:
         s.setEffects(ReelEffects.off);
       case _Panel.motion:
-        s.setMotion(VerseMotion.standard);
+        s
+          ..setMotion(VerseMotion.standard)
+          ..resetAccent();
     }
   }
 
@@ -246,13 +255,13 @@ class _StyleScreenState extends State<StyleScreen> {
           listenable: creationState,
           builder: (context, _) => LayoutBuilder(
             builder: (context, box) {
-              // The panel takes a fixed share and scrolls inside it;
-              // the frame takes what is left. The other way round —
-              // a frame sized to the screen and a panel taking the
-              // remainder — leaves a phone with a short screen showing
-              // half a row of swatches and no way to know there are
-              // more.
-              final panelH = (box.maxHeight * 0.40).clamp(180.0, 272.0);
+              // The panel takes a fixed share, and every panel is laid
+              // out to fit it whole — no row below the fold, nothing to
+              // scroll to — on the smallest phone; the frame takes what
+              // is left. The other way round — a frame sized to the
+              // screen and a panel taking the remainder — leaves a phone
+              // with a short screen showing half a row of swatches.
+              final panelH = (box.maxHeight * 0.40).clamp(206.0, 256.0);
               return Column(
                 children: [
                   Padding(
@@ -332,8 +341,6 @@ class _StyleScreenState extends State<StyleScreen> {
         _Panel.colour => _ColourPanel(
             target: _shownTarget,
             onTarget: (t) => _tap(() => setState(() => _target = t)),
-            wordHighlight: creationState.reciter != null &&
-                WordAlignService.supports(creationState.reciter!),
           ),
         // Handed the value it draws rather than reaching for it.
         // Not a style point: a panel that takes nothing can be built
@@ -345,15 +352,24 @@ class _StyleScreenState extends State<StyleScreen> {
             key: ValueKey(_resets),
             effects: creationState.effects,
           ),
-        _Panel.motion => ListView(
-            padding: const EdgeInsets.only(bottom: 14),
-            children: [
-              MotionPicker(
-                motion: creationState.motion,
-                hasWords: _hasWords,
-                onChanged: creationState.setMotion,
+        _Panel.motion => SingleChildScrollView(
+            padding: const EdgeInsets.only(top: 12, bottom: 8),
+            child: MotionPicker(
+              motion: creationState.motion,
+              hasWords: _hasWords,
+              onChanged: creationState.setMotion,
+              heading: false,
+              tint: AyahOverlay.lightTintOf(
+                  Color(creationState.accentArgb), creationState.accentInk),
+              below: MotionColourRow(
+                accentArgb: creationState.accentArgb,
+                accentInk: creationState.accentInk,
+                onLight: creationState.onLightGround,
+                onColour: creationState.setAccentColor,
+                onInk: creationState.setAccentInk,
+                onGold: creationState.resetAccent,
               ),
-            ],
+            ),
           ),
       };
 }
@@ -573,6 +589,8 @@ class _StageState extends State<_Stage> {
             ] else ...[
               if (s.backdrop == LetterboxBackdrop.colour)
                 ColoredBox(color: Color(s.backdropArgb))
+              else if (s.backdrop == LetterboxBackdrop.glow)
+                BandGlowGround(glow: s.bandGlow, box: geo)
               else
                 // The blurred backdrop, straight rather than through
                 // the preview's shrink-and-upscale trick: that exists
@@ -631,6 +649,7 @@ class _StageState extends State<_Stage> {
                   surah: s.surah,
                   edition: translation,
                   at: s.surahTitleAt,
+                  scale: s.surahTitleScale,
                   letterbox: geo,
                   onLight: ReelDedication.onLightAt(
                       s.surahTitleAt ?? ReelSurahTitle.defaultCentre(geo),
@@ -907,43 +926,69 @@ class _PanelTabs extends StatelessWidget {
   }
 }
 
-/// A small heading inside a panel, with an optional line under it.
-class _PanelHeading extends StatelessWidget {
-  final String title;
-  final String? body;
+/// [name] with its first letter a capital, for a heading: the colours'
+/// names are written to be read inside a sentence.
+String _cap(String name) =>
+    name.isEmpty ? name : name[0].toUpperCase() + name.substring(1);
 
-  const _PanelHeading(this.title, {this.body});
+/// A one-line heading inside a panel: what the row under it sets, and
+/// what it is set to now.
+class _MiniHeading extends StatelessWidget {
+  final String title;
+  final String? value;
+
+  const _MiniHeading(this.title, {this.value});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 14, 24, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          A11yHeader(
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.6,
-                color: AppColors.textSecondary,
+      padding: const EdgeInsets.fromLTRB(22, 0, 22, 4),
+      child: A11yHeader(
+        child: Text.rich(
+          TextSpan(children: [
+            TextSpan(text: title.toUpperCase()),
+            if (value != null)
+              TextSpan(
+                text: '  ·  $value',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.2,
+                  color: AppColors.textPrimary,
+                ),
               ),
-            ),
+          ]),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 11,
+            height: 1.3,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.6,
+            color: AppColors.textSecondary,
           ),
-          if (body != null) ...[
-            const SizedBox(height: 3),
-            Text(
-              body!,
-              style: const TextStyle(
-                  fontSize: 11.5, height: 1.35, color: AppColors.textSecondary),
-            ),
-          ],
-        ],
+        ),
       ),
     );
   }
+}
+
+/// A panel's controls, all of them in view: laid out to fit the panel's
+/// height on the smallest phone the app runs on. The scroll view is only
+/// a net for a screen smaller still, or type set larger than the app's
+/// own; on every phone the panel was laid out for, nothing moves.
+class _PanelBody extends StatelessWidget {
+  final List<Widget> children;
+
+  const _PanelBody({required this.children});
+
+  @override
+  Widget build(BuildContext context) => SingleChildScrollView(
+        padding: const EdgeInsets.only(top: 10, bottom: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
+        ),
+      );
 }
 
 // ---------------------------------------------------------------------
@@ -964,27 +1009,23 @@ class _TypePanel extends StatelessWidget {
     final edition = SettingsService.state.value.translation;
     final faces =
         TranslationFace.forScript(arabicScript: edition.arabicScript);
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 10),
+    return _PanelBody(
       children: [
-        _PanelHeading(l.styleVerseFace),
+        _MiniHeading(l.styleVerseFace, value: s.verseFace.label),
         SizedBox(
-          height: _FaceCard.twoLineHeight,
+          height: _FaceCard.arabicHeight,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 18),
             itemCount: VerseFace.values.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            separatorBuilder: (_, __) => const SizedBox(width: 6),
             itemBuilder: (_, i) {
               final f = VerseFace.values[i];
               return _FaceCard(
                 specimen: f.specimen,
                 label: f.label,
-                // Its own line height: the marks under a Quran face
-                // reach well below the letters, and a line set any
-                // tighter puts them on the name beneath.
-                style: AppTheme.quran(size: 16, face: f)
-                    .copyWith(color: AppColors.textPrimary),
+                style: AppTheme.quran(size: 13, face: f)
+                    .copyWith(color: AppColors.textPrimary, height: 1.5),
                 direction: TextDirection.rtl,
                 selected: s.verseFace == f,
                 section: l.styleVerseFace,
@@ -996,34 +1037,33 @@ class _TypePanel extends StatelessWidget {
             },
           ),
         ),
+        const SizedBox(height: 8),
         // Headed by the edition's own name rather than the word
         // "translation": somebody setting an Urdu line should see اردو
         // over the row that decides how their Urdu looks.
-        _PanelHeading('${l.styleTranslationFace} · ${edition.nativeName}'),
+        _MiniHeading('${l.styleTranslationFace} · ${edition.nativeName}',
+            value: s.typography.translation.label),
         SizedBox(
           // A Latin face is named in itself, one line; an Arabic-script
           // one needs its Latin name under its specimen, as the verse's.
           height: edition.arabicScript
-              ? _FaceCard.twoLineHeight
-              : _FaceCard.oneLineHeight,
+              ? _FaceCard.arabicHeight
+              : _FaceCard.latinHeight,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 18),
             itemCount: faces.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            separatorBuilder: (_, __) => const SizedBox(width: 6),
             itemBuilder: (_, i) {
               final f = faces[i];
               return _FaceCard(
                 specimen: f.specimen,
                 label: f.label,
-                // Latin names sit on one tight line; an Arabic-script
-                // specimen keeps its own height, for the same reason as
-                // the verse's (Nastaliq reaches furthest of all).
                 style: f.arabicScript
-                    ? AppTheme.translation(size: 13.5, face: f)
-                        .copyWith(color: AppColors.textPrimary)
-                    : AppTheme.translation(size: 14.5, face: f)
-                        .copyWith(color: AppColors.textPrimary, height: 1.3),
+                    ? AppTheme.translation(size: 13, face: f)
+                        .copyWith(color: AppColors.textPrimary, height: 1.5)
+                    : AppTheme.translation(size: 14, face: f)
+                        .copyWith(color: AppColors.textPrimary, height: 1.25),
                 direction: edition.direction,
                 selected: s.typography.translation == f,
                 section: l.styleTranslationFace,
@@ -1035,9 +1075,9 @@ class _TypePanel extends StatelessWidget {
             },
           ),
         ),
-        _PanelHeading(l.styleSize),
+        const SizedBox(height: 6),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 18),
           child: Row(
             children: [
               const ExcludeSemantics(
@@ -1057,15 +1097,18 @@ class _TypePanel extends StatelessWidget {
                         overlayShape:
                             const RoundSliderOverlayShape(overlayRadius: 11),
                       ),
-                      child: Slider(
-                        value: s.textScale,
-                        min: 0.7,
-                        max: 1.5,
-                        activeColor: AppColors.gold,
-                        inactiveColor: AppColors.surfaceRaised,
-                        semanticFormatterCallback: (v) =>
-                            '${(v * 100).round()}%',
-                        onChanged: s.setTextScale,
+                      child: SizedBox(
+                        height: 30,
+                        child: Slider(
+                          value: s.textScale,
+                          min: 0.7,
+                          max: 1.5,
+                          activeColor: AppColors.gold,
+                          inactiveColor: AppColors.surfaceRaised,
+                          semanticFormatterCallback: (v) =>
+                              '${(v * 100).round()}%',
+                          onChanged: s.setTextScale,
+                        ),
                       ),
                     ),
                   ),
@@ -1079,10 +1122,18 @@ class _TypePanel extends StatelessWidget {
             ],
           ),
         ),
+        const SizedBox(height: 4),
+        // The card's three designed looks: how the letters stand off the
+        // scenery — a shadow, a glow, or nothing but the letters. Type,
+        // not motion: they change how the verse is set, not what it does.
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          // Shrunk rather than cut where three long names in a large type
+          // would run off the edge.
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               for (final p in TextPreset.values) ...[
                 _Chip(
@@ -1101,6 +1152,7 @@ class _TypePanel extends StatelessWidget {
               ],
             ],
           ),
+          ),
         ),
       ],
     );
@@ -1117,10 +1169,10 @@ class _TypePanel extends StatelessWidget {
 /// its name in itself, once, and the card is a single line.
 class _FaceCard extends StatelessWidget {
   /// A specimen with the name under it.
-  static const twoLineHeight = 58.0;
+  static const arabicHeight = 48.0;
 
   /// A name set in its own face.
-  static const oneLineHeight = 40.0;
+  static const latinHeight = 34.0;
 
   final String specimen;
   final String label;
@@ -1155,10 +1207,10 @@ class _FaceCard extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          width: named ? null : 92,
-          constraints: named ? const BoxConstraints(minWidth: 64) : null,
+          width: named ? null : 80,
+          constraints: named ? const BoxConstraints(minWidth: 58) : null,
           alignment: Alignment.center,
-          padding: EdgeInsets.symmetric(horizontal: named ? 14 : 6),
+          padding: EdgeInsets.symmetric(horizontal: named ? 12 : 5),
           decoration: BoxDecoration(
             color: selected
                 ? AppColors.gold.withValues(alpha: 0.12)
@@ -1190,13 +1242,14 @@ class _FaceCard extends StatelessWidget {
                       // reader has the face's name from the label.
                       style: style,
                     ),
+                    const SizedBox(height: 1),
                     Text(
                       label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 9.5,
-                        height: 1.2,
+                        fontSize: 9,
+                        height: 1.15,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.2,
                         color: ink,
@@ -1210,23 +1263,29 @@ class _FaceCard extends StatelessWidget {
   }
 }
 
-/// A small pill with a selected state — the presets, and the colour
-/// panel's two targets.
+/// A small pill with a selected state — the presets, and the blur.
 class _Chip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final IconData? icon;
+
+  /// What a reader hears, when [label] alone would not say what the
+  /// chip sets.
+  final String? a11yLabel;
 
   const _Chip({
     required this.label,
     required this.selected,
     required this.onTap,
+    this.icon,
+    this.a11yLabel,
   });
 
   @override
   Widget build(BuildContext context) {
     return A11yTap(
-      label: label,
+      label: a11yLabel ?? label,
       selected: selected,
       onTap: onTap,
       child: GestureDetector(
@@ -1234,25 +1293,39 @@ class _Chip extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          height: 30,
+          padding: const EdgeInsets.symmetric(horizontal: 13),
           decoration: BoxDecoration(
             color: selected
                 ? AppColors.gold.withValues(alpha: 0.16)
                 : AppColors.surface,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: selected ? AppColors.gold : AppColors.stroke,
               width: selected ? 1.5 : 1,
             ),
           ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w600,
-              color:
-                  selected ? AppColors.goldBright : AppColors.textSecondary,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(icon,
+                    size: 14,
+                    color: selected
+                        ? AppColors.goldBright
+                        : AppColors.textSecondary),
+                const SizedBox(width: 5),
+              ],
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color:
+                      selected ? AppColors.goldBright : AppColors.textSecondary,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1264,296 +1337,308 @@ class _Chip extends StatelessWidget {
 // Colour
 // ---------------------------------------------------------------------
 
-/// One palette, two targets.
+/// The verse's colour, and on a wide card the band's: every colour in
+/// view at once, in two grids that need no scrolling.
 ///
-/// The verse and the accent draw on the same colours, so they are one
-/// panel with a switch at the top rather than two. The switch shows
-/// what each target is set to right now, so which of the reel's two
-/// colours a tap is about to change is never a guess.
-///
-/// Under it, two kinds of colour. The luminous inks come first, each
-/// shown as a word written in it over the reel's own ground: an ink is
-/// light as much as colour, and a disc of it says little about what it
-/// does to letters. Then the flat colours, one family to a row —
-/// neutrals, warm, cool — so a warmer gold is found beside the gold.
+/// The luminous inks come first, each a disc of its own light; then the
+/// flat colours, two rows of twelve in the palette's own order, and any
+/// colour mixed at the end. The accent — the lit word, the thread, the
+/// light — is the motion's colour now, and is chosen on the motion panel,
+/// where what it colours can be seen moving.
 class _ColourPanel extends StatelessWidget {
   final _Target target;
   final ValueChanged<_Target> onTarget;
 
-  /// Whether the voice being set has a word to light as it is recited.
-  final bool wordHighlight;
-
-  const _ColourPanel({
-    required this.target,
-    required this.onTarget,
-    required this.wordHighlight,
-  });
-
-  /// The flat palette, one family to a row. Sliced rather than listed
-  /// again, so the palette stays the one place its colours are named.
-  static List<List<int>> get _families => [
-        versePalette.sublist(0, 8), // neutrals, light to dark
-        versePalette.sublist(8, 16), // the golds, then warm
-        versePalette.sublist(16, 24), // greens, then blues and violets
-      ];
+  const _ColourPanel({required this.target, required this.onTarget});
 
   @override
   Widget build(BuildContext context) {
-    if (target == _Target.backdrop) return _backdrop(context);
     final l = L10n.of(context);
     final s = creationState;
-    final verse = target == _Target.verse;
-    final ink = verse ? s.verseInk : s.accentInk;
-    final argb = verse ? s.textArgb : s.accentArgb;
-    // Named for the target as well as the colour. The two sets of
-    // swatches are otherwise identical to a reader, so without it
-    // there is no way to know which of the reel's two colours a tap is
-    // about to overwrite.
-    final section = verse ? l.styleVerseColour : l.styleAccentColour;
-    final inks = VerseInk.ordered(onLight: s.onLightGround);
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 14),
+    final wide = s.layout == ReelLayout.letterbox;
+    final band = wide && target == _Target.backdrop;
+    return _PanelBody(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-          child: _TargetSwitch(target: target, onTap: onTarget),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-          child: Text(
-            verse
-                ? l.styleVerseColourBody
-                // A voice the app cannot follow word by word has no
-                // recited word to colour; saying so would be a claim
-                // the frame never shows.
-                : wordHighlight
-                    ? l.styleAccentBody
-                    : l.styleAccentRuleBody,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-                fontSize: 11.5, height: 1.35, color: AppColors.textSecondary),
-          ),
-        ),
-        _PanelHeading(l.styleLuminous),
-        SizedBox(
-          height: _InkTile.height,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: inks.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (_, i) => _InkTile(
-              ink: inks[i],
-              section: section,
-              selected: ink == inks[i],
-              onTap: () {
-                HapticFeedback.selectionClick();
-                if (verse) {
-                  s.setVerseInk(inks[i]);
-                } else {
-                  s.setAccentInk(inks[i]);
-                }
-              },
-            ),
-          ),
-        ),
-        _PanelHeading(l.styleSolid),
-        LayoutBuilder(
-          builder: (context, box) {
-            // Eight to a row on any phone: the targets narrow before a
-            // family is ever broken across two lines.
-            final cell = math.min(44.0, (box.maxWidth - 28) / 8);
-            return Column(
-              children: [
-                for (final family in _families)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (final c in family)
-                        SizedBox(
-                          width: cell,
-                          height: 42,
-                          child: _Swatch(
-                            argb: c,
-                            section: section,
-                            selected: ink.isNone && argb == c,
-                            onTap: () {
-                              HapticFeedback.selectionClick();
-                              if (verse) {
-                                s.setTextColor(c);
-                              } else {
-                                s.setAccentColor(c);
-                              }
-                            },
-                          ),
-                        ),
-                    ],
-                  ),
-              ],
-            );
-          },
-        ),
-        // Any colour the palette does not hold, mixed and kept.
-        const SizedBox(height: 8),
-        Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CustomColourCircle(
-                size: 28,
-                current: argb,
-                chosen: ink.isNone &&
-                    !versePalette
-                        .any((c) => (c & 0xFFFFFF) == (argb & 0xFFFFFF)),
-                onPick: (c) {
-                  if (verse) {
-                    s.setTextColor(c);
-                  } else {
-                    s.setAccentColor(c);
-                  }
-                },
-              ),
-              const SizedBox(width: 10),
-              ExcludeSemantics(
-                child: Text(
-                  l.customColour,
-                  style: const TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        if (wide)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
+            child: _TargetSwitch(target: target, onTap: onTarget),
+          )
+        else
+          _MiniHeading(l.styleVerseColour,
+              value: _cap(s.verseInk.isNone
+                  ? l.colourName(s.textArgb)
+                  : l.inkName(s.verseInk))),
+        if (band) ..._band(context) else ..._verse(context),
       ],
     );
   }
 
-  /// The wide card's band, as the scenery screen offers it: the
-  /// scenery blurred, a few flat colours, any colour mixed.
-  Widget _backdrop(BuildContext context) {
+  List<Widget> _verse(BuildContext context) {
     final l = L10n.of(context);
     final s = creationState;
-    final blurred = s.backdrop == LetterboxBackdrop.blur;
-    final section = l.styleBackdropColour;
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 14),
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-          child: _TargetSwitch(target: target, onTap: onTarget),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-          child: Text(
-            l.styleBackdropBody,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-                fontSize: 11.5, height: 1.35, color: AppColors.textSecondary),
+    final section = l.styleVerseColour;
+    final inks = VerseInk.ordered(onLight: s.onLightGround);
+    const flat = versePalette;
+    final custom = s.verseInk.isNone &&
+        !flat.any((c) => (c & 0xFFFFFF) == (s.textArgb & 0xFFFFFF));
+    return [
+      _Grid(
+        rows: 2,
+        children: [
+          for (final ink in inks)
+            _Cell(
+              label: '$section${l.comma} ${l.a11yInkSwatch(ink)}',
+              selected: s.verseInk == ink,
+              onTap: () => s.setVerseInk(ink),
+              child: (size) => InkDisc(ink: ink, size: size),
+            ),
+        ],
+      ),
+      const _Divider(),
+      _Grid(
+        rows: 2,
+        children: [
+          for (final c in flat)
+            _Cell(
+              label: '$section${l.comma} ${l.a11yColourSwatch(c)}',
+              selected: s.verseInk.isNone && s.textArgb == c,
+              onTap: () => s.setTextColor(c),
+              child: (size) => _SolidDisc(argb: c, size: size),
+            ),
+          // Any colour the palette does not hold, mixed and kept.
+          _Cell.raw(
+            child: (size) => CustomColourCircle(
+              size: size,
+              current: s.textArgb,
+              chosen: custom,
+              onPick: s.setTextColor,
+            ),
           ),
-        ),
-        const SizedBox(height: 14),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 6,
-            runSpacing: 8,
+        ],
+      ),
+    ];
+  }
+
+  /// The wide card's band: the scenery blurred, a luminous ground, a
+  /// flat colour, or any colour mixed.
+  List<Widget> _band(BuildContext context) {
+    final l = L10n.of(context);
+    final s = creationState;
+    final section = l.styleBackdropColour;
+    final blurred = s.backdrop == LetterboxBackdrop.blur;
+    final glowing = s.backdrop == LetterboxBackdrop.glow;
+    final flat = s.backdrop == LetterboxBackdrop.colour;
+    return [
+      _MiniHeading(l.styleLuminous,
+          value: glowing ? l.bandGlowName(s.bandGlow) : null),
+      _Grid(
+        rows: 2,
+        cell: 44,
+        children: [
+          for (final g in BandGlow.values)
+            _Cell(
+              label: '$section${l.comma} ${l.bandGlowName(g)}',
+              selected: glowing && s.bandGlow == g,
+              onTap: () => s.setBandGlow(g),
+              child: (size) => _GlowDisc(glow: g, size: size),
+            ),
+        ],
+      ),
+      const _Divider(),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              _BlurChoice(
+              _Chip(
+                label: l.backdropBlur,
+                a11yLabel: '$section${l.comma} ${l.backdropBlur}',
+                icon: Icons.blur_on_rounded,
                 selected: blurred,
                 onTap: () {
                   HapticFeedback.selectionClick();
                   s.setBackdrop(LetterboxBackdrop.blur);
                 },
               ),
+              const SizedBox(width: 8),
               for (final c in letterboxBackdropSwatches)
                 SizedBox(
-                  width: 36,
-                  height: 42,
-                  child: _Swatch(
-                    argb: c,
-                    section: section,
-                    selected: !blurred && s.backdropArgb == c,
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      s.setBackdropColor(c);
-                    },
+                  width: 34,
+                  height: 34,
+                  child: Center(
+                    child: _Ringed(
+                      label: '$section${l.comma} ${l.a11yColourSwatch(c)}',
+                      selected: flat && s.backdropArgb == c,
+                      onTap: () => s.setBackdropColor(c),
+                      child: _SolidDisc(argb: c, size: 24),
+                    ),
                   ),
                 ),
+              const SizedBox(width: 4),
               CustomColourCircle(
-                size: 28,
+                size: 24,
                 current: s.backdropArgb,
-                chosen: !blurred &&
+                chosen: flat &&
                     !letterboxBackdropSwatches.contains(s.backdropArgb),
                 onPick: s.setBackdropColor,
               ),
             ],
           ),
         ),
-      ],
+      ),
+    ];
+  }
+}
+
+/// A thin rule between a panel's two grids.
+class _Divider extends StatelessWidget {
+  const _Divider();
+
+  @override
+  Widget build(BuildContext context) => Container(
+        height: 1,
+        margin: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
+        color: AppColors.stroke.withValues(alpha: 0.6),
+      );
+}
+
+/// Swatches in [rows] rows that share the panel's width evenly, as many
+/// to a row as it takes: every one in view, none scrolled to.
+class _Grid extends StatelessWidget {
+  final int rows;
+  final List<_Cell> children;
+
+  /// The widest a cell grows on a wide phone.
+  final double cell;
+
+  const _Grid({required this.rows, required this.children, this.cell = 34});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, box) {
+        const pad = 16.0;
+        final perRow = (children.length / rows).ceil();
+        final w = math.min(cell, (box.maxWidth - 2 * pad) / perRow);
+        final h = math.min(cell, w + 4);
+        final disc = (math.min(w, h) - 7).clamp(14.0, 40.0);
+        return Column(
+          children: [
+            for (var r = 0; r < rows; r++)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (var i = r * perRow;
+                      i < math.min(children.length, (r + 1) * perRow);
+                      i++)
+                    SizedBox(
+                      width: w,
+                      height: h,
+                      child: Center(child: children[i].child(disc)),
+                    ),
+                ],
+              ),
+          ],
+        );
+      },
     );
   }
 }
 
-/// The band as the scenery itself, blurred: a pill among the swatches.
-class _BlurChoice extends StatelessWidget {
+/// One swatch in a [_Grid]: a disc of colour with a finger's worth of
+/// target around it, ringed in gold with a gap when it is the one.
+class _Cell {
+  final Widget Function(double size) child;
+
+  _Cell({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+    required Widget Function(double size) child,
+  }) : child = ((size) => _Ringed(
+              label: label,
+              selected: selected,
+              onTap: onTap,
+              child: child(size),
+            ));
+
+  /// A cell that is its own control, as the mixed colour's circle is.
+  _Cell.raw({required this.child});
+}
+
+class _Ringed extends StatelessWidget {
+  final String label;
   final bool selected;
   final VoidCallback onTap;
-  const _BlurChoice({required this.selected, required this.onTap});
+  final Widget child;
+
+  const _Ringed({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final l = L10n.of(context);
     return A11yTap(
-      label: '${l.styleBackdropColour}${l.comma} ${l.backdropBlur}',
+      label: label,
       selected: selected,
       onTap: onTap,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: onTap,
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          height: 32,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
+            shape: BoxShape.circle,
             border: Border.all(
-              color: selected ? AppColors.gold : AppColors.stroke,
-              width: selected ? 1.6 : 1,
+              color: selected ? AppColors.gold : Colors.transparent,
+              width: 1.6,
             ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.blur_on_rounded,
-                  size: 15,
-                  color:
-                      selected ? AppColors.goldBright : AppColors.textSecondary),
-              const SizedBox(width: 6),
-              Text(
-                l.backdropBlur,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color:
-                      selected ? AppColors.textPrimary : AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
+          child: child,
         ),
       ),
     );
   }
 }
 
+/// A luminous ground as a disc: its gradient and its light, as the band
+/// is painted.
+class _GlowDisc extends StatelessWidget {
+  final BandGlow glow;
+  final double size;
+
+  const _GlowDisc({required this.glow, required this.size});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+          boxShadow: [
+            BoxShadow(
+              color: Color(glow.glow).withValues(alpha: 0.4),
+              blurRadius: size * 0.35,
+            ),
+          ],
+        ),
+        child: ClipOval(child: BandGlowGround(glow: glow)),
+      );
+}
+
 /// The targets, side by side, each wearing the colour it is set to and
-/// its name: the verse and the accent, and on a wide card its band.
+/// its name: the verse, and the wide card's band.
 class _TargetSwitch extends StatelessWidget {
   final _Target target;
   final ValueChanged<_Target> onTap;
@@ -1564,32 +1649,33 @@ class _TargetSwitch extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L10n.of(context);
     final s = creationState;
-    final wide = s.layout == ReelLayout.letterbox;
     Widget half(_Target t) {
-      final verse = t == _Target.verse;
       final band = t == _Target.backdrop;
-      final blurred = s.backdrop == LetterboxBackdrop.blur;
-      final ink = band
-          ? VerseInk.none
-          : verse
-              ? s.verseInk
-              : s.accentInk;
-      final argb = band
-          ? s.backdropArgb
-          : verse
-              ? s.textArgb
-              : s.accentArgb;
       final on = target == t;
-      final label = band
-          ? l.styleBackdropColour
-          : verse
-              ? l.styleVerseColour
-              : l.styleAccentColour;
-      final name = band && blurred
-          ? l.backdropBlur
-          : ink.isNone
-              ? l.colourName(argb)
-              : l.inkName(ink);
+      final label = band ? l.styleBackdropColour : l.styleVerseColour;
+      final String name;
+      final Widget disc;
+      if (band) {
+        switch (s.backdrop) {
+          case LetterboxBackdrop.blur:
+            name = l.backdropBlur;
+            disc = const Icon(Icons.blur_on_rounded,
+                size: 20, color: AppColors.textSecondary);
+          case LetterboxBackdrop.glow:
+            name = l.bandGlowName(s.bandGlow);
+            disc = _GlowDisc(glow: s.bandGlow, size: 20);
+          case LetterboxBackdrop.colour:
+            name = _cap(l.colourName(s.backdropArgb));
+            disc = _SolidDisc(argb: s.backdropArgb, size: 20);
+        }
+      } else {
+        name = _cap(s.verseInk.isNone
+            ? l.colourName(s.textArgb)
+            : l.inkName(s.verseInk));
+        disc = s.verseInk.isNone
+            ? _SolidDisc(argb: s.textArgb, size: 20)
+            : InkDisc(ink: s.verseInk, size: 20);
+      }
       return Expanded(
         child: A11yTap(
           label: label,
@@ -1600,8 +1686,8 @@ class _TargetSwitch extends StatelessWidget {
             onTap: () => onTap(t),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
-              height: 46,
-              padding: EdgeInsets.symmetric(horizontal: wide ? 7 : 10),
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 9),
               decoration: BoxDecoration(
                 color: on
                     ? AppColors.gold.withValues(alpha: 0.14)
@@ -1615,22 +1701,13 @@ class _TargetSwitch extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  if (band && blurred)
-                    Icon(Icons.blur_on_rounded,
-                        size: wide ? 20 : 22, color: AppColors.textSecondary)
-                  else if (ink.isNone)
-                    _SolidDisc(argb: argb, size: wide ? 20 : 22)
-                  else
-                    InkDisc(ink: ink, size: wide ? 20 : 22),
-                  SizedBox(width: wide ? 7 : 10),
+                  disc,
+                  const SizedBox(width: 9),
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Three to a row on a wide card: a long name
-                        // ("Hintergrund") shrinks to fit rather than
-                        // losing its end.
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: AlignmentDirectional.centerStart,
@@ -1652,8 +1729,8 @@ class _TargetSwitch extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              fontSize: 11,
-                              height: 1.25,
+                              fontSize: 10.5,
+                              height: 1.2,
                               color: AppColors.textSecondary,
                             ),
                           ),
@@ -1680,153 +1757,9 @@ class _TargetSwitch extends StatelessWidget {
         children: [
           half(_Target.verse),
           const SizedBox(width: 3),
-          half(_Target.accent),
-          if (wide) ...[
-            const SizedBox(width: 3),
-            half(_Target.backdrop),
-          ],
+          half(_Target.backdrop),
         ],
       ),
-    );
-  }
-}
-
-/// One luminous ink: a word written in it, over a small window of the
-/// ground the verse will actually sit on, and its name.
-class _InkTile extends StatelessWidget {
-  static const height = 86.0;
-  static const _width = 70.0;
-
-  final VerseInk ink;
-  final String section;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _InkTile({
-    required this.ink,
-    required this.section,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L10n.of(context);
-    final s = creationState;
-    final onLight = s.onLightGround;
-    final name = l.inkName(ink);
-    return A11yTap(
-      label: '$section${l.comma} ${l.a11yInkSwatch(ink)}',
-      selected: selected,
-      onTap: onTap,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: SizedBox(
-          width: _width,
-          child: Column(
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                height: 60,
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(13),
-                  border: Border.all(
-                    color: selected ? AppColors.gold : AppColors.stroke,
-                    width: selected ? 1.6 : 1,
-                  ),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      const _Ground(),
-                      Center(
-                        child: InkSpecimen(
-                          text: 'نور',
-                          ink: ink,
-                          // Short leading: one word, no marks above it,
-                          // in a window a third the height of a line
-                          // box.
-                          style: AppTheme.quran(size: 25, face: s.verseFace)
-                              .copyWith(height: 1.25),
-                          halo: onLight
-                              ? Color(legibleInkOn(ink.base))
-                              : Colors.black,
-                          // Half again the verse's own proportion: at
-                          // 25px the true one is a glow a pixel or two
-                          // wide, and the tile is here to show the
-                          // light.
-                          scale: 25 / 64 * 1.6,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 5),
-              ExcludeSemantics(
-                child: Text(
-                  name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w600,
-                    color: selected
-                        ? AppColors.goldBright
-                        : AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// What the verse sits on, in miniature: the band's flat colour in a
-/// letterbox reel, otherwise the scenery under the scrim that darkens
-/// it for the verse.
-class _Ground extends StatelessWidget {
-  const _Ground();
-
-  @override
-  Widget build(BuildContext context) {
-    final s = creationState;
-    if (s.layout == ReelLayout.letterbox &&
-        s.backdrop == LetterboxBackdrop.colour) {
-      return ColoredBox(color: Color(s.backdropArgb));
-    }
-    final b = s.background;
-    final grad = b?.gradientArgb ?? const [0xFF1B2735, 0xFF0B0F14];
-    final poster = b == null || b.isUserFile
-        ? null
-        : SceneCatalog.byId(b.id)?.thumbAsset;
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(grad[0]), Color(grad[1])],
-            ),
-          ),
-        ),
-        if (poster != null)
-          Image.asset(poster,
-              fit: BoxFit.cover,
-              cacheWidth: 160,
-              excludeFromSemantics: true,
-              errorBuilder: (_, __, ___) => const SizedBox.shrink()),
-        ColoredBox(color: Colors.black.withValues(alpha: 0.42)),
-      ],
     );
   }
 }
@@ -1866,61 +1799,15 @@ class _SolidDisc extends StatelessWidget {
   }
 }
 
-/// A flat colour with a finger's worth of target around it. Chosen, it
-/// is ringed in gold with a gap, so the ring never reads as part of the
-/// colour.
-class _Swatch extends StatelessWidget {
-  final int argb;
-
-  /// Which of the reel's two colours this row is setting.
-  final String section;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _Swatch({
-    required this.argb,
-    required this.section,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L10n.of(context);
-    return A11yTap(
-      label: '$section${l.comma} ${l.a11yColourSwatch(argb)}',
-      selected: selected,
-      onTap: onTap,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: Center(
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            padding: const EdgeInsets.all(2.5),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: selected ? AppColors.gold : Colors.transparent,
-                width: 1.8,
-              ),
-            ),
-            child: _SolidDisc(argb: argb, size: 26),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 // ---------------------------------------------------------------------
 // Effects
 // ---------------------------------------------------------------------
 
-/// The looks, then the five things that ride on top of one.
+/// The looks, then the switches that ride on top of one, and the one
+/// slider that says how much of the effect last switched on.
 class _EffectsPanel extends StatefulWidget {
-  /// What the rows are drawn from. See the call site for why this is
-  /// passed in rather than read off the singleton.
+  /// What the switches are drawn from. See the call site for why this
+  /// is passed in rather than read off the singleton.
   final ReelEffects effects;
 
   const _EffectsPanel({super.key, required this.effects});
@@ -1930,22 +1817,26 @@ class _EffectsPanel extends StatefulWidget {
 }
 
 class _EffectsPanelState extends State<_EffectsPanel> {
-  /// Which rows have their slider out.
+  /// Which of the effects with an amount are on.
   ///
   /// Held here rather than read back off the value, which is what it
   /// used to be. Warmth and vibrance run from cool to warm through
   /// zero, and zero is both the middle of the track and the easiest
-  /// value to land on mid-drag — so "open when the value is not zero"
+  /// value to land on mid-drag — so "on when the value is not zero"
   /// tore the slider out from under the user's finger the moment they
-  /// crossed the centre, collapsed the row, and flipped its own switch
-  /// off. The toggle opens the row; the slider sets the amount, and
-  /// nothing is unusual about setting it to none.
+  /// crossed the centre, and flipped its own switch off. The switch
+  /// turns an effect on; the slider sets the amount, and nothing is
+  /// unusual about setting it to none.
   late final Set<String> _open = {
     for (final row in _rows(widget.effects))
       if (row.$2 != 0) row.$1,
   };
 
-  /// Name and current value of every row, in the order they are shown.
+  /// The effect the slider is setting: the one last switched on, or
+  /// last tapped while on.
+  late String? _focus = _open.isEmpty ? null : _open.first;
+
+  /// Name and current value of every effect with an amount, in order.
   static List<(String, double)> _rows(ReelEffects e) => [
         ('warmth', e.warmth),
         ('vibrance', e.vibrance),
@@ -1953,21 +1844,44 @@ class _EffectsPanelState extends State<_EffectsPanel> {
         ('grain', e.grain),
       ];
 
-  void _toggle(String row, bool on, void Function(double) set) {
-    HapticFeedback.selectionClick();
-    setState(() => on ? _open.add(row) : _open.remove(row));
-    set(on ? _defaults[row]! : 0);
-  }
-
-  /// Where a row lands when it is switched on: a strength somebody
-  /// would actually have chosen, rather than zero and a row that looks
-  /// broken.
+  /// Where an effect lands when it is switched on: a strength somebody
+  /// would actually have chosen, rather than zero and a switch that
+  /// looks broken.
   static const _defaults = {
     'warmth': 0.5,
     'vibrance': 0.4,
     'vignette': 0.5,
     'grain': 0.4,
   };
+
+  double _value(ReelEffects e, String row) => switch (row) {
+        'warmth' => e.warmth,
+        'vibrance' => e.vibrance,
+        'vignette' => e.vignette,
+        _ => e.grain,
+      };
+
+  ReelEffects _with(ReelEffects e, String row, double v) => switch (row) {
+        'warmth' => e.copyWith(warmth: v),
+        'vibrance' => e.copyWith(vibrance: v),
+        'vignette' => e.copyWith(vignette: v),
+        _ => e.copyWith(grain: v),
+      };
+
+  void _toggle(String row, bool on) {
+    HapticFeedback.selectionClick();
+    final s = creationState;
+    setState(() {
+      if (on) {
+        _open.add(row);
+        _focus = row;
+      } else {
+        _open.remove(row);
+        if (_focus == row) _focus = _open.isEmpty ? null : _open.last;
+      }
+    });
+    s.setEffects(_with(widget.effects, row, on ? _defaults[row]! : 0));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1979,110 +1893,166 @@ class _EffectsPanelState extends State<_EffectsPanel> {
     // identical stock swatches would say what the grade does to some
     // other picture.
     final grad = s.background?.gradientArgb ?? const [0xFF1B2735, 0xFFC79A5B];
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 14),
+    String name(String row) => switch (row) {
+          'warmth' => l.effectWarmth,
+          'vibrance' => l.effectVibrance,
+          'vignette' => l.effectVignette,
+          _ => l.effectGrain,
+        };
+    IconData icon(String row) => switch (row) {
+          'warmth' => Icons.wb_sunny_outlined,
+          'vibrance' => Icons.palette_outlined,
+          'vignette' => Icons.vignette_outlined,
+          _ => Icons.grain_rounded,
+        };
+    final focus = _focus != null && _open.contains(_focus) ? _focus : null;
+    return _PanelBody(
       children: [
-        _PanelHeading(l.styleLook, body: l.styleEffectsBody),
-        SizedBox(
-          height: 72,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: ReelLook.values.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (_, i) {
-              final look = ReelLook.values[i];
-              return _LookCard(
-                look: look,
-                gradient: grad,
-                selected: e.look == look,
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  s.setEffects(e.copyWith(look: look));
-                },
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 8),
-        // First of the switches. At the foot of the list it sat under
-        // four rows, below the fold of a short panel, and any slider
-        // opened above it pushed it further down. It has no slider of
-        // its own, so up here it never moves the rows under it.
-        _EffectRow(
-          icon: Icons.gradient_rounded,
-          label: l.effectFade,
-          on: e.fade,
-          onToggle: (on) {
+        _LookGrid(
+          gradient: grad,
+          chosen: e.look,
+          onPick: (look) {
             HapticFeedback.selectionClick();
-            s.setEffects(e.copyWith(fade: on));
+            s.setEffects(e.copyWith(look: look));
           },
         ),
-        // The wide card's corners, here as well as on the scenery
-        // screen: a finish like the others, and one to try against them.
-        if (s.layout == ReelLayout.letterbox)
-          _EffectRow(
-            icon: Icons.rounded_corner_rounded,
-            label: l.roundedCorners,
-            on: s.roundedCorners,
-            onToggle: (on) {
-              HapticFeedback.selectionClick();
-              s.setRoundedCorners(on);
-            },
-          ),
-        _EffectRow(
-          icon: Icons.wb_sunny_outlined,
-          label: l.effectWarmth,
-          on: _open.contains('warmth'),
-          value: e.warmth,
-          min: -1,
-          onChanged: (v) => s.setEffects(e.copyWith(warmth: v)),
-          onToggle: (on) => _toggle(
-              'warmth', on, (v) => s.setEffects(e.copyWith(warmth: v))),
+        const SizedBox(height: 8),
+        LayoutBuilder(
+          builder: (context, box) {
+            const pad = 16.0, gap = 6.0;
+            final w = (box.maxWidth - 2 * pad - gap) / 2;
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: pad),
+              child: Wrap(
+                spacing: gap,
+                runSpacing: 4,
+                children: [
+                  // First of the switches: it has no slider of its own,
+                  // and up here it is in view on the shortest panel.
+                  _EffectToggle(
+                    width: w,
+                    icon: Icons.gradient_rounded,
+                    label: l.effectFadeShort,
+                    a11yLabel: l.effectFade,
+                    on: e.fade,
+                    onToggle: (on) {
+                      HapticFeedback.selectionClick();
+                      s.setEffects(e.copyWith(fade: on));
+                    },
+                  ),
+                  // The wide card's corners: a finish like the others,
+                  // and one to try against them.
+                  if (s.layout == ReelLayout.letterbox)
+                    _EffectToggle(
+                      width: w,
+                      icon: Icons.rounded_corner_rounded,
+                      label: l.roundedCorners,
+                      on: s.roundedCorners,
+                      onToggle: (on) {
+                        HapticFeedback.selectionClick();
+                        s.setRoundedCorners(on);
+                      },
+                    ),
+                  for (final (row, _) in _rows(e))
+                    _EffectToggle(
+                      width: w,
+                      icon: icon(row),
+                      label: name(row),
+                      on: _open.contains(row),
+                      focused: focus == row,
+                      onFocus: _open.contains(row) && focus != row
+                          ? () {
+                              HapticFeedback.selectionClick();
+                              setState(() => _focus = row);
+                            }
+                          : null,
+                      onToggle: (on) => _toggle(row, on),
+                    ),
+                ],
+              ),
+            );
+          },
         ),
-        _EffectRow(
-          icon: Icons.palette_outlined,
-          label: l.effectVibrance,
-          on: _open.contains('vibrance'),
-          value: e.vibrance,
-          min: -1,
-          onChanged: (v) => s.setEffects(e.copyWith(vibrance: v)),
-          onToggle: (on) => _toggle(
-              'vibrance', on, (v) => s.setEffects(e.copyWith(vibrance: v))),
-        ),
-        _EffectRow(
-          icon: Icons.vignette_outlined,
-          label: l.effectVignette,
-          on: _open.contains('vignette'),
-          value: e.vignette,
-          onChanged: (v) => s.setEffects(e.copyWith(vignette: v)),
-          onToggle: (on) => _toggle(
-              'vignette', on, (v) => s.setEffects(e.copyWith(vignette: v))),
-        ),
-        _EffectRow(
-          icon: Icons.grain_rounded,
-          label: l.effectGrain,
-          on: _open.contains('grain'),
-          value: e.grain,
-          note: l.styleGrainNote,
-          onChanged: (v) => s.setEffects(e.copyWith(grain: v)),
-          onToggle: (on) =>
-              _toggle('grain', on, (v) => s.setEffects(e.copyWith(grain: v))),
+        const SizedBox(height: 4),
+        SizedBox(
+          height: 32,
+          child: focus == null
+              ? Center(
+                  child: Text(
+                    l.styleEffectAmountHint,
+                    style: const TextStyle(
+                        fontSize: 11, color: AppColors.textSecondary),
+                  ),
+                )
+              : _EffectSlider(
+                  label: name(focus),
+                  value: _value(e, focus),
+                  min: focus == 'warmth' || focus == 'vibrance' ? -1 : 0,
+                  onChanged: (v) => s.setEffects(_with(e, focus, v)),
+                ),
         ),
       ],
     );
   }
 }
 
-/// One look, shown as the reel's own colours put through it.
-class _LookCard extends StatelessWidget {
+/// The looks, four to a row and all in view: each a chip of the reel's
+/// own colours put through it, with its name over them.
+class _LookGrid extends StatelessWidget {
+  final List<int> gradient;
+  final ReelLook chosen;
+  final ValueChanged<ReelLook> onPick;
+
+  const _LookGrid({
+    required this.gradient,
+    required this.chosen,
+    required this.onPick,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    return LayoutBuilder(
+      builder: (context, box) {
+        const pad = 16.0, gap = 6.0;
+        const perRow = 4;
+        final w = (box.maxWidth - 2 * pad - gap * (perRow - 1)) / perRow;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: pad),
+          child: Wrap(
+            spacing: gap,
+            runSpacing: gap,
+            children: [
+              for (final look in ReelLook.values)
+                _LookChip(
+                  width: w,
+                  look: look,
+                  name: l.lookName(look.name),
+                  gradient: gradient,
+                  selected: chosen == look,
+                  onTap: () => onPick(look),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// One look: the reel's own colours put through it, its name over them.
+class _LookChip extends StatelessWidget {
+  final double width;
   final ReelLook look;
+  final String name;
   final List<int> gradient;
   final bool selected;
   final VoidCallback onTap;
 
-  const _LookCard({
+  const _LookChip({
+    required this.width,
     required this.look,
+    required this.name,
     required this.gradient,
     required this.selected,
     required this.onTap,
@@ -2091,10 +2061,8 @@ class _LookCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
-    final name = l.lookName(look.name);
     final swatch = DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(7),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -2110,176 +2078,230 @@ class _LookCard extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: AnimatedContainer(
+        child: SizedBox(
+          width: width,
+          height: 26,
+          child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          width: 78,
-          padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: selected
-                ? AppColors.gold.withValues(alpha: 0.12)
-                : AppColors.surface,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(9),
             border: Border.all(
               color: selected ? AppColors.gold : AppColors.stroke,
-              width: selected ? 1.5 : 1,
+              width: selected ? 1.6 : 1,
             ),
           ),
-          child: Column(
-            children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(7),
-                  child: SizedBox.expand(
-                    child: ReelFinish.graded(
-                      ReelEffects(look: look),
-                      swatch,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                ReelFinish.graded(ReelEffects(look: look), swatch),
+                ColoredBox(color: Colors.black.withValues(alpha: 0.28)),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        name,
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: selected
+                              ? AppColors.goldBright
+                              : Colors.white,
+                          shadows: const [
+                            Shadow(color: Color(0xAA000000), blurRadius: 6),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w600,
-                  color:
-                      selected ? AppColors.goldBright : AppColors.textSecondary,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
+        ),
         ),
       ),
     );
   }
 }
 
-/// One effect: a name, a switch, and — once it is on — the one slider
-/// that says how much of it.
-///
-/// A row each rather than a wall of sliders. Every one of these is off
-/// by default and reads as off, so the panel opens saying "the picture
-/// as it was" rather than asking five questions at once; and switching
-/// one on gives it a strength somebody would actually have chosen,
-/// instead of landing on zero and looking broken.
-class _EffectRow extends StatelessWidget {
+/// One effect: an icon, a name and its switch, half the panel wide.
+/// Tapping the name of one that is on puts the slider on it.
+class _EffectToggle extends StatelessWidget {
+  final double width;
   final IconData icon;
   final String label;
+
+  /// What a reader hears, when [label] is a short form of it.
+  final String? a11yLabel;
   final bool on;
 
-  /// Null for an effect that is a switch and nothing else.
-  final double? value;
-  final double min;
-  final String? note;
-  final ValueChanged<double>? onChanged;
+  /// Whether the slider under the switches is setting this one.
+  final bool focused;
+  final VoidCallback? onFocus;
+  final ValueChanged<bool> onToggle;
 
-  /// What the switch does. Always given — the row does not decide for
-  /// itself what turning an effect on means, because whether the row
-  /// is open is not the same question as whether its value is zero.
-  final ValueChanged<bool>? onToggle;
-
-  const _EffectRow({
+  const _EffectToggle({
+    required this.width,
     required this.icon,
     required this.label,
     required this.on,
-    this.value,
-    this.min = 0,
-    this.note,
-    this.onChanged,
-    this.onToggle,
+    required this.onToggle,
+    this.focused = false,
+    this.onFocus,
+    this.a11yLabel,
   });
 
   @override
   Widget build(BuildContext context) {
-    final pct = value == null ? null : (value! * 100).round();
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 2, 12, 2),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          MergeSemantics(
-            child: Row(
-              children: [
-                Icon(icon,
-                    size: 17,
-                    color: on ? AppColors.goldBright : AppColors.textSecondary),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w600,
-                      color:
-                          on ? AppColors.textPrimary : AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-                if (on && pct != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: ExcludeSemantics(
-                      child: Text(
-                        '$pct%',
-                        style: const TextStyle(
-                            fontSize: 11.5, color: AppColors.textSecondary),
+    return SizedBox(
+      width: width,
+      height: 32,
+      child: AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      padding: const EdgeInsetsDirectional.fromSTEB(10, 0, 0, 0),
+      decoration: BoxDecoration(
+        color: focused
+            ? AppColors.gold.withValues(alpha: 0.10)
+            : AppColors.surface.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: focused
+              ? AppColors.gold.withValues(alpha: 0.55)
+              : AppColors.stroke.withValues(alpha: 0.7),
+        ),
+      ),
+      child: MergeSemantics(
+        child: Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onFocus ?? () => onToggle(!on),
+                child: Row(
+                  children: [
+                    Icon(icon,
+                        size: 16,
+                        color:
+                            on ? AppColors.goldBright : AppColors.textSecondary),
+                    const SizedBox(width: 7),
+                    Expanded(
+                      // A short name on the row, the whole one read out.
+                      child: Semantics(
+                        label: a11yLabel,
+                        excludeSemantics: a11yLabel != null,
+                        child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: on
+                              ? AppColors.textPrimary
+                              : AppColors.textSecondary,
+                        ),
+                      ),
                       ),
                     ),
-                  ),
-                Transform.scale(
-                  scale: 0.78,
-                  child: Switch(
-                    value: on,
-                    activeThumbColor: AppColors.gold,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onChanged: onToggle,
-                  ),
+                  ],
                 ),
-              ],
+              ),
+            ),
+            Transform.scale(
+              scale: 0.72,
+              child: Switch(
+                value: on,
+                activeThumbColor: AppColors.gold,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                onChanged: onToggle,
+              ),
+            ),
+          ],
+        ),
+      ),
+      ),
+    );
+  }
+}
+
+/// The one slider: how much of the effect it is on.
+class _EffectSlider extends StatelessWidget {
+  final String label;
+  final double value;
+  final double min;
+  final ValueChanged<double> onChanged;
+
+  const _EffectSlider({
+    required this.label,
+    required this.value,
+    required this.min,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = (value * 100).round();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      child: Row(
+        children: [
+          ExcludeSemantics(
+            child: SizedBox(
+              width: 74,
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.goldBright,
+                ),
+              ),
             ),
           ),
-          if (on && value != null) ...[
-            SliderTheme(
+          Expanded(
+            child: SliderTheme(
               data: SliderTheme.of(context).copyWith(
                 trackHeight: 1.5,
                 thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
                 overlayShape: const RoundSliderOverlayShape(overlayRadius: 11),
               ),
-              // Merged, so the name lands on the slider's own node
-              // rather than beside it: unmerged, a reader announces
-              // "Warmth" and then, separately, "50 percent, slider".
-              // The size slider in the type panel has always done it
-              // this way.
+              // Merged, so the name lands on the slider's own node rather
+              // than beside it: unmerged, a reader announces "Warmth" and
+              // then, separately, "50 percent, slider".
               child: MergeSemantics(
                 child: Semantics(
                   label: label,
                   child: Slider(
-                  value: value!.clamp(min, 1.0),
-                  min: min,
-                  max: 1,
-                  activeColor: AppColors.gold,
-                  inactiveColor: AppColors.surfaceRaised,
-                  semanticFormatterCallback: (v) => '${(v * 100).round()}%',
-                  onChanged: onChanged,
+                    value: value.clamp(min, 1.0),
+                    min: min,
+                    max: 1,
+                    activeColor: AppColors.gold,
+                    inactiveColor: AppColors.surfaceRaised,
+                    semanticFormatterCallback: (v) => '${(v * 100).round()}%',
+                    onChanged: onChanged,
                   ),
                 ),
               ),
             ),
-            if (note != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(27, 0, 8, 6),
-                child: Text(
-                  note!,
-                  style: const TextStyle(
-                      fontSize: 10.5,
-                      height: 1.3,
-                      color: AppColors.textSecondary),
-                ),
+          ),
+          ExcludeSemantics(
+            child: SizedBox(
+              width: 38,
+              child: Text(
+                '$pct%',
+                textAlign: TextAlign.end,
+                style: const TextStyle(
+                    fontSize: 11, color: AppColors.textSecondary),
               ),
-          ],
+            ),
+          ),
         ],
       ),
     );

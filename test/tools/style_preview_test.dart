@@ -8,6 +8,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:ayah_reels/data/band_glow.dart';
 import 'package:ayah_reels/data/fatiha_data.dart';
 import 'package:ayah_reels/data/models.dart';
 import 'package:ayah_reels/data/reel_effects.dart';
@@ -83,7 +84,10 @@ void main() {
 
     final key = GlobalKey();
     Future<void> shoot(String name, AppLang lang,
-        {String Function(L10n l)? tab, double scroll = 0}) async {
+        {String Function(L10n l)? tab,
+        String Function(L10n l)? then,
+        Size size = const Size(390, 844)}) async {
+      t.view.physicalSize = size;
       await t.pumpWidget(const SizedBox());
       await t.pumpWidget(RepaintBoundary(
         key: key,
@@ -109,9 +113,9 @@ void main() {
           find.text((tab ?? (l) => l.styleTabType)(L10n(lang))).first);
       await t.pump();
       await t.pump(const Duration(milliseconds: 400));
-      if (scroll != 0) {
-        // The panel's own list, which is the last vertical one built.
-        await t.drag(find.byType(ListView).last, Offset(0, -scroll));
+      if (then != null) {
+        await t.tap(find.text(then(L10n(lang))).first);
+        await t.pump();
         await t.pump(const Duration(milliseconds: 400));
       }
       await t.runAsync(() async {
@@ -144,14 +148,46 @@ void main() {
       ..setVerseInk(VerseInk.iris)
       ..setAccentInk(VerseInk.gilded);
     await shoot('colour_iris_en', AppLang.en, tab: (l) => l.styleTabColour);
-    await shoot('colour_solid_en', AppLang.en,
-        tab: (l) => l.styleTabColour, scroll: 400);
+    await shoot('colour_iris_small', AppLang.en,
+        tab: (l) => l.styleTabColour, size: const Size(360, 640));
     SettingsService.state.value = AppSettings.defaults.copyWith(lang: AppLang.ar);
     creationState.setVerseInk(VerseInk.aurora);
     await shoot('colour_aurora_ar', AppLang.ar, tab: (l) => l.styleTabColour);
     SettingsService.state.value = AppSettings.defaults;
+    creationState.setEffects(const ReelEffects(look: ReelLook.golden, warmth: 0.5));
     await shoot('effects_en', AppLang.en, tab: (l) => l.styleTabEffects);
+    await shoot('effects_small', AppLang.en,
+        tab: (l) => l.styleTabEffects, size: const Size(360, 640));
     creationState
+      ..setEffects(ReelEffects.off)
+      ..setVerseInk(VerseInk.none)
+      ..setTextColor(inkOnDark)
+      ..setAccentColor(accentOnDark);
+    await shoot('motion_en', AppLang.en, tab: (l) => l.styleTabMotion);
+    creationState.setAccentColor(0xFF9CC7F5);
+    await shoot('motion_sky_small', AppLang.en,
+        tab: (l) => l.styleTabMotion, size: const Size(360, 640));
+    creationState.setAccentColor(accentOnDark);
+    // The wide card, its band in a luminous ground, the verse in the
+    // colour nobody chose: it follows the band, light or pale.
+    creationState
+      ..resetVerseColour()
+      ..resetAccent()
+      ..setLayout(ReelLayout.letterbox)
+      ..setBandGlow(BandGlow.aurora);
+    await shoot('band_aurora_en', AppLang.en,
+        tab: (l) => l.styleTabColour, then: (l) => l.styleBackdropColour);
+    creationState.setBandGlow(BandGlow.gold);
+    await shoot('band_gold_small', AppLang.en,
+        tab: (l) => l.styleTabColour,
+        then: (l) => l.styleBackdropColour,
+        size: const Size(360, 640));
+    creationState.setBandGlow(BandGlow.pearl);
+    await shoot('band_pearl_en', AppLang.en,
+        tab: (l) => l.styleTabColour, then: (l) => l.styleBackdropColour);
+    creationState
+      ..setBackdrop(LetterboxBackdrop.blur)
+      ..setLayout(ReelLayout.fullFrame)
       ..setTextColor(inkOnDark)
       ..setAccentColor(accentOnDark);
   }, skip: out == null);

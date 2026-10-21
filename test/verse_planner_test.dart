@@ -134,8 +134,8 @@ void main() {
     expect(units.length, parts.length + 1);
   });
 
-  testWidgets('a verse with no timing it can be cut on stays whole',
-      (t) async {
+  testWidgets('a verse with no breath to cut on is still cut, where its '
+      'letters put each line, rather than shown whole', (t) async {
     late VerseLinePlan plan;
     await t.runAsync(() async {
       plan = await VersePlanner.plan(
@@ -150,7 +150,31 @@ void main() {
             List<double>.generate(2700, (i) => i.isEven ? 50 : 70),
       );
     });
+    final parts = plan.partsOf(255)!;
+    expect(parts.length, greaterThan(1));
+    expect(plan.whole, 0);
+    for (var i = 1; i < parts.length; i++) {
+      expect(parts[i].startMs, parts[i - 1].endMs);
+      expect(parts[i].durationMs, greaterThanOrEqualTo(PartTiming.minPartMs));
+    }
+  });
+
+  testWidgets('with no recording to time it by, a verse stays whole, and '
+      'the plan says how many did', (t) async {
+    late VerseLinePlan plan;
+    await t.runAsync(() async {
+      plan = await VersePlanner.plan(
+        lines: 2,
+        ayahs: ayahs,
+        recitation: rec,
+        startAyah: 255,
+        endAyah: 256,
+        look: look,
+        loudness: () async => null,
+      );
+    });
     expect(plan.isEmpty, isTrue);
+    expect(plan.whole, 1);
   });
 
   testWidgets('a stand-in recitation plays the cut a reel would make',

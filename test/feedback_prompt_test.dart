@@ -13,8 +13,8 @@ import 'package:ayah_reels/widgets/feedback_sheet.dart';
 /// Feedback is the only channel that carries a sentence back from a
 /// user, and the only prompt in the app with no store quota holding it
 /// down — nothing outside this file stops it from becoming a nag. So
-/// what is pinned here is the restraint: two asks, at the eighth and
-/// twentieth renders, none once a note has been sent, and a Settings
+/// what is pinned here is the restraint: two asks, at the fifteenth and
+/// fortieth renders, none once a note has been sent, and a Settings
 /// row that outlives all of it.
 ///
 /// The POST itself is pinned by its payload rather than by a live
@@ -32,11 +32,11 @@ void main() {
   });
 
   group('when it lets itself in', () {
-    test('the asks land on the eighth and twentieth renders', () {
+    test('the asks land on the fifteenth and fortieth renders', () {
       // Late on purpose. Second-and-fifth collected first impressions
-      // from people who had not formed one; eight reels is a habit
-      // with something in its way, twenty is a regular.
-      expect(FeedbackService.milestones, [8, 20]);
+      // from people who had not formed one, and eight was still too
+      // soon for users; fifteen reels is a habit, forty a regular.
+      expect(FeedbackService.milestones, [15, 40]);
     });
 
     test('the early renders belong to the reminder and the rating', () {

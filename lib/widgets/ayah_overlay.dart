@@ -8,7 +8,7 @@ import '../data/verse_ink.dart';
 import '../data/verse_numbering.dart';
 import '../data/verse_translation.dart';
 import '../state/creation_state.dart'
-    show TextPreset, inkOnLight, legibleInkOn;
+    show TextPreset, accentOnDark, accentOnLight, inkOnLight, legibleInkOn;
 import '../theme/app_theme.dart';
 import 'verse_geometry.dart';
 
@@ -397,8 +397,10 @@ class AyahOverlay extends StatelessWidget {
   /// The glint: the letters alone, in light. The verse-end sign is laid
   /// out but not drawn, so the lines break exactly where the card's do.
   Widget _glinted(double ts) {
-    final style = AppTheme.quran(size: 64 * ts, color: glintColour, face: verseFace)
-        .copyWith(shadows: glintGlow(ts));
+    final tint = lightTintOf(_accent, accentInk);
+    final style = AppTheme.quran(
+            size: 64 * ts, color: glintColourFor(tint), face: verseFace)
+        .copyWith(shadows: glintGlowFor(ts, tint));
     final mark = endMark ? _markSpan(ts, style) : null;
     return Text.rich(
       TextSpan(children: [
@@ -452,6 +454,39 @@ class AyahOverlay extends StatelessWidget {
             color: const Color(0xFFE8A93A).withValues(alpha: 0.3),
             blurRadius: 20 * ts),
       ];
+
+  /// The colour the light passing through the letters takes: the
+  /// accent's, which is the motion's colour too — the reel's own gold
+  /// unless another was chosen, and a luminous accent's own light.
+  static Color lightTintOf(Color accent, VerseInk accentInk) =>
+      accentInk.isNone ? accent : Color(accentInk.glow);
+
+  /// Whether [tint] is one of the reel's own two golds: those keep the
+  /// light exactly as it was drawn before it could take a colour, so the
+  /// default look, and every reel cached with it, is unchanged.
+  static bool isHouseGold(Color tint) {
+    final v = tint.toARGB32() & 0xFFFFFF;
+    return v == (accentOnDark & 0xFFFFFF) || v == (accentOnLight & 0xFFFFFF);
+  }
+
+  /// The glint's letters in the light's [tint]: nearly white, warmed (or
+  /// cooled) by the tint, the way a bright light keeps a little of its
+  /// colour at its core.
+  static Color glintColourFor(Color tint) => isHouseGold(tint)
+      ? glintColour
+      : Color.lerp(tint, const Color(0xFFFFFFFF), 0.8)!;
+
+  /// [glintGlow] in the light's [tint].
+  static List<Shadow> glintGlowFor(double ts, Color tint) {
+    if (isHouseGold(tint)) return glintGlow(ts);
+    return [
+      Shadow(
+          color: Color.lerp(tint, const Color(0xFFFFFFFF), 0.35)!
+              .withValues(alpha: 0.8),
+          blurRadius: 10 * ts),
+      Shadow(color: tint.withValues(alpha: 0.3), blurRadius: 20 * ts),
+    ];
+  }
 
   /// The verse in a luminous ink.
   ///

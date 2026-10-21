@@ -164,6 +164,30 @@ void main() {
     expect(g, isNot(contains('color=c=')));
   });
 
+  test('a luminous band is each scene\'s own picture: no split ahead of '
+      'the join, no colour generated', () {
+    final g = VideoRenderer.sceneRunGraph(
+      lengths: lengths(0),
+      cuts: cuts,
+      fadeMs: 0,
+      segStartMs: 0,
+      letterbox: LetterboxGeometry.of(16 / 9),
+      bandIdxs: const [11, 12, 13],
+      scrimIdx: null,
+    );
+    for (var i = 0; i < 3; i++) {
+      expect(
+          g,
+          contains('[${11 + i}:v]loop=loop=-1:size=1:start=0,'
+              'trim=duration=${lengths(0)[i].toStringAsFixed(3)}[bgc$i];'));
+      expect(g, contains('[bgc$i]null[bgbases$i];'));
+    }
+    expect(g, isNot(contains('color=c=')));
+    expect(g, isNot(contains('split=2[bgsrc')));
+    final labels = defined(g);
+    expect(labels.toSet(), hasLength(labels.length));
+  });
+
   test('the fade a plan can afford never outruns its shortest scene', () {
     // Cuts of 6s, 5s and 4s: half of the shortest still clears the
     // 500ms default, so the default stands.

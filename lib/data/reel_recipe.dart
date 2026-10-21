@@ -1,6 +1,7 @@
 import 'dart:ui' show Offset;
 
 import '../state/creation_state.dart';
+import 'band_glow.dart';
 import 'models.dart';
 import 'dedication.dart';
 import 'reel_effects.dart';
@@ -86,6 +87,16 @@ class ReelRecipe {
   final bool surahTitle;
   final Offset? surahTitleAt;
 
+  /// How far the surah's name was pinched from its own size; 1 for a
+  /// reel made before it could be.
+  final double surahTitleScale;
+
+  /// The luminous ground behind a wide card, when [backdrop] is
+  /// [LetterboxBackdrop.glow]. A build that predates it reads the
+  /// backdrop as a flat colour, and [backdropArgb] holds the ground's
+  /// base for it.
+  final BandGlow bandGlow;
+
   const ReelRecipe({
     required this.reciterId,
     required this.surah,
@@ -119,6 +130,8 @@ class ReelRecipe {
     this.motion = VerseMotion.none,
     this.surahTitle = false,
     this.surahTitleAt,
+    this.surahTitleScale = 1.0,
+    this.bandGlow = BandGlow.midnight,
   });
 
   static const _imagePrefix = 'image:';
@@ -171,6 +184,8 @@ class ReelRecipe {
         motion: s.motion,
         surahTitle: s.surahTitle,
         surahTitleAt: s.surahTitle ? s.surahTitleAt : null,
+        surahTitleScale: s.surahTitle ? s.surahTitleScale : 1.0,
+        bandGlow: s.bandGlow,
       );
 
   Map<String, dynamic> toJson() => {
@@ -208,6 +223,9 @@ class ReelRecipe {
         if (surahTitle) 'surahTitle': true,
         if (surahTitle && surahTitleAt != null)
           'surahTitleAt': [surahTitleAt!.dx, surahTitleAt!.dy],
+        if (surahTitle && surahTitleScale != 1.0)
+          'surahTitleScale': surahTitleScale,
+        if (backdrop == LetterboxBackdrop.glow) 'bandGlow': bandGlow.name,
       };
 
   /// An `[x, y]` pair of fractions, or null for anything else.
@@ -269,6 +287,11 @@ class ReelRecipe {
             (j['motion'] as Map?)?.cast<String, dynamic>()),
         surahTitle: j['surahTitle'] as bool? ?? false,
         surahTitleAt: _offset(j['surahTitleAt']),
+        surahTitleScale: ((j['surahTitleScale'] as num?)?.toDouble() ?? 1.0)
+            .clamp(CreationState.surahTitleScales.min,
+                CreationState.surahTitleScales.max),
+        bandGlow:
+            BandGlow.fromName(j['bandGlow'] as String?) ?? BandGlow.midnight,
       );
 
   /// Puts everything but the sceneries back onto [s]. The sceneries
@@ -300,6 +323,8 @@ class ReelRecipe {
       ..setSurahTitle(surahTitle)
       ..setSurahTitleAt(surahTitleAt);
     if (backdrop == LetterboxBackdrop.colour) s.setBackdropColor(backdropArgb);
+    if (backdrop == LetterboxBackdrop.glow) s.setBandGlow(bandGlow);
+    s.setSurahTitleScale(surahTitleScale);
     // After the backdrop: setting the backdrop re-derives a default
     // ink and a default accent, and the recipe's own colours have to
     // be the last word.

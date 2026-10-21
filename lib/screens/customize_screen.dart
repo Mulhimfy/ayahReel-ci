@@ -218,30 +218,41 @@ class _Page extends StatelessWidget {
           title: l.motionTitle,
           note: l.customizeMotionNote,
           children: [
+            // Every look in one row, all in view: the cards narrow on a
+            // small phone rather than run off its edge.
             _FullBleed(
-              child: SizedBox(
-                height: 112,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: MotionPreset.values.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 10),
-                  itemBuilder: (_, i) {
-                    final p = MotionPreset.values[i];
-                    return MotionPresetCard(
-                      preset: p,
-                      selected: MotionPreset.of(c.motion) == p,
-                      // A default for reels to come, whose voices are not
-                      // chosen yet: every look is on offer, and a voice
-                      // without word timing plays the part it can.
-                      enabled: true,
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        c.setMotion(p.motion);
-                      },
-                    );
-                  },
-                ),
+              child: LayoutBuilder(
+                builder: (context, box) {
+                  const pad = 16.0, gap = 8.0;
+                  final n = MotionPreset.values.length;
+                  final w = ((box.maxWidth - 2 * pad - gap * (n - 1)) / n)
+                      .clamp(52.0, 88.0);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: pad),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (var i = 0; i < n; i++) ...[
+                          if (i > 0) const SizedBox(width: gap),
+                          MotionPresetCard(
+                            preset: MotionPreset.values[i],
+                            width: w,
+                            selected:
+                                MotionPreset.of(c.motion) == MotionPreset.values[i],
+                            // A default for reels to come, whose voices are
+                            // not chosen yet: every look is on offer, and a
+                            // voice without word timing plays the part it can.
+                            enabled: true,
+                            onTap: () {
+                              HapticFeedback.selectionClick();
+                              c.setMotion(MotionPreset.values[i].motion);
+                            },
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 8),
