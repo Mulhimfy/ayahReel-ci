@@ -7,6 +7,8 @@ import '../data/reel_effects.dart';
 import '../data/settings_service.dart';
 import '../data/verse_font.dart';
 import '../data/verse_ink.dart';
+import '../data/verse_lines.dart';
+import '../data/verse_motion.dart';
 
 /// Designed looks for the verse card. Each is a coherent set of
 /// choices; the raw slider/swatches still fine-tune on top.
@@ -37,6 +39,11 @@ enum ScenePacing {
 
   /// Equal slices of the reel, wherever they fall.
   even,
+
+  /// Like [perAyah], with a verse cut into lines counting each line:
+  /// the scenery changes as each line comes on. Per verse for a reel
+  /// whose verses are all shown whole.
+  perLine,
 }
 
 /// How one scene gives way to the next.
@@ -236,6 +243,19 @@ class CreationState extends ChangeNotifier {
   /// Where the dedication line was dragged to; see [dedicationAt].
   Offset? _dedicationAt;
   bool _wordHighlight = true;
+
+  /// How this reel shows a verse too long for the frame; see
+  /// [VerseLines]. Seated from Settings by [startNewReel].
+  int _verseLines = SettingsService.state.value.verseLines;
+
+  /// What the verse does as it is recited. A preference, like the
+  /// faces and the grade: kept from one reel to the next.
+  VerseMotion _motion = VerseMotion.none;
+
+  /// Whether this reel carries the surah's name, and where it was
+  /// dragged to (null for its place at the head of the frame).
+  bool _surahTitle = SettingsService.state.value.surahTitle;
+  Offset? _surahTitleAt;
   ReelLayout _layout = ReelLayout.fullFrame;
   bool _roundedCorners = true;
   LetterboxBackdrop _backdrop = LetterboxBackdrop.colour;
@@ -473,6 +493,40 @@ class CreationState extends ChangeNotifier {
 
   void setWordHighlight(bool on) {
     _wordHighlight = on;
+    notifyListeners();
+  }
+
+  /// The most lines of a long verse on screen at a time, or
+  /// [VerseLines.whole].
+  int get verseLines => _verseLines;
+
+  void setVerseLines(int lines) {
+    final v = VerseLines.clamp(lines);
+    if (_verseLines == v) return;
+    _verseLines = v;
+    notifyListeners();
+  }
+
+  VerseMotion get motion => _motion;
+
+  void setMotion(VerseMotion m) {
+    if (_motion == m) return;
+    _motion = m;
+    notifyListeners();
+  }
+
+  bool get surahTitle => _surahTitle;
+  Offset? get surahTitleAt => _surahTitleAt;
+
+  void setSurahTitle(bool on) {
+    if (_surahTitle == on) return;
+    _surahTitle = on;
+    notifyListeners();
+  }
+
+  void setSurahTitleAt(Offset? at) {
+    if (_surahTitleAt == at) return;
+    _surahTitleAt = at;
     notifyListeners();
   }
 
@@ -753,7 +807,18 @@ class CreationState extends ChangeNotifier {
     // on one reel.
     _dedicationAt = null;
     _multiScene = false;
-    _pacing = ScenePacing.perAyah;
+    // The verse lines and the surah's name start each reel from
+    // Settings, where they are chosen once for every reel; a reopened
+    // reel puts its own back on top (see `ReelRecipe.applyStyling`).
+    final prefs = SettingsService.state.value;
+    _verseLines = VerseLines.clamp(prefs.verseLines);
+    _surahTitle = prefs.surahTitle;
+    _surahTitleAt = null;
+    // With lines, the scenery follows them unless Settings says each
+    // verse; the per-verse pacing is what the app has always started on.
+    _pacing = _verseLines > VerseLines.whole && prefs.scenesFollowLines
+        ? ScenePacing.perLine
+        : ScenePacing.perAyah;
     _transition = SceneTransition.fade;
     // A run collapses to the scenery it opened on rather than emptying:
     // the scenery screen re-seeds from this, and a null background is a

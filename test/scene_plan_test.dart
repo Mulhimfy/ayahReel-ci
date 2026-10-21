@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ayah_reels/data/models.dart';
+import 'package:ayah_reels/data/verse_lines.dart';
 import 'package:ayah_reels/render/scene_plan.dart';
 import 'package:ayah_reels/state/creation_state.dart';
 
@@ -240,6 +241,96 @@ void main() {
       expect(cuts, hasLength(1));
       expect(cuts.single.startMs, 0);
       expect(cuts.single.durationMs, greaterThan(0));
+    });
+  });
+
+  group('a scene per line', () {
+    // Verse 4 (15–22 s) cut into three lines, verse 7 (33–46 s) into two.
+    VersePart part(int ayah, int i, int n, int t0, int t1) => VersePart(
+          ayah: ayah,
+          index: i,
+          count: n,
+          tokenStart: i,
+          tokenEnd: i + 1,
+          startMs: t0,
+          endMs: t1,
+          arabic: 'x',
+          translation: '',
+          fit: 1,
+        );
+    final lines = VerseLinePlan(2, {
+      4: [
+        part(4, 0, 3, 15000, 17500),
+        part(4, 1, 3, 17500, 19800),
+        part(4, 2, 3, 19800, 22000),
+      ],
+      7: [part(7, 0, 2, 33000, 39000), part(7, 1, 2, 39000, 46000)],
+    });
+    final units = VerseUnit.of(rec, 1, 7, lines);
+
+    test('lands a scene on every line', () {
+      final cuts = ScenePlan.of(
+        sceneCount: units.length,
+        recitation: rec,
+        startAyah: 1,
+        endAyah: 7,
+        pacing: ScenePacing.perLine,
+        units: units,
+      );
+      expect(cuts, hasLength(10));
+      expectGapless(cuts);
+      for (var i = 0; i < cuts.length; i++) {
+        expect(cuts[i].startMs, units[i].startMs);
+        expect(cuts[i].endMs, units[i].endMs);
+        expect(cuts[i].firstAyah, units[i].ayah);
+      }
+    });
+
+    test('fewer scenes than lines deal the lines out', () {
+      final cuts = ScenePlan.of(
+        sceneCount: 4,
+        recitation: rec,
+        startAyah: 1,
+        endAyah: 7,
+        pacing: ScenePacing.perLine,
+        units: units,
+      );
+      expect(cuts, hasLength(4));
+      expectGapless(cuts);
+      // Every cut on a line's edge.
+      final edges = {for (final u in units) u.startMs};
+      for (final c in cuts) {
+        expect(edges.contains(c.startMs), isTrue);
+      }
+    });
+
+    test('without lines it is the scene per verse it always was', () {
+      expect(
+        ScenePlan.of(
+          sceneCount: 7,
+          recitation: rec,
+          startAyah: 1,
+          endAyah: 7,
+          pacing: ScenePacing.perLine,
+        ),
+        plan(7),
+      );
+      // And per verse ignores the lines.
+      expect(
+        ScenePlan.of(
+          sceneCount: 7,
+          recitation: rec,
+          startAyah: 1,
+          endAyah: 7,
+          units: units,
+        ),
+        plan(7),
+      );
+    });
+
+    test('a reel can hold a scene for every line', () {
+      expect(ScenePlan.maxScenes(units.length, segMs: 46000),
+          greaterThanOrEqualTo(10));
     });
   });
 

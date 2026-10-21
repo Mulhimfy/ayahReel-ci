@@ -16,7 +16,10 @@ import '../data/quran_text_service.dart';
 import '../data/reel_effects.dart';
 import '../data/trouble.dart' show saysOutOfSpace;
 import '../data/verse_font.dart';
+import '../data/verse_follow.dart';
 import '../data/verse_ink.dart';
+import '../data/verse_lines.dart';
+import '../data/verse_motion.dart';
 import '../data/verse_numbering.dart';
 import '../data/verse_translation.dart';
 import '../state/creation_state.dart'
@@ -27,8 +30,12 @@ import '../state/creation_state.dart'
         SceneTransition,
         isLightGround;
 import '../widgets/reel_watermark.dart' show ReelDedication;
+import '../widgets/surah_title.dart';
+import '../widgets/verse_geometry.dart';
+import '../widgets/verse_unit_card.dart';
 import 'ayah_rasterizer.dart';
 import 'letterbox_layout.dart';
+import 'motion_graph.dart';
 import 'on_screen.dart';
 import 'render_dir.dart';
 import 'render_plan.dart';
@@ -140,7 +147,29 @@ class _OverlayClip {
   /// the same card lit differently.
   final double cardH;
 
-  const _OverlayClip(this.file, this.startMs, this.endMs, this.cardH);
+  /// The unit — a whole verse, or one part of a verse cut into lines —
+  /// this card belongs to, uncut by any pass: what its motion is timed
+  /// by. Null on the path every reel without motion takes.
+  final int? unitStartMs;
+  final int? unitEndMs;
+
+  const _OverlayClip(this.file, this.startMs, this.endMs, this.cardH,
+      {this.unitStartMs, this.unitEndMs});
+}
+
+/// One unit's flourishes, as the cards were rasterized: its card's
+/// height, the lines its Arabic was laid out in (card pixels), how the
+/// recitation crosses each, and the glint card its light is cut from.
+/// Where the card sits in the frame is left to the command, since the
+/// verse's drag moves it without the cards being drawn again.
+class _UnitShow {
+  final int startMs;
+  final int endMs;
+  final double cardH;
+  final List<MotionRow> rows;
+  final File? glint;
+
+  const _UnitShow(this.startMs, this.endMs, this.cardH, this.rows, this.glint);
 }
 
 /// Composites background + ayah PNG overlays + recitation audio into a
@@ -156,6 +185,7 @@ abstract final class VideoRenderer {
   /// background skip the slow widget-to-PNG pass.
   static String? _rasterMemoKey;
   static List<_OverlayClip> _rasterMemoClips = const [];
+  static List<_UnitShow> _rasterMemoShows = const [];
 
   /// Monotonic render generation. Every [render] call and every
   /// [cancelActive] bumps it; a running render aborts at its next
@@ -708,7 +738,12 @@ abstract final class VideoRenderer {
   /// flattened backdrops, the dedication line and photos converted for
   /// FFmpeg ([StillSource]): see [sweepCache].
   static final _drawnForARender = RegExp(
-      r'^ayah_(?:-?[0-9a-f]+_\d+(?:_w\d+_\d+)?|bgflat_.+|lbflat_.+|ded_v1_.+|still_.+)\.png$');
+      r'^ayah_(?:-?[0-9a-f]+_\d+(?:_w\d+_\d+)?'
+      // A unit's cards — a whole verse, or one part of a cut one — in
+      // each state a follow card draws, and its glint.
+      r'|-?[0-9a-f]+_\d+(?:_p\d+)?_(?:base|glint|w(?:x|\d+_\d+)_d(?:x|\d+))'
+      r'|bgflat_.+|lbflat_.+|ded_v1_.+|title_v1_.+|thread_v1_.+|spark_v1_.+'
+      r'|still_.+)\.png$');
 
   static DateTime _mtime(File f) {
     try {
@@ -815,6 +850,29 @@ abstract final class VideoRenderer {
     /// re-rendered as — takes the whole feature out of the graph.
     ReelEffects effects = ReelEffects.off,
     Map<int, List<HighlightSpan>>? highlight,
+
+    /// The voice's word windows whether or not the word highlight is
+    /// on — what the trail and the unveil follow. Null without word
+    /// timing.
+    Map<int, List<HighlightSpan>>? words,
+
+    /// Each verse's tokens' recited windows, from word timing: what the
+    /// thread and the light are timed by. Null without word timing,
+    /// and they cross each line at an even pace instead.
+    Map<int, List<(int, int)?>>? wordTimes,
+
+    /// Long verses cut into lines; null or empty shows every verse
+    /// whole, on exactly the path it always took.
+    VerseLinePlan? lines,
+
+    /// What the verse does as it is recited. [VerseMotion.none], the
+    /// default, keeps every graph as it was.
+    VerseMotion motion = VerseMotion.none,
+
+    /// The surah's name at the head of the reel, and where its centre
+    /// was dragged to (null for its place at the top).
+    bool surahTitle = false,
+    Offset? surahTitleAt,
     ReelLayout layout = ReelLayout.fullFrame,
     bool roundedCorners = true,
     LetterboxBackdrop backdrop = LetterboxBackdrop.colour,
@@ -891,7 +949,12 @@ abstract final class VideoRenderer {
         // keeps the key it was cached under.
         '${numbering == VerseNumbering.off ? '' : '_n${numbering.code}'}'
         // Only when off, for the same reason.
-        '${showTranslation ? '' : '_t0'}';
+        '${showTranslation ? '' : '_t0'}'
+        // Only when a verse is cut, or the verse moves, for the same
+        // reason again.
+        '${lines == null || lines.isEmpty ? '' : '_L${lines.fingerprint}'}'
+        '${motion.isNone ? '' : '_M${motion.key}${_wordTimesFingerprint(wordTimes)}'}'
+        '${motion.followsWords ? '_w${_highlightFingerprint(words)}' : ''}';
     // The letterbox card's shape, corners and backdrop all change the
     // finished picture, so they all belong in the key; full-frame
     // renders carry a single 'f' and are unaffected.
@@ -953,6 +1016,9 @@ abstract final class VideoRenderer {
         // Only when on, so every reel cached before the switch existed
         // keeps its key.
         '${highQuality ? '_hq' : ''}'
+        // The surah's name, and where it was put. Absent without it, so
+        // every reel rendered before the title existed keeps its key.
+        '${surahTitle ? '_st${surahTitleAt == null ? '' : '${(surahTitleAt.dx * 1000).round()}_${(surahTitleAt.dy * 1000).round()}'}' : ''}'
         // A phone on the tightest budget encodes lean (see [leanX264]),
         // and the lean reels made before 2026-10-13 were too heavy to
         // play. Keyed as they were, a Save of the same reel would be
@@ -1233,6 +1299,10 @@ abstract final class VideoRenderer {
     _checkCurrent(gen);
 
     List<_OverlayClip> clips;
+    // Only for a reel whose verses are cut into lines or move: every
+    // other reel takes the path below exactly as it always has.
+    var shows = const <_UnitShow>[];
+    final byUnits = (lines != null && !lines.isEmpty) || !motion.isNone;
     var fromMemo = false;
     // The memo holds clips, and a clip is a card *and* the moment it
     // shows: the same verses and styling read by another voice (or by
@@ -1243,9 +1313,60 @@ abstract final class VideoRenderer {
     final memoKey = '$rasterKey|${recitation.reciterId}'
         '|${_timingFingerprint(recitation, startAyah, end)}';
     if (_rasterMemoKey == memoKey &&
-        _rasterMemoClips.every((c) => c.file.existsSync())) {
+        _rasterMemoClips.every((c) => c.file.existsSync()) &&
+        _rasterMemoShows.every((u) => u.glint?.existsSync() ?? true)) {
       clips = _rasterMemoClips; // e.g. only the background changed
+      shows = _rasterMemoShows;
       fromMemo = true;
+    } else if (byUnits) {
+      final tag = '${rasterKey.hashCode.toRadixString(16)}_';
+      final showPrep = segMs > RenderPlan.singlePassMaxMs;
+      PhoneBudget.exportStage('cards');
+      final built = await _unitCards(
+        recitation: recitation,
+        ayahs: ayahs,
+        startAyah: startAyah,
+        endAyah: end,
+        lines: lines,
+        motion: motion,
+        highlight: highlight,
+        words: words,
+        wordTimes: wordTimes,
+        keepGoing: () => gen == _generation,
+        onUnit: showPrep && onProgress != null
+            ? (v) => onProgress(v * _prepShare)
+            : null,
+        draw: (ayah, part, name,
+                {lit, dim, glint = false, measure = false}) =>
+            AyahRasterizer.rasterizeUnit(
+              ayah,
+              part: part,
+              name: name,
+              highlight: lit,
+              dimFrom: dim,
+              glint: glint,
+              measure: measure,
+              textColor: Color(textArgb),
+              accent: Color(accentArgb),
+              ink: verseInk,
+              accentInk: accentInk,
+              textScale: textScale,
+              preset: preset,
+              onLight: onLight,
+              typography: typography,
+              edition: edition,
+              numbering: numbering,
+              showTranslation: showTranslation,
+              surah: recitation.surah,
+              fileTag: tag,
+            ),
+      );
+      _checkCurrent(gen);
+      clips = built.clips;
+      shows = built.shows;
+      _rasterMemoKey = memoKey;
+      _rasterMemoClips = clips;
+      _rasterMemoShows = shows;
     } else {
       final tag = '${rasterKey.hashCode.toRadixString(16)}_';
       // Hundreds of cards is a real wait; a few is over before it
@@ -1319,13 +1440,34 @@ abstract final class VideoRenderer {
       }
       _rasterMemoKey = memoKey;
       _rasterMemoClips = clips;
+      _rasterMemoShows = const [];
     }
     // The cut comes off after the memo, not before it: the cards past
     // it belong to the selection and are worth keeping for the render
     // of the whole thing; this reel just never reaches them.
     if (trimmed) {
       clips = [for (final c in clips) if (c.startMs < segEndMs) c];
+      shows = [for (final u in shows) if (u.startMs < segEndMs) u];
     }
+    // What rides on the cards: the thread's strip and its spark, drawn
+    // in the reel's accent. Only when the motion has a thread.
+    final threadPath = motion.thread && shows.isNotEmpty
+        ? (await AyahRasterizer.rasterizeThreadStrip(accentArgb)).path
+        : null;
+    final sparkPath = motion.thread && shows.isNotEmpty
+        ? (await AyahRasterizer.rasterizeSpark(accentArgb)).path
+        : null;
+    // The surah's name, on the ground its centre lands on: the band of
+    // a pale letterbox flips its ink, the card does not.
+    final titleCentre =
+        surahTitleAt ?? ReelSurahTitle.defaultCentre(letterbox);
+    final titlePath = surahTitle
+        ? (await AyahRasterizer.rasterizeSurahTitle(recitation.surah,
+                edition: edition ?? QuranTextService.edition,
+                onLight: ReelDedication.onLightAt(titleCentre,
+                    onLightGround: onLight, letterbox: letterbox)))
+            .path
+        : null;
     _checkCurrent(gen);
     prepMs = clock.elapsedMilliseconds;
     rlog('render: ${clips.length} overlays ready in ${prepMs}ms '
@@ -1408,7 +1550,13 @@ abstract final class VideoRenderer {
           segStartMs: segStartMs,
           segEndMs: segEndMs,
           spans: spans,
-          clips: [for (final c in clips) (startMs: c.startMs, endMs: c.endMs)],
+          // A unit's glint card is an input like any card, held for the
+          // whole pass, so it counts against the pass's budget as one.
+          clips: [
+            for (final c in clips) (startMs: c.startMs, endMs: c.endMs),
+            for (final u in shows)
+              if (u.glint != null) (startMs: u.startMs, endMs: u.endMs),
+          ]..sort((a, b) => a.startMs.compareTo(b.startMs)),
           fadeMs: fadeMs,
           maxClips: maxClips,
         );
@@ -1434,6 +1582,12 @@ abstract final class VideoRenderer {
           dedicationPath: dedPath,
           dedicationAt: dedicationAt,
           clips: clips,
+          motion: motion,
+          shows: shows,
+          threadPath: threadPath,
+          sparkPath: sparkPath,
+          titlePath: titlePath,
+          titleAt: titleCentre,
           segStartMs: segStartMs,
           segMs: segMs,
           overlayAlign: overlayAlign,
@@ -1514,6 +1668,12 @@ abstract final class VideoRenderer {
             dedicationPath: dedPath,
             dedicationAt: dedicationAt,
             clips: pClips,
+            motion: motion,
+            shows: shows,
+            threadPath: threadPath,
+            sparkPath: sparkPath,
+            titlePath: titlePath,
+            titleAt: titleCentre,
             segStartMs: p.startMs,
             segMs: p.durationMs,
             overlayAlign: overlayAlign,
@@ -2039,6 +2199,8 @@ abstract final class VideoRenderer {
               c.startMs < p.startMs ? p.startMs : c.startMs,
               c.endMs > p.endMs ? p.endMs : c.endMs,
               c.cardH,
+              unitStartMs: c.unitStartMs,
+              unitEndMs: c.unitEndMs,
             ),
       ];
 
@@ -2311,6 +2473,23 @@ abstract final class VideoRenderer {
     return x.toRadixString(36);
   }
 
+  static String _wordTimesFingerprint(Map<int, List<(int, int)?>>? w) {
+    if (w == null || w.isEmpty) return '';
+    var x = 0x811c9dc5;
+    void mix(int v) {
+      x = ((x ^ (v & 0xFFFFFFFF)) * 0x01000193) & 0xFFFFFFFF;
+    }
+
+    for (final ayah in w.keys.toList()..sort()) {
+      mix(ayah);
+      for (final t in w[ayah]!) {
+        mix(t?.$1 ?? -1);
+        mix(t?.$2 ?? -1);
+      }
+    }
+    return '_wt${x.toRadixString(36)}';
+  }
+
   static String _highlightFingerprint(Map<int, List<HighlightSpan>>? h) {
     if (h == null || h.isEmpty) return '0';
     var x = 0x811c9dc5;
@@ -2328,6 +2507,203 @@ abstract final class VideoRenderer {
       }
     }
     return x.toRadixString(16);
+  }
+
+  /// Every unit's cards — a whole verse, or each line of a cut one — the
+  /// windows they show in, and what rides on them: the path a reel takes
+  /// when its verses are cut into lines or move. Every other reel keeps
+  /// the per-verse path it always had.
+  ///
+  /// [draw] rasterizes one card of a unit in the reel's styling; see
+  /// [AyahRasterizer.rasterizeUnit].
+  static Future<({List<_OverlayClip> clips, List<_UnitShow> shows})>
+      _unitCards({
+    required Recitation recitation,
+    required List<Ayah> ayahs,
+    required int startAyah,
+    required int endAyah,
+    required VerseLinePlan? lines,
+    required VerseMotion motion,
+    required Map<int, List<HighlightSpan>>? highlight,
+    required Map<int, List<HighlightSpan>>? words,
+    required Map<int, List<(int, int)?>>? wordTimes,
+    required Future<({File file, double height, List<VerseRow> rows})>
+            Function(Ayah ayah, VersePart? part, String name,
+                {({int start, int end})? lit,
+                int? dim,
+                bool glint,
+                bool measure})
+        draw,
+    required bool Function() keepGoing,
+    void Function(double done)? onUnit,
+  }) async {
+    final units = VerseUnit.of(recitation, startAyah, endAyah, lines);
+    final follow = highlight ?? words;
+    final needRows = motion.thread || motion.light;
+    final clips = <_OverlayClip>[];
+    final shows = <_UnitShow>[];
+    for (var i = 0; i < units.length; i++) {
+      if (!keepGoing()) throw const RenderCancelled();
+      final u = units[i];
+      final ayah = ayahs[u.ayah - 1];
+      final verseStart = recitation.timing(u.ayah).startMs;
+      final windows = VerseFollow.of(
+        unit: u,
+        verseStartMs: verseStart,
+        spans: follow?[u.ayah],
+        highlight: highlight != null,
+        trail: motion.trail,
+        unveil: motion.unveil,
+      );
+      // One card per state the unit passes through, however many
+      // windows show it.
+      final drawn = <String, ({File file, double height})>{};
+      var rows = const <VerseRow>[];
+      var cardH = 0.0;
+      for (final w in windows) {
+        var c = drawn[w.key];
+        if (c == null) {
+          final r = await draw(ayah, u.part, w.key,
+              lit: w.lit, dim: w.dimFrom, measure: needRows && rows.isEmpty);
+          if (needRows && rows.isEmpty) rows = r.rows;
+          c = (file: r.file, height: r.height);
+          drawn[w.key] = c;
+          if (!keepGoing()) throw const RenderCancelled();
+        }
+        cardH = c.height;
+        clips.add(_OverlayClip(c.file, w.startMs, w.endMs, c.height,
+            unitStartMs: u.startMs, unitEndMs: u.endMs));
+      }
+      File? glint;
+      if (motion.light && rows.isNotEmpty) {
+        glint = (await draw(ayah, u.part, 'glint', glint: true)).file;
+      }
+      final times = u.timesIn(wordTimes?[u.ayah], verseStart);
+      final voiced = VerseRows.voicedIn(u.durationMs);
+      final progress = rows.isEmpty
+          ? const <RowProgress>[]
+          : times != null
+              ? [for (final r in rows) r.progressFromWords(times, 0)]
+              : VerseRows.even(
+                  rows,
+                  VerseUnitCard.textOf(ayah, u.part).arabic.split(' '),
+                  voiced.fromMs,
+                  voiced.toMs);
+      shows.add(_UnitShow(
+        u.startMs,
+        u.endMs,
+        cardH,
+        [
+          for (var k = 0; k < rows.length; k++)
+            MotionRow(
+              left: rows[k].left,
+              right: rows[k].right,
+              top: rows[k].top,
+              bottom: rows[k].bottom,
+              threadY: rows[k].threadY,
+              progress: progress[k],
+            ),
+        ],
+        glint,
+      ));
+      onUnit?.call((i + 1) / units.length);
+    }
+    return (clips: clips, shows: shows);
+  }
+
+  /// The whole FFmpeg command for a reel whose verses are cut into lines
+  /// or move, on one still background, drawn by the real cards: what a
+  /// desktop FFmpeg is pointed at to see that the motion's graph runs
+  /// and lands where the preview draws it. Picture only when [audio] is
+  /// null. See test/tools/export_motion_tool_test.dart.
+  @visibleForTesting
+  static Future<String> unitReelCommand({
+    required Recitation recitation,
+    required List<Ayah> ayahs,
+    required int startAyah,
+    required int endAyah,
+    required String background,
+    required String out,
+    VerseLinePlan? lines,
+    VerseMotion motion = VerseMotion.none,
+    Map<int, List<HighlightSpan>>? highlight,
+    Map<int, List<HighlightSpan>>? words,
+    Map<int, List<(int, int)?>>? wordTimes,
+    int accentArgb = 0xFFEEC96B,
+    double overlayAlign = 0.5,
+    bool surahTitle = false,
+    VerseTranslation edition = VerseTranslation.english,
+    VerseNumbering numbering = VerseNumbering.off,
+    String? audio,
+  }) async {
+    final built = await _unitCards(
+      recitation: recitation,
+      ayahs: ayahs,
+      startAyah: startAyah,
+      endAyah: endAyah,
+      lines: lines,
+      motion: motion,
+      highlight: highlight,
+      words: words,
+      wordTimes: wordTimes,
+      keepGoing: () => true,
+      draw: (ayah, part, name, {lit, dim, glint = false, measure = false}) =>
+          AyahRasterizer.rasterizeUnit(
+        ayah,
+        part: part,
+        name: name,
+        highlight: lit,
+        dimFrom: dim,
+        glint: glint,
+        measure: measure,
+        accent: Color(accentArgb),
+        edition: edition,
+        numbering: numbering,
+        surah: recitation.surah,
+        fileTag: 'tool_',
+      ),
+    );
+    final segStart = recitation.timing(startAyah).startMs;
+    final segMs = recitation.timing(endAyah).endMs - segStart;
+    final wm = await AyahRasterizer.rasterizeWatermark();
+    return _buildCommand(
+      audioPath: audio,
+      bgPath: background,
+      bgIsImage: true,
+      bgReady: true,
+      sceneInputs: null,
+      cuts: const [],
+      fadeMs: 0,
+      scrimPath: null,
+      maskPath: null,
+      watermarkPath: wm.path,
+      clips: built.clips,
+      motion: motion,
+      shows: built.shows,
+      threadPath: motion.thread
+          ? (await AyahRasterizer.rasterizeThreadStrip(accentArgb)).path
+          : null,
+      sparkPath: motion.thread
+          ? (await AyahRasterizer.rasterizeSpark(accentArgb)).path
+          : null,
+      titlePath: surahTitle
+          ? (await AyahRasterizer.rasterizeSurahTitle(recitation.surah,
+                  edition: edition))
+              .path
+          : null,
+      titleAt: surahTitle ? ReelSurahTitle.defaultCentre(null) : null,
+      segStartMs: segStart,
+      segMs: segMs,
+      overlayAlign: overlayAlign,
+      letterbox: null,
+      backdrop: LetterboxBackdrop.colour,
+      backdropArgb: 0xFF000000,
+      outPath: out,
+      hardware: false,
+      threads: 2,
+      reelMs: segMs,
+      frames: audio == null ? (segMs * 30 / 1000).round() : null,
+    );
   }
 
   static String _buildCommand({
@@ -2357,6 +2733,19 @@ abstract final class VideoRenderer {
     /// null for the foot of it.
     Offset? dedicationAt,
     required List<_OverlayClip> clips,
+
+    /// The verse's motion, and what rides on its cards (see
+    /// [VerseMotionGraph]). [VerseMotion.none] writes the cards' overlays
+    /// exactly as they always were.
+    VerseMotion motion = VerseMotion.none,
+    List<_UnitShow> shows = const [],
+    String? threadPath,
+    String? sparkPath,
+
+    /// The surah's name as a cropped PNG, centred at [titleAt]; null
+    /// adds nothing to the graph.
+    String? titlePath,
+    Offset? titleAt,
     required int segStartMs,
     required int segMs,
     required double overlayAlign,
@@ -2497,6 +2886,61 @@ abstract final class VideoRenderer {
           '"color=c=${_ffColor(backdropArgb)}:s=1080x1920:r=30" ');
       colourIdx = nextIdx++;
     }
+    // The verse's flourishes, for the units this pass shows: each one's
+    // glint card when its light is on, and the thread's strip and spark.
+    final passEndMs = segStartMs + segMs;
+    double cardTopOf(double cardH) => letterbox == null
+        ? (LetterboxGeometry.frameH - cardH) * overlayAlign.clamp(0.0, 1.0)
+        : letterbox.verseTop(cardH, overlayAlign);
+    var motionUnits = <MotionUnit>[
+      for (final u in shows)
+        if (u.endMs > segStartMs && u.startMs < passEndMs)
+          MotionUnit(
+            startMs: u.startMs,
+            endMs: u.endMs,
+            cardTop: cardTopOf(u.cardH),
+            cardH: u.cardH,
+            rows: u.rows,
+            glintInput: u.glint == null ? null : -1,
+          ),
+    ];
+    int? threadIdx;
+    int? sparkIdx;
+    if (!motion.isNone && motionUnits.isNotEmpty) {
+      final use = VerseMotionGraph.uses(
+          units: motionUnits,
+          motion: motion,
+          passStartMs: segStartMs,
+          passEndMs: passEndMs);
+      final shown = [
+        for (final u in shows)
+          if (u.endMs > segStartMs && u.startMs < passEndMs) u,
+      ];
+      final withGlints = <MotionUnit>[];
+      for (var i = 0; i < motionUnits.length; i++) {
+        final glint = shown[i].glint;
+        if (use.glintUnits.contains(i) && glint != null) {
+          inputs.write('$still-i "${glint.path}" ');
+          withGlints.add(motionUnits[i].withGlint(nextIdx++));
+        } else {
+          withGlints.add(motionUnits[i].withGlint(null));
+        }
+      }
+      motionUnits = withGlints;
+      if (use.thread && threadPath != null) {
+        inputs.write('$still-i "$threadPath" ');
+        threadIdx = nextIdx++;
+      }
+      if (use.spark && sparkPath != null) {
+        inputs.write('$still-i "$sparkPath" ');
+        sparkIdx = nextIdx++;
+      }
+    }
+    int? titleIdx;
+    if (titlePath != null && titleAt != null) {
+      inputs.write('$still-i "$titlePath" ');
+      titleIdx = nextIdx++;
+    }
 
     // Filtergraph: build the 1080x1920 base frame, then chain one timed
     // overlay per ayah (segment-relative times).
@@ -2572,17 +3016,48 @@ abstract final class VideoRenderer {
         ? letterbox.verseYExpr(overlayAlign)
         : '(H-h)*${overlayAlign.toStringAsFixed(3)}';
     var prev = vignetteIdx == null ? 'v0' : 'v0v';
-    for (var i = 0; i < clips.length; i++) {
-      final s = ((clips[i].startMs - segStartMs) / 1000).toStringAsFixed(3);
-      final e = ((clips[i].endMs - segStartMs) / 1000).toStringAsFixed(3);
-      final label = 'v${i + 1}';
-      // The y expression is quoted: the letterbox form contains commas,
-      // which would otherwise read as the end of the filter. The window
-      // is half-open: between() holds both ends, and at a seam that
-      // lands on a frame two cards drew on it, one over the other.
-      f.write("[$prev][${clipBase + i}:v]overlay=(W-w)/2:'$verseY':"
-          "enable='gte(t,$s)*lt(t,$e)'[$label];");
-      prev = label;
+    if (motion.isNone) {
+      for (var i = 0; i < clips.length; i++) {
+        final s = ((clips[i].startMs - segStartMs) / 1000).toStringAsFixed(3);
+        final e = ((clips[i].endMs - segStartMs) / 1000).toStringAsFixed(3);
+        final label = 'v${i + 1}';
+        // The y expression is quoted: the letterbox form contains commas,
+        // which would otherwise read as the end of the filter. The window
+        // is half-open: between() holds both ends, and at a seam that
+        // lands on a frame two cards drew on it, one over the other.
+        f.write("[$prev][${clipBase + i}:v]overlay=(W-w)/2:'$verseY':"
+            "enable='gte(t,$s)*lt(t,$e)'[$label];");
+        prev = label;
+      }
+    } else {
+      prev = VerseMotionGraph.write(
+        f,
+        prev: prev,
+        cards: [
+          for (var i = 0; i < clips.length; i++)
+            MotionCard(
+              input: clipBase + i,
+              startMs: clips[i].startMs,
+              endMs: clips[i].endMs,
+              unitStartMs: clips[i].unitStartMs ?? clips[i].startMs,
+              unitEndMs: clips[i].unitEndMs ?? clips[i].endMs,
+            ),
+        ],
+        units: motionUnits,
+        motion: motion,
+        passStartMs: segStartMs,
+        passEndMs: passEndMs,
+        baseY: verseY,
+        threadInput: threadIdx,
+        sparkInput: sparkIdx,
+      );
+    }
+    // The surah's name, over the verse and under the mark, centred
+    // where the preview puts it and held inside the frame the same way.
+    if (titleIdx != null) {
+      f.write('[$prev][$titleIdx:v]overlay=${surahTitleOverlay(titleAt!)}'
+          '[vtitle];');
+      prev = 'vtitle';
     }
     // Watermark last, above the verse card — exactly where the preview
     // draws it. The PNG is cropped to the mark, so it is placed rather

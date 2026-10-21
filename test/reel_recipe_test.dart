@@ -8,6 +8,7 @@ import 'package:ayah_reels/data/reel_recipe.dart';
 import 'package:ayah_reels/data/dedication.dart';
 import 'package:ayah_reels/data/verse_font.dart';
 import 'package:ayah_reels/data/verse_ink.dart';
+import 'package:ayah_reels/data/verse_motion.dart';
 import 'package:ayah_reels/state/creation_state.dart';
 
 /// A recipe is what lets a finished reel be opened again. What is
@@ -293,5 +294,57 @@ void main() {
     expect(r.layout, ReelLayout.fullFrame);
     expect(r.preset, TextPreset.classic);
     expect(r.scenes, isEmpty);
+  });
+
+  test('lines, motion and the surah title survive the round trip', () {
+    final s = CreationState()
+      ..startNewReel()
+      ..selectReciter(reciters.first)
+      ..setVerseLines(2)
+      ..setMotion(const VerseMotion(
+          arrival: VerseArrival.rise, thread: true, light: true))
+      ..setSurahTitle(true)
+      ..setSurahTitleAt(const Offset(0.4, 0.2));
+    final json = ReelRecipe.capture(s).toJson();
+    final r = ReelRecipe.fromJson(json);
+    expect(r.verseLines, 2);
+    expect(r.motion,
+        const VerseMotion(arrival: VerseArrival.rise, thread: true, light: true));
+    expect(r.surahTitle, isTrue);
+    expect(r.surahTitleAt, const Offset(0.4, 0.2));
+
+    final back = CreationState();
+    r.applyStyling(back, reciters.first);
+    expect(back.verseLines, 2);
+    expect(back.motion.light, isTrue);
+    expect(back.surahTitle, isTrue);
+    expect(back.surahTitleAt, const Offset(0.4, 0.2));
+  });
+
+  test('a reel saved before them opens whole, still and untitled', () {
+    final r = ReelRecipe.fromJson({
+      'reciterId': 'alafasy',
+      'surah': 1,
+      'startAyah': 1,
+      'endAyah': 7,
+      'scenes': ['sky_pexels_01'],
+      'sceneWeights': [1],
+      'textArgb': 0xFFFFFFFF,
+    });
+    expect(r.verseLines, 0);
+    expect(r.motion, VerseMotion.none);
+    expect(r.surahTitle, isFalse);
+    final s = CreationState()
+      ..setMotion(const VerseMotion(arrival: VerseArrival.fade))
+      ..setSurahTitle(true);
+    r.applyStyling(s, reciters.first);
+    expect(s.motion, VerseMotion.none);
+    expect(s.surahTitle, isFalse);
+    expect(s.verseLines, 0);
+    // And a recipe writes none of it when there is none.
+    final json = ReelRecipe.capture(s).toJson();
+    expect(json.containsKey('verseLines'), isFalse);
+    expect(json.containsKey('motion'), isFalse);
+    expect(json.containsKey('surahTitle'), isFalse);
   });
 }

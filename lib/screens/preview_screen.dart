@@ -8,6 +8,7 @@ import 'package:app_settings/app_settings.dart' as os_settings;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show listEquals;
+import 'package:flutter/scheduler.dart' show Ticker;
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
@@ -35,6 +36,8 @@ import '../data/settings_service.dart';
 import '../data/share_origin.dart';
 import '../data/verse_font.dart';
 import '../data/verse_ink.dart';
+import '../data/verse_lines.dart';
+import '../data/verse_motion.dart';
 import '../data/verse_numbering.dart';
 import '../data/verse_translation.dart';
 import '../data/whatsapp_share.dart';
@@ -44,6 +47,7 @@ import '../render/ayah_rasterizer.dart';
 import '../render/letterbox_layout.dart';
 import '../render/render_process.dart';
 import '../render/scene_plan.dart';
+import '../render/verse_planner.dart';
 import '../render/video_renderer.dart';
 import '../state/creation_state.dart';
 import '../theme/app_theme.dart';
@@ -51,7 +55,6 @@ import '../widgets/a11y.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/feedback_sheet.dart';
 import '../widgets/rate_sheet.dart';
-import '../widgets/ayah_overlay.dart';
 import '../widgets/colour_picker.dart';
 import '../widgets/dedicate_sheet.dart';
 import '../widgets/direct_share_button.dart';
@@ -60,11 +63,14 @@ import '../widgets/hashtags_sheet.dart';
 import '../widgets/instagram_choice.dart';
 import '../widgets/ink_swatch.dart';
 import '../widgets/measure_height.dart';
+import '../widgets/motion_picker.dart';
 import '../widgets/reel_finish.dart';
 import '../widgets/reel_watermark.dart';
 import '../widgets/shimmer_text.dart';
 import '../widgets/step_dots.dart';
+import '../widgets/surah_title.dart';
 import '../widgets/telegram_invite.dart';
+import '../widgets/verse_stage.dart';
 import '../widgets/verses_milestone.dart';
 import 'home_shell.dart';
 
@@ -98,7 +104,7 @@ class PreviewScreen extends StatefulWidget {
 }
 
 class _PreviewScreenState extends State<PreviewScreen>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   /// ONE player for every preview visit, for the app's lifetime.
   /// Creating and disposing a platform player per visit is exactly the
   /// churn that wedges Android's media stack: the second visit's
@@ -420,15 +426,47 @@ class _PreviewScreenState extends State<PreviewScreen>
   Map<int, List<HighlightSpan>>? _hlPlan;
   bool _wordHl = creationState.wordHighlight;
 
-  /// Display-token range currently lit, driven off playback position.
-  ({int start, int end})? _hlRange;
+
+  /// The voice's raw word timing, when it has any: what long verses are
+  /// cut by, and what the thread and the light follow. Null until it is
+  /// in, and for a voice without it.
+  Map<int, List<WordSpan>>? _spans;
+  bool _spansFailed = false;
+
+  /// Each verse's tokens' recited windows, from [_spans].
+  Map<int, List<(int, int)?>>? _wordTimes;
+
+  /// The long verses cut into lines, when this reel cuts them; null for
+  /// every verse whole. See [VersePlanner].
+  VerseLinePlan? _linePlan;
+  int _planGen = 0;
+
+  /// What is on screen in turn: whole verses, and the lines of cut ones.
+  List<VerseUnit> _units = const [];
+
+  /// What the verse does as it is recited, as chosen on the style step.
+  late VerseMotion _motionChoice = creationState.motion;
+
+  /// The motion this reel can run: the trail and the unveil need word
+  /// windows, which not every voice has.
+  VerseMotion get _motion => _motionChoice.forVoice(hasWords: _hlPlan != null);
+
+  /// Where the recitation is, every frame: what the verse on screen and
+  /// its motion are drawn at. The position events alone come every
+  /// fifth of a second; the same wall-clock interpolation the word
+  /// highlight uses fills in between.
+  final ValueNotifier<int> _clock = ValueNotifier(0);
+  late final Ticker _clockTicker = createTicker((_) => _tickClock());
+
+  /// The surah's name at the head of the reel, and where it was dragged.
+  bool _titleOn = creationState.surahTitle;
+  Offset? _titleAt = creationState.surahTitleAt;
 
   /// Player position events arrive only every ~200ms; a word lasts
-  /// 300-600ms. The ticker interpolates between events with a wall
+  /// 300-600ms. The clock interpolates between events with a wall
   /// clock so the highlight lands on the word, not near it.
   Duration _lastPos = Duration.zero;
   final Stopwatch _posClock = Stopwatch();
-  Timer? _hlTicker;
 
   /// FFmpeg encode in progress: shows the progress bar.
   bool _rendering = false;
@@ -645,6 +683,7 @@ class _PreviewScreenState extends State<PreviewScreen>
         _ayahs = ayahs;
         _recitation = rec;
         _endAyah = end;
+        _units = VerseUnit.of(rec, _startAyah, end, null);
         // A cut carried in from a recipe has to fit the recitation it
         // is now standing on: past the end, or under the handle's own
         // floor, it is no cut at all.
@@ -665,7 +704,11 @@ class _PreviewScreenState extends State<PreviewScreen>
       }
       _attachListeners();
       _startFadeTicker();
+      if (!_clockTicker.isActive) _clockTicker.start();
       _loadHighlight();
+      // Long verses are cut once the voice's word timing is in, when it
+      // has any; a voice without it is cut on its pauses straight away.
+      unawaited(_replanLines());
       await _prepareSource();
       await _playSegment();
       // Start rendering silently so Share feels instant — but only
@@ -699,6 +742,7 @@ class _PreviewScreenState extends State<PreviewScreen>
         endAyah: _endAyah,
         pacing: _pacing,
         weights: _weights,
+        units: _units,
       ),
       _reelEndMs,
     );
@@ -709,6 +753,175 @@ class _PreviewScreenState extends State<PreviewScreen>
     });
     _ensureSceneVideo(_sceneIndex);
     if (drop) _restyled();
+  }
+
+  /// Everything the verse card's layout answers to, as this screen has
+  /// it now: what a plan of cut verses is made for.
+  VerseLook get _look => VerseLook(
+        textScale: _textScale,
+        preset: _preset,
+        typography: _typography,
+        edition: _edition,
+        numbering: _numbering,
+        showTranslation: _showTranslation,
+        ink: _verseInk,
+        surah: _surah,
+      );
+
+  /// (Re)cuts the long verses into lines for the reel as it now looks.
+  ///
+  /// A voice with word timing waits for it: cuts are placed on its
+  /// words, and a plan made without them would be thrown away a moment
+  /// later. Superseded plans stop where they are.
+  Future<void> _replanLines() async {
+    final rec = _recitation;
+    final ayahs = _ayahs;
+    if (rec == null || ayahs == null) return;
+    final gen = ++_planGen;
+    final lines = creationState.verseLines;
+    if (lines == VerseLines.whole) {
+      _applyPlan(null);
+      return;
+    }
+    if (WordAlignService.supports(_reciter) && _spans == null && !_spansFailed) {
+      return;
+    }
+    VerseLinePlan plan;
+    try {
+      plan = await VersePlanner.plan(
+        lines: lines,
+        ayahs: ayahs,
+        recitation: rec,
+        startAyah: _startAyah,
+        endAyah: _endAyah,
+        look: _look,
+        words: _spans,
+        loudness: _spans == null
+            ? () => RecitationService.loudness(rec.audioPath)
+            : null,
+        keepGoing: () => mounted && gen == _planGen,
+      );
+    } catch (e, st) {
+      // A plan that fails leaves every verse whole, which is the reel
+      // as it always was — never a broken preview.
+      rlogError('lines: plan', e, st);
+      plan = VerseLinePlan.empty;
+    }
+    if (!mounted || gen != _planGen) return;
+    rlog('lines: ${plan.byAyah.length} verse(s) cut into '
+        '${plan.partCount} lines');
+    _applyPlan(plan.isEmpty ? null : plan);
+  }
+
+  void _applyPlan(VerseLinePlan? plan) {
+    final rec = _recitation;
+    if (rec == null) return;
+    final changed =
+        (plan?.fingerprint ?? '') != (_linePlan?.fingerprint ?? '');
+    setState(() {
+      _linePlan = plan;
+      _units = VerseUnit.of(rec, _startAyah, _endAyah, plan);
+    });
+    // The scenes may follow the lines, and the export draws them: both
+    // are a different reel now.
+    if (changed) _replan(drop: true);
+  }
+
+  /// Where the recitation is now, for the verse's motion.
+  void _tickClock() {
+    final playing = _audio.state == PlayerState.playing;
+    final ms = playing
+        ? _lastPos.inMilliseconds + _posClock.elapsedMilliseconds
+        : _lastPos.inMilliseconds;
+    if (_clock.value != ms) _clock.value = ms;
+  }
+
+  /// Where the title's centre is: dragged, or its place at the head.
+  Offset get _titleCentre => _titleAt ?? ReelSurahTitle.defaultCentre(_box);
+
+  bool get _titleOnLight => ReelDedication.onLightAt(_titleCentre,
+      onLightGround: _onLight, letterbox: _box);
+
+  /// How big the title laid out, for keeping it on the frame.
+  Size? _titleSize;
+
+  void _moveTitle(Offset delta, BoxConstraints box) {
+    final w = box.maxWidth, h = box.maxHeight;
+    final size = _titleSize;
+    if (size == null || w == 0 || h == 0) return;
+    final margin = ReelWatermarkMark.shadowMargin *
+        w /
+        ReelWatermarkMark.referenceWidth;
+    final from = _titleCentre;
+    double keep(double v, double half) =>
+        half >= 0.5 ? 0.5 : v.clamp(half, 1 - half);
+    setState(() => _titleAt = Offset(
+          keep(from.dx + delta.dx / w, ((size.width) / 2 + margin) / w),
+          keep(from.dy + delta.dy / h, ((size.height) / 2 + margin) / h),
+        ));
+  }
+
+  void _settleTitle() {
+    creationState.setSurahTitleAt(_titleAt);
+    _restyled();
+  }
+
+  void _resetTitle() {
+    if (_titleAt == null) return;
+    HapticFeedback.selectionClick();
+    setState(() => _titleAt = null);
+    _settleTitle();
+  }
+
+  void _toggleTitle() {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _titleOn = !_titleOn;
+      if (!_titleOn) _titleAt = null;
+    });
+    creationState
+      ..setSurahTitle(_titleOn)
+      ..setSurahTitleAt(_titleAt);
+    _restyled();
+  }
+
+  /// A motion picked on this screen, from the sheet under the reel.
+  void _setMotion(VerseMotion m) {
+    if (m == _motionChoice) return;
+    setState(() => _motionChoice = m);
+    creationState.setMotion(m);
+    _restyled();
+  }
+
+  /// The motion, as a sheet that leaves the reel playing above it — and
+  /// how this reel shows its long verses, chosen the same way.
+  Future<void> _pickMotion() => showMotionSheet(
+        context,
+        motion: _motionChoice,
+        hasWords: _hlPlan != null,
+        onChanged: _setMotion,
+        lines: creationState.verseLines,
+        onLines: _setLines,
+      );
+
+  /// Long verses whole or line by line, for this reel. The scenery
+  /// follows the lines when Settings says it should and the reel is on
+  /// the per-verse pacing it started on.
+  void _setLines(int lines) {
+    if (lines == creationState.verseLines) return;
+    creationState.setVerseLines(lines);
+    final follow = SettingsService.state.value.scenesFollowLines;
+    if (lines > VerseLines.whole &&
+        follow &&
+        _pacing == ScenePacing.perAyah) {
+      setState(() => _pacing = ScenePacing.perLine);
+      creationState.setPacing(ScenePacing.perLine);
+    } else if (lines == VerseLines.whole && _pacing == ScenePacing.perLine) {
+      setState(() => _pacing = ScenePacing.perAyah);
+      creationState.setPacing(ScenePacing.perAyah);
+    }
+    _restyled();
+    unawaited(_replanLines());
   }
 
   /// Live while the trim handle is moving: the reel on screen is the
@@ -1156,6 +1369,12 @@ class _PreviewScreenState extends State<PreviewScreen>
         dedication: _dedicationLine,
         dedicationAt: _dedicationAt,
         highlight: _wordHl ? _hlPlan : null,
+        words: _hlPlan,
+        wordTimes: _wordTimes,
+        lines: _linePlan,
+        motion: _motion,
+        surahTitle: _titleOn,
+        surahTitleAt: _titleAt,
         layout: _layout,
         roundedCorners: _rounded,
         backdrop: _backdrop,
@@ -1393,21 +1612,27 @@ class _PreviewScreenState extends State<PreviewScreen>
   }
 
   void _setTextColor(int argb) {
+    final inked = !_verseInk.isNone;
     setState(() {
       _textArgb = argb;
       _verseInk = VerseInk.none;
     });
     creationState.setTextColor(argb);
     _restyled(); // same reason as _onDragEnd
+    // An ink gives the card room above its first line for its light;
+    // the cut verses' parts are held to heights measured with it.
+    if (inked) unawaited(_replanLines());
   }
 
   void _setVerseInk(VerseInk ink) {
+    final relaid = _verseInk.isNone != ink.isNone;
     setState(() {
       _verseInk = ink;
       _textArgb = ink.base;
     });
     creationState.setVerseInk(ink);
     _restyled();
+    if (relaid) unawaited(_replanLines());
   }
 
   void _setTextScale(double v, {required bool done}) {
@@ -1415,6 +1640,8 @@ class _PreviewScreenState extends State<PreviewScreen>
     if (done) {
       creationState.setTextScale(v);
       _restyled();
+      // Bigger type is more lines: the long verses are cut again.
+      unawaited(_replanLines());
     }
   }
 
@@ -1422,6 +1649,7 @@ class _PreviewScreenState extends State<PreviewScreen>
     setState(() => _preset = p);
     creationState.setTextPreset(p);
     _restyled();
+    unawaited(_replanLines());
   }
 
   /// Drives [_fadeLevel] while the reel fades at its edges.
@@ -1474,7 +1702,6 @@ class _PreviewScreenState extends State<PreviewScreen>
         break;
       }
     }
-    _syncWord(ms);
   }
 
   /// Fetches word-timing data for this voice (one-time download shared
@@ -1483,7 +1710,19 @@ class _PreviewScreenState extends State<PreviewScreen>
   Future<void> _loadHighlight() async {
     if (!WordAlignService.supports(_reciter)) return;
     final spans = await WordAlignService.load(_reciter, _surah);
-    if (!mounted || spans == null || _recitation == null) return;
+    if (!mounted || _recitation == null) return;
+    if (spans == null) {
+      // No word timing after all: long verses are cut on the pauses.
+      _spansFailed = true;
+      unawaited(_replanLines());
+      return;
+    }
+    setState(() {
+      _spans = spans;
+      _wordTimes =
+          VersePlanner.wordTimes(_ayahs!, spans, _startAyah, _endAyah);
+    });
+    unawaited(_replanLines());
     final plan = WordAlignService.highlightPlan(
       recitation: _recitation!,
       ayahs: _ayahs!,
@@ -1491,42 +1730,19 @@ class _PreviewScreenState extends State<PreviewScreen>
       startAyah: _startAyah,
       endAyah: _endAyah,
     );
-    if (plan == null) return;
+    if (plan == null) {
+      // Too many windows to highlight, but the thread and the light can
+      // still follow the words.
+      if (_motion.thread || _motion.light) _restyled();
+      return;
+    }
     rlog('align: highlight ready '
         '(${plan.values.fold<int>(0, (n, l) => n + l.length)} windows)');
     setState(() => _hlPlan = plan);
-    _hlTicker ??= Timer.periodic(
-      const Duration(milliseconds: 66),
-      (_) {
-        if (_wordHl && _hlPlan != null && _audio.state == PlayerState.playing) {
-          _syncWord(_lastPos.inMilliseconds + _posClock.elapsedMilliseconds);
-        }
-      },
-    );
     // The eager render may already be encoding without the highlight;
     // redo it — unless the user is mid-export, which must not be
     // yanked away (that one reel ships plain).
-    if (_wordHl) _restyled();
-  }
-
-  void _syncWord(int ms) {
-    final plan = _wordHl ? _hlPlan : null;
-    final rec = _recitation;
-    ({int start, int end})? r;
-    if (plan != null && rec != null) {
-      final t = rec.timing(_ayahIndex + 1);
-      final spans = plan[t.ayah];
-      if (spans != null) {
-        final rel = ms - t.startMs;
-        for (final h in spans) {
-          if (rel >= h.startMs && rel < h.endMs) {
-            r = (start: h.tokenStart, end: h.tokenEnd);
-            break;
-          }
-        }
-      }
-    }
-    if (r != _hlRange && mounted) setState(() => _hlRange = r);
+    if (_wordHl || !_motionChoice.isNone) _restyled();
   }
 
   void _setPacing(ScenePacing p) {
@@ -1571,7 +1787,7 @@ class _PreviewScreenState extends State<PreviewScreen>
     // and the reel is the reel it was. Say the one thing that makes
     // the tap work, and offer it — a control that does nothing and
     // says nothing is the worst of the three.
-    if (_pacing == ScenePacing.perAyah && listEquals(before, _cuts)) {
+    if (_pacing != ScenePacing.even && listEquals(before, _cuts)) {
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()
         ..showSnackBar(toast(
@@ -1587,10 +1803,7 @@ class _PreviewScreenState extends State<PreviewScreen>
   }
 
   void _setWordHighlight(bool on) {
-    setState(() {
-      _wordHl = on;
-      if (!on) _hlRange = null;
-    });
+    setState(() => _wordHl = on);
     creationState.setWordHighlight(on);
     _restyled(); // the export must match what's shown
   }
@@ -2106,7 +2319,8 @@ class _PreviewScreenState extends State<PreviewScreen>
     _posSub?.cancel();
     _endSub?.cancel();
     _evtSub?.cancel();
-    _hlTicker?.cancel();
+    _clockTicker.dispose();
+    _clock.dispose();
     _fadeTicker?.cancel();
     _fadeLevel.dispose();
     _audio.stop().catchError((_) {});
@@ -2320,32 +2534,30 @@ class _PreviewScreenState extends State<PreviewScreen>
       alignment: Alignment(0, _overlayAlign * 2 - 1),
       minHeight: 0,
       maxHeight: double.infinity,
-      child: MeasureHeight(
-        onChange: _onOverlayHeight,
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 450),
-          switchInCurve: Curves.easeOut,
-          switchOutCurve: Curves.easeIn,
-          child: AyahOverlay(
-            key: ValueKey(_ayahIndex),
-            ayah: _ayahs![_ayahIndex],
-            width: box.maxWidth,
-            translation: _edition,
-            numbering: _numbering,
-            showTranslation: _showTranslation,
-            surah: _surah,
-            textColor: Color(_textArgb),
-            accent: Color(_accentArgb),
-            ink: _verseInk,
-            accentInk: _accentInk,
-            textScale: _textScale,
-            preset: _preset,
-            onLight: _onLight,
-            verseFace: _typography.verse,
-            translationFace: _typography.translation,
-            highlightTokens: _hlRange,
-          ),
-        ),
+      child: VerseStage(
+        clock: _clock,
+        units: _units,
+        ayahs: _ayahs!,
+        recitation: _recitation!,
+        motion: _motion,
+        words: _hlPlan,
+        highlight: _wordHl,
+        wordTimes: _wordTimes,
+        width: box.maxWidth,
+        translation: _edition,
+        numbering: _numbering,
+        showTranslation: _showTranslation,
+        surah: _surah,
+        textColor: Color(_textArgb),
+        accent: Color(_accentArgb),
+        ink: _verseInk,
+        accentInk: _accentInk,
+        textScale: _textScale,
+        preset: _preset,
+        onLight: _onLight,
+        verseFace: _typography.verse,
+        translationFace: _typography.translation,
+        onHeight: _onOverlayHeight,
       ),
     );
     // Positioned either way, even when the verse has the whole frame:
@@ -2435,6 +2647,28 @@ class _PreviewScreenState extends State<PreviewScreen>
                                 trouble: _prepTrouble,
                                 progress: _prepProgress,
                                 onRetry: _boot,
+                              ),
+                            // The surah's name, where the exporter lays
+                            // it. It takes its own drag, as the
+                            // dedication does, so a finger on it moves
+                            // it and a finger anywhere else still moves
+                            // the verse; a double tap puts it back.
+                            if (ready && _titleOn)
+                              Positioned.fill(
+                                child: ReelSurahTitle(
+                                  width: box.maxWidth,
+                                  surah: _surah,
+                                  edition: _edition,
+                                  onLight: _titleOnLight,
+                                  at: _titleAt,
+                                  letterbox: _box,
+                                  onSize: (size) => _titleSize = size,
+                                  onDrag: _busy
+                                      ? null
+                                      : (d) => _moveTitle(d, box),
+                                  onDragEnd: _settleTitle,
+                                  onReset: _resetTitle,
+                                ),
                               ),
                             // Same mark the exporter burns in, same
                             // position — the preview never lies. In
@@ -2555,6 +2789,7 @@ class _PreviewScreenState extends State<PreviewScreen>
                       weights: _weights,
                       onAddScenes: () =>
                           Navigator.of(context).pop(PreviewScreen.addScenes),
+                      hasLines: _linePlan != null,
                       // The reel's length lives under the ribbon: the
                       // scene panel is where this reel's shape is
                       // settled, and where it ends is part of that.
@@ -2779,6 +3014,14 @@ class _PreviewScreenState extends State<PreviewScreen>
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         HashtagsButton(surahName: _surahName),
+                        _TitlePill(
+                          on: _titleOn,
+                          onTap: ready ? _toggleTitle : null,
+                        ),
+                        _MotionPill(
+                          motion: _motionChoice,
+                          onTap: ready ? _pickMotion : null,
+                        ),
                         _DedicatePill(
                           dedication: _dedication,
                           line: _dedicationLine,
@@ -2958,6 +3201,10 @@ class _SceneControls extends StatelessWidget {
   final ValueChanged<int>? onWeigh;
   final VoidCallback onAddScenes;
 
+  /// Whether any verse of the reel is cut into lines, which is when a
+  /// scene per line is a choice at all.
+  final bool hasLines;
+
   /// The whole selection, and how much of it this reel keeps; see
   /// [_TrimBar]. Null [onTrim] while the recitation is still loading,
   /// and always for an app voice — only the user's own recording can
@@ -2980,6 +3227,7 @@ class _SceneControls extends StatelessWidget {
     required this.onTransition,
     required this.onWeigh,
     required this.onAddScenes,
+    this.hasLines = false,
     required this.fullMs,
     required this.reelMs,
     required this.onTrim,
@@ -3069,9 +3317,21 @@ class _SceneControls extends StatelessWidget {
                           _ChipGroup(
                             caption: l.scenePace,
                             children: [
+                              if (hasLines) ...[
+                                _PresetChip(
+                                  label: l.pacePerLine,
+                                  selected: pacing == ScenePacing.perLine,
+                                  onTap: onPacing == null
+                                      ? null
+                                      : () => onPacing!(ScenePacing.perLine),
+                                ),
+                                const SizedBox(width: 8),
+                              ],
                               _PresetChip(
                                 label: l.pacePerVerse,
-                                selected: pacing == ScenePacing.perAyah,
+                                selected: pacing == ScenePacing.perAyah ||
+                                    (!hasLines &&
+                                        pacing == ScenePacing.perLine),
                                 onTap: onPacing == null
                                     ? null
                                     : () => onPacing!(ScenePacing.perAyah),
@@ -3688,6 +3948,132 @@ class _PrepOverlay extends StatelessWidget {
 /// trips 'package:flutter/src/widgets/framework.dart': Failed assertion:
 /// '_dependents.isEmpty': is not true. A render object already knows
 /// its size, so nothing has to be looked up by key at all.
+
+/// The surah's name on the reel: on or off, in one tap. It shows on the
+/// frame above as it is switched, which is where the user looks.
+class _TitlePill extends StatelessWidget {
+  final bool on;
+  final VoidCallback? onTap;
+
+  const _TitlePill({required this.on, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    return _QuietPill(
+      label: l.surahNameTitle,
+      semanticsLabel: l.a11ySurahNamePill(on),
+      hint: l.a11ySurahNameHint,
+      icon: on ? Icons.check_rounded : Icons.add_rounded,
+      on: on,
+      onTap: onTap,
+    );
+  }
+}
+
+/// The verse's motion: the look's name once one is chosen, and the
+/// sheet of them on a tap.
+class _MotionPill extends StatelessWidget {
+  final VerseMotion motion;
+  final VoidCallback? onTap;
+
+  const _MotionPill({required this.motion, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    final preset = MotionPreset.of(motion);
+    final name = motion.isNone
+        ? l.styleTabMotion
+        : preset == null
+            ? l.styleTabMotion
+            : l.motionPresetName(preset.name);
+    return _QuietPill(
+      label: name,
+      semanticsLabel: '${l.motionTitle}${l.comma} $name',
+      hint: l.a11yMotionPillHint,
+      icon: Icons.motion_photos_on_rounded,
+      on: !motion.isNone,
+      onTap: onTap,
+    );
+  }
+}
+
+/// The small gold-edged pill the reel screen's extras are drawn as.
+class _QuietPill extends StatelessWidget {
+  final String label;
+  final String semanticsLabel;
+  final String hint;
+  final IconData icon;
+  final bool on;
+  final VoidCallback? onTap;
+
+  const _QuietPill({
+    required this.label,
+    required this.semanticsLabel,
+    required this.hint,
+    required this.icon,
+    required this.on,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      container: true,
+      button: true,
+      enabled: onTap != null,
+      label: semanticsLabel,
+      hint: hint,
+      excludeSemantics: true,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 200),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          decoration: BoxDecoration(
+            color: AppColors.gold.withValues(alpha: on ? 0.12 : 0.06),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+                color: AppColors.gold.withValues(alpha: on ? 0.55 : 0.34)),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 4, 12, 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, size: 12, color: AppColors.goldBright),
+                    const SizedBox(width: 5),
+                    Flexible(
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          height: 1.6,
+                          fontWeight: on ? FontWeight.w600 : FontWeight.w500,
+                          color: on
+                              ? AppColors.textPrimary
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 /// "Make it for someone", and afterwards the line itself.
 ///

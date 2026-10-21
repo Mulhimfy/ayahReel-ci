@@ -15,8 +15,10 @@ import '../data/debug_log.dart';
 import '../data/scene_catalog.dart';
 import '../data/scene_matcher.dart';
 import '../data/settings_service.dart';
+import '../data/verse_lines.dart';
 import '../l10n/l10n.dart';
 import '../render/scene_plan.dart';
+import '../render/verse_planner.dart';
 import '../state/creation_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/a11y.dart';
@@ -127,13 +129,49 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
     final segMs = rec != null && rec.covers(start, end)
         ? rec.timing(end).endMs - rec.timing(start).startMs
         : null;
-    return ScenePlan.maxScenes(end - start + 1, segMs: segMs);
+    return ScenePlan.maxScenes(_slotCount, segMs: segMs);
   }
 
-  /// A scene per verse: what the blurb suggests, and what the reel is
-  /// built around.
-  int get _sceneIdeal => ScenePlan.recommended(
-      creationState.endAyah - creationState.startAyah + 1);
+  /// What a scene each would be: the verses, or — with long verses shown
+  /// line by line and the scenery following the lines — every line of
+  /// them, counted from the text as it will be typeset.
+  int get _slotCount {
+    final s = creationState;
+    final ayahs = QuranRepository.ayahsIfCached(s.surah);
+    return (ayahs == null ? null : _lineTexts(ayahs))?.length ??
+        s.endAyah - s.startAyah + 1;
+  }
+
+  /// The text of each line of the selection when its long verses go
+  /// line by line and the scenery follows them; null when it is a
+  /// scene per verse.
+  List<String>? _lineTexts(List<Ayah> ayahs) {
+    final s = creationState;
+    if (s.verseLines == VerseLines.whole || s.pacing != ScenePacing.perLine) {
+      return null;
+    }
+    final settings = SettingsService.state.value;
+    return VersePlanner.estimateLines(
+      ayahs,
+      s.startAyah,
+      s.endAyah,
+      s.verseLines,
+      VerseLook(
+        textScale: s.textScale,
+        preset: s.textPreset,
+        typography: s.typography,
+        edition: settings.translation,
+        numbering: settings.verseNumbering,
+        showTranslation: !settings.verseTranslationOff,
+        ink: s.verseInk,
+        surah: s.surah,
+      ),
+    );
+  }
+
+  /// A scene per verse — or per line — : what the blurb suggests, and
+  /// what the reel is built around.
+  int get _sceneIdeal => ScenePlan.recommended(_slotCount);
 
   /// This scenery's place in the run, 1-based; 0 when it is not in it.
   int _orderOf(String id) {
@@ -334,9 +372,10 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
 
   /// Lets the verses choose.
   ///
-  /// Reads the selection, picks one scenery per verse — as many as the
-  /// reel holds, fewer for a short reel with long verses — fetches the
-  /// files, and only then replaces the run: a run half swapped for one
+  /// Reads the selection, picks one scenery per verse — or per line,
+  /// when long verses go line by line — as many as the reel holds,
+  /// fewer for a short reel with long verses — fetches the files, and
+  /// only then replaces the run: a run half swapped for one
   /// that never arrived is worse than the run the user had. Several
   /// sceneries put the picker into multi-scene mode on their own; one
   /// verse gets one, and the mode stays as it was.
@@ -355,16 +394,27 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
       final start = creationState.startAyah;
       final end = creationState.endAyah;
       final limit = _sceneLimit;
-      final count = (end - start + 1).clamp(1, limit);
+      // With long verses going line by line and the scenery following
+      // them, every line chooses its own scenery from its own words.
+      final lines = _lineTexts(ayahs);
+      final source = lines == null
+          ? ayahs
+          : [
+              for (var i = 0; i < lines.length; i++)
+                Ayah(number: i + 1, arabic: lines[i], translation: ''),
+            ];
+      final from = lines == null ? start : 1;
+      final to = lines == null ? end : lines.length;
+      final count = (to - from + 1).clamp(1, limit);
       final wide = creationState.layout == ReelLayout.letterbox;
       final ready = <String>{
         for (final s in SceneCatalog.all)
           if (SceneCatalog.isReadySync(s)) s.id,
       };
       final picks = SceneMatcher.match(
-        ayahs: ayahs,
-        startAyah: start,
-        endAyah: end,
+        ayahs: source,
+        startAyah: from,
+        endAyah: to,
         count: count,
         wide: wide,
         catalog: SceneCatalog.all,
@@ -964,7 +1014,12 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
             A11yLive(child: _SceneAdvice(text: _matchedLine(l))),
           ] else if (_multi) ...[
             const SizedBox(height: 8),
-            A11yLive(child: _SceneAdvice(text: l.sceneryFills(_sceneIdeal))),
+            A11yLive(
+                child: _SceneAdvice(
+                    text: _sceneIdeal >
+                            creationState.endAyah - creationState.startAyah + 1
+                        ? l.sceneryFillsLines(_sceneIdeal)
+                        : l.sceneryFills(_sceneIdeal))),
           ],
           const SizedBox(height: 12),
           // The frame decision comes before the scenery because it

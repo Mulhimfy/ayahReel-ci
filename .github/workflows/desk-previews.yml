@@ -58,6 +58,7 @@ jobs:
             BATCH_PREVIEW_OUT="$dir" ARENA_PREVIEW_OUT="$dir" \
             CARD_PREVIEW_OUT="$dir" STYLE_PREVIEW_OUT="$dir" \
             NOTIF_PREVIEW_OUT="$dir" INVITE_STORY_OUT="$dir" \
+            LINES_PREVIEW_OUT="$dir" EXPORT_MOTION_OUT="$dir" \
               flutter test "test/tools/${tool}_test.dart" \
               || echo "::warning::$tool did not finish"
           done

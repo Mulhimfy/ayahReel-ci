@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../data/models.dart';
+import '../data/verse_lines.dart';
 import '../state/creation_state.dart';
 
 /// One scenery's turn on screen: which scene, from when to when, and
@@ -110,6 +111,11 @@ abstract final class ScenePlan {
   /// scenes a bigger or smaller share of what they are competing for —
   /// verses when there are verses to spare, seconds when there are not;
   /// one weight per scene, all 1 for an even hand.
+  ///
+  /// [units] are what a scene per line counts: the verses, with every
+  /// verse cut into lines standing as its parts (see [VerseUnit]). Read
+  /// only by [ScenePacing.perLine]; without them that pacing is per
+  /// verse.
   static List<SceneCut> of({
     required int sceneCount,
     required Recitation recitation,
@@ -117,15 +123,48 @@ abstract final class ScenePlan {
     required int endAyah,
     ScenePacing pacing = ScenePacing.perAyah,
     List<int> weights = const [],
+    List<VerseUnit>? units,
   }) {
-    final ayahCount = endAyah - startAyah + 1;
+    final slots = slotsFor(
+      recitation: recitation,
+      startAyah: startAyah,
+      endAyah: endAyah,
+      pacing: pacing,
+      units: units,
+    );
     final segMs = recitation.timing(endAyah).endMs -
         recitation.timing(startAyah).startMs;
-    final n = sceneCount.clamp(1, maxScenes(ayahCount, segMs: segMs));
+    final n = sceneCount.clamp(1, maxScenes(slots.length, segMs: segMs));
     final w = _weightsFor(n, weights);
-    return pacing == ScenePacing.perAyah
-        ? _perAyah(n, w, recitation, startAyah, endAyah)
-        : _even(n, w, recitation, startAyah, endAyah);
+    return pacing == ScenePacing.even
+        ? _even(n, w, recitation, startAyah, endAyah)
+        : _perSlot(n, w, slots);
+  }
+
+  /// What a pacing deals scenes out over: a slot per verse, or — a scene
+  /// per line — one per unit, so a verse cut into three lines is three
+  /// slots.
+  static List<({int startMs, int endMs, int ayah})> slotsFor({
+    required Recitation recitation,
+    required int startAyah,
+    required int endAyah,
+    required ScenePacing pacing,
+    List<VerseUnit>? units,
+  }) {
+    if (pacing == ScenePacing.perLine && units != null && units.isNotEmpty) {
+      return [
+        for (final u in units)
+          (startMs: u.startMs, endMs: u.endMs, ayah: u.ayah),
+      ];
+    }
+    return [
+      for (var a = startAyah; a <= endAyah; a++)
+        (
+          startMs: recitation.timing(a).startMs,
+          endMs: recitation.timing(a).endMs,
+          ayah: a,
+        ),
+    ];
   }
 
   /// The same plan, cut off at [endMs].
@@ -207,64 +246,63 @@ abstract final class ScenePlan {
     return shares;
   }
 
-  /// Cuts on ayah boundaries.
+  /// Cuts on slot boundaries: a verse's, or with a scene per line, a
+  /// line's.
   ///
-  /// Up to one scene per verse, the verses are dealt out over the
-  /// scenes by weight, so a 7-verse reel over 3 even scenes runs 3, 2,
-  /// 2 rather than leaving one scene holding three times what its
+  /// Up to one scene per slot, the slots are dealt out over the scenes
+  /// by weight, so a 7-verse reel over 3 even scenes runs 3, 2, 2
+  /// rather than leaving one scene holding three times what its
   /// neighbours do.
   ///
-  /// Past one scene per verse there are no verses left to deal, so the
-  /// scenes queue up inside a verse instead and share its window
-  /// between them — by weight again. Every ayah boundary is still a
-  /// cut; there are simply cuts between them too.
-  static List<SceneCut> _perAyah(
+  /// Past one scene per slot there are no slots left to deal, so the
+  /// scenes queue up inside a slot instead and share its window between
+  /// them — by weight again. Every slot boundary is still a cut; there
+  /// are simply cuts between them too.
+  static List<SceneCut> _perSlot(
     int n,
     List<int> weights,
-    Recitation rec,
-    int startAyah,
-    int endAyah,
+    List<({int startMs, int endMs, int ayah})> slots,
   ) {
-    final ayahCount = endAyah - startAyah + 1;
-    if (n <= ayahCount) {
-      final runs = _deal(ayahCount, weights);
+    final count = slots.length;
+    if (n <= count) {
+      final runs = _deal(count, weights);
       final cuts = <SceneCut>[];
-      var ayah = startAyah;
+      var at = 0;
       for (var i = 0; i < n; i++) {
-        final last = ayah + runs[i] - 1;
+        final last = at + runs[i] - 1;
         cuts.add(SceneCut(
           scene: i,
-          startMs: rec.timing(ayah).startMs,
-          endMs: rec.timing(last).endMs,
-          firstAyah: ayah,
-          lastAyah: last,
+          startMs: slots[at].startMs,
+          endMs: slots[last].endMs,
+          firstAyah: slots[at].ayah,
+          lastAyah: slots[last].ayah,
         ));
-        ayah = last + 1;
+        at = last + 1;
       }
       return cuts;
     }
-    // More scenes than verses: every verse takes at least one, and the
-    // spare scenes go to the verses at the front — the opening of a
+    // More scenes than slots: every slot takes at least one, and the
+    // spare scenes go to the slots at the front — the opening of a
     // passage is where a second picture is worth most.
-    final per = n ~/ ayahCount;
-    final spare = n % ayahCount;
+    final per = n ~/ count;
+    final spare = n % count;
     final cuts = <SceneCut>[];
     var scene = 0;
-    for (var a = startAyah; a <= endAyah; a++) {
-      final count = per + (a - startAyah < spare ? 1 : 0);
-      final t = rec.timing(a);
-      final mine = weights.sublist(scene, scene + count);
-      final slices = _slice(t.startMs, t.endMs, mine);
-      for (var k = 0; k < count; k++) {
+    for (var k = 0; k < count; k++) {
+      final take = per + (k < spare ? 1 : 0);
+      final slot = slots[k];
+      final mine = weights.sublist(scene, scene + take);
+      final slices = _slice(slot.startMs, slot.endMs, mine);
+      for (var j = 0; j < take; j++) {
         cuts.add(SceneCut(
-          scene: scene + k,
-          startMs: slices[k],
-          endMs: slices[k + 1],
-          firstAyah: a,
-          lastAyah: a,
+          scene: scene + j,
+          startMs: slices[j],
+          endMs: slices[j + 1],
+          firstAyah: slot.ayah,
+          lastAyah: slot.ayah,
         ));
       }
-      scene += count;
+      scene += take;
     }
     return cuts;
   }

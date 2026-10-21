@@ -183,6 +183,19 @@ class AppSettings {
   /// update would fill somebody's phone without their asking.
   final bool highQualityVideo;
 
+  /// How a new reel shows a verse too long for the frame: 0 is the whole
+  /// verse at once, shrunk to fit, as reels always were; 1–3 is that
+  /// many lines at a time, each while it is recited. See [VerseLines].
+  final int verseLines;
+
+  /// Whether a reel whose long verses are cut into lines changes its
+  /// scenery with each line rather than with each verse. Only read
+  /// while [verseLines] cuts anything.
+  final bool scenesFollowLines;
+
+  /// Whether a new reel carries the surah's name at its head.
+  final bool surahTitle;
+
   const AppSettings({
     required this.streakReminderOn,
     required this.personalReminderOn,
@@ -218,6 +231,9 @@ class AppSettings {
     this.verseNumbering = VerseNumbering.off,
     this.verseTranslationOff = false,
     this.highQualityVideo = false,
+    this.verseLines = 0,
+    this.scenesFollowLines = true,
+    this.surahTitle = true,
   });
 
   static const defaults = AppSettings(
@@ -270,6 +286,9 @@ class AppSettings {
     VerseNumbering? verseNumbering,
     bool? verseTranslationOff,
     bool? highQualityVideo,
+    int? verseLines,
+    bool? scenesFollowLines,
+    bool? surahTitle,
   }) {
     return AppSettings(
       streakReminderOn: streakReminderOn ?? this.streakReminderOn,
@@ -308,6 +327,9 @@ class AppSettings {
       verseNumbering: verseNumbering ?? this.verseNumbering,
       verseTranslationOff: verseTranslationOff ?? this.verseTranslationOff,
       highQualityVideo: highQualityVideo ?? this.highQualityVideo,
+      verseLines: verseLines ?? this.verseLines,
+      scenesFollowLines: scenesFollowLines ?? this.scenesFollowLines,
+      surahTitle: surahTitle ?? this.surahTitle,
     );
   }
 
@@ -346,6 +368,9 @@ class AppSettings {
         'verseNumbering': verseNumbering.code,
         'verseTranslationOff': verseTranslationOff,
         'highQualityVideo': highQualityVideo,
+        'verseLines': verseLines,
+        'scenesFollowLines': scenesFollowLines,
+        'surahTitle': surahTitle,
       };
 
   factory AppSettings.fromJson(Map<String, dynamic> j) => AppSettings(
@@ -411,6 +436,11 @@ class AppSettings {
         // have always carried a translation.
         verseTranslationOff: j['verseTranslationOff'] as bool? ?? false,
         highQualityVideo: j['highQualityVideo'] as bool? ?? false,
+        // Absent on every install that predates lines: their reels have
+        // always shown each verse whole.
+        verseLines: ((j['verseLines'] as num?)?.toInt() ?? 0).clamp(0, 3),
+        scenesFollowLines: j['scenesFollowLines'] as bool? ?? true,
+        surahTitle: j['surahTitle'] as bool? ?? true,
       );
 }
 

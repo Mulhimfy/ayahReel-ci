@@ -10,6 +10,7 @@ import '../data/verse_translation.dart';
 import '../state/creation_state.dart'
     show TextPreset, inkOnLight, legibleInkOn;
 import '../theme/app_theme.dart';
+import 'verse_geometry.dart';
 
 /// The verse card burned onto the video and shown in live preview.
 /// This exact widget is rasterized to transparent PNG by the renderer,
@@ -90,6 +91,28 @@ class AyahOverlay extends StatelessWidget {
   /// colour they are drawn in.
   final VerseInk accentInk;
 
+  /// The size the card is set at, instead of the one it works out from
+  /// its own length. Every part of a verse cut into lines is set at the
+  /// one size (see `VersePart.fit`), so the type does not change size
+  /// from one part to the next. Null for a whole verse.
+  final double? fit;
+
+  /// Whether the verse-end sign follows the last word, when [numbering]
+  /// asks for one. False on every part of a cut verse but its last: the
+  /// sign ends the verse, not each line of it.
+  final bool endMark;
+
+  /// Display tokens from this one on wait faint, for the unveil: the
+  /// words the reciter has not reached yet. Colour only, so the layout
+  /// is the same as the plain card's.
+  final int? dimFrom;
+
+  /// Draws the Arabic's letters alone, in light, with everything else
+  /// laid out but transparent: the picture the band of light that
+  /// passes through the words is cut from. Laid out exactly as the
+  /// plain card, so the light lands on the letters it lights.
+  final bool glint;
+
   AyahOverlay({
     super.key,
     VerseTranslation? translation,
@@ -108,6 +131,10 @@ class AyahOverlay extends StatelessWidget {
     this.accent,
     this.ink = VerseInk.none,
     this.accentInk = VerseInk.none,
+    this.fit,
+    this.endMark = true,
+    this.dimFrom,
+    this.glint = false,
   })  : numbering =
             numbering ?? SettingsService.state.value.verseNumbering,
         translation = translation ?? SettingsService.state.value.translation,
@@ -206,6 +233,62 @@ class AyahOverlay extends StatelessWidget {
     return math.pow(comfortable / chars, 0.45).toDouble();
   }
 
+  /// [_fit] for a translation of [chars] characters alone: what a part
+  /// of a cut verse is set at, whose Arabic always fits at full size.
+  static double translationFit(int chars) => _fit(chars, 220);
+
+  /// The size factor a whole verse is set at.
+  static double fitFor(Ayah ayah, {required bool showTranslation}) =>
+      math.min(_fit(ayah.arabic.length, 120),
+          _fit(showTranslation ? ayah.translation.length : 0, 220));
+
+  /// The Arabic's text style, as [_arabic] sets it, for laying the
+  /// verse out without building the card: what the splitter measures a
+  /// part by. Shadows and colour change nothing about where a line
+  /// breaks, so they are left out.
+  static TextStyle verseLayoutStyle({
+    required double width,
+    required double textScale,
+    required TextPreset preset,
+    required VerseFace face,
+    required double fit,
+  }) {
+    final ts = width / 1080 * textScale * fit * _presetSize(preset);
+    return AppTheme.quran(size: 64 * ts, face: face);
+  }
+
+  /// The verse-end sign as [_markSpan] draws it, for the same purpose.
+  static TextSpan endMarkLayoutSpan({
+    required double width,
+    required double textScale,
+    required TextPreset preset,
+    required VerseFace face,
+    required double fit,
+    required int ayah,
+  }) {
+    final ts = width / 1080 * textScale * fit * _presetSize(preset);
+    final base = AppTheme.quran(size: 64 * ts, face: face);
+    final m = ayahEndMark(face, ayah);
+    final mf = AppTheme.quran(size: 64 * ts, face: m.face);
+    return TextSpan(
+      text: ' ${m.text}',
+      style: base.copyWith(
+        fontFamily: mf.fontFamily,
+        fontFamilyFallback: mf.fontFamilyFallback,
+        fontSize: mf.fontSize,
+      ),
+    );
+  }
+
+  /// How wide the verse's lines may run on a card [width] wide.
+  static double lineWidth(double width) => width - 2 * 72 * (width / 1080);
+
+  static double _presetSize(TextPreset p) =>
+      p == TextPreset.minimal ? 0.85 : 1.0;
+
+  /// The light the glint is drawn in: warm white, haloed in gold.
+  static const glintColour = Color(0xFFFFF6DC);
+
   List<Shadow> _arabicShadows(double ts) {
     final halo = _halo;
     switch (preset) {
@@ -243,15 +326,19 @@ class AyahOverlay extends StatelessWidget {
   /// The verse line. With a highlight range the same string is emitted
   /// as per-token spans differing only in color — glyphs, spacing and
   /// shaping stay byte-identical to the plain rendering.
-  Widget _arabic(double ts) {
+  Widget _arabic(double ts) => VerseTextAnchor(child: _arabicText(ts));
+
+  Widget _arabicText(double ts) {
+    if (glint) return _glinted(ts);
     final style = AppTheme.quran(size: 64 * ts, color: textColor, face: verseFace)
         .copyWith(
             shadows:
                 ink.isNone ? _arabicShadows(ts) : ink.shadows(ts, halo: _halo));
-    final mark = _markSpan(ts, style);
+    final mark = endMark ? _markSpan(ts, style) : null;
     if (!ink.isNone) return _inked(style, _litStyle(ts, style), mark);
     final hl = highlightTokens;
-    if (hl == null) {
+    final dim = dimFrom;
+    if (hl == null && dim == null) {
       if (mark == null) {
         return Text(
           ayah.arabic,
@@ -268,18 +355,68 @@ class AyahOverlay extends StatelessWidget {
       );
     }
     final hlStyle = _litStyle(ts, style);
+    final faint = _faint(style);
     final tokens = ayah.arabic.split(' ');
     final spans = <TextSpan>[];
     for (var i = 0; i < tokens.length; i++) {
-      final lit = i >= hl.start && i < hl.end;
+      final lit = hl != null && i >= hl.start && i < hl.end;
+      final waiting = !lit && dim != null && i >= dim;
       spans.add(TextSpan(
         text: i == 0 ? tokens[i] : ' ${tokens[i]}',
-        style: lit ? hlStyle : style,
+        style: lit ? hlStyle : (waiting ? faint : style),
       ));
     }
     if (mark != null) spans.add(mark);
     return Text.rich(
       TextSpan(children: spans),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.rtl,
+      style: style,
+    );
+  }
+
+  /// A word the reciter has not reached yet, in the unveil: the verse's
+  /// own style, faint, its halo faded with it so no dark smudge is left
+  /// around letters that are barely there.
+  static TextStyle _faint(TextStyle style) {
+    const share = 0.28;
+    final c = style.color ?? Colors.white;
+    return style.copyWith(
+      color: c.withValues(alpha: c.a * share),
+      shadows: [
+        for (final s in style.shadows ?? const <Shadow>[])
+          Shadow(
+            color: s.color.withValues(alpha: s.color.a * share),
+            blurRadius: s.blurRadius,
+            offset: s.offset,
+          ),
+      ],
+    );
+  }
+
+  /// The glint: the letters alone, in light. The verse-end sign is laid
+  /// out but not drawn, so the lines break exactly where the card's do.
+  Widget _glinted(double ts) {
+    final style = AppTheme.quran(size: 64 * ts, color: glintColour, face: verseFace)
+        .copyWith(shadows: [
+      Shadow(
+          color: const Color(0xFFFFD27A).withValues(alpha: 0.85),
+          blurRadius: 12 * ts),
+      Shadow(
+          color: const Color(0xFFE8A93A).withValues(alpha: 0.5),
+          blurRadius: 30 * ts),
+    ]);
+    final mark = endMark ? _markSpan(ts, style) : null;
+    return Text.rich(
+      TextSpan(children: [
+        TextSpan(text: ayah.arabic),
+        if (mark != null)
+          TextSpan(
+            text: mark.text,
+            style: mark.style!
+                .copyWith(color: const Color(0x00000000), shadows: const []),
+          ),
+      ]),
       textAlign: TextAlign.center,
       textDirection: TextDirection.rtl,
       style: style,
@@ -312,13 +449,19 @@ class AyahOverlay extends StatelessWidget {
   Widget _inked(TextStyle style, TextStyle litStyle, TextSpan? mark) {
     const clear = Color(0x00000000);
     final hl = highlightTokens;
-    final tokens = hl == null ? [ayah.arabic] : ayah.arabic.split(' ');
+    final dim = dimFrom;
+    final tokens = hl == null && dim == null
+        ? [ayah.arabic]
+        : ayah.arabic.split(' ');
     bool lit(int i) => hl != null && i >= hl.start && i < hl.end;
+    bool waiting(int i) => !lit(i) && dim != null && i >= dim;
     String text(int i) => i == 0 ? tokens[i] : ' ${tokens[i]}';
 
     final glow = style.copyWith(color: clear);
     final fill = style.copyWith(color: const Color(0xFFFFFFFF), shadows: []);
     final hole = style.copyWith(color: clear, shadows: []);
+    final faintGlow = _faint(glow);
+    final faintFill = fill.copyWith(color: const Color(0x47FFFFFF));
 
     Widget paragraph(List<TextSpan> spans, TextStyle root) => Text.rich(
           TextSpan(children: spans),
@@ -331,7 +474,9 @@ class AyahOverlay extends StatelessWidget {
       children: [
         paragraph([
           for (var i = 0; i < tokens.length; i++)
-            TextSpan(text: text(i), style: lit(i) ? litStyle : glow),
+            TextSpan(
+                text: text(i),
+                style: lit(i) ? litStyle : (waiting(i) ? faintGlow : glow)),
           if (mark != null) mark,
         ], glow),
         ShaderMask(
@@ -339,7 +484,9 @@ class AyahOverlay extends StatelessWidget {
           shaderCallback: (bounds) => ink.gradient.createShader(bounds),
           child: paragraph([
             for (var i = 0; i < tokens.length; i++)
-              TextSpan(text: text(i), style: lit(i) ? hole : fill),
+              TextSpan(
+                  text: text(i),
+                  style: lit(i) ? hole : (waiting(i) ? faintFill : fill)),
             if (mark != null)
               TextSpan(
                   text: mark.text,
@@ -393,17 +540,19 @@ class AyahOverlay extends StatelessWidget {
         size: 24 * ts,
         arabic: translation.arabicScript,
         face: translationFace,
-        color: textColor.withValues(alpha: 0.7),
+        color: glint ? Colors.transparent : textColor.withValues(alpha: 0.7),
       ).copyWith(
         fontStyle: FontStyle.normal,
         letterSpacing: translation.arabicScript ? 0 : 1.2 * ts,
-        shadows: [
-          Shadow(
-            color: _halo.withValues(alpha: 0.8),
-            blurRadius: 14 * ts,
-            offset: Offset(0, 2 * ts),
-          ),
-        ],
+        shadows: glint
+            ? const []
+            : [
+                Shadow(
+                  color: _halo.withValues(alpha: 0.8),
+                  blurRadius: 14 * ts,
+                  offset: Offset(0, 2 * ts),
+                ),
+              ],
       ),
     );
   }
@@ -414,12 +563,8 @@ class AyahOverlay extends StatelessWidget {
     // Text grows/shrinks with the user setting; frame padding does not,
     // so resizing never changes the usable line width. One shared fit
     // factor keeps the Arabic and translation proportioned.
-    final fit = math.min(
-      _fit(ayah.arabic.length, 120),
-      _fit(showTranslation ? ayah.translation.length : 0, 220),
-    );
-    final presetSize = preset == TextPreset.minimal ? 0.85 : 1.0;
-    final ts = scale * textScale * fit * presetSize;
+    final fit = this.fit ?? fitFor(ayah, showTranslation: showTranslation);
+    final ts = scale * textScale * fit * _presetSize(preset);
     final reference = _reference(ts);
     // One thing to a screen reader — the verse and its meaning — not
     // two lines of text with a rule between them. The exporter
@@ -449,7 +594,9 @@ class AyahOverlay extends StatelessWidget {
                 key: dividerKey,
                 width: 120 * scale,
                 height: 2 * scale,
-                decoration: BoxDecoration(
+                decoration: glint
+                    ? null
+                    : BoxDecoration(
                   gradient: LinearGradient(colors: [
                     Colors.transparent,
                     // Whatever the reel's accent is — the house gold
@@ -480,17 +627,21 @@ class AyahOverlay extends StatelessWidget {
                   size: 30 * ts,
                   arabic: translation.arabicScript,
                   face: translationFace,
-                  color: textColor.withValues(
-                      alpha: preset == TextPreset.minimal ? 0.75 : 0.85),
+                  color: glint
+                      ? Colors.transparent
+                      : textColor.withValues(
+                          alpha: preset == TextPreset.minimal ? 0.75 : 0.85),
                 ).copyWith(
-                  shadows: [
-                    Shadow(
-                      color: _halo.withValues(alpha: 0.8),
-                      blurRadius: 16 * ts,
-                      offset: Offset(0, 2 * ts),
-                    ),
-                    if (!ink.isNone) ink.translationGlow(ts),
-                  ],
+                  shadows: glint
+                      ? const []
+                      : [
+                          Shadow(
+                            color: _halo.withValues(alpha: 0.8),
+                            blurRadius: 16 * ts,
+                            offset: Offset(0, 2 * ts),
+                          ),
+                          if (!ink.isNone) ink.translationGlow(ts),
+                        ],
                 ),
               ),
             ],

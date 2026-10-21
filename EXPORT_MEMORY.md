@@ -396,6 +396,47 @@ not memory. `Android: not responding` means the save starves the app:
 fewer threads on `tight`. `Android: low memory` with room in the note
 means the phone filled between readings.
 
+## 2026-10-21: long verses line by line, and verse motion
+
+Not a report: a feature, and what it costs a save. A reel can now cut
+its long verses into lines (Settings → Customize, or the reel screen's
+Motion sheet), carry the surah's name, and move its verse (style step →
+Motion: fade or rise in and out, a gold thread drawn under the words,
+a band of light through the letters, recited words staying gold, words
+waiting faint).
+
+- **Every reel without lines or motion takes the old path, byte for
+  byte.** `VideoRenderer.render` only goes through `_unitCards` and
+  `VerseMotionGraph` when a verse is cut or the motion is on; the
+  defaults are off. The surah's name, on by default for new reels, is
+  one small PNG and one untimed overlay, like the dedication.
+- **Cards.** A cut verse is one card per part instead of one per verse,
+  and each part is smaller. With the word highlight, the trail or the
+  unveil, a part has a card per word window, exactly as a whole verse
+  with the highlight always had. `RenderPlan` counts them as it counts
+  any card, so the per-pass budgets still bound the memory.
+- **Motion pieces.** A fade or rise is a `loop` of the card (references,
+  no copies) through `fade`, which needs a writable frame: one copy of
+  the card (about 2 MB at 1080x440) held by its overlay from the start
+  of the pass. At most two per unit. Cropped strips (thread, light)
+  are zero-copy.
+- **Light.** One glint card per unit with light on, an input like any
+  card: `RenderPlan` is handed it as a card, so a pass holds fewer
+  units rather than more memory.
+- **Measured** with desktop FFmpeg 8.0.1, one pass holding every card
+  of Ayat al-Kursi and 2:256 cut into 6 lines with word windows
+  (`test/tools/export_motion_tool_test.dart`, then the commands it
+  writes), x264, two threads, 44 s: no motion 83 inputs, 1189 MB peak;
+  light 89 inputs, 1214 MB; rise + trail + thread 85 inputs, 1122 MB.
+  The cost is the card count, as before; motion adds next to nothing
+  on top of it. The app splits such a reel into passes of 48, 16, 8 or
+  4 cards by budget, as it does any reel.
+
+**Not device-tested.** No phone or emulator here. Before a release,
+save a reel with long verses line by line and each motion preset on a
+real phone (the preview APK installs beside the store app), and check
+that the lines change where the reciter ends them and the file plays.
+
 ## What a note says since 2026-10-08
 
 While a foreground save runs, `PhoneBudget` writes its stage and the

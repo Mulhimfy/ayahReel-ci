@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../data/models.dart';
+import '../data/quran_text_service.dart';
+import '../data/verse_lines.dart';
 import '../data/reel_effects.dart';
 import '../data/verse_font.dart';
 import '../data/verse_ink.dart';
@@ -14,6 +16,10 @@ import '../data/whole_file.dart';
 import '../state/creation_state.dart' show TextPreset;
 import '../widgets/ayah_overlay.dart';
 import '../widgets/reel_watermark.dart';
+import '../widgets/surah_title.dart';
+import '../widgets/verse_flourish.dart';
+import '../widgets/verse_geometry.dart';
+import '../widgets/verse_unit_card.dart';
 import 'letterbox_layout.dart';
 import 'on_screen.dart';
 import 'render_dir.dart';
@@ -222,6 +228,189 @@ abstract final class AyahRasterizer {
     );
     final f = File(
         '${dir.path}/ayah_$fileTag${ayah.number}_w${tokenStart}_$tokenEnd.png');
+    await writeWholeBytes(f, bytes);
+    return f;
+  }
+
+  /// One unit's card — a whole verse, or one part of a verse cut into
+  /// lines — as [VerseUnitCard] draws it, with whatever word state a
+  /// follow card carries: lit tokens, faint ones, or the glint.
+  ///
+  /// With [measure], the lines its Arabic was laid out in come back too,
+  /// in the card's own pixels, read off the card itself rather than a
+  /// second layout of it: what the thread and the light are placed by.
+  ///
+  /// [name] tells this card's file apart from the rest of the unit's.
+  static Future<({File file, double height, List<VerseRow> rows})>
+      rasterizeUnit(
+    Ayah ayah, {
+    VersePart? part,
+    required String name,
+    ({int start, int end})? highlight,
+    int? dimFrom,
+    bool glint = false,
+    bool measure = false,
+    Color textColor = Colors.white,
+    double textScale = 1.0,
+    TextPreset preset = TextPreset.classic,
+    bool onLight = false,
+    ReelTypography typography = const ReelTypography(),
+    Color? accent,
+    VerseInk ink = VerseInk.none,
+    VerseInk accentInk = VerseInk.none,
+    VerseTranslation? edition,
+    VerseNumbering numbering = VerseNumbering.off,
+    int surah = 0,
+    bool showTranslation = true,
+    String fileTag = '',
+  }) async {
+    final dir = await renderDir();
+    final text = VerseUnitCard.textOf(ayah, part).arabic;
+    var rows = const <VerseRow>[];
+    final shot = await _capture(
+      MediaQuery(
+        data: const MediaQueryData(
+          size: Size(exportWidth, 1920),
+          devicePixelRatio: 1.0,
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: VerseUnitCard(
+            ayah: ayah,
+            part: part,
+            width: exportWidth,
+            textColor: textColor,
+            textScale: textScale,
+            preset: preset,
+            onLight: onLight,
+            translation: edition ?? QuranTextService.edition,
+            numbering: numbering,
+            showTranslation: showTranslation,
+            surah: surah,
+            verseFace: typography.verse,
+            translationFace: typography.translation,
+            accent: accent,
+            ink: ink,
+            accentInk: accentInk,
+            highlightTokens: highlight,
+            dimFrom: dimFrom,
+            glint: glint,
+          ),
+        ),
+      ),
+      inspect: measure ? (root) => rows = VerseRows.measure(root, text) : null,
+    );
+    final unit = part == null ? '' : '_p${part.index}';
+    final f = File('${dir.path}/ayah_$fileTag${ayah.number}${unit}_$name.png');
+    await writeWholeBytes(f, shot.bytes);
+    return (file: f, height: shot.height, rows: rows);
+  }
+
+  /// How tall a unit's card lays out at 1080 wide, without drawing it:
+  /// what every part of a cut verse is held to (the tallest of them).
+  static double unitHeight(Widget card) {
+    final boundary = RenderRepaintBoundary();
+    final view = ui.PlatformDispatcher.instance.views.first;
+    final renderView = RenderView(
+      view: view,
+      configuration: const ViewConfiguration(
+        logicalConstraints: BoxConstraints.tightFor(
+          width: exportWidth,
+          height: 1920,
+        ),
+        devicePixelRatio: 1.0,
+      ),
+      child: RenderPositionedBox(
+        alignment: Alignment.center,
+        child: boundary,
+      ),
+    );
+    final pipelineOwner = PipelineOwner()..rootNode = renderView;
+    renderView.prepareInitialFrame();
+    final buildOwner = BuildOwner(focusManager: FocusManager());
+    final rootElement = RenderObjectToWidgetAdapter<RenderBox>(
+      container: boundary,
+      child: MediaQuery(
+        data: const MediaQueryData(
+          size: Size(exportWidth, 1920),
+          devicePixelRatio: 1.0,
+        ),
+        child: Directionality(textDirection: TextDirection.ltr, child: card),
+      ),
+    ).attachToRenderTree(buildOwner);
+    buildOwner
+      ..buildScope(rootElement)
+      ..finalizeTree();
+    pipelineOwner.flushLayout();
+    return boundary.size.height;
+  }
+
+  /// The strip the gold thread is cropped from: empty for its first
+  /// half, the thread for its second. See [ThreadLook].
+  static Future<File> rasterizeThreadStrip(int accentArgb) async {
+    final dir = await renderDir();
+    final f = File('${dir.path}/ayah_thread_v1_${accentArgb.toRadixString(16)}.png');
+    if (f.existsSync() && f.lengthSync() > 0) return f;
+    final bytes = await widgetToPng(
+      SizedBox(
+        width: 2 * ThreadLook.half,
+        height: ThreadLook.stripHeight,
+        child: CustomPaint(painter: _ThreadStripPainter(Color(accentArgb))),
+      ),
+      canvas: const Size(2 * ThreadLook.half, 1920),
+    );
+    await writeWholeBytes(f, bytes);
+    return f;
+  }
+
+  /// The spark that rides the thread's growing end. See [SparkLook].
+  static Future<File> rasterizeSpark(int accentArgb) async {
+    final dir = await renderDir();
+    final f = File('${dir.path}/ayah_spark_v1_${accentArgb.toRadixString(16)}.png');
+    if (f.existsSync() && f.lengthSync() > 0) return f;
+    final bytes = await widgetToPng(
+      SizedBox(
+        width: SparkLook.size,
+        height: SparkLook.size,
+        child: CustomPaint(painter: _SparkPainter(Color(accentArgb))),
+      ),
+    );
+    await writeWholeBytes(f, bytes);
+    return f;
+  }
+
+  /// The surah's name, shrink-wrapped to its glyphs plus the shadow
+  /// margin, as [rasterizeDedication] does a dedication and for the
+  /// same reason. The exporter centres it where [ReelSurahTitle] puts
+  /// it on the preview; see `surahTitleOverlay`.
+  ///
+  /// The _v1 versions the design: bump it if the title ever changes.
+  static Future<File> rasterizeSurahTitle(int surah,
+      {required VerseTranslation edition, bool onLight = false}) async {
+    final dir = await renderDir();
+    final f = File('${dir.path}/ayah_title_v1_${surah}_${edition.code}'
+        '${onLight ? '_lt' : ''}.png');
+    if (f.existsSync() && f.lengthSync() > 0) return f;
+    final bytes = await widgetToPng(
+      MediaQuery(
+        data: const MediaQueryData(
+          size: Size(exportWidth, 1920),
+          devicePixelRatio: 1.0,
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Padding(
+            padding: const EdgeInsets.all(ReelWatermarkMark.shadowMargin),
+            child: SurahTitleLine(
+              surah: surah,
+              width: exportWidth,
+              edition: edition,
+              onLight: onLight,
+            ),
+          ),
+        ),
+      ),
+    );
     await writeWholeBytes(f, bytes);
     return f;
   }
@@ -454,7 +643,10 @@ abstract final class AyahRasterizer {
     // from it changed at every launch, the file was never found again,
     // and a new full-frame PNG piled up in the cache each time.
     final gradeKey = grade.isEmpty ? '' : '_g${_stableHash('$grade')}';
-    final f = File('${dir.path}/ayah_grad_${argb[0].toRadixString(16)}_'
+    // _v2: the first cut of this PNG laid its Stack out with no text
+    // direction, which Flutter refuses — the file came out as the error
+    // box, not the gradient — so a PNG kept from then is drawn again.
+    final f = File('${dir.path}/ayah_grad_v2_${argb[0].toRadixString(16)}_'
         '${argb[1].toRadixString(16)}${withScrim ? '' : '_plain'}'
         '${vignette == 0 ? '' : '_v${(vignette * 100).round()}'}'
         '$gradeKey.png');
@@ -475,6 +667,10 @@ abstract final class AyahRasterizer {
         width: exportWidth,
         height: 1920,
         child: Stack(
+          // Explicit: nothing above this in the off-screen tree says
+          // which way text runs, and a Stack's default alignment needs
+          // to know.
+          textDirection: TextDirection.ltr,
           fit: StackFit.expand,
           children: [
             graded(DecoratedBox(
@@ -509,8 +705,8 @@ abstract final class AyahRasterizer {
   /// picture off-screen, and the invite's story card wants exactly
   /// that: drawn with the same faces and ornaments as the app, at
   /// story resolution, without ever being on screen.
-  static Future<List<int>> widgetToPng(Widget widget) async =>
-      (await _capture(widget)).bytes;
+  static Future<List<int>> widgetToPng(Widget widget, {Size? canvas}) async =>
+      (await _capture(widget, canvas: canvas)).bytes;
 
   /// Standard off-screen widget capture: attach the widget to a private
   /// render tree, lay it out at export size, capture the repaint
@@ -519,18 +715,18 @@ abstract final class AyahRasterizer {
   /// Reports the captured height as well, because a shrink-wrapped
   /// boundary is the only thing that knows how tall the widget decided
   /// to be — see [VerseCard].
-  static Future<({List<int> bytes, double height})> _capture(
-      Widget widget) async {
+  static Future<({List<int> bytes, double height})> _capture(Widget widget,
+      {void Function(RenderBox root)? inspect, Size? canvas}) async {
     await _warmFonts();
     final boundary = RenderRepaintBoundary();
     final view = ui.PlatformDispatcher.instance.views.first;
 
     final renderView = RenderView(
       view: view,
-      configuration: const ViewConfiguration(
+      configuration: ViewConfiguration(
         logicalConstraints: BoxConstraints.tightFor(
-          width: exportWidth,
-          height: 1920,
+          width: canvas?.width ?? exportWidth,
+          height: canvas?.height ?? 1920,
         ),
         devicePixelRatio: 1.0,
       ),
@@ -556,6 +752,7 @@ abstract final class AyahRasterizer {
       ..flushLayout()
       ..flushCompositingBits()
       ..flushPaint();
+    inspect?.call(boundary);
 
     await OnScreen.settle('capture');
     final image = await boundary.toImage(pixelRatio: 1.0);
@@ -601,4 +798,29 @@ String _stableHash(String s) {
     h = ((h ^ c) * 0x01000193) & 0xFFFFFFFF;
   }
   return h.toRadixString(16);
+}
+
+class _ThreadStripPainter extends CustomPainter {
+  final Color colour;
+  const _ThreadStripPainter(this.colour);
+
+  @override
+  void paint(Canvas canvas, Size size) =>
+      ThreadLook.paintStrip(canvas, colour);
+
+  @override
+  bool shouldRepaint(covariant _ThreadStripPainter old) =>
+      old.colour != colour;
+}
+
+class _SparkPainter extends CustomPainter {
+  final Color colour;
+  const _SparkPainter(this.colour);
+
+  @override
+  void paint(Canvas canvas, Size size) => SparkLook.paint(
+      canvas, Offset(size.width / 2, size.height / 2), 1, colour);
+
+  @override
+  bool shouldRepaint(covariant _SparkPainter old) => old.colour != colour;
 }

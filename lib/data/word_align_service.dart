@@ -304,6 +304,30 @@ abstract final class WordAlignService {
     return (start: start, end: end);
   }
 
+  /// Each display token's recited window in [arabic], in ms from the
+  /// verse's start, from its raw alignment [spans] — the real end of
+  /// each word rather than the gap-filled windows the highlight uses —
+  /// and the places inside an aligned group of several words, where a
+  /// verse may not be cut: nobody knows where in the group one word
+  /// ends. A pause sign takes its word's window.
+  static ({List<(int, int)?> times, Set<int> held}) tokenWindows(
+      String arabic, List<WordSpan> spans) {
+    final n = arabic.split(' ').length;
+    final times = List<(int, int)?>.filled(n, null);
+    final held = <int>{};
+    for (final s in spans) {
+      final r = displayRange(arabic, s.startWord, s.endWord);
+      if (r == null || s.endMs <= s.startMs) continue;
+      for (var k = r.start; k < r.end && k < n; k++) {
+        times[k] = (s.startMs, s.endMs);
+      }
+      for (var k = r.start + 1; k < r.end; k++) {
+        held.add(k);
+      }
+    }
+    return (times: times, held: held);
+  }
+
   /// Turns raw spans into per-ayah highlight windows for the selected
   /// range, ready for both live preview and export:
   ///  - windows are gap-filled (a word stays lit through pauses) and

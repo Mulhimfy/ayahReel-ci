@@ -202,6 +202,18 @@ shows it on 1.0.3/1.0.4 only) and the boot receiver's alarm-limit crash
 (`BootReceiver`, 1.0.8 only). Check the rules again on every Flutter
 upgrade (`RenderBackend`'s doc).
 
+**Also for the 1.0.10 store build (native), 2026-10-21:** `7ac4743` on
+`feat/live-recitation`, from a 1.0.9 note (the app gone in pass 5/17
+with 166 MB and 1.3 GB free; `EXPORT_MEMORY.md`, 2026-10-21).
+`RenderService`'s `exitInfo` takes `since`, so the next launch can ask
+how the app's own process ended during a save (closed by the user: not
+a loss; otherwise Android's reason in the note), and its encode thread
+runs at nice +4, which FFmpeg's threads inherit. Feedback code date
+`2026-10-21`. The Dart half does nothing on 1.0.9's native side, so it
+is not for a 1.0.9 patch. Play's Crashes and ANRs (28 days to
+2026-10-21) had nothing new on 1.0.9: the Reno2 Z Impeller GLES crash
+and the background and PowerVR ANRs, all answered by `d220473` above.
+
 **2026-10-14, from the VPS via the public mirror: saves reclaimed in
 the background, and the Telegram invitation. Dart only.** At the user's
 word ("fix it and comm push all", then "... then ota push it"). From a

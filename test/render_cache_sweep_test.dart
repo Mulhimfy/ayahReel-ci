@@ -86,12 +86,27 @@ void main() {
     put('ayah_1f3a_2.png', age: const Duration(days: 3));
     put('ayah_1f3a_2_w0_3.png', age: const Duration(days: 3));
     put('ayah_bgflat_k.png', age: const Duration(days: 3));
+    // The cards of verses cut into lines or moving, and what rides on
+    // them.
+    put('ayah_-1f3a_255_p0_base.png', age: const Duration(days: 3));
+    put('ayah_1f3a_255_p2_w0_14_dx.png', age: const Duration(days: 3));
+    put('ayah_1f3a_255_p1_wx_d0.png', age: const Duration(days: 3));
+    put('ayah_1f3a_255_p1_w3_4_d4.png', age: const Duration(days: 3));
+    put('ayah_1f3a_7_glint.png', age: const Duration(days: 3));
+    put('ayah_thread_v1_ffeec96b.png', age: const Duration(days: 3));
+    put('ayah_spark_v1_ffeec96b.png', age: const Duration(days: 3));
+    put('ayah_title_v1_2_en_lt.png', age: const Duration(days: 3));
     // Drawn today: the session that drew them may want them again.
     put('ayah_1f3a_3.png', age: const Duration(hours: 2));
+    put('ayah_1f3a_255_p0_base.png', age: const Duration(hours: 2));
     put('ig_ayah_reel_b.mp4', age: const Duration(seconds: 30));
 
     VideoRenderer.sweepCache(tmp, keep: keep, now: now);
 
-    expect(left(), ['ayah_1f3a_3.png', 'ig_ayah_reel_b.mp4']);
+    expect(left(), [
+      'ayah_1f3a_255_p0_base.png',
+      'ayah_1f3a_3.png',
+      'ig_ayah_reel_b.mp4',
+    ]);
   });
 }

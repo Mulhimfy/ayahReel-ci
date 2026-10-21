@@ -179,7 +179,7 @@ void main() {
     });
   });
 
-  testWidgets('Settings sets it from the Customize menu', (t) async {
+  testWidgets('Settings sets it from the Customize panel', (t) async {
     t.view.physicalSize = const Size(390 * 3, 844 * 3);
     t.view.devicePixelRatio = 3;
     addTearDown(t.view.resetPhysicalSize);
@@ -218,10 +218,12 @@ void main() {
     // Says where the choice ends up.
     expect(find.text('Shown on your reels'), findsOneWidget);
 
+    await t.ensureVisible(find.text('Mark and reference'));
+    await t.pumpAndSettle();
     await t.tap(find.text('Mark and reference'));
     await t.pumpAndSettle();
     expect(SettingsService.state.value.verseNumbering, VerseNumbering.both);
-    // The menu stays open, ticking the new choice, so the next one can
+    // The panel stays open, marking the new choice, so the next one can
     // be tried without reopening it.
     var picked = t.widget<Text>(find.text('Mark and reference'));
     expect(picked.style?.fontWeight, FontWeight.w600);
@@ -233,8 +235,10 @@ void main() {
     expect(t.widget<Text>(find.text('Mark and reference')).style?.fontWeight,
         FontWeight.w400);
 
-    // Dismissed, then opened again, it ticks the last choice.
-    await t.tapAt(const Offset(8, 8));
+    // Shut, then opened again, it marks the last choice.
+    await t.ensureVisible(find.text('Customize'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Customize'));
     await t.pumpAndSettle();
     expect(find.text('Verse-end mark'), findsNothing);
     await t.tap(find.text('Customize'));

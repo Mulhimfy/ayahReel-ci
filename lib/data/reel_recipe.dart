@@ -6,6 +6,7 @@ import 'dedication.dart';
 import 'reel_effects.dart';
 import 'verse_font.dart';
 import 'verse_ink.dart';
+import 'verse_motion.dart';
 
 /// Everything that went into a reel, so it can be opened again and
 /// changed rather than rebuilt from the first screen.
@@ -76,6 +77,15 @@ class ReelRecipe {
   /// selection; null for the whole of it.
   final int? trimMs;
 
+  /// How the reel showed its long verses (see `VerseLines`), what its
+  /// verse did as it was recited, and whether — and where — it carried
+  /// the surah's name. Absent on every reel made before them, which
+  /// showed each verse whole, still, and untitled.
+  final int verseLines;
+  final VerseMotion motion;
+  final bool surahTitle;
+  final Offset? surahTitleAt;
+
   const ReelRecipe({
     required this.reciterId,
     required this.surah,
@@ -105,6 +115,10 @@ class ReelRecipe {
     this.dedication = Dedication.none,
     this.dedicationAt,
     this.trimMs,
+    this.verseLines = 0,
+    this.motion = VerseMotion.none,
+    this.surahTitle = false,
+    this.surahTitleAt,
   });
 
   static const _imagePrefix = 'image:';
@@ -153,6 +167,10 @@ class ReelRecipe {
         overlayAlign: s.overlayAlign,
         wordHighlight: s.wordHighlight,
         trimMs: trimMs,
+        verseLines: s.verseLines,
+        motion: s.motion,
+        surahTitle: s.surahTitle,
+        surahTitleAt: s.surahTitle ? s.surahTitleAt : null,
       );
 
   Map<String, dynamic> toJson() => {
@@ -185,6 +203,11 @@ class ReelRecipe {
         'overlayAlign': overlayAlign,
         'wordHighlight': wordHighlight,
         'trimMs': trimMs,
+        if (verseLines > 0) 'verseLines': verseLines,
+        if (!motion.isNone) 'motion': motion.toJson(),
+        if (surahTitle) 'surahTitle': true,
+        if (surahTitle && surahTitleAt != null)
+          'surahTitleAt': [surahTitleAt!.dx, surahTitleAt!.dy],
       };
 
   /// An `[x, y]` pair of fractions, or null for anything else.
@@ -241,6 +264,11 @@ class ReelRecipe {
         overlayAlign: (j['overlayAlign'] as num?)?.toDouble() ?? 0.5,
         wordHighlight: j['wordHighlight'] as bool? ?? true,
         trimMs: j['trimMs'] as int?,
+        verseLines: ((j['verseLines'] as num?)?.toInt() ?? 0).clamp(0, 3),
+        motion: VerseMotion.fromJson(
+            (j['motion'] as Map?)?.cast<String, dynamic>()),
+        surahTitle: j['surahTitle'] as bool? ?? false,
+        surahTitleAt: _offset(j['surahTitleAt']),
       );
 
   /// Puts everything but the sceneries back onto [s]. The sceneries
@@ -266,7 +294,11 @@ class ReelRecipe {
       ..setTranslationFace(arabicScriptFace)
       ..setEffects(effects)
       ..setDedication(dedication)
-      ..setDedicationAt(dedicationAt);
+      ..setDedicationAt(dedicationAt)
+      ..setVerseLines(verseLines)
+      ..setMotion(motion)
+      ..setSurahTitle(surahTitle)
+      ..setSurahTitleAt(surahTitleAt);
     if (backdrop == LetterboxBackdrop.colour) s.setBackdropColor(backdropArgb);
     // After the backdrop: setting the backdrop re-derives a default
     // ink and a default accent, and the recipe's own colours have to

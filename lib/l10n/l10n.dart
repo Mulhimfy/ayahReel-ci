@@ -693,6 +693,15 @@ class L10n {
       'Satu adegan per ayat — $n mengisi reel ini.',
       'Eine Szene pro Vers — $n füllen dieses Reel.');
 
+  /// The same, when the reel's long verses go line by line and the
+  /// scenery follows the lines.
+  String sceneryFillsLines(int n) => _t(
+      'A scene per line — $n fills this reel.',
+      'مشهد لكل سطر — $n تملأ هذا المقطع.',
+      'ہر سطر کے لیے ایک منظر — $n سے یہ ریل بھر جاتی ہے۔',
+      'Satu adegan per baris — $n mengisi reel ini.',
+      'Eine Szene pro Zeile — $n füllen dieses Reel.');
+
   /// Refusing a scene past what the reel can hold.
   String sceneLimit(int n) => _t(
       'This reel holds $n scenes.',
@@ -935,14 +944,14 @@ class L10n {
   String get styleTitle => _t('Make it yours', 'اجعله على ذوقك',
       'اسے اپنا بنائیں', 'Jadikan milikmu', 'Mach es zu deinem');
   String get styleBody => _t(
-      'The type, the colour and the light. Nothing plays here — this '
-          'frame is still on purpose.',
-      'الخط واللون والإضاءة. لا شيء يُعرض هنا — هذه لقطة ثابتة عن قصد.',
-      'خط، رنگ اور روشنی۔ یہاں کچھ نہیں چلتا — یہ فریم جان بوجھ کر ساکن ہے۔',
-      'Huruf, warna, dan cahaya. Tidak ada yang diputar di sini — bingkai '
-          'ini sengaja diam.',
-      'Schrift, Farbe und Licht. Hier läuft nichts — dieses Bild steht mit '
-          'Absicht still.');
+      'The type, the colour, the light and the motion. The frame holds '
+          'still, and moves only to show the motion.',
+      'الخط واللون والإضاءة والحركة. اللقطة ثابتة، ولا تتحرك إلا لتعرض الحركة.',
+      'خط، رنگ، روشنی اور حرکت۔ فریم ساکن رہتا ہے، اور صرف حرکت دکھانے کو چلتا ہے۔',
+      'Huruf, warna, cahaya, dan gerak. Bingkai ini diam, dan hanya bergerak '
+          'untuk menunjukkan gerak.',
+      'Schrift, Farbe, Licht und Bewegung. Das Bild steht still und bewegt '
+          'sich nur, um die Bewegung zu zeigen.');
   String get styleTabType =>
       _t('Type', 'الخط', 'خط', 'Huruf', 'Schrift');
   String get styleTabColour =>
@@ -1528,11 +1537,11 @@ class L10n {
   /// The row's title says nothing of what it holds, so a screen reader
   /// is told.
   String get a11yCustomizeHint => _t(
-      'Opens verse numbers and video quality',
-      'يفتح أرقام الآيات وجودة الفيديو',
-      'آیات کے نمبر اور ویڈیو کا معیار کھولتا ہے',
-      'Membuka nomor ayat dan kualitas video',
-      'Öffnet Versnummern und Videoqualität');
+      'Opens long verses, scenes, the surah name, verse numbers and video quality',
+      'يفتح الآيات الطويلة والمشاهد واسم السورة وأرقام الآيات وجودة الفيديو',
+      'لمبی آیات، مناظر، سورت کا نام، آیات کے نمبر اور ویڈیو کا معیار کھولتا ہے',
+      'Membuka ayat panjang, adegan, nama surah, nomor ayat, dan kualitas video',
+      'Öffnet lange Verse, Szenen, Surenname, Versnummern und Videoqualität');
 
   String get highQualityVideo => _t(
       'High-quality video',
@@ -5903,6 +5912,170 @@ class L10n {
           ),
         _ => (id, ''),
       };
+
+  // ---- long verses, line by line ------------------------------------
+
+  /// The Customize panel's first section: what happens to a verse too
+  /// long for the frame.
+  String get longVersesTitle => _t('Long verses', 'الآيات الطويلة',
+      'لمبی آیات', 'Ayat panjang', 'Lange Verse');
+  String get longVersesNote => _t(
+      'How a verse too long for the frame appears',
+      'كيف تظهر الآية الأطول من الإطار',
+      'فریم سے لمبی آیت کیسے دکھائی دے',
+      'Cara ayat yang terlalu panjang untuk bingkai ditampilkan',
+      'Wie ein Vers erscheint, der zu lang für das Bild ist');
+  String get versesWhole => _t('Whole verse', 'الآية كاملة', 'پوری آیت',
+      'Ayat utuh', 'Ganzer Vers');
+  String get versesWholeNote => _t('Shrinks to fit', 'تصغر لتتسع',
+      'سمانے کے لیے چھوٹی ہو جاتی ہے', 'Mengecil agar muat',
+      'Wird kleiner, bis er passt');
+  String get versesLines => _t('Line by line', 'سطرًا سطرًا',
+      'سطر بہ سطر', 'Baris demi baris', 'Zeile für Zeile');
+  String get versesLinesNote => _t(
+      'Each line as it is recited',
+      'كل سطر حين يُتلى',
+      'ہر سطر جب پڑھی جائے',
+      'Setiap baris saat dibacakan',
+      'Jede Zeile, während sie rezitiert wird');
+  String get linesAtOnce => _t('Lines at a time', 'عدد الأسطر معًا',
+      'ایک وقت میں سطریں', 'Baris sekaligus', 'Zeilen auf einmal');
+  String linesCount(int n) => switch (lang) {
+        AppLang.ar => switch (n) {
+            1 => 'سطر واحد',
+            2 => 'سطران',
+            _ => '$n أسطر',
+          },
+        AppLang.ur => n == 1 ? 'ایک سطر' : '$n سطریں',
+        AppLang.id => '$n baris',
+        AppLang.de => n == 1 ? '1 Zeile' : '$n Zeilen',
+        _ => n == 1 ? '1 line' : '$n lines',
+      };
+
+  /// Under the choice: what timing the cuts follow, so nobody wonders
+  /// whether a line can change in the middle of a word.
+  String get linesTimingNote => _t(
+      'Each line changes as the reciter finishes it. A verse whose lines '
+          "can't be timed to the recitation stays whole.",
+      'يتغير كل سطر حين ينتهي القارئ منه. والآية التي لا يمكن ضبط أسطرها '
+          'على التلاوة تبقى كاملة.',
+      'ہر سطر قاری کے ختم کرتے ہی بدلتی ہے۔ جس آیت کی سطریں تلاوت کے '
+          'ساتھ نہ مل سکیں وہ پوری رہتی ہے۔',
+      'Setiap baris berganti saat qari selesai membacanya. Ayat yang '
+          'barisnya tidak bisa diselaraskan dengan bacaan tetap utuh.',
+      'Jede Zeile wechselt, wenn der Rezitator sie beendet. Ein Vers, '
+          'dessen Zeilen sich nicht zeitlich zuordnen lassen, bleibt ganz.');
+  String get scenesChangeTitle => _t('Scenes change', 'تتغير المشاهد',
+      'مناظر بدلتے ہیں', 'Adegan berganti', 'Szenen wechseln');
+  String get scenesEveryLine => _t('Every line', 'مع كل سطر', 'ہر سطر پر',
+      'Setiap baris', 'Mit jeder Zeile');
+  String get scenesEveryVerse => _t('Every verse', 'مع كل آية',
+      'ہر آیت پر', 'Setiap ayat', 'Mit jedem Vers');
+  String get scenesChangeNote => _t(
+      'When a reel has several sceneries and its verses go line by line',
+      'حين يكون للمقطع عدة مشاهد وتظهر آياته سطرًا سطرًا',
+      'جب ریل میں کئی مناظر ہوں اور اس کی آیات سطر بہ سطر ہوں',
+      'Saat reel punya beberapa adegan dan ayatnya tampil baris demi baris',
+      'Wenn ein Reel mehrere Szenen hat und die Verse Zeile für Zeile kommen');
+  String get pacePerLine =>
+      _t('Per line', 'لكل سطر', 'فی سطر', 'Per baris', 'Pro Zeile');
+
+  // ---- the surah's name ---------------------------------------------
+
+  String get surahNameTitle =>
+      _t('Surah name', 'اسم السورة', 'سورت کا نام', 'Nama surah', 'Surenname');
+  String get surahNameNote => _t(
+      'At the top of new reels. Drag it anywhere on the preview.',
+      'أعلى المقاطع الجديدة. اسحبه إلى أي مكان في المعاينة.',
+      'نئی ریلز کے اوپر۔ پیش نظارہ میں اسے کہیں بھی گھسیٹیں۔',
+      'Di atas reel baru. Seret ke mana saja di pratinjau.',
+      'Oben in neuen Reels. Zieh ihn in der Vorschau, wohin du willst.');
+  String a11ySurahNamePill(bool on) => on
+      ? _t('Surah name, shown', 'اسم السورة، ظاهر', 'سورت کا نام، دکھایا گیا',
+          'Nama surah, ditampilkan', 'Surenname, sichtbar')
+      : _t('Surah name, hidden', 'اسم السورة، مخفي', 'سورت کا نام، چھپا ہوا',
+          'Nama surah, disembunyikan', 'Surenname, ausgeblendet');
+  String get a11ySurahNameHint => _t(
+      'Shows or hides it on the reel',
+      'يُظهره أو يخفيه في المقطع',
+      'ریل پر دکھاتا یا چھپاتا ہے',
+      'Menampilkan atau menyembunyikannya di reel',
+      'Blendet ihn im Reel ein oder aus');
+
+  // ---- motion ----------------------------------------------------------
+
+  String get styleTabMotion =>
+      _t('Motion', 'الحركة', 'حرکت', 'Gerak', 'Bewegung');
+  String get motionTitle =>
+      _t('Verse motion', 'حركة الآية', 'آیت کی حرکت', 'Gerak ayat', 'Versbewegung');
+  String get motionBody => _t(
+      'How the verse moves as it is recited. Your saved reel moves the same.',
+      'كيف تتحرك الآية وهي تُتلى. ويتحرك مقطعك المحفوظ بالطريقة نفسها.',
+      'تلاوت کے ساتھ آیت کیسے حرکت کرے۔ محفوظ ریل بھی ویسے ہی حرکت کرے گی۔',
+      'Cara ayat bergerak saat dibacakan. Reel yang Anda simpan bergerak sama.',
+      'Wie sich der Vers beim Rezitieren bewegt. Dein gespeichertes Reel '
+          'bewegt sich genauso.');
+  String motionPresetName(String key) => switch (key) {
+        'still' => _t('Still', 'ثابت', 'ساکن', 'Diam', 'Ruhig'),
+        'breathe' => _t('Breathe', 'تنفّس', 'سانس', 'Napas', 'Atem'),
+        'rise' => _t('Rise', 'صعود', 'ابھار', 'Naik', 'Aufstieg'),
+        'thread' => _t('Golden thread', 'خيط ذهبي', 'سنہری دھاگا',
+            'Benang emas', 'Goldener Faden'),
+        'light' => _t('Light', 'نور', 'نور', 'Cahaya', 'Licht'),
+        'unveil' =>
+          _t('Unveil', 'إظهار', 'نمودار', 'Singkap', 'Enthüllen'),
+        'gilded' =>
+          _t('Gilded', 'مُذهَّب', 'سنہرا', 'Berlapis emas', 'Vergoldet'),
+        _ => key,
+      };
+  String get motionArrival => _t('Arrives and leaves', 'الظهور والاختفاء',
+      'آنا اور جانا', 'Muncul dan hilang', 'Kommen und Gehen');
+  String get arrivalCut => _t('Cut', 'قطع', 'کٹ', 'Potong', 'Schnitt');
+  String get arrivalFade =>
+      _t('Fade', 'تلاشٍ', 'دھیرے دھیرے', 'Pudar', 'Blende');
+  String get arrivalRise => _t('Rise', 'صعود', 'ابھار', 'Naik', 'Aufstieg');
+  String get motionThread => _t(
+      'Golden thread under the words',
+      'خيط ذهبي تحت الكلمات',
+      'الفاظ کے نیچے سنہری دھاگا',
+      'Benang emas di bawah kata',
+      'Goldener Faden unter den Worten');
+  String get motionLight => _t(
+      'Light passing through the letters',
+      'نور يمرّ عبر الحروف',
+      'حروف سے گزرتا نور',
+      'Cahaya melewati huruf',
+      'Licht, das durch die Buchstaben zieht');
+  String get motionTrail => _t(
+      'Recited words stay gold',
+      'الكلمات المتلوّة تبقى ذهبية',
+      'پڑھے گئے الفاظ سنہرے رہیں',
+      'Kata yang dibaca tetap emas',
+      'Rezitierte Worte bleiben golden');
+  String get motionUnveil => _t(
+      'Words wait faint until recited',
+      'تبقى الكلمات باهتة حتى تُتلى',
+      'الفاظ پڑھے جانے تک مدھم رہیں',
+      'Kata tetap samar hingga dibacakan',
+      'Worte bleiben blass, bis sie rezitiert werden');
+  String get motionFollowsWords => _t(
+      'Follows each word with voices that have word timing',
+      'يتبع كل كلمة مع الأصوات التي لها توقيت للكلمات',
+      'لفظی وقت والی آوازوں کے ساتھ ہر لفظ کے پیچھے چلتا ہے',
+      'Mengikuti setiap kata pada suara yang punya waktu per kata',
+      'Folgt jedem Wort bei Stimmen mit Wort-Timing');
+  String get motionNeedsWords => _t(
+      'Needs a voice with word timing',
+      'يحتاج صوتًا له توقيت للكلمات',
+      'لفظی وقت والی آواز درکار ہے',
+      'Perlu suara dengan waktu per kata',
+      'Braucht eine Stimme mit Wort-Timing');
+  String get a11yMotionPillHint => _t(
+      'Opens the verse motion',
+      'يفتح حركة الآية',
+      'آیت کی حرکت کھولتا ہے',
+      'Membuka gerak ayat',
+      'Öffnet die Versbewegung');
 
   /// '12 Mar 2026' / '12 مارس 2026'.
   String formatDate(DateTime d) {

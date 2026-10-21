@@ -104,7 +104,7 @@ void main() {
     });
   });
 
-  testWidgets('the switch sits in the Customize menu, and stays open',
+  testWidgets('the switch sits in the Customize panel, and stays open',
       (t) async {
     t.view.physicalSize = const Size(390 * 3, 844 * 3);
     t.view.devicePixelRatio = 3;
@@ -125,6 +125,9 @@ void main() {
     expect(find.text('High-quality video'), findsOneWidget);
     expect(find.text('Sharper, larger files'), findsOneWidget);
 
+    // The panel opens in place, under the row: the switch is at its foot.
+    await t.ensureVisible(find.text('High-quality video'));
+    await t.pumpAndSettle();
     await t.tap(find.text('High-quality video'));
     await t.pumpAndSettle();
     expect(SettingsService.state.value.highQualityVideo, isTrue);

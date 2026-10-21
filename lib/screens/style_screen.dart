@@ -15,6 +15,8 @@ import '../data/scene_catalog.dart';
 import '../data/settings_service.dart';
 import '../data/verse_font.dart';
 import '../data/verse_ink.dart';
+import '../data/verse_lines.dart';
+import '../data/verse_motion.dart';
 import '../l10n/l10n.dart';
 import '../render/ayah_rasterizer.dart';
 import '../render/letterbox_layout.dart';
@@ -27,8 +29,11 @@ import '../widgets/colour_picker.dart';
 import '../widgets/glow_button.dart';
 import '../widgets/ink_swatch.dart';
 import '../widgets/measure_height.dart';
+import '../widgets/motion_picker.dart';
 import '../widgets/reel_finish.dart';
 import '../widgets/reel_watermark.dart';
+import '../widgets/surah_title.dart';
+import '../widgets/verse_stage.dart';
 import '../widgets/step_dots.dart';
 import 'background_screen.dart';
 import 'preview_screen.dart';
@@ -82,7 +87,7 @@ class StyleScreen extends StatefulWidget {
 }
 
 /// Which panel is open under the frame.
-enum _Panel { type, colour, effects }
+enum _Panel { type, colour, effects, motion }
 
 /// Which of the reel's colours the palette is setting: the verse's, the
 /// accent's, and — on a wide card — the band's around it.
@@ -189,6 +194,8 @@ class _StyleScreenState extends State<StyleScreen> {
         s.resetColours();
       case _Panel.effects:
         s.setEffects(ReelEffects.off);
+      case _Panel.motion:
+        s.setMotion(VerseMotion.none);
     }
   }
 
@@ -271,7 +278,17 @@ class _StyleScreenState extends State<StyleScreen> {
                           child: Semantics(
                             container: true,
                             label: l.a11yStyleStage,
-                            child: _Stage(ayah: _ayah, aspect: _aspect),
+                            child: _Stage(
+                              ayah: _ayah,
+                              aspect: _aspect,
+                              // The motion plays on the frame while its
+                              // panel is open; the other panels judge
+                              // type and colour on a still.
+                              motion: _panel == _Panel.motion
+                                  ? creationState.motion
+                                  : null,
+                              hasWords: _hasWords,
+                            ),
                           ),
                         ),
                       ),
@@ -304,6 +321,12 @@ class _StyleScreenState extends State<StyleScreen> {
     );
   }
 
+  /// Whether the chosen voice has word timing: what the trail and the
+  /// unveil need.
+  bool get _hasWords =>
+      creationState.reciter != null &&
+      WordAlignService.supports(creationState.reciter!);
+
   Widget _panelBody(L10n l) => switch (_panel) {
         _Panel.type => _TypePanel(ayah: _ayah),
         _Panel.colour => _ColourPanel(
@@ -322,6 +345,16 @@ class _StyleScreenState extends State<StyleScreen> {
             key: ValueKey(_resets),
             effects: creationState.effects,
           ),
+        _Panel.motion => ListView(
+            padding: const EdgeInsets.only(bottom: 14),
+            children: [
+              MotionPicker(
+                motion: creationState.motion,
+                hasWords: _hasWords,
+                onChanged: creationState.setMotion,
+              ),
+            ],
+          ),
       };
 }
 
@@ -338,7 +371,16 @@ class _Stage extends StatefulWidget {
   final Ayah ayah;
   final double? aspect;
 
-  const _Stage({required this.ayah, this.aspect});
+  /// The motion to play on the verse, looping; null for the still.
+  final VerseMotion? motion;
+  final bool hasWords;
+
+  const _Stage({
+    required this.ayah,
+    this.aspect,
+    this.motion,
+    this.hasWords = false,
+  });
 
   @override
   State<_Stage> createState() => _StageState();
@@ -472,7 +514,16 @@ class _StageState extends State<_Stage> {
     return LayoutBuilder(
       builder: (context, box) {
         final scale = box.maxWidth / LetterboxGeometry.frameW;
-        final verse = MeasureHeight(
+        final motion = widget.motion;
+        final verse = motion != null && !motion.isNone
+            ? _MotionVerse(
+                ayah: widget.ayah,
+                motion: motion.forVoice(hasWords: widget.hasWords),
+                highlight: s.wordHighlight && widget.hasWords,
+                width: box.maxWidth,
+                onHeight: _onCardHeight,
+              )
+            : MeasureHeight(
           onChange: _onCardHeight,
           child: AyahOverlay(
             ayah: widget.ayah,
@@ -573,6 +624,20 @@ class _StageState extends State<_Stage> {
                   child: verse,
                 ),
               ),
+            if (s.surahTitle)
+              Positioned.fill(
+                child: ReelSurahTitle(
+                  width: box.maxWidth,
+                  surah: s.surah,
+                  edition: translation,
+                  at: s.surahTitleAt,
+                  letterbox: geo,
+                  onLight: ReelDedication.onLightAt(
+                      s.surahTitleAt ?? ReelSurahTitle.defaultCentre(geo),
+                      onLightGround: onLight,
+                      letterbox: geo),
+                ),
+              ),
             ReelWatermark(
               width: box.maxWidth,
               letterbox: geo,
@@ -582,6 +647,159 @@ class _StageState extends State<_Stage> {
           ],
         );
       },
+    );
+  }
+}
+
+/// The verse on the still frame, playing a motion on a loop: the real
+/// card, through the reel's own [VerseStage], on a stand-in recitation
+/// whose words are spaced by their letters. So what the panel shows is
+/// what the reel does — only the timing is invented.
+class _MotionVerse extends StatefulWidget {
+  final Ayah ayah;
+  final VerseMotion motion;
+  final bool highlight;
+  final double width;
+  final ValueChanged<double> onHeight;
+
+  const _MotionVerse({
+    required this.ayah,
+    required this.motion,
+    required this.highlight,
+    required this.width,
+    required this.onHeight,
+  });
+
+  @override
+  State<_MotionVerse> createState() => _MotionVerseState();
+}
+
+class _MotionVerseState extends State<_MotionVerse>
+    with SingleTickerProviderStateMixin {
+  /// How long the verse is "recited", and the loop it plays in: a beat
+  /// of rest before it comes round again.
+  static const _unitMs = 4600;
+  static const _loopMs = 5300;
+
+  late final AnimationController _c = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: _loopMs));
+  final _clock = ValueNotifier<int>(0);
+
+  late Recitation _rec;
+  late List<VerseUnit> _units;
+  late List<Ayah> _ayahs;
+  late Map<int, List<HighlightSpan>> _words;
+  late Map<int, List<(int, int)?>> _times;
+
+  @override
+  void initState() {
+    super.initState();
+    _plan();
+    _c.addListener(() => _clock.value = (_c.value * _loopMs).round());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    if (still) {
+      _c
+        ..stop()
+        ..value = 0.55;
+    } else if (!_c.isAnimating) {
+      _c.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _MotionVerse old) {
+    super.didUpdateWidget(old);
+    if (old.ayah.arabic != widget.ayah.arabic ||
+        old.ayah.number != widget.ayah.number) {
+      _plan();
+    }
+  }
+
+  /// A stand-in recitation of the verse: its words one after another
+  /// from a tenth of the way in to near the end, each taking its share
+  /// of the letters, with a breath between.
+  void _plan() {
+    final n = widget.ayah.number;
+    _rec = Recitation(
+      reciterId: 'demo',
+      surah: creationState.surah,
+      audioPath: '',
+      timings: [AyahTiming(n, 0, _unitMs)],
+    );
+    _units = [VerseUnit(n, null, 0, _unitMs)];
+    _ayahs = List.filled(n, widget.ayah);
+    final tokens = VerseText.tokens(widget.ayah.arabic);
+    final letters = [for (final t in tokens) VerseText.letters(t)];
+    final total = letters.fold<int>(0, (a, b) => a + b);
+    const from = _unitMs * 0.1, to = _unitMs * 0.86;
+    final times = List<(int, int)?>.filled(tokens.length, null);
+    final spans = <HighlightSpan>[];
+    var done = 0;
+    for (var k = 0; k < tokens.length; k++) {
+      if (letters[k] == 0) {
+        if (k > 0) times[k] = times[k - 1];
+        continue;
+      }
+      final a = (from + (to - from) * done / (total == 0 ? 1 : total)).round();
+      done += letters[k];
+      final b = (from + (to - from) * done / (total == 0 ? 1 : total)).round();
+      times[k] = (a, a + ((b - a) * 0.86).round());
+      // A word's window runs to the next word, as the highlight's do.
+      var end = k + 1;
+      while (end < tokens.length && letters[end] == 0) {
+        end++;
+      }
+      spans.add(HighlightSpan(a, b, k, end));
+    }
+    // Gap-filled to the verse's end, as the real windows are.
+    if (spans.isNotEmpty) {
+      final last = spans.removeLast();
+      spans.add(HighlightSpan(last.startMs, _unitMs, last.tokenStart, last.tokenEnd));
+    }
+    _words = {n: spans};
+    _times = {n: times};
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    _clock.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = creationState;
+    final settings = SettingsService.state.value;
+    return VerseStage(
+      clock: _clock,
+      units: _units,
+      ayahs: _ayahs,
+      recitation: _rec,
+      motion: widget.motion,
+      words: _words,
+      highlight: widget.highlight,
+      wordTimes: _times,
+      width: widget.width,
+      textColor: Color(s.textArgb),
+      accent: Color(s.accentArgb),
+      ink: s.verseInk,
+      accentInk: s.accentInk,
+      textScale: s.textScale,
+      preset: s.textPreset,
+      onLight: s.onLightGround,
+      translation: settings.translation,
+      numbering: settings.verseNumbering,
+      showTranslation: !settings.verseTranslationOff,
+      surah: s.surah,
+      verseFace: s.verseFace,
+      translationFace: s.typography.translation,
+      onHeight: widget.onHeight,
     );
   }
 }
@@ -613,6 +831,7 @@ class _PanelTabs extends StatelessWidget {
           _Panel.type => l.styleTabType,
           _Panel.colour => l.styleTabColour,
           _Panel.effects => l.styleTabEffects,
+          _Panel.motion => l.styleTabMotion,
         };
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),

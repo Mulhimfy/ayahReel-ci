@@ -571,6 +571,38 @@ abstract final class RecitationService {
         'fetching the ayah table for surah $surah', last);
   }
 
+  /// The loudness of a whole recording, in 10 ms steps (see
+  /// [SurahSlice.envelopeOf]): where its pauses are, which is what a
+  /// verse cut into lines is timed by when the voice has no word
+  /// timing. Kept for the file it was measured from, while the file
+  /// stays the same; null when it could not be decoded.
+  static Future<List<double>?> loudness(String audioPath) async {
+    final f = File(audioPath);
+    if (!f.existsSync()) return null;
+    final stamp = '$audioPath|${f.lengthSync()}|'
+        '${f.lastModifiedSync().millisecondsSinceEpoch}';
+    final kept = _loudness;
+    if (kept != null && kept.$1 == stamp) return kept.$2;
+    final pcm = File('${(await getTemporaryDirectory()).path}/'
+        'loudness_${stamp.hashCode.toUnsigned(32).toRadixString(36)}.pcm');
+    try {
+      if (debugFfmpeg == null) await configureFfmpeg();
+      await _decodeMono(f, pcm);
+      final env = await compute(SurahSlice.envelopeOf, pcm.path);
+      _loudness = (stamp, env);
+      return env;
+    } catch (e) {
+      rlog('rec: loudness of $audioPath failed ($e)');
+      return null;
+    } finally {
+      try {
+        if (pcm.existsSync()) pcm.deleteSync();
+      } catch (_) {}
+    }
+  }
+
+  static (String, List<double>)? _loudness;
+
   /// [audio] decoded to raw mono 16-bit samples at [SurahSlice.envRate],
   /// for [SurahSlice.envelopeOf]. On this isolate: FFmpeg is a plugin,
   /// and a plugin's channel only answers the isolate that owns it.
