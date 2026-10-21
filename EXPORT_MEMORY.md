@@ -349,6 +349,53 @@ Done, Dart only:
 **Not device-tested.** Check on a phone planned smallest that a reel
 saves, plays, and that its passes join by stream copy at 720x1280.
 
+## 2026-10-21: a save on a phone with room, and the app gone
+
+One note from `version: 1.0.9`, `code: 2026-10-14` (so none of the
+2026-10-15 or 10-17 work), source `exportTrouble`, "My reel didn't
+save", Android 12 (`SP1A.210812.003`):
+
+    tightest, 3704 MB, 1 lost · lost: the app closed while a reel was saving (pass 5/17, 6 cards; app 166 MB, 328 MB at most; phone 1333 MB free)
+
+The phone was planned `tight` when it died (3.7 GB, no loss yet); the
+loss itself made it `tightest`. Not memory: the app at 166 MB, 1.3 GB
+of the phone free, and no render-process figure (2026-10-14 code kept
+a stale pid there; FFmpeg was not in the app, which would be 300 MB
+and up). A 17-pass save on x264 with four threads is minutes long. So
+the app was ended by something other than the low-memory killer: the
+user closing it (swiped out of the recent apps, which 2026-10-14 code
+could count as a loss when the hidden mark landed late), an ANR
+("isn't responding", then Close), or a crash. Play's vitals for 1.0.9
+(28 days to 2026-10-21) have no crash of the app on Android 12 and an
+input-dispatch ANR with the main thread idle (1 user), which is what a
+phone too busy to schedule the main thread looks like.
+
+Done, for the 1.0.10 store build (native) with the Dart beside it:
+
+- **Android says how the app ended.** The running mark carries the
+  app's pid and when the save began (`pid`, `since`). The next launch
+  asks `ApplicationExitInfo` for that pid's record from after `since`
+  (`RenderProcess.appExit`, the same `exitInfo` call, which now takes
+  `since`). Closed by the user (`REASON_USER_REQUESTED`, "remove task",
+  or `USER_STOPPED`) or ended out of sight: not a lost save, no smaller
+  budget, no notice; counted as `N closed` in the summary. Anything
+  else counts as before, and the note says Android's reason:
+  `lost: … (pass 2/9, 8 cards; Android: not responding, importance 100; app …)`.
+  On 1.0.9's native side `exitInfo` knows only the last two minutes, so
+  a patch there changes nothing.
+- **FFmpeg a notch below the app.** The render process's encode thread
+  runs at nice +4 (`RenderService.ENCODE_PRIORITY`), and FFmpeg's
+  threads inherit it, so a save that fills every core leaves the app's
+  main and UI threads first. Short of `THREAD_PRIORITY_BACKGROUND`,
+  which would also move the encode onto the slow cores.
+- `FeedbackService.codeDate` is `2026-10-21`.
+
+What the next such note says: `N closed` with no loss means people
+give up on long saves; look at the save's length (passes) and speed,
+not memory. `Android: not responding` means the save starves the app:
+fewer threads on `tight`. `Android: low memory` with room in the note
+means the phone filled between readings.
+
 ## What a note says since 2026-10-08
 
 While a foreground save runs, `PhoneBudget` writes its stage and the

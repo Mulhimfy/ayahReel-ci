@@ -57,7 +57,14 @@ class RenderService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        worker = HandlerThread("render").also { it.start() }
+        // FFmpeg's threads are started from this one and take its
+        // priority. A notch below the app's, so a save that fills every
+        // core still leaves the app's main and UI threads first in line:
+        // a budget phone saving at full tilt stopped answering touches
+        // ("isn't responding"), and closing it there loses the save.
+        // Short of THREAD_PRIORITY_BACKGROUND, which would also move the
+        // encode onto the phone's slow cores.
+        worker = HandlerThread("render", ENCODE_PRIORITY).also { it.start() }
         work = Handler(worker.looper)
         try {
             // As the app sets them (ffmpeg_setup.dart): warnings and up
@@ -120,6 +127,9 @@ class RenderService : Service() {
         const val DONE = 3
         const val KEY_ARGS = "args"
         const val KEY_LOGS = "logs"
+
+        /** Nice +4: below the app's threads, above the background group. */
+        private const val ENCODE_PRIORITY = Process.THREAD_PRIORITY_LESS_FAVORABLE * 4
 
         /** FFmpeg could not be started in this process at all. */
         const val UNAVAILABLE = -1001
@@ -284,7 +294,12 @@ object RenderClient {
                 }
                 result.success(null)
             }
-            "exitInfo" -> result.success(exitInfo(call.argument<Int>("pid") ?: 0))
+            "exitInfo" -> result.success(
+                exitInfo(
+                    call.argument<Int>("pid") ?: 0,
+                    call.argument<Number>("since")?.toLong(),
+                ),
+            )
             // A save the user waits on keeps the screen on: a slow one
             // outlasts the timeout, and with the screen off the app is
             // in the background, where the render process is the first
@@ -354,13 +369,18 @@ object RenderClient {
     }
 
     /**
-     * Android's record of how the render process [pid] ended, if it
+     * Android's record of how the process [pid] of this app ended, if it
      * keeps one (Android 11 and up) and it is recent: why, and how
      * important the process was as it died, which says whether the app
      * was in front. Null for a record not written yet, which the app
      * asks for again; "unsupported" where there will never be one.
+     *
+     * For the render process just heard dying, recent is the last two
+     * minutes. For the app's own process asked about at the next launch
+     * (a save it died in), [since] is when that save began: a pid is
+     * reused, and a record from before the save is another process's.
      */
-    private fun exitInfo(pid: Int): Map<String, Any>? {
+    private fun exitInfo(pid: Int, since: Long? = null): Map<String, Any>? {
         if (pid <= 0 || Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             return mapOf("unsupported" to true)
         }
@@ -371,7 +391,11 @@ object RenderClient {
         } catch (e: Exception) {
             null
         } ?: return null
-        if (System.currentTimeMillis() - info.timestamp > EXIT_RECENT_MS) return null
+        if (since != null) {
+            if (info.timestamp < since) return null
+        } else if (System.currentTimeMillis() - info.timestamp > EXIT_RECENT_MS) {
+            return null
+        }
         return mapOf(
             "reason" to info.reason,
             "importance" to info.importance,

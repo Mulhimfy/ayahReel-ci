@@ -184,6 +184,24 @@ To ship (the user's call): `tool/public_mirror.sh patch/1.0.9
 patch/1.0.9 gpatch-1.0.9+23--3` and `... gipatch-1.0.9+11--3`, then
 record them here. Not for 1.0.8: no render process there.
 
+**For the 1.0.10 store build, not in any patch (native):** `d220473` on
+`feat/live-recitation` (mirror `564171e`), from Play's Crashes and ANRs
+(28 days to 2026-10-17). `RenderBackend.kt` passes
+`--enable-impeller=false` from `MainActivity.getFlutterShellArgs` on
+phones where Impeller would take OpenGL ES (the engine's own rules from
+3.47.5, before the first engine start, plus the engine's log line after
+the first frame for phones the rules miss), which ends the
+`CreateSnapshotSurface`/`DeviceBufferGLES`/`RenderPassGLES` crashes and
+the PowerVR surface-creation ANR there; Vulkan phones keep Impeller.
+Supersedes `fix/android-skia` (Skia everywhere). `AppComponents.kt`
+(`appComponentFactory`, Android 9+) runs the notification plugin's alarm
+receiver, and `BootReceiver` its boot work, on one worker thread under
+`goAsync` (the `ScheduledNotificationReceiver` ANRs). Already fixed in
+1.0.9's store build: Gson's "Missing type parameter" (keep rules, Play
+shows it on 1.0.3/1.0.4 only) and the boot receiver's alarm-limit crash
+(`BootReceiver`, 1.0.8 only). Check the rules again on every Flutter
+upgrade (`RenderBackend`'s doc).
+
 **2026-10-14, from the VPS via the public mirror: saves reclaimed in
 the background, and the Telegram invitation. Dart only.** At the user's
 word ("fix it and comm push all", then "... then ota push it"). From a
@@ -305,7 +323,8 @@ Next tags: `gpatch-1.0.9+23--2`, `gpatch-1.0.8+22--6`, `+21--6`,
 has no `mbtree=0`), and Play's issues above are on 1.0.8 and 1.0.9;
 1.0.7's Android reminders keep their 90 days.
 
-Not in any patch, for the next store build (the user's call):
+Not in any patch, for the next store build (the user's call; since
+2026-10-18 done the narrow way in `d220473`, see above):
 `fix/android-skia` (`c5076a2`), the manifest's
 `io.flutter.embedding.android.EnableImpeller=false`, which ends both
 Impeller OpenGL ES failures (the snapshot crash and the PowerVR

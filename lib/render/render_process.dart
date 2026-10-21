@@ -475,10 +475,31 @@ abstract final class RenderProcess {
     }
     return null;
   }
+
+  /// What Android recorded about the death of this app's own process
+  /// [pid], asked at the next launch about a save that process died in.
+  /// [since] (ms since the epoch) is when that save began; an older
+  /// record is another process's that had the same pid. Null where it
+  /// can't say: before Android 11, and on store builds up to 1.0.9,
+  /// whose native side knows only the last two minutes.
+  static Future<RenderExit?> appExit(int pid, int since) async {
+    if (!Platform.isAndroid || pid <= 0) return null;
+    try {
+      final r = await _channel.invokeMethod<Map<Object?, Object?>>(
+          'exitInfo', {'pid': pid, 'since': since}).timeout(
+          const Duration(seconds: 3));
+      if (r == null || r['unsupported'] == true) return null;
+      return RenderExit.from(r);
+    } catch (_) {
+      return null;
+    }
+  }
 }
 
-/// Android's own account of a render process's death
-/// (`ApplicationExitInfo`, Android 11 and up).
+/// Android's own account of a death in this app: the render process
+/// (`RenderProcess.lastExit`) or, at the next launch, the app's own
+/// process during a save (`RenderProcess.appExit`).
+/// (`ApplicationExitInfo`, Android 11 and up.)
 class RenderExit {
   const RenderExit({
     required this.reason,
@@ -500,6 +521,12 @@ class RenderExit {
 
   final String description;
 
+  static const _exitSelf = 1;
+  static const _signaled = 2;
+  static const _userRequested = 10;
+  static const _userStopped = 11;
+  static const _other = 13;
+  static const _packageUpdated = 16;
   static const _crash = 4;
   static const _crashNative = 5;
   static const _anr = 6;
@@ -518,6 +545,11 @@ class RenderExit {
   /// nothing about what the encode cost.
   bool get reclaimed => !crashed && importance >= _outOfSight;
 
+  /// Ended by the person holding the phone: swiped out of the recent
+  /// apps (Android says "remove task") or stopped from Settings. Says
+  /// nothing about what a save costs.
+  bool get userEnded => reason == _userRequested || reason == _userStopped;
+
   /// Ended with the app in front: the encode died for what it asked
   /// (the low-memory killer) or what it ran.
   bool get inFront => importance > 0 && importance < _outOfSight;
@@ -529,6 +561,12 @@ class RenderExit {
       _crash => 'crash',
       _crashNative => 'native crash',
       _anr => 'not responding',
+      _exitSelf => 'exited',
+      _signaled => 'signaled',
+      _userRequested => 'closed by the user',
+      _userStopped => 'stopped by the user',
+      _other => 'ended by the system',
+      _packageUpdated => 'app updated',
       _ => 'reason $reason',
     };
     return '$why, importance $importance'

@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ayah_reels/data/export_budget.dart';
 import 'package:ayah_reels/data/feedback_service.dart';
 import 'package:ayah_reels/render/render_plan.dart';
+import 'package:ayah_reels/render/render_process.dart' show RenderExit;
 import 'package:ayah_reels/render/video_renderer.dart';
 
 /// Exports sized to the phone: first-time users on 3 and 4 GB Android
@@ -199,6 +200,60 @@ void main() {
       PhoneBudget.debugMemKb = 8 * gb;
       await PhoneBudget.load();
       expect(PhoneBudget.now, ExportBudget.tight);
+    });
+
+    test('a save the user closed the app on is not a lost save', () async {
+      // A 3.7 GB phone, 1.3 GB free, the app at 166 MB in pass 5 of 17
+      // (2026-10-21 note): no phone out of memory. Android's record says
+      // why the app ended (the 1.0.10 store build up).
+      PhoneBudget.debugMemKb = (3.7 * gb).round();
+      await PhoneBudget.exportStarted();
+      PhoneBudget.exportStage('pass 5/17, 6 cards');
+      await PhoneBudget.debugFlush();
+      final mark = jsonDecode(history().readAsStringSync()) as Map;
+      expect(mark['pid'], pid);
+      expect(mark['since'], isA<int>());
+
+      PhoneBudget.reset(); // swiped out of the recent apps
+      PhoneBudget.debugMemKb = (3.7 * gb).round();
+      int? askedPid;
+      int? askedSince;
+      PhoneBudget.debugAppExit = (p, since) async {
+        askedPid = p;
+        askedSince = since;
+        return const RenderExit(
+            reason: 10, importance: 100, description: 'remove task');
+      };
+      await PhoneBudget.load();
+      expect(askedPid, pid);
+      expect(askedSince, mark['since']);
+      expect(PhoneBudget.takeLostExport(), isFalse);
+      expect(PhoneBudget.now, ExportBudget.tight, reason: 'not one smaller');
+      expect(PhoneBudget.summary, 'tight, 3788 MB, 1 closed');
+
+      // Killed by Android in front: counted, and the note says so.
+      await PhoneBudget.exportStarted();
+      PhoneBudget.exportStage('pass 2/9, 8 cards');
+      await PhoneBudget.debugFlush();
+      PhoneBudget.reset();
+      PhoneBudget.debugMemKb = (3.7 * gb).round();
+      PhoneBudget.debugAppExit =
+          (p, since) async => const RenderExit(reason: 6, importance: 100);
+      await PhoneBudget.load();
+      expect(PhoneBudget.takeLostExport(), isTrue);
+      expect(PhoneBudget.now, ExportBudget.tightest);
+      // (No app or phone memory here: /proc is read on Android only.)
+      expect(PhoneBudget.lostDetail,
+          ' (pass 2/9, 8 cards; Android: not responding, importance 100)');
+
+      // No record (before Android 11, or 1.0.9's native side): as before.
+      await PhoneBudget.exportStarted();
+      PhoneBudget.reset();
+      PhoneBudget.debugMemKb = (3.7 * gb).round();
+      PhoneBudget.debugAppExit = (p, since) async => null;
+      await PhoneBudget.load();
+      expect(PhoneBudget.takeLostExport(), isTrue);
+      expect(PhoneBudget.summary, startsWith('tightest, 3788 MB, 2 lost'));
     });
 
     test('an encode in the app says so in the stage, once', () async {

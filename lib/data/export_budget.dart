@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:path_provider/path_provider.dart';
 
+import '../render/render_process.dart' show RenderExit, RenderProcess;
 import 'debug_log.dart';
 
 /// How much of the phone an export may ask for: how many verse cards
@@ -135,6 +136,22 @@ abstract final class PhoneBudget {
   /// saves that would once have closed the app. Told in the note, so
   /// the shelter can be seen working (see [renderDied]).
   static int _survived = 0;
+
+  /// Saves the app died in that Android says were the user's doing:
+  /// swiped out of the recent apps or stopped from Settings (or ended
+  /// out of sight, where the hidden mark came too late). Not losses;
+  /// told in the note, so a "didn't save" report can be read.
+  static int _closed = 0;
+
+  /// When the save under way began, in ms since the epoch: written
+  /// beside the app's pid, so the next launch can ask Android how that
+  /// process ended (`ApplicationExitInfo`) and not mistake another
+  /// process that had the same pid for it.
+  static int? _since;
+
+  /// Stands in for Android's record of the app's death in tests.
+  @visibleForTesting
+  static Future<RenderExit?> Function(int pid, int since)? debugAppExit;
 
   /// The render process's pid while a save's encodes run there, so its
   /// memory is read beside the app's. Set by the renderer.
@@ -318,6 +335,9 @@ abstract final class PhoneBudget {
     ].join(', ');
     final parts = [
       if (stage.isNotEmpty) stage,
+      // Android's own word on how the app ended, since the 1.0.10
+      // store build: an ANR, a crash, the low-memory killer.
+      if (j['exit'] is String) 'Android: ${j['exit']}',
       if (app.isNotEmpty) app,
       if (render != null)
         'render $render MB'
@@ -355,6 +375,7 @@ abstract final class PhoneBudget {
       if (_is32Bit) '32-bit',
       if (_losses > 0) '$_losses lost',
       if (_survived > 0) '$_survived survived',
+      if (_closed > 0) '$_closed closed',
       if (!hardwareTrusted) 'x264 only',
     ].join(', ');
   }
@@ -374,8 +395,19 @@ abstract final class PhoneBudget {
       _hwLosses = (j['hwLost'] as int?) ?? 0;
       _leanLosses = (j['leanLost'] as int?) ?? 0;
       _survived = (j['survived'] as int?) ?? 0;
+      _closed = (j['closed'] as int?) ?? 0;
       if (j['running'] == true) {
-        if (j['hidden'] == true) {
+        final exit = j['hidden'] == true ? null : await _appExit(j);
+        if (exit != null && (exit.userEnded || exit.reclaimed)) {
+          // Android says the user closed the app, or that it went out
+          // of sight before it was ended: the hidden mark below, come
+          // too late or never. A slow save someone gave up on is not a
+          // phone short of memory, and a smaller budget would make
+          // every later save slower still.
+          _closed++;
+          rlog('budget: the last export ended with the app '
+              '(Android: $exit) — not counted');
+        } else if (j['hidden'] == true) {
           // Out of sight when it died: Android reclaims a backgrounded
           // app on any phone, and a swipe out of the recents list ends
           // it too. Neither says anything about what an export costs,
@@ -395,7 +427,8 @@ abstract final class PhoneBudget {
           _losses++;
           if (hardware) _hwLosses++;
           _lostUntold = true;
-          _lostDetail = describeLoss(j);
+          _lostDetail =
+              describeLoss({...j, if (exit != null) 'exit': '$exit'});
           rlogError('export', 'the last export died with the app '
               '($_losses lost on this phone) — planning smaller from now on');
         }
@@ -403,6 +436,21 @@ abstract final class PhoneBudget {
       }
     } catch (e) {
       rlog('budget: unreadable history: $e');
+    }
+  }
+
+  /// Android's record of how the process that wrote the running mark
+  /// [j] ended, if the mark names it (written since 2026-10-21) and
+  /// Android kept one.
+  static Future<RenderExit?> _appExit(Map<String, dynamic> j) async {
+    final p = j['pid'];
+    final since = j['since'];
+    if (p is! int || since is! int) return null;
+    final read = debugAppExit ?? RenderProcess.appExit;
+    try {
+      return await read(p, since);
+    } catch (_) {
+      return null;
     }
   }
 
@@ -428,6 +476,7 @@ abstract final class PhoneBudget {
     _running = true;
     _hidden = false;
     _stage = 'starting';
+    _since = DateTime.now().millisecondsSinceEpoch;
     _peakIsSave = _restartPeak();
     _mem = _memoryNow();
     _sampler?.cancel();
@@ -514,6 +563,7 @@ abstract final class PhoneBudget {
     _sampler = null;
     _stage = null;
     _budget = null;
+    _since = null;
     _mem = const {};
     try {
       final f = await _file();
@@ -625,7 +675,10 @@ abstract final class PhoneBudget {
           if (_hwLosses > 0) 'hwLost': _hwLosses,
           if (_leanLosses > 0) 'leanLost': _leanLosses,
           if (_survived > 0) 'survived': _survived,
+          if (_closed > 0) 'closed': _closed,
           'running': running,
+          if (running) 'pid': pid,
+          if (running && _since != null) 'since': _since,
           if (hidden) 'hidden': true,
           if (running && _stage != null) 'stage': _stage,
           if (running && _budget != null) 'budget': _budget!.name,
@@ -653,6 +706,9 @@ abstract final class PhoneBudget {
     _budget = null;
     _peakIsSave = false;
     _survived = 0;
+    _closed = 0;
+    _since = null;
+    debugAppExit = null;
     renderPid = null;
     _floor = ExportBudget.roomy;
     _loaded = null;
