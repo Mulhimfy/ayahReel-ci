@@ -1,0 +1,5 @@
+alafasy_173    alafasy_95       n=162 fail=0 wave=0.144/0.241/0.602 same=0 doubt=1 dur=1.048±0.1069 close=0.086 env=0.125 ok=True why=None
+husary_qasr    husary_122       n=162 fail=0 wave=0.99/0.999/1.0 same=155 doubt=0 dur=0.988±0.0122 close=0.605 env=0.942 ok=False why=the same audio in 155 of 162 verses, e.g. ['1:2', '2:2', '3:2', '4:2']; 60% of verses as long as each other; loudness contours correlate at 0.942
+husary_122     husary_mujawwad  n=162 fail=0 wave=0.148/0.247/0.469 same=0 doubt=0 dur=0.588±0.1157 close=0.099 env=0.042 ok=True why=None
+muaiqly_159    muaiqly_mujawwad n=162 fail=0 wave=0.999/1.0/1.0 same=162 doubt=0 dur=1.001±0.0011 close=0.895 env=0.999 ok=False why=the same audio in 162 of 162 verses, e.g. ['1:2', '2:2', '3:2', '4:2']; 90% of verses as long as each other; loudness contours correlate at 0.999
+sudais_mq54    sudais           n=162 fail=0 wave=0.164/0.728/0.982 same=8 doubt=18 dur=1.006±0.0775 close=0.148 env=0.17 ok=False why=the same audio in 8 of 162 verses, e.g. ['13:2', '23:2', '28:2', '42:2']; 18 verses nearly the same audio
