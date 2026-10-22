@@ -1,0 +1,4 @@
+budair_mq43    vs budair         n=162 fail=0 wave=0.123/0.204/0.289 same=0 doubt=0 dur=1.037±0.1092 close=0.093 env=0.055 ok=True why=None (50s)
+ayyub_mq109    vs ayyub          n=162 fail=0 wave=0.524/0.796/0.922 same=16 doubt=42 dur=0.993±0.0146 close=0.611 env=0.914 ok=False why=the same audio in 16 of 162 verses, e.g. ['21:2', '32:2', '58:2', '74:2']; 42 verses nearly the same audio; 61% of verses as long as each other; loudness contours correlate at 0.914 (51s)
+muaiqly_65     vs muaiqly        n=162 fail=0 wave=0.152/0.438/0.645 same=0 doubt=1 dur=1.116±0.0679 close=0.167 env=0.164 ok=True why=None (45s)
+husary_qasr    vs husary         n=162 fail=0 wave=0.154/0.241/0.368 same=0 doubt=0 dur=0.685±0.1112 close=0.142 env=0.043 ok=True why=None (85s)
