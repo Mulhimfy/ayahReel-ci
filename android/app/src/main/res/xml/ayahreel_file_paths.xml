@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Roots the direct-share FileProvider may serve — WhatsApp, and
+     Instagram's reel composer. Cache only: renders are produced there,
+     and both share services stage library copies into it first. -->
+<paths>
+    <cache-path name="cache" path="." />
+</paths>

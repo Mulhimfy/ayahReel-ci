@@ -1,0 +1,21 @@
+# Sceneries that must never enter the library, whatever they score.
+#
+# The harvest is machine-driven and the only human filter in front of it
+# is a Haar face cascade, which answers "is there a face here" and
+# nothing else. A figure turned away, cropped, stylised or — as below —
+# with no head at all sails straight past it at a high score, because
+# by every measurement the scorer takes it is an excellent backdrop:
+# dark, quiet, well composed, nothing competing with the verse.
+#
+# So this file, and it is checked before anything is scored or framed.
+# Rebuilding the library re-runs the whole pipeline, and scene ids are
+# positional (`{category}_{source}_{NN}`) — the same slug lands on a
+# different photo every run — so entries are keyed on the provider's own
+# candidate id, which is stable, plus the perceptual hash, which catches
+# the same footage re-uploaded under a new id.
+#
+# Format:  <candidate id>  <dhash>  # why
+# Either column may be `-` if only the other is known.
+
+pixabay_229452  2049250401817240884  # nude figure; removed 2026-08-09
+-  1410615007702479096  # AI-generated fantasy valley (was cinematic_pixabay_24); removed 2026-09-28
