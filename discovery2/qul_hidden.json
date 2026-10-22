@@ -1,0 +1,5501 @@
+{
+"surah": {
+"1": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/abdulBasit/mujawwad/mp3/112.mp3",
+"duration": 29,
+"audio_size": 467490.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"2": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/abdulBasit/murattal/mp3/112.mp3",
+"duration": 13,
+"audio_size": 220476.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"3": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/abdulrahmanAlSudais/murattal/mp3/112.mp3",
+"duration": 12,
+"audio_size": 206682.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"4": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/abuBakrAlShatri/murattal/mp3/112.mp3",
+"duration": 11,
+"audio_size": 180347.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"5": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/haniarRifai/murattal/mp3/112.mp3",
+"duration": 12,
+"audio_size": 585856.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"6": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/husary/murattal/mp3/112.mp3",
+"duration": 25,
+"audio_size": 404380.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"7": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/alafasy/murattal/mp3/112.mp3",
+"duration": 13,
+"audio_size": 214195.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"8": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/minshawy/mujawwad/mp3/112.mp3",
+"duration": 27,
+"audio_size": 2656384.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"9": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/minshawy/murattal/mp3/112.mp3",
+"duration": 14,
+"audio_size": 231754.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"10": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/saudAlShuraim/murattal/mp3/112.mp3",
+"duration": 9,
+"audio_size": 148580.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"11": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdul_muhsin_alqasim/112.mp3",
+"duration": 15,
+"audio_size": 391296.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"12": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/husary/muallim/mp3/112.mp3",
+"duration": 26,
+"audio_size": 424440.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"13": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/ghamadi/murattal/mp3/112.mp3",
+"duration": 10,
+"audio_size": 166957.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"14": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/fares/112.mp3",
+"duration": 15,
+"audio_size": 469120.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"15": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/thubaity//112.mp3",
+"duration": 14,
+"audio_size": 348288.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"16": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 16 and chapter 112.'}"
+},
+"17": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/sahl_yaaseen/112.mp3",
+"duration": 14,
+"audio_size": 243840.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"18": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/salaah_bukhaatir//112.mp3",
+"duration": 14,
+"audio_size": 233600.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"19": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/ahmed_ibn_3ali_al-3ajamy//112.mp3",
+"duration": 10,
+"audio_size": 219264.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"20": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/sodais_and_shuraim//112.mp3",
+"duration": 17,
+"audio_size": 284800.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"21": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdulazeez_al-ahmad//112.mp3",
+"duration": 10,
+"audio_size": 182400.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"22": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/muhammad_ayyoob//112.mp3",
+"duration": 22,
+"audio_size": 368768.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"23": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/tawfeeq_bin_saeed-as-sawaaigh//112.mp3",
+"duration": 15,
+"audio_size": 256128.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"24": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdullaah_alee_jaabir//112.mp3",
+"duration": 15,
+"audio_size": 262272.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"25": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1419//112.mp3",
+"duration": 13,
+"audio_size": 366720.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"26": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/mehysni//112.mp3",
+"duration": 13,
+"audio_size": 395392.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"27": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 27 and chapter 112.'}"
+},
+"28": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/jibreen//112.mp3",
+"duration": 58,
+"audio_size": 1423488.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"29": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1426//112.mp3",
+"duration": 15,
+"audio_size": 395392.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"30": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1426//112.mp3",
+"duration": 14,
+"audio_size": 364672.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"31": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/sa3d_al-ghaamidi/hidayah//112.mp3",
+"duration": 58,
+"audio_size": 1423488.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"32": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/muhammad_jibreel/hidayah//112.mp3",
+"duration": 22,
+"audio_size": 370816.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"33": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1427//112.mp3",
+"duration": 11,
+"audio_size": 288896.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"34": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1427//112.mp3",
+"duration": 15,
+"audio_size": 393344.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"35": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 35 and chapter 112.'}"
+},
+"36": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/sudais_shuraim_and_english//112.mp3",
+"duration": 29,
+"audio_size": 714880.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"37": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 37 and chapter 112.'}"
+},
+"38": {
+"status": 200,
+"audio": {
+"url": null,
+"duration": 58,
+"audio_size": 1423488.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"39": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/muhammad_ayub_and_mikaal_waters//112.mp3",
+"duration": 44,
+"audio_size": 1075328.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"40": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdulwadood_haneef//112.mp3",
+"duration": 12,
+"audio_size": 299136.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"41": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 41 and chapter 112.'}"
+},
+"42": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/shakir_qasami_with_english/112.mp3",
+"duration": 58,
+"audio_size": 1423488.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"43": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/salahbudair//112.mp3",
+"duration": 15,
+"audio_size": 389248.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"44": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/aziz_alili//112.mp3",
+"duration": 15,
+"audio_size": 264320.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"45": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1425//112.mp3",
+"duration": 12,
+"audio_size": 303232.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"46": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1423//112.mp3",
+"duration": 12,
+"audio_size": 317568.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"47": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdulbaset_with_naeem_sultan_pickthall//112.mp3",
+"duration": 43,
+"audio_size": 440448.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"48": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/sudais_shuraim_with_naeem_sultan_pickthall//112.mp3",
+"duration": 35,
+"audio_size": 366720.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"49": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/mishaari_with_saabir_mkhan//112.mp3",
+"duration": 40,
+"audio_size": 823424.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"50": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 50 and chapter 112.'}"
+},
+"51": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 51 and chapter 112.'}"
+},
+"52": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 52 and chapter 112.'}"
+},
+"53": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 53 and chapter 112.'}"
+},
+"54": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdulbaset_warsh//112.mp3",
+"duration": 19,
+"audio_size": 342144.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"55": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/alhusaynee_al3azazee_with_children//112.mp3",
+"duration": 43,
+"audio_size": 1060992.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"56": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/jibreen/jibreen_1426-1427//112.mp3",
+"duration": 58,
+"audio_size": 1423488.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"57": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdulbasit_w_ibrahim_walk_si//112.mp3",
+"duration": 58,
+"audio_size": 1423488.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"58": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/mishaari_w_ibrahim_walk_si//112.mp3",
+"duration": 40,
+"audio_size": 991360.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"59": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1428//112.mp3",
+"duration": 14,
+"audio_size": 362624.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"60": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdurrashid_sufi_soosi_rec//112.mp3",
+"duration": 16,
+"audio_size": 407680.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"61": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/sadaqat_ali/112.mp3",
+"duration": 58,
+"audio_size": 1423488.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"62": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdurrashid_sufi_-_khalaf_3an_7amza_recitation//112.mp3",
+"duration": 25,
+"audio_size": 510080.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"63": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1424//112.mp3",
+"duration": 12,
+"audio_size": 217216.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"64": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/hamad_sinan//112.mp3",
+"duration": 23,
+"audio_size": 358528.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"65": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/maherAlMuaiqly/murattal/mp3/112.mp3",
+"duration": 10,
+"audio_size": 164034.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"66": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdullah_basfar_w_ibrahim_walk_si//112.mp3",
+"duration": 38,
+"audio_size": 1117664.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"67": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/sudais_and_shuraim_with_urdu//112.mp3",
+"duration": 32,
+"audio_size": 532608.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"68": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdulrazaq_bin_abtan_al_dulaimi//112.mp3",
+"duration": 28,
+"audio_size": 469120.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"69": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdullaah_alee_jaabir_studio//112.mp3",
+"duration": 58,
+"audio_size": 1423488.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"70": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/muhammad_abdulkareem//112.mp3",
+"duration": 14,
+"audio_size": 235648.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"71": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/mustafa_al3azzawi//112.mp3",
+"duration": 18,
+"audio_size": 305280.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"72": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/khayat//112.mp3",
+"duration": 11,
+"audio_size": 186496.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"73": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1428//112.mp3",
+"duration": 18,
+"audio_size": 297088.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"74": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 74 and chapter 112.'}"
+},
+"75": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 75 and chapter 112.'}"
+},
+"76": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 76 and chapter 112.'}"
+},
+"77": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1429//112.mp3",
+"duration": 16,
+"audio_size": 397440.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"78": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_doori//112.mp3",
+"duration": 37,
+"audio_size": 614528.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"79": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/mu7ammad_7assan//112.mp3",
+"duration": 17,
+"audio_size": 284800.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"80": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/salah_alhashim//112.mp3",
+"duration": 22,
+"audio_size": 372864.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"81": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/adel_kalbani//112.mp3",
+"duration": 13,
+"audio_size": 217216.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"82": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1430//112.mp3",
+"duration": 16,
+"audio_size": 444544.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"83": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1431//112.mp3",
+"duration": 17,
+"audio_size": 292992.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"84": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1431//112.mp3",
+"duration": 17,
+"audio_size": 282752.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"85": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 85 and chapter 112.'}"
+},
+"86": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/hatem_farid/taraweeh1432//112.mp3",
+"duration": 12,
+"audio_size": 213859.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"87": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/hatem_farid/taraweeh1431//112.mp3",
+"duration": 58,
+"audio_size": 1423488.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"88": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/mostafa_ismaeel//112.mp3",
+"duration": 24,
+"audio_size": 403584.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"89": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 89 and chapter 112.'}"
+},
+"90": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/muhammad_patel//112.mp3",
+"duration": 19,
+"audio_size": 886912.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"91": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/mohammad_altablawi//112.mp3",
+"duration": 28,
+"audio_size": 465024.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"92": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/mohammad_ismaeel_almuqaddim//112.mp3",
+"duration": 17,
+"audio_size": 282752.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"93": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/imad_zuhair_hafez//112.mp3",
+"duration": 23,
+"audio_size": 254080.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"94": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1432//112.mp3",
+"duration": 12,
+"audio_size": 209024.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"95": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/mishaari_california//112.mp3",
+"duration": 58,
+"audio_size": 1423488.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"96": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 96 and chapter 112.'}"
+},
+"97": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/yasser_ad-dussary//112.mp3",
+"duration": 11,
+"audio_size": 191104.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"98": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1433//112.mp3",
+"duration": 16,
+"audio_size": 553088.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"99": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1429//112.mp3",
+"duration": 18,
+"audio_size": 118836.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"100": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1430//112.mp3",
+"duration": 17,
+"audio_size": 112768.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"101": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1432//112.mp3",
+"duration": 17,
+"audio_size": 116864.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"102": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1433//112.mp3",
+"duration": 16,
+"audio_size": 106624.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"103": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/ibrahim_al_akhdar//112.mp3",
+"duration": 19,
+"audio_size": 108672.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"104": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/nasser_bin_ali_alqatami//112.mp3",
+"duration": 10,
+"audio_size": 184448.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"105": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 105 and chapter 112.'}"
+},
+"106": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdulkareem_al_hazmi//112.mp3",
+"duration": 13,
+"audio_size": 504836.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"107": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/muhammad_ayyoob_hq//112.mp3",
+"duration": 13,
+"audio_size": 325248.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"108": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdulmun3im_abdulmubdi2//112.mp3",
+"duration": 19,
+"audio_size": 320453.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"109": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdurrashid_sufi//112.mp3",
+"duration": 15,
+"audio_size": 251761.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"110": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdurrashid_sufi_abi_al7arith//112.mp3",
+"duration": 18,
+"audio_size": 302137.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"111": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdurrashid_sufi_doori//112.mp3",
+"duration": 15,
+"audio_size": 249832.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"112": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdurrashid_sufi_shu3ba//112.mp3",
+"duration": 15,
+"audio_size": 250663.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"113": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/ahmad_alhuthayfi//112.mp3",
+"duration": 20,
+"audio_size": 345523.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"114": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/huthayfi_qaloon//112.mp3",
+"duration": 18,
+"audio_size": 308332.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"115": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abu_bakr_ash-shatri_tarawee7//112.mp3",
+"duration": 14,
+"audio_size": 245213.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"116": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/idrees_akbar//112.mp3",
+"duration": 15,
+"audio_size": 252730.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"117": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 117 and chapter 112.'}"
+},
+"118": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/masjid_quba_1434//112.mp3",
+"duration": 16,
+"audio_size": 269453.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"119": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/muhammad_khaleel//112.mp3",
+"duration": 20,
+"audio_size": 344685.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"120": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1434//112.mp3",
+"duration": 17,
+"audio_size": 580030.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"121": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/muhaisny_1435//112.mp3",
+"duration": 18,
+"audio_size": 299548.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"122": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a//112.mp3",
+"duration": 22,
+"audio_size": 367681.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"123": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1435//112.mp3",
+"duration": 15,
+"audio_size": 254845.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"124": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdullah_matroud//112.mp3",
+"duration": 18,
+"audio_size": 299551.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"125": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdul_wadood_haneef_rare//112.mp3",
+"duration": 16,
+"audio_size": 570979.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"126": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/ahmad_nauina//112.mp3",
+"duration": 22,
+"audio_size": 364332.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"127": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/akram_al_alaqmi//112.mp3",
+"duration": 20,
+"audio_size": 332570.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"128": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/ali_hajjaj_alsouasi//112.mp3",
+"duration": 14,
+"audio_size": 243132.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"129": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/mahmood_ali_albana//112.mp3",
+"duration": 22,
+"audio_size": 369772.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"130": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/wadee_hammadi_al-yamani//112.mp3",
+"duration": 18,
+"audio_size": 370180.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"131": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1435//112.mp3",
+"duration": 13,
+"audio_size": 167830.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"132": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1436//112.mp3",
+"duration": 14,
+"audio_size": 123472.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"133": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1437//112.mp3",
+"duration": 18,
+"audio_size": 868184.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"134": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/fatih_seferagic//112.mp3",
+"duration": 16,
+"audio_size": 666539.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"135": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/asim_abdulaleem//112.mp3",
+"duration": 20,
+"audio_size": 494524.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"136": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdallah_abdal//112.mp3",
+"duration": 17,
+"audio_size": 286876.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"137": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdurrashid_sufi_soosi_2020//112.mp3",
+"duration": 17,
+"audio_size": 383844.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"138": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/adel_kalbani_1437//112.mp3",
+"duration": 14,
+"audio_size": 238518.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"139": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/hatem_farid/taraweeh1430//112.mp3",
+"duration": 15,
+"audio_size": 189826.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"140": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 140 and chapter 112.'}"
+},
+"141": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/husary_muallim//112.mp3",
+"duration": 26,
+"audio_size": 433579.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"142": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/husary_muallim_kids_repeat//112.mp3",
+"duration": 87,
+"audio_size": 1406314.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"143": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1434//112.mp3",
+"duration": 13,
+"audio_size": 219713.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"144": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1436//112.mp3",
+"duration": 14,
+"audio_size": 248968.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"145": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1437//112.mp3",
+"duration": 17,
+"audio_size": 183059.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"146": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1439//112.mp3",
+"duration": 15,
+"audio_size": 136041.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"147": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1440//112.mp3",
+"duration": 17,
+"audio_size": 77815.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"148": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1441//112.mp3",
+"duration": 16,
+"audio_size": 266940.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"149": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/madinah_1442//112.mp3",
+"duration": 18,
+"audio_size": 753864.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"150": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1438//112.mp3",
+"duration": 18,
+"audio_size": 743436.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"151": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1439//112.mp3",
+"duration": 18,
+"audio_size": 456275.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"152": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1440//112.mp3",
+"duration": 17,
+"audio_size": 147821.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"153": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1441//112.mp3",
+"duration": 16,
+"audio_size": 682232.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"154": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/makkah_1442//112.mp3",
+"duration": 18,
+"audio_size": 759488.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"155": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/noreen_siddiq//112.mp3",
+"duration": 18,
+"audio_size": 985497.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"156": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/sa3ood_al-shuraym/older//112.mp3",
+"duration": 12,
+"audio_size": 60264.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"157": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/sodais_and_shuraim/older//112.mp3",
+"duration": 15,
+"audio_size": 72974.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"158": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/ali_jaber//112.mp3",
+"duration": 18,
+"audio_size": 726737.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"159": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/maher_almu3aiqly/year1440//112.mp3",
+"duration": 27,
+"audio_size": 332803.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"160": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/bandar_baleela/complete//112.mp3",
+"duration": 19,
+"audio_size": 442768.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"161": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/khalifaAlTunaiji/murattal/mp3/112.mp3",
+"duration": 12,
+"audio_size": 206257.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"162": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdullaah_3awwaad_al-juhaynee//112.mp3",
+"duration": 13,
+"audio_size": 221312.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"163": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/abdullaah_basfar//112.mp3",
+"duration": 18,
+"audio_size": 301184.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"164": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/husary/mujawwad/mp3/112.mp3",
+"duration": 29,
+"audio_size": 464972.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"165": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/nabil_rifa3i//112.mp3",
+"duration": 15,
+"audio_size": 297088.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"166": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/khaalid_al-qahtaanee//112.mp3",
+"duration": 14,
+"audio_size": 399053.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"167": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/huthayfi//112.mp3",
+"duration": 20,
+"audio_size": 503936.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"168": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/minshawy/kids_repeat/mp3/112.mp3",
+"duration": 24,
+"audio_size": null
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"169": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/muhammad_jibreel/complete//112.mp3",
+"duration": 19,
+"audio_size": 321664.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"170": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/qdc/khalid_jalil/murattal/mp3/112.mp3",
+"duration": 14,
+"audio_size": null
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"171": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 171 and chapter 112.'}"
+},
+"172": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/qdc/hadi_toure/mp3/112.mp3",
+"duration": 19,
+"audio_size": null
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"173": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/qdc/mishari_al_afasy/streaming/mp3/112.mp3",
+"duration": 13,
+"audio_size": 167407.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"174": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/yasserAlDosari/murattal/mp3/112.mp3",
+"duration": 11,
+"audio_size": 183364.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"175": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/alnufais/murattal/mp3/112.mp3",
+"duration": 13,
+"audio_size": 215441.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"176": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/alijon_qari/mp3/112.mp3",
+"duration": null,
+"audio_size": null
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"177": {
+"status": 200,
+"audio": {
+"url": "https://download.quranicaudio.com/quran/badr_al_turki/mp3/112.mp3",
+"duration": null,
+"audio_size": null
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"178": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/abubakr_dhaby_hafs_2020/112.mp3",
+"duration": 13,
+"audio_size": 219845.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"179": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/mansourAlSalimi/murattal/mp3/112.mp3",
+"duration": 12,
+"audio_size": 196635.0
+},
+"nseg": 4,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"180": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/abdulKabirHaidari/murattal/112.mp3",
+"duration": null,
+"audio_size": null
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"181": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 181 and chapter 112.'}"
+},
+"182": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 182 and chapter 112.'}"
+},
+"183": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 183 and chapter 112.'}"
+},
+"184": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 184 and chapter 112.'}"
+},
+"185": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 185 and chapter 112.'}"
+},
+"186": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 186 and chapter 112.'}"
+},
+"187": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 187 and chapter 112.'}"
+},
+"188": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 188 and chapter 112.'}"
+},
+"189": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 189 and chapter 112.'}"
+},
+"190": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 190 and chapter 112.'}"
+},
+"191": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 191 and chapter 112.'}"
+},
+"192": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 192 and chapter 112.'}"
+},
+"193": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 193 and chapter 112.'}"
+},
+"194": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 194 and chapter 112.'}"
+},
+"195": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 195 and chapter 112.'}"
+},
+"196": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 196 and chapter 112.'}"
+},
+"197": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 197 and chapter 112.'}"
+},
+"198": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 198 and chapter 112.'}"
+},
+"199": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 199 and chapter 112.'}"
+},
+"200": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 200 and chapter 112.'}"
+},
+"201": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 201 and chapter 112.'}"
+},
+"202": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 202 and chapter 112.'}"
+},
+"203": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 203 and chapter 112.'}"
+},
+"204": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 204 and chapter 112.'}"
+},
+"205": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/minshawi/kids_repeat/mp3/112.mp3",
+"duration": 24,
+"audio_size": null
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"206": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 206 and chapter 112.'}"
+},
+"207": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 207 and chapter 112.'}"
+},
+"208": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 208 and chapter 112.'}"
+},
+"209": {
+"status": 200,
+"audio": {
+"url": "https://audio-cdn.tarteel.ai/quran/surah/ahmed_al_hammadi/murattal/mp3/112.mp3",
+"duration": 10,
+"audio_size": 160701.0
+},
+"nseg": 0,
+"keys": [
+"audio",
+"segments",
+"pagination"
+],
+"raw": null
+},
+"210": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 210 and chapter 112.'}"
+},
+"211": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 211 and chapter 112.'}"
+},
+"212": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 212 and chapter 112.'}"
+},
+"213": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 213 and chapter 112.'}"
+},
+"214": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 214 and chapter 112.'}"
+},
+"215": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 215 and chapter 112.'}"
+},
+"216": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 216 and chapter 112.'}"
+},
+"217": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 217 and chapter 112.'}"
+},
+"218": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 218 and chapter 112.'}"
+},
+"219": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 219 and chapter 112.'}"
+},
+"220": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 220 and chapter 112.'}"
+},
+"221": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 221 and chapter 112.'}"
+},
+"222": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 222 and chapter 112.'}"
+},
+"223": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 223 and chapter 112.'}"
+},
+"224": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 224 and chapter 112.'}"
+},
+"225": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 225 and chapter 112.'}"
+},
+"226": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 226 and chapter 112.'}"
+},
+"227": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 227 and chapter 112.'}"
+},
+"228": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 228 and chapter 112.'}"
+},
+"229": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 229 and chapter 112.'}"
+},
+"230": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 230 and chapter 112.'}"
+},
+"231": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 231 and chapter 112.'}"
+},
+"232": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 232 and chapter 112.'}"
+},
+"233": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 233 and chapter 112.'}"
+},
+"234": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 234 and chapter 112.'}"
+},
+"235": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 235 and chapter 112.'}"
+},
+"236": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 236 and chapter 112.'}"
+},
+"237": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 237 and chapter 112.'}"
+},
+"238": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 238 and chapter 112.'}"
+},
+"239": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 239 and chapter 112.'}"
+},
+"240": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 240 and chapter 112.'}"
+},
+"241": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 241 and chapter 112.'}"
+},
+"242": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 242 and chapter 112.'}"
+},
+"243": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 243 and chapter 112.'}"
+},
+"244": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 244 and chapter 112.'}"
+},
+"245": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 245 and chapter 112.'}"
+},
+"246": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 246 and chapter 112.'}"
+},
+"247": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 247 and chapter 112.'}"
+},
+"248": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 248 and chapter 112.'}"
+},
+"249": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 249 and chapter 112.'}"
+},
+"250": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 250 and chapter 112.'}"
+},
+"251": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 251 and chapter 112.'}"
+},
+"252": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 252 and chapter 112.'}"
+},
+"253": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 253 and chapter 112.'}"
+},
+"254": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 254 and chapter 112.'}"
+},
+"255": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 255 and chapter 112.'}"
+},
+"256": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 256 and chapter 112.'}"
+},
+"257": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 257 and chapter 112.'}"
+},
+"258": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 258 and chapter 112.'}"
+},
+"259": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 259 and chapter 112.'}"
+},
+"260": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 260 and chapter 112.'}"
+},
+"261": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 261 and chapter 112.'}"
+},
+"262": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 262 and chapter 112.'}"
+},
+"263": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 263 and chapter 112.'}"
+},
+"264": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 264 and chapter 112.'}"
+},
+"265": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 265 and chapter 112.'}"
+},
+"266": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 266 and chapter 112.'}"
+},
+"267": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 267 and chapter 112.'}"
+},
+"268": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 268 and chapter 112.'}"
+},
+"269": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 269 and chapter 112.'}"
+},
+"270": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 270 and chapter 112.'}"
+},
+"271": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 271 and chapter 112.'}"
+},
+"272": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 272 and chapter 112.'}"
+},
+"273": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 273 and chapter 112.'}"
+},
+"274": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 274 and chapter 112.'}"
+},
+"275": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 275 and chapter 112.'}"
+},
+"276": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 276 and chapter 112.'}"
+},
+"277": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 277 and chapter 112.'}"
+},
+"278": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 278 and chapter 112.'}"
+},
+"279": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 279 and chapter 112.'}"
+},
+"280": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 280 and chapter 112.'}"
+},
+"281": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 281 and chapter 112.'}"
+},
+"282": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 282 and chapter 112.'}"
+},
+"283": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 283 and chapter 112.'}"
+},
+"284": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 284 and chapter 112.'}"
+},
+"285": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 285 and chapter 112.'}"
+},
+"286": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 286 and chapter 112.'}"
+},
+"287": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 287 and chapter 112.'}"
+},
+"288": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 288 and chapter 112.'}"
+},
+"289": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 289 and chapter 112.'}"
+},
+"290": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 290 and chapter 112.'}"
+},
+"291": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 291 and chapter 112.'}"
+},
+"292": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 292 and chapter 112.'}"
+},
+"293": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 293 and chapter 112.'}"
+},
+"294": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 294 and chapter 112.'}"
+},
+"295": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 295 and chapter 112.'}"
+},
+"296": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 296 and chapter 112.'}"
+},
+"297": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 297 and chapter 112.'}"
+},
+"298": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 298 and chapter 112.'}"
+},
+"299": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 299 and chapter 112.'}"
+},
+"300": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 300 and chapter 112.'}"
+},
+"301": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 301 and chapter 112.'}"
+},
+"302": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 302 and chapter 112.'}"
+},
+"303": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 303 and chapter 112.'}"
+},
+"304": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 304 and chapter 112.'}"
+},
+"305": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 305 and chapter 112.'}"
+},
+"306": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 306 and chapter 112.'}"
+},
+"307": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 307 and chapter 112.'}"
+},
+"308": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 308 and chapter 112.'}"
+},
+"309": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 309 and chapter 112.'}"
+},
+"310": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 310 and chapter 112.'}"
+},
+"311": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 311 and chapter 112.'}"
+},
+"312": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 312 and chapter 112.'}"
+},
+"313": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 313 and chapter 112.'}"
+},
+"314": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 314 and chapter 112.'}"
+},
+"315": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 315 and chapter 112.'}"
+},
+"316": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 316 and chapter 112.'}"
+},
+"317": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 317 and chapter 112.'}"
+},
+"318": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 318 and chapter 112.'}"
+},
+"319": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 319 and chapter 112.'}"
+},
+"320": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 320 and chapter 112.'}"
+},
+"321": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 321 and chapter 112.'}"
+},
+"322": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 322 and chapter 112.'}"
+},
+"323": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 323 and chapter 112.'}"
+},
+"324": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 324 and chapter 112.'}"
+},
+"325": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 325 and chapter 112.'}"
+},
+"326": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 326 and chapter 112.'}"
+},
+"327": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 327 and chapter 112.'}"
+},
+"328": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 328 and chapter 112.'}"
+},
+"329": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 329 and chapter 112.'}"
+},
+"330": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 330 and chapter 112.'}"
+},
+"331": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 331 and chapter 112.'}"
+},
+"332": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 332 and chapter 112.'}"
+},
+"333": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 333 and chapter 112.'}"
+},
+"334": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 334 and chapter 112.'}"
+},
+"335": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 335 and chapter 112.'}"
+},
+"336": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 336 and chapter 112.'}"
+},
+"337": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 337 and chapter 112.'}"
+},
+"338": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 338 and chapter 112.'}"
+},
+"339": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 339 and chapter 112.'}"
+},
+"340": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 340 and chapter 112.'}"
+},
+"341": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 341 and chapter 112.'}"
+},
+"342": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 342 and chapter 112.'}"
+},
+"343": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 343 and chapter 112.'}"
+},
+"344": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 344 and chapter 112.'}"
+},
+"345": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 345 and chapter 112.'}"
+},
+"346": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 346 and chapter 112.'}"
+},
+"347": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 347 and chapter 112.'}"
+},
+"348": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 348 and chapter 112.'}"
+},
+"349": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 349 and chapter 112.'}"
+},
+"350": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 350 and chapter 112.'}"
+},
+"351": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 351 and chapter 112.'}"
+},
+"352": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 352 and chapter 112.'}"
+},
+"353": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 353 and chapter 112.'}"
+},
+"354": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 354 and chapter 112.'}"
+},
+"355": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 355 and chapter 112.'}"
+},
+"356": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 356 and chapter 112.'}"
+},
+"357": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 357 and chapter 112.'}"
+},
+"358": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 358 and chapter 112.'}"
+},
+"359": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 359 and chapter 112.'}"
+},
+"360": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 360 and chapter 112.'}"
+},
+"361": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 361 and chapter 112.'}"
+},
+"362": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 362 and chapter 112.'}"
+},
+"363": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 363 and chapter 112.'}"
+},
+"364": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 364 and chapter 112.'}"
+},
+"365": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 365 and chapter 112.'}"
+},
+"366": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 366 and chapter 112.'}"
+},
+"367": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 367 and chapter 112.'}"
+},
+"368": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 368 and chapter 112.'}"
+},
+"369": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 369 and chapter 112.'}"
+},
+"370": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 370 and chapter 112.'}"
+},
+"371": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 371 and chapter 112.'}"
+},
+"372": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 372 and chapter 112.'}"
+},
+"373": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 373 and chapter 112.'}"
+},
+"374": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 374 and chapter 112.'}"
+},
+"375": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 375 and chapter 112.'}"
+},
+"376": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 376 and chapter 112.'}"
+},
+"377": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 377 and chapter 112.'}"
+},
+"378": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 378 and chapter 112.'}"
+},
+"379": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 379 and chapter 112.'}"
+},
+"380": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 380 and chapter 112.'}"
+},
+"381": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 381 and chapter 112.'}"
+},
+"382": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 382 and chapter 112.'}"
+},
+"383": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 383 and chapter 112.'}"
+},
+"384": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 384 and chapter 112.'}"
+},
+"385": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 385 and chapter 112.'}"
+},
+"386": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 386 and chapter 112.'}"
+},
+"387": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 387 and chapter 112.'}"
+},
+"388": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 388 and chapter 112.'}"
+},
+"389": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 389 and chapter 112.'}"
+},
+"390": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 390 and chapter 112.'}"
+},
+"391": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 391 and chapter 112.'}"
+},
+"392": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 392 and chapter 112.'}"
+},
+"393": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 393 and chapter 112.'}"
+},
+"394": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 394 and chapter 112.'}"
+},
+"395": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 395 and chapter 112.'}"
+},
+"396": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 396 and chapter 112.'}"
+},
+"397": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 397 and chapter 112.'}"
+},
+"398": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 398 and chapter 112.'}"
+},
+"399": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 399 and chapter 112.'}"
+},
+"400": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 400 and chapter 112.'}"
+},
+"401": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 401 and chapter 112.'}"
+},
+"402": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 402 and chapter 112.'}"
+},
+"403": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 403 and chapter 112.'}"
+},
+"404": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 404 and chapter 112.'}"
+},
+"405": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 405 and chapter 112.'}"
+},
+"406": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 406 and chapter 112.'}"
+},
+"407": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 407 and chapter 112.'}"
+},
+"408": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 408 and chapter 112.'}"
+},
+"409": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 409 and chapter 112.'}"
+},
+"410": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 410 and chapter 112.'}"
+},
+"411": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 411 and chapter 112.'}"
+},
+"412": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 412 and chapter 112.'}"
+},
+"413": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 413 and chapter 112.'}"
+},
+"414": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 414 and chapter 112.'}"
+},
+"415": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 415 and chapter 112.'}"
+},
+"416": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 416 and chapter 112.'}"
+},
+"417": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 417 and chapter 112.'}"
+},
+"418": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 418 and chapter 112.'}"
+},
+"419": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 419 and chapter 112.'}"
+},
+"420": {
+"status": 404,
+"audio": null,
+"nseg": null,
+"keys": [
+"error",
+"message"
+],
+"raw": "{'error': 'Not Found', 'message': 'No surah audio file found for recitation 420 and chapter 112.'}"
+}
+},
+"ayah": {
+"1": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio.qurancdn.com/AbdulBaset/Mujawwad/mp3/112001.mp3', 'segments': [['0', '1', '2350', '2770'], ['1', '2', '2780', '3840'], ['2', '3', '3850', '5020'], ['3', '4', '5030', '6020']]}, '112:2': {'audio_url': 'https://audio.qurancdn.com/AbdulBaset/Mujawwad/mp3/112002.mp3', 'segments': [['0', '1', '1560', '2710'], ['1', '2', '2720', '5390']]}, '112:3': {'audio_url': 'https://audio.qurancdn.com/AbdulBaset/Mujawwad/mp3/112003.mp3', 'segments': [['0', '1', '1200', '1750'], ['1', '2', '1760', '2920'], ['2', '3', '2930', '4290'], ['3', '4', '4300', '7110']]"
+},
+"2": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio.qurancdn.com/AbdulBaset/Murattal/mp3/112001.mp3', 'segments': [[0, 1, 500, 710], [1, 2, 720, 1190], [2, 3, 1200, 2040], [3, 4, 2050, 2990]]}, '112:2': {'audio_url': 'https://audio.qurancdn.com/AbdulBaset/Murattal/mp3/112002.mp3', 'segments': [[0, 1, 500, 1430], [1, 2, 1440, 2590]]}, '112:3': {'audio_url': 'https://audio.qurancdn.com/AbdulBaset/Murattal/mp3/112003.mp3', 'segments': [[0, 1, 500, 730], [1, 2, 740, 1330], [2, 3, 1340, 2000], [3, 4, 2010, 3150]]}, '112:4': {'audio_url': 'https://audio.qurancdn.com/AbdulBaset/Murattal/mp3/112004.mp"
+},
+"3": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio.qurancdn.com/Sudais/mp3/112001.mp3', 'segments': [['0', '1', '100', '500'], ['1', '2', '510', '910'], ['2', '3', '920', '1930'], ['3', '4', '1940', '2800']]}, '112:2': {'audio_url': 'https://audio.qurancdn.com/Sudais/mp3/112002.mp3', 'segments': [['0', '1', '180', '1310'], ['1', '2', '1320', '2260']]}, '112:3': {'audio_url': 'https://audio.qurancdn.com/Sudais/mp3/112003.mp3', 'segments': [['0', '1', '190', '590'], ['1', '2', '600', '1210'], ['2', '3', '1220', '1880'], ['3', '4', '1890', '2720']]}, '112:4': {'audio_url': 'https://audio.qurancd"
+},
+"4": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio.qurancdn.com/Shatri/mp3/112001.mp3', 'segments': [[0, 1, 200, 420], [1, 2, 430, 810], [2, 3, 820, 1640], [3, 4, 1650, 2280]]}, '112:2': {'audio_url': 'https://audio.qurancdn.com/Shatri/mp3/112002.mp3', 'segments': [[0, 1, 100, 1000], [1, 2, 1010, 1880]]}, '112:3': {'audio_url': 'https://audio.qurancdn.com/Shatri/mp3/112003.mp3', 'segments': [[0, 1, 100, 350], [1, 2, 360, 940], [2, 3, 950, 1450], [3, 4, 1460, 2360]]}, '112:4': {'audio_url': 'https://audio.qurancdn.com/Shatri/mp3/112004.mp3', 'segments': [[0, 1, 70, 540], [1, 2, 550, 1030], [2,"
+},
+"5": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio.qurancdn.com/Rifai/mp3/112001.mp3', 'segments': [[0, 2, 0, 1890], [2, 3, 1900, 2560], [3, 4, 2570, 3170]]}, '112:2': {'audio_url': 'https://audio.qurancdn.com/Rifai/mp3/112002.mp3', 'segments': [[0, 1, 40, 1020], [1, 2, 1030, 1870]]}, '112:3': {'audio_url': 'https://audio.qurancdn.com/Rifai/mp3/112003.mp3', 'segments': [[0, 1, 250, 580], [1, 2, 590, 1220], [2, 3, 1230, 1940], [3, 4, 1950, 2830]]}, '112:4': {'audio_url': 'https://audio.qurancdn.com/Rifai/mp3/112004.mp3', 'segments': [[0, 1, 110, 690], [1, 2, 700, 1230], [2, 3, 1240, 2060], [3,"
+},
+"6": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://mirrors.quranicaudio.com/everyayah/Husary_64kbps/112001.mp3', 'segments': [[0, 1, 850, 1370], [1, 2, 1380, 2090], [2, 3, 2100, 3710], [3, 4, 3720, 4610]]}, '112:2': {'audio_url': 'https://mirrors.quranicaudio.com/everyayah/Husary_64kbps/112002.mp3', 'segments': [[0, 1, 1610, 2580], [1, 2, 2590, 3760]]}, '112:3': {'audio_url': 'https://mirrors.quranicaudio.com/everyayah/Husary_64kbps/112003.mp3', 'segments': [[0, 1, 450, 910], [1, 2, 920, 2080], [2, 3, 2090, 3380], [3, 4, 3390, 4900]]}, '112:4': {'audio_url': 'https://mirrors.quranicaudio.com/everya"
+},
+"7": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio.qurancdn.com/Alafasy/mp3/112001.mp3', 'segments': [[0, 1, 30, 390], [1, 2, 400, 790], [2, 3, 800, 1640], [3, 4, 1650, 2300]]}, '112:2': {'audio_url': 'https://audio.qurancdn.com/Alafasy/mp3/112002.mp3', 'segments': [[0, 1, 40, 980], [1, 2, 990, 1850]]}, '112:3': {'audio_url': 'https://audio.qurancdn.com/Alafasy/mp3/112003.mp3', 'segments': [[0, 1, 60, 390], [1, 2, 400, 1000], [2, 3, 1010, 1720], [3, 4, 1730, 2490]]}, '112:4': {'audio_url': 'https://audio.qurancdn.com/Alafasy/mp3/112004.mp3', 'segments': [[0, 1, 30, 650], [1, 2, 660, 1130], [2"
+},
+"8": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio.qurancdn.com/Minshawi/Mujawwad/mp3/112001.mp3', 'segments': [[0, 1, 120, 890], [1, 2, 900, 1750], [2, 3, 1760, 3310], [3, 4, 3320, 4240]]}, '112:2': {'audio_url': 'https://audio.qurancdn.com/Minshawi/Mujawwad/mp3/112002.mp3', 'segments': [[0, 1, 40, 2100], [1, 2, 2110, 3550]]}, '112:3': {'audio_url': 'https://audio.qurancdn.com/Minshawi/Mujawwad/mp3/112003.mp3', 'segments': [[0, 1, 30, 700], [1, 2, 710, 1900], [2, 3, 1910, 3810], [3, 4, 3820, 6750]]}, '112:4': {'audio_url': 'https://audio.qurancdn.com/Minshawi/Mujawwad/mp3/112004.mp3', 'segme"
+},
+"9": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio.qurancdn.com/Minshawi/Murattal/mp3/112001.mp3', 'segments': [[0, 1, 150, 520], [1, 2, 530, 1000], [2, 3, 1010, 1970], [3, 4, 1980, 2900]]}, '112:2': {'audio_url': 'https://audio.qurancdn.com/Minshawi/Murattal/mp3/112002.mp3', 'segments': [[0, 1, 250, 1340], [1, 2, 1350, 2420]]}, '112:3': {'audio_url': 'https://audio.qurancdn.com/Minshawi/Murattal/mp3/112003.mp3', 'segments': [[0, 1, 250, 720], [1, 2, 730, 1310], [2, 3, 1320, 1970], [3, 4, 1980, 3150]]}, '112:4': {'audio_url': 'https://audio.qurancdn.com/Minshawi/Murattal/mp3/112004.mp3', 'seg"
+},
+"10": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio.qurancdn.com/Shuraym/mp3/112001.mp3', 'segments': [[0, 1, 40, 270], [1, 2, 280, 560], [2, 3, 570, 1230], [3, 4, 1240, 1780]]}, '112:2': {'audio_url': 'https://audio.qurancdn.com/Shuraym/mp3/112002.mp3', 'segments': [[0, 1, 80, 800], [1, 2, 810, 1460]]}, '112:3': {'audio_url': 'https://audio.qurancdn.com/Shuraym/mp3/112003.mp3', 'segments': [[0, 1, 100, 310], [1, 2, 320, 810], [2, 3, 820, 1280], [3, 4, 1290, 1980]]}, '112:4': {'audio_url': 'https://audio.qurancdn.com/Shuraym/mp3/112004.mp3', 'segments': [[0, 1, 100, 500], [1, 2, 510, 1000], [2"
+},
+"11": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://mirrors.quranicaudio.com/everyayah/Mohammad_al_Tablaway_128kbps/112001.mp3', 'segments': [[0, 1, 300, 810], [1, 2, 820, 1420], [2, 3, 1430, 3070], [3, 4, 3080, 3920]]}, '112:2': {'audio_url': 'https://mirrors.quranicaudio.com/everyayah/Mohammad_al_Tablaway_128kbps/112002.mp3', 'segments': [[0, 1, 650, 2310], [1, 2, 2320, 3610]]}, '112:3': {'audio_url': 'https://mirrors.quranicaudio.com/everyayah/Mohammad_al_Tablaway_128kbps/112003.mp3', 'segments': [[0, 1, 770, 1190], [1, 2, 1200, 2310], [2, 3, 2320, 3160], [3, 4, 3170, 4360]]}, '112:4': {'audio_ur"
+},
+"12": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://mirrors.quranicaudio.com/everyayah/Husary_Muallim_128kbps/112001.mp3', 'segments': [[0, 1, 150, 710], [1, 2, 720, 1170], [2, 3, 1180, 2450], [3, 4, 2460, 3150]]}, '112:2': {'audio_url': 'https://mirrors.quranicaudio.com/everyayah/Husary_Muallim_128kbps/112002.mp3', 'segments': [[0, 1, 0, 1580], [1, 2, 1590, 3010]]}, '112:3': {'audio_url': 'https://mirrors.quranicaudio.com/everyayah/Husary_Muallim_128kbps/112003.mp3', 'segments': [[0, 1, 250, 630], [1, 2, 640, 1640], [2, 3, 1650, 2490], [3, 4, 2500, 3580]]}, '112:4': {'audio_url': 'https://mirrors.q"
+},
+"13": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/maherAlMuaiqly/112001.mp3', 'segments': [[0, 1, 0, 70], [1, 2, 200, 440], [2, 3, 610, 710], [3, 4, 1320, 1920]]}, '112:2': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/maherAlMuaiqly/112002.mp3', 'segments': [[0, 1, 170, 270], [1, 2, 840, 1560]]}, '112:3': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/maherAlMuaiqly/112003.mp3', 'segments': [[0, 1, 0, 200], [1, 2, 280, 680], [2, 3, 720, 1080], [3, 4, 1200, 2080]]}, '112:4': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/maherAlMuaiqly/112004.mp3', 'segments': "
+},
+"14": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/abdulBasitMujawwad/112001.mp3', 'segments': [[0, 1, 0, 70], [1, 2, 2600, 3040], [2, 3, 3530, 3630], [3, 4, 5280, 7640]]}, '112:2': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/abdulBasitMujawwad/112002.mp3', 'segments': [[0, 1, 1250, 1350], [1, 2, 3080, 5440]]}, '112:3': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/abdulBasitMujawwad/112003.mp3', 'segments': [[0, 1, 0, 1400], [1, 2, 1640, 2640], [2, 3, 2840, 3800], [3, 4, 4160, 7120]]}, '112:4': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/abdulBasitMujawwa"
+},
+"15": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/abdulBasitMurattal/112001.mp3', 'segments': [[0, 1, 0, 70], [1, 2, 680, 1000], [2, 3, 1250, 1350], [3, 4, 2240, 3160]]}, '112:2': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/abdulBasitMurattal/112002.mp3', 'segments': [[0, 1, 650, 750], [1, 2, 1560, 2840]]}, '112:3': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/abdulBasitMurattal/112003.mp3', 'segments': [[0, 1, 0, 600], [1, 2, 720, 1320], [2, 3, 1400, 1880], [3, 4, 2040, 3440]]}, '112:4': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/abdulBasitMurattal/112"
+},
+"16": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/abdulrahmanAlSudais/112001.mp3', 'segments': [[0, 1, 0, 70], [1, 2, 400, 720], [2, 3, 1010, 1110], [3, 4, 2120, 2920]]}, '112:2': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/abdulrahmanAlSudais/112002.mp3', 'segments': [[0, 1, 450, 550], [1, 2, 1440, 2520]]}, '112:3': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/abdulrahmanAlSudais/112003.mp3', 'segments': [[0, 1, 0, 400], [1, 2, 520, 1120], [2, 3, 1200, 1680], [3, 4, 1840, 2720]]}, '112:4': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/abdulrahmanAlSudais/"
+},
+"17": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/abuBakrAlShatri/112001.mp3', 'segments': [[0, 1, 0, 70], [1, 2, 320, 640], [2, 3, 810, 910], [3, 4, 1760, 2600]]}, '112:2': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/abuBakrAlShatri/112002.mp3', 'segments': [[0, 1, 210, 310], [1, 2, 1040, 2040]]}, '112:3': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/abuBakrAlShatri/112003.mp3', 'segments': [[0, 1, 0, 240], [1, 2, 320, 800], [2, 3, 880, 1320], [3, 4, 1440, 2680]]}, '112:4': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/abuBakrAlShatri/112004.mp3', 'segmen"
+},
+"18": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/alafasy/112001.mp3', 'segments': [[0, 1, 0, 70], [1, 2, 360, 680], [2, 3, 930, 1030], [3, 4, 1880, 3040]]}, '112:2': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/alafasy/112002.mp3', 'segments': [[0, 1, 290, 390], [1, 2, 1200, 2600]]}, '112:3': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/alafasy/112003.mp3', 'segments': [[0, 1, 0, 320], [1, 2, 440, 1000], [2, 3, 1080, 1600], [3, 4, 1720, 3040]]}, '112:4': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/alafasy/112004.mp3', 'segments': [[0, 1, 0, 520], [1, 2, "
+},
+"19": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/ghamadi/112001.mp3', 'segments': [[0, 1, 0, 70], [1, 2, 800, 1080], [2, 3, 1290, 1390], [3, 4, 2200, 2920]]}, '112:2': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/ghamadi/112002.mp3', 'segments': [[0, 1, 90, 190], [1, 2, 800, 2040]]}, '112:3': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/ghamadi/112003.mp3', 'segments': [[0, 1, 0, 280], [1, 2, 400, 920], [2, 3, 1000, 1440], [3, 4, 1560, 2440]]}, '112:4': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/ghamadi/112004.mp3', 'segments': [[0, 1, 0, 280], [1, 2, 4"
+},
+"20": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/husary/112001.mp3', 'segments': [[0, 1, 0, 70], [1, 2, 1200, 1680], [2, 3, 2250, 2350], [3, 4, 3960, 5800]]}, '112:2': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/husary/112002.mp3', 'segments': [[0, 1, 1050, 1150], [1, 2, 2720, 5000]]}, '112:3': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/husary/112003.mp3', 'segments': [[0, 1, 0, 680], [1, 2, 880, 1880], [2, 3, 2080, 3000], [3, 4, 3320, 5880]]}, '112:4': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/husary/112004.mp3', 'segments': [[0, 1, 0, 800], [1, 2,"
+},
+"21": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/husaryMujawwad/112001.mp3', 'segments': [[0, 1, 0, 70], [1, 2, 3520, 4080], [2, 3, 4770, 4870], [3, 4, 6680, 9040]]}, '112:2': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/husaryMujawwad/112002.mp3', 'segments': [[0, 1, 2610, 2710], [1, 2, 4440, 6960]]}, '112:3': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/husaryMujawwad/112003.mp3', 'segments': [[0, 1, 0, 2280], [1, 2, 2560, 3600], [2, 3, 3840, 4800], [3, 4, 5160, 8080]]}, '112:4': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/husaryMujawwad/112004.mp3', '"
+},
+"22": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/husaryMuallim/112001.mp3', 'segments': [[0, 1, 0, 90], [1, 2, 480, 840], [2, 3, 1250, 1350], [3, 4, 2640, 5960]]}, '112:2': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/husaryMuallim/112002.mp3', 'segments': [[0, 1, 410, 510], [1, 2, 1720, 5800]]}, '112:3': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/husaryMuallim/112003.mp3', 'segments': [[0, 1, 0, 400], [1, 2, 600, 1360], [2, 3, 1440, 2120], [3, 4, 2320, 6040]]}, '112:4': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/husaryMuallim/112004.mp3', 'segments':"
+},
+"23": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/khalifaAlTunaiji/112001.mp3', 'segments': [[0, 1, 0, 70], [1, 2, 560, 880], [2, 3, 1050, 1150], [3, 4, 1960, 2960]]}, '112:2': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/khalifaAlTunaiji/112002.mp3', 'segments': [[0, 1, 410, 510], [1, 2, 1240, 2440]]}, '112:3': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/khalifaAlTunaiji/112003.mp3', 'segments': [[0, 1, 0, 520], [1, 2, 640, 1160], [2, 3, 1240, 1680], [3, 4, 1840, 3280]]}, '112:4': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/khalifaAlTunaiji/112004.mp3',"
+},
+"24": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/minshawyMurattal/112001.mp3', 'segments': [[0, 1, 0, 90], [1, 2, 360, 680], [2, 3, 1010, 1110], [3, 4, 2120, 3200]]}, '112:2': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/minshawyMurattal/112002.mp3', 'segments': [[0, 1, 450, 550], [1, 2, 1440, 2640]]}, '112:3': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/minshawyMurattal/112003.mp3', 'segments': [[0, 1, 0, 480], [1, 2, 640, 1240], [2, 3, 1320, 1920], [3, 4, 2080, 3320]]}, '112:4': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/minshawyMurattal/112004.mp3',"
+},
+"25": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/saudAlShuraim/112001.mp3', 'segments': [[0, 1, 0, 70], [1, 2, 200, 440], [2, 3, 610, 710], [3, 4, 1360, 2000]]}, '112:2': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/saudAlShuraim/112002.mp3', 'segments': [[0, 1, 210, 310], [1, 2, 840, 1680]]}, '112:3': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/saudAlShuraim/112003.mp3', 'segments': [[0, 1, 0, 200], [1, 2, 320, 760], [2, 3, 800, 1160], [3, 4, 1280, 2200]]}, '112:4': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/saudAlShuraim/112004.mp3', 'segments': [[0,"
+},
+"26": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/yasserAlDosari/112001.mp3', 'segments': [[0, 1, 0, 70], [1, 2, 280, 520], [2, 3, 690, 790], [3, 4, 1480, 2360]]}, '112:2': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/yasserAlDosari/112002.mp3', 'segments': [[0, 1, 530, 630], [1, 2, 1240, 2040]]}, '112:3': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/yasserAlDosari/112003.mp3', 'segments': [[0, 1, 0, 600], [1, 2, 720, 1160], [2, 3, 1240, 1640], [3, 4, 1800, 2720]]}, '112:4': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/yasserAlDosari/112004.mp3', 'segments"
+},
+"27": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"28": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"29": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"30": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"31": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"32": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"33": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"34": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"35": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"36": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"37": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"38": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"39": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"40": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"41": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"42": {
+"status": 200,
+"raw": "{'segments': {'112:1': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/alnufais/112001.mp3', 'segments': [[0, 1, 0, 3640], [1, 2, 3640, 4070], [2, 3, 4210, 4960], [3, 4, 4960, 5820]]}, '112:2': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/alnufais/112002.mp3', 'segments': [[0, 1, 200, 1300], [1, 2, 1300, 2360]]}, '112:3': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/alnufais/112003.mp3', 'segments': [[0, 1, 0, 430], [1, 2, 430, 1060], [2, 3, 1060, 1740], [3, 4, 1740, 2850]]}, '112:4': {'audio_url': 'https://audio-cdn.tarteel.ai/quran/alnufais/112004.mp3', 'segments': [[0, 1, 0, 730"
+},
+"43": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"44": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"45": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"46": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"47": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"48": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"49": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"50": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"51": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"52": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"53": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"54": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"55": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"56": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"57": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"58": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"59": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"60": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"61": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"62": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"63": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"64": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"65": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"66": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"67": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"68": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"69": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"70": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"71": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"72": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"73": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"74": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"75": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"76": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"77": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"78": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"79": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"80": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"81": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"82": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"83": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"84": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"85": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"86": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"87": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"88": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"89": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"90": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"91": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"92": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"93": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"94": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"95": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"96": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"97": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"98": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"99": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"100": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"101": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"102": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"103": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"104": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"105": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"106": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"107": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"108": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"109": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"110": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"111": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"112": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"113": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"114": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"115": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"116": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"117": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"118": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"119": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+},
+"120": {
+"status": 200,
+"raw": "{'segments': {}, 'pagination': {'next_page': None, 'previous_page': None, 'total_pages': 1, 'total_count': 4}}"
+}
+}
+}

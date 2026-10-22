@@ -1,0 +1,258 @@
+{
+"https://audio-cdn.tarteel.ai/quran/muhammadAlLuhaidan/001001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/surah/muhammadAlLuhaidan/murattal/mp3/001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/mohammedAlLuhaidan/001001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/surah/mohammedAlLuhaidan/murattal/mp3/001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/mohammadAlLuhaidan/001001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/surah/mohammadAlLuhaidan/murattal/mp3/001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/muhammadAlLohaidan/001001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/surah/muhammadAlLohaidan/murattal/mp3/001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/mohammedAlLohaidan/001001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/surah/mohammedAlLohaidan/murattal/mp3/001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/luhaidan/001001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/surah/luhaidan/murattal/mp3/001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/alLuhaidan/001001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/surah/alLuhaidan/murattal/mp3/001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/muhammad_al_luhaidan/001001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/surah/muhammad_al_luhaidan/murattal/mp3/001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/mohammed_al_luhaidan/001001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/surah/mohammed_al_luhaidan/murattal/mp3/001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/muhammad_luhaidan/001001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/surah/muhammad_luhaidan/murattal/mp3/001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/mohamedAlLuhaidan/001001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/surah/mohamedAlLuhaidan/murattal/mp3/001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/MuhammadAlLuhaidan/001001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/surah/MuhammadAlLuhaidan/murattal/mp3/001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/muhammadLuhaidan/001001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://audio-cdn.tarteel.ai/quran/surah/muhammadLuhaidan/murattal/mp3/001.mp3": {
+"status": 404,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message>"
+},
+"https://download.quranicaudio.com/quran/muhammad_alhaidan/001.mp3": {
+"status": 206,
+"range": "bytes 0-3/596096",
+"type": "audio/mpeg",
+"loc": null,
+"head": "49443303"
+},
+"https://download.quranicaudio.com/quran/muhammad_alhaidan//001.mp3": {
+"status": 206,
+"range": "bytes 0-3/596096",
+"type": "audio/mpeg",
+"loc": null,
+"head": "49443303"
+},
+"https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1/001.mp3": {
+"status": 206,
+"range": "bytes 0-3/709922",
+"type": "audio/mpeg",
+"loc": null,
+"head": "49443303"
+},
+"https://server8.mp3quran.net/lhdan/001.mp3": {
+"status": 206,
+"range": "bytes 0-3/709922",
+"type": "audio/mpeg",
+"loc": null,
+"head": "49443303"
+},
+"https://cdn.islamic.network/quran/audio-surah/128/ar.muhammadalluhaidan/1.mp3": {
+"status": 206,
+"range": "bytes 0-3/1256835",
+"type": "audio/mpeg",
+"loc": null,
+"head": "49443303"
+},
+"https://cdn.islamic.network/quran/audio/128/ar.muhammadalluhaidan/1.mp3": {
+"status": 403,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Error><Code>AccessDenied</Code><Message></Message><BucketName>cdn-islamic-network"
+},
+"https://cdn.islamic.network/quran/audio/64/ar.muhammadalluhaidan/1.mp3": {
+"status": 403,
+"range": null,
+"type": "application/xml",
+"loc": null,
+"head": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Error><Code>AccessDenied</Code><Message></Message><BucketName>cdn-islamic-network"
+},
+"https://everyayah.com/data/Muhammad_Al_Luhaidan_128kbps/001001.mp3": {
+"status": 404,
+"range": null,
+"type": "text/html",
+"loc": null,
+"head": "<html><head><title>404 - File Not Found</title><link href='//fonts.bunny.net/css?family=Rubik:300,400,500' rel='styleshe"
+},
+"https://everyayah.com/data/Mohammed_Al_Luhaidan_128kbps/001001.mp3": {
+"status": 404,
+"range": null,
+"type": "text/html",
+"loc": null,
+"head": "<html><head><title>404 - File Not Found</title><link href='//fonts.bunny.net/css?family=Rubik:300,400,500' rel='styleshe"
+},
+"https://quran.ksu.edu.sa/ayat/mp3/Muhammad_Al_Luhaidan_128kbps/001001.mp3": {
+"status": 404,
+"range": null,
+"type": "text/html; charset=iso-8859-1",
+"loc": null,
+"head": "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n<html><head>\n<title>404 Not Found</title>\n</head><body>\n<h1>Not Found"
+},
+"alqurancloud_surah1": [
+200,
+"{'code': 200, 'status': 'OK', 'data': {'number': 1, 'name': 'سُورَةُ ٱلْفَاتِحَةِ', 'englishName': 'Al-Faatiha', 'englishNameTranslation': 'The Opening', 'revelationType': 'Meccan', 'numberOfAyahs': 7, 'audio': 'https://cdn.islamic.network/quran/audio-surah/128/ar.muhammadalluhaidan/1.mp3', 'audioSecondary': [], 'ayahs': [{'number': 1, 'text': '\\ufeffبِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', 'numberInSurah': 1, 'juz': 1, 'manzil': 1, 'page': 1, 'ruku': 1, 'hizbQuarter': 1, 'sajda': False}, {'number': 2, 'text': 'ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ', 'numberInSurah': 2, 'juz': 1, 'manzil': 1, 'page': 1, 'ruku': 1, 'hizbQuarter': 1, 'sajda': False}, {'number': 3, 'text': 'ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', 'numberInSurah': 3, 'juz': 1, 'manzil': 1, 'page': 1, 'ruku': 1, 'hizbQuarter': 1, 'sajda': False}, {'number': 4, 'text': 'مَٰلِكِ يَوْمِ ٱلدِّينِ', 'numberInSurah': 4, 'juz': 1, 'manzil': 1, 'page': 1, 'ruku': 1, 'hizbQuarter': 1, 'sajda': False}, {'number': 5, 'text': 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ', 'numberInSurah': 5, 'juz': 1, 'manzil': 1, 'page': 1, 'ruku': 1, 'hizbQuarter': 1, 'sajda': False}, {'number': 6, 'text': 'ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ', 'numberInSurah': 6, 'juz': 1, 'manzil': 1, 'page': 1, 'ruku': 1, 'hizbQuarter': 1, 'sajda': False}, {'number': 7, 'text': 'صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ', 'numberInSurah': 7, 'juz': 1, 'manzil': 1, 'page': 1, 'ruku': 1, 'hizbQuarter': 1, 'sajda': False}], 'edition': {'identifier': 'ar.muhammadalluhaidan', 'language': 'ar', 'name': 'محمد اللحيدان', 'englishName': 'Muhammad al-Luhaidan', 'format': 'audio', 'type': 'surahbysurah', 'direction': None}}}"
+]
+}
