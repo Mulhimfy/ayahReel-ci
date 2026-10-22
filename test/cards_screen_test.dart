@@ -197,7 +197,9 @@ void main() {
     // draws before anything has been downloaded.
     expect(SceneCatalog.all.where((s) => s.wide), isNotEmpty);
     for (final scene in SceneCatalog.all) {
-      expect(scene.thumbAsset, endsWith('.jpg'));
+      expect(scene.thumbAsset, anyOf(endsWith('.jpg'), endsWith('.webp')));
+      expect(File(scene.thumbAsset).existsSync(), isTrue,
+          reason: '${scene.id} has no poster');
     }
   });
 

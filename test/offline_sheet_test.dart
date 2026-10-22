@@ -55,7 +55,7 @@ void main() {
     // The moving sceneries say their size though they are not ticked.
     final clips = OfflinePack.sceneBytes(clips: true);
     expect(clips, greaterThan(100 * 1000 * 1000));
-    expect(find.textContaining('${(clips / 1e6).ceil()} MB'), findsOneWidget);
+    expect(find.textContaining(OfflineSheet.sizeLabel(clips)), findsOneWidget);
 
     final before = total(t);
     await t.tap(find.text('Moving sceneries'));

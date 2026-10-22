@@ -37,6 +37,15 @@ class Scene {
   /// Shipped inside the app: usable with no network, ever.
   final bool bundled;
 
+  /// The release the full file is served from, when it isn't the
+  /// catalog's first (`baseUrl`): a GitHub release holds at most 1000
+  /// files, so later sceneries live on later ones (see `releases`).
+  final String? release;
+
+  /// The bundled poster's format. Later sceneries carry WebP posters,
+  /// about half the bytes of the JPEG ones at the same size.
+  final String posterExt;
+
   const Scene({
     required this.id,
     required this.tab,
@@ -46,6 +55,8 @@ class Scene {
     required this.bytes,
     required this.gradientArgb,
     required this.bundled,
+    this.release,
+    this.posterExt = 'jpg',
   });
 
   factory Scene.fromJson(Map<String, dynamic> j) => Scene(
@@ -57,9 +68,11 @@ class Scene {
         bytes: j['bytes'] as int? ?? 0,
         gradientArgb: (j['grad'] as List).cast<int>(),
         bundled: j['bundled'] as bool? ?? false,
+        release: j['release'] as String?,
+        posterExt: j['poster'] as String? ?? 'jpg',
       );
 
-  String get thumbAsset => 'assets/scene_thumbs/$id.jpg';
+  String get thumbAsset => 'assets/scene_thumbs/$id.$posterExt';
   String get bundledAsset => 'assets/backgrounds/$id.$ext';
   String get fileName => '$id.$ext';
 
@@ -103,6 +116,13 @@ class Scene {
 abstract final class SceneCatalog {
   static List<Scene> _all = const [];
   static String _baseUrl = '';
+
+  /// Release name -> its download URL, for scenes not on `baseUrl`.
+  static Map<String, String> _releases = const {};
+
+  /// Where [s]'s full file is served from.
+  static String _urlOf(Scene s) =>
+      (s.release == null ? null : _releases[s.release]) ?? _baseUrl;
   static final Map<String, List<Scene>> _byTab = {};
   static bool _loaded = false;
 
@@ -257,6 +277,10 @@ abstract final class SceneCatalog {
       final raw = await rootBundle.loadString('assets/catalog.json');
       final j = jsonDecode(raw) as Map<String, dynamic>;
       _baseUrl = j['baseUrl'] as String? ?? '';
+      _releases = {
+        for (final e in ((j['releases'] as Map?) ?? const {}).entries)
+          '${e.key}': '${e.value}',
+      };
       _all = (j['scenes'] as List)
           .map((e) => Scene.fromJson(e as Map<String, dynamic>))
           .where((s) => !withdrawn.contains(s.id))
@@ -347,6 +371,7 @@ abstract final class SceneCatalog {
     Duration idle = const Duration(milliseconds: 300),
   }) {
     _baseUrl = baseUrl;
+    _releases = const {};
     _dir = cacheDir;
     _idleTimeout = idle;
     _inFlight.clear();
@@ -397,7 +422,7 @@ abstract final class SceneCatalog {
     final client = http.Client();
     IOSink? sink;
     try {
-      final req = http.Request('GET', Uri.parse('$_baseUrl/${s.fileName}'));
+      final req = http.Request('GET', Uri.parse('${_urlOf(s)}/${s.fileName}'));
       final res = await client.send(req).timeout(_idleTimeout);
       if (res.statusCode != 200) {
         rlog('scene ${s.id}: HTTP ${res.statusCode}');

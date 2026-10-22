@@ -36,6 +36,9 @@ Future<void> showOfflineSheet(BuildContext context) {
 class OfflineSheet extends StatefulWidget {
   const OfflineSheet({super.key});
 
+  /// A size as the sheet writes it: megabytes, or gigabytes from 1000 MB.
+  static String sizeLabel(int bytes) => _OfflineSheetState.size(bytes);
+
   /// The voice it opens on: the one the last reel was made with, or the
   /// app's first when there is none yet (or it was the user's own).
   static Reciter defaultVoice() {
