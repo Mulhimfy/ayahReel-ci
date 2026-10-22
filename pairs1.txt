@@ -1,0 +1,5 @@
+basfar_mq60    basfar_163       n=156 fail=6 wave=0.974/0.999/1.0 same=105 doubt=0 dur=0.715±0.0968 close=0.122 env=0.039 ok=False why=the same audio in 105 of 156 verses, e.g. ['1:2', '2:2', '4:2', '5:2']
+muaiqly_159    muaiqly_65       n=162 fail=0 wave=0.151/0.241/0.407 same=0 doubt=0 dur=1.504±0.114 close=0.086 env=0.038 ok=True why=None
+muaiqly_65     muaiqly_mujawwad n=162 fail=0 wave=0.168/0.251/0.473 same=0 doubt=0 dur=0.655±0.1164 close=0.074 env=0.033 ok=True why=None
+hudhaify_mq74  hudhaify         n=2 fail=160 wave=0.624/0.624/0.624 same=0 doubt=1 dur=1.029±0.0254 close=0.5 env=0.954 ok=False why=only 2 verses compared; 1 verses nearly the same audio; loudness contours correlate at 0.954; 160 verses could not be compared
+husary_qasr    husary_mujawwad  n=162 fail=0 wave=0.14/0.23/0.466 same=0 doubt=0 dur=0.559±0.1097 close=0.123 env=0.032 ok=True why=None

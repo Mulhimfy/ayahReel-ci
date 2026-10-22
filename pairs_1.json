@@ -1,0 +1,792 @@
+[
+ {
+  "verses": 156,
+  "surahs": 114,
+  "failed": 6,
+  "failed_e_g": [
+   "28:79 slice answered 416",
+   "30:54 slice answered 416",
+   "33:70 slice answered 416",
+   "37:164 slice answered 416",
+   "68:46 slice answered 416"
+  ],
+  "wave_median": 0.974,
+  "wave_p90": 0.999,
+  "wave_max": 1.0,
+  "wave_same": 105,
+  "wave_same_e_g": [
+   "1:2",
+   "2:2",
+   "4:2",
+   "5:2",
+   "6:2",
+   "7:2",
+   "8:2",
+   "9:2"
+  ],
+  "wave_doubt": 0,
+  "dur_ratio": 0.715,
+  "dur_spread": 0.0968,
+  "dur_close": 0.122,
+  "env_corr": 0.039,
+  "ok": false,
+  "why": "the same audio in 105 of 156 verses, e.g. ['1:2', '2:2', '4:2', '5:2']",
+  "pair": [
+   "basfar_mq60",
+   "basfar_163"
+  ],
+  "rows": null
+ },
+ {
+  "verses": 162,
+  "surahs": 114,
+  "failed": 0,
+  "wave_median": 0.14,
+  "wave_p90": 0.23,
+  "wave_max": 0.466,
+  "wave_same": 0,
+  "wave_doubt": 0,
+  "dur_ratio": 0.559,
+  "dur_spread": 0.1097,
+  "dur_close": 0.123,
+  "env_corr": 0.032,
+  "ok": true,
+  "pair": [
+   "husary_qasr",
+   "husary_mujawwad"
+  ],
+  "rows": null
+ },
+ {
+  "verses": 162,
+  "surahs": 114,
+  "failed": 0,
+  "wave_median": 0.151,
+  "wave_p90": 0.241,
+  "wave_max": 0.407,
+  "wave_same": 0,
+  "wave_doubt": 0,
+  "dur_ratio": 1.504,
+  "dur_spread": 0.114,
+  "dur_close": 0.086,
+  "env_corr": 0.038,
+  "ok": true,
+  "pair": [
+   "muaiqly_159",
+   "muaiqly_65"
+  ],
+  "rows": null
+ },
+ {
+  "verses": 162,
+  "surahs": 114,
+  "failed": 0,
+  "wave_median": 0.168,
+  "wave_p90": 0.251,
+  "wave_max": 0.473,
+  "wave_same": 0,
+  "wave_doubt": 0,
+  "dur_ratio": 0.655,
+  "dur_spread": 0.1164,
+  "dur_close": 0.074,
+  "env_corr": 0.033,
+  "ok": true,
+  "pair": [
+   "muaiqly_65",
+   "muaiqly_mujawwad"
+  ],
+  "rows": null
+ },
+ {
+  "verses": 2,
+  "surahs": 2,
+  "failed": 160,
+  "failed_e_g": [
+   "1:2 table 1 unusable",
+   "2:2 table 2 unusable",
+   "3:2 table 3 unusable",
+   "4:2 table 4 unusable",
+   "5:2 table 5 unusable"
+  ],
+  "wave_median": 0.624,
+  "wave_p90": 0.624,
+  "wave_max": 0.624,
+  "wave_same": 0,
+  "wave_doubt": 1,
+  "dur_ratio": 1.029,
+  "dur_spread": 0.0254,
+  "dur_close": 0.5,
+  "env_corr": 0.954,
+  "ok": false,
+  "why": "only 2 verses compared; 1 verses nearly the same audio; loudness contours correlate at 0.954; 160 verses could not be compared",
+  "pair": [
+   "hudhaify_mq74",
+   "hudhaify"
+  ],
+  "rows": [
+   {
+    "key": "1:2",
+    "error": "table 1 unusable"
+   },
+   {
+    "key": "2:2",
+    "error": "table 2 unusable"
+   },
+   {
+    "key": "3:2",
+    "error": "table 3 unusable"
+   },
+   {
+    "key": "4:2",
+    "error": "table 4 unusable"
+   },
+   {
+    "key": "5:2",
+    "error": "table 5 unusable"
+   },
+   {
+    "key": "6:2",
+    "error": "table 6 unusable"
+   },
+   {
+    "key": "7:2",
+    "error": "table 7 unusable"
+   },
+   {
+    "key": "8:2",
+    "error": "table 8 unusable"
+   },
+   {
+    "key": "9:2",
+    "error": "table 9 unusable"
+   },
+   {
+    "key": "10:2",
+    "error": "table 10 unusable"
+   },
+   {
+    "key": "11:2",
+    "error": "table 11 unusable"
+   },
+   {
+    "key": "12:2",
+    "error": "table 12 unusable"
+   },
+   {
+    "key": "13:2",
+    "error": "table 13 unusable"
+   },
+   {
+    "key": "14:2",
+    "error": "table 14 unusable"
+   },
+   {
+    "key": "15:2",
+    "error": "table 15 unusable"
+   },
+   {
+    "key": "16:2",
+    "error": "table 16 unusable"
+   },
+   {
+    "key": "17:2",
+    "error": "table 17 unusable"
+   },
+   {
+    "key": "18:2",
+    "error": "table 18 unusable"
+   },
+   {
+    "key": "19:2",
+    "error": "table 19 unusable"
+   },
+   {
+    "key": "20:2",
+    "error": "table 20 unusable"
+   },
+   {
+    "key": "21:2",
+    "error": "table 21 unusable"
+   },
+   {
+    "key": "22:2",
+    "error": "table 22 unusable"
+   },
+   {
+    "key": "23:2",
+    "error": "table 23 unusable"
+   },
+   {
+    "key": "24:2",
+    "error": "table 24 unusable"
+   },
+   {
+    "key": "25:2",
+    "error": "table 25 unusable"
+   },
+   {
+    "key": "26:2",
+    "error": "table 26 unusable"
+   },
+   {
+    "key": "27:2",
+    "error": "table 27 unusable"
+   },
+   {
+    "key": "28:2",
+    "error": "table 28 unusable"
+   },
+   {
+    "key": "29:2",
+    "error": "table 29 unusable"
+   },
+   {
+    "key": "30:2",
+    "error": "table 30 unusable"
+   },
+   {
+    "key": "31:2",
+    "error": "table 31 unusable"
+   },
+   {
+    "key": "32:2",
+    "error": "table 32 unusable"
+   },
+   {
+    "key": "33:2",
+    "error": "table 33 unusable"
+   },
+   {
+    "key": "34:2",
+    "error": "table 34 unusable"
+   },
+   {
+    "key": "35:2",
+    "error": "table 35 unusable"
+   },
+   {
+    "key": "36:2",
+    "error": "table 36 unusable"
+   },
+   {
+    "key": "37:2",
+    "error": "table 37 unusable"
+   },
+   {
+    "key": "38:2",
+    "error": "table 38 unusable"
+   },
+   {
+    "key": "39:2",
+    "error": "table 39 unusable"
+   },
+   {
+    "key": "40:2",
+    "error": "table 40 unusable"
+   },
+   {
+    "key": "41:2",
+    "error": "table 41 unusable"
+   },
+   {
+    "key": "42:2",
+    "error": "table 42 unusable"
+   },
+   {
+    "key": "43:2",
+    "error": "table 43 unusable"
+   },
+   {
+    "key": "44:2",
+    "error": "table 44 unusable"
+   },
+   {
+    "key": "45:2",
+    "error": "table 45 unusable"
+   },
+   {
+    "key": "46:2",
+    "error": "table 46 unusable"
+   },
+   {
+    "key": "47:2",
+    "error": "table 47 unusable"
+   },
+   {
+    "key": "48:2",
+    "error": "table 48 unusable"
+   },
+   {
+    "key": "49:2",
+    "error": "table 49 unusable"
+   },
+   {
+    "key": "50:2",
+    "error": "table 50 unusable"
+   },
+   {
+    "key": "51:2",
+    "error": "table 51 unusable"
+   },
+   {
+    "key": "52:2",
+    "error": "table 52 unusable"
+   },
+   {
+    "key": "53:2",
+    "error": "table 53 unusable"
+   },
+   {
+    "key": "54:2",
+    "error": "table 54 unusable"
+   },
+   {
+    "key": "55:2",
+    "error": "table 55 unusable"
+   },
+   {
+    "key": "56:2",
+    "error": "table 56 unusable"
+   },
+   {
+    "key": "57:2",
+    "error": "table 57 unusable"
+   },
+   {
+    "key": "58:2",
+    "error": "table 58 unusable"
+   },
+   {
+    "key": "59:2",
+    "error": "table 59 unusable"
+   },
+   {
+    "key": "60:2",
+    "error": "table 60 unusable"
+   },
+   {
+    "key": "61:2",
+    "error": "table 61 unusable"
+   },
+   {
+    "key": "62:2",
+    "error": "table 62 unusable"
+   },
+   {
+    "key": "63:2",
+    "error": "table 63 unusable"
+   },
+   {
+    "key": "64:2",
+    "error": "table 64 unusable"
+   },
+   {
+    "key": "65:2",
+    "error": "table 65 unusable"
+   },
+   {
+    "key": "66:2",
+    "error": "table 66 unusable"
+   },
+   {
+    "key": "67:2",
+    "error": "table 67 unusable"
+   },
+   {
+    "key": "68:2",
+    "error": "table 68 unusable"
+   },
+   {
+    "key": "69:2",
+    "error": "table 69 unusable"
+   },
+   {
+    "key": "70:2",
+    "error": "table 70 unusable"
+   },
+   {
+    "key": "71:2",
+    "error": "table 71 unusable"
+   },
+   {
+    "key": "72:2",
+    "error": "table 72 unusable"
+   },
+   {
+    "key": "73:2",
+    "error": "table 73 unusable"
+   },
+   {
+    "key": "74:2",
+    "error": "table 74 unusable"
+   },
+   {
+    "key": "75:2",
+    "error": "table 75 unusable"
+   },
+   {
+    "key": "76:2",
+    "error": "table 76 unusable"
+   },
+   {
+    "key": "77:2",
+    "error": "table 77 unusable"
+   },
+   {
+    "key": "78:2",
+    "error": "table 78 unusable"
+   },
+   {
+    "key": "79:2",
+    "error": "table 79 unusable"
+   },
+   {
+    "key": "80:2",
+    "error": "table 80 unusable"
+   },
+   {
+    "key": "81:2",
+    "error": "table 81 unusable"
+   },
+   {
+    "key": "82:2",
+    "error": "table 82 unusable"
+   },
+   {
+    "key": "83:2",
+    "error": "table 83 unusable"
+   },
+   {
+    "key": "84:2",
+    "error": "table 84 unusable"
+   },
+   {
+    "key": "85:2",
+    "error": "table 85 unusable"
+   },
+   {
+    "key": "86:2",
+    "error": "table 86 unusable"
+   },
+   {
+    "key": "87:2",
+    "error": "table 87 unusable"
+   },
+   {
+    "key": "88:2",
+    "error": "table 88 unusable"
+   },
+   {
+    "key": "89:2",
+    "error": "table 89 unusable"
+   },
+   {
+    "key": "90:2",
+    "error": "table 90 unusable"
+   },
+   {
+    "key": "91:2",
+    "error": "table 91 unusable"
+   },
+   {
+    "key": "92:2",
+    "error": "table 92 unusable"
+   },
+   {
+    "key": "93:2",
+    "error": "table 93 unusable"
+   },
+   {
+    "key": "94:2",
+    "error": "table 94 unusable"
+   },
+   {
+    "key": "95:2",
+    "error": "table 95 unusable"
+   },
+   {
+    "key": "96:2",
+    "error": "table 96 unusable"
+   },
+   {
+    "key": "97:2",
+    "error": "table 97 unusable"
+   },
+   {
+    "key": "98:2",
+    "error": "table 98 unusable"
+   },
+   {
+    "key": "99:2",
+    "error": "table 99 unusable"
+   },
+   {
+    "key": "100:2",
+    "error": "table 100 unusable"
+   },
+   {
+    "key": "101:2",
+    "error": "table 101 unusable"
+   },
+   {
+    "key": "102:2",
+    "error": "table 102 unusable"
+   },
+   {
+    "key": "103:2",
+    "error": "table 103 unusable"
+   },
+   {
+    "key": "104:2",
+    "error": "table 104 unusable"
+   },
+   {
+    "key": "105:2",
+    "error": "table 105 unusable"
+   },
+   {
+    "key": "106:2",
+    "error": "table 106 unusable"
+   },
+   {
+    "key": "107:2",
+    "error": "table 107 unusable"
+   },
+   {
+    "key": "108:2",
+    "error": "table 108 unusable"
+   },
+   {
+    "key": "109:2",
+    "da": 5380,
+    "db": 5230,
+    "peaks": [
+     0.197,
+     0.266,
+     0.475
+    ],
+    "env": 0.891
+   },
+   {
+    "key": "110:2",
+    "da": 7050,
+    "db": 7030,
+    "peaks": [
+     0.456,
+     0.302,
+     0.624,
+     0.365
+    ],
+    "env": 0.954
+   },
+   {
+    "key": "111:2",
+    "error": "table 111 unusable"
+   },
+   {
+    "key": "112:2",
+    "error": "table 112 unusable"
+   },
+   {
+    "key": "113:2",
+    "error": "table 113 unusable"
+   },
+   {
+    "key": "114:2",
+    "error": "table 114 unusable"
+   },
+   {
+    "key": "1:3",
+    "error": "table 1 unusable"
+   },
+   {
+    "key": "2:146",
+    "error": "table 2 unusable"
+   },
+   {
+    "key": "3:58",
+    "error": "table 3 unusable"
+   },
+   {
+    "key": "4:21",
+    "error": "table 4 unusable"
+   },
+   {
+    "key": "5:47",
+    "error": "table 5 unusable"
+   },
+   {
+    "key": "6:96",
+    "error": "table 6 unusable"
+   },
+   {
+    "key": "7:97",
+    "error": "table 7 unusable"
+   },
+   {
+    "key": "8:35",
+    "error": "table 8 unusable"
+   },
+   {
+    "key": "10:17",
+    "error": "table 10 unusable"
+   },
+   {
+    "key": "11:54",
+    "error": "table 11 unusable"
+   },
+   {
+    "key": "12:60",
+    "error": "table 12 unusable"
+   },
+   {
+    "key": "15:6",
+    "error": "table 15 unusable"
+   },
+   {
+    "key": "16:12",
+    "error": "table 16 unusable"
+   },
+   {
+    "key": "17:17",
+    "error": "table 17 unusable"
+   },
+   {
+    "key": "18:33",
+    "error": "table 18 unusable"
+   },
+   {
+    "key": "19:38",
+    "error": "table 19 unusable"
+   },
+   {
+    "key": "20:51",
+    "error": "table 20 unusable"
+   },
+   {
+    "key": "21:26",
+    "error": "table 21 unusable"
+   },
+   {
+    "key": "22:29",
+    "error": "table 22 unusable"
+   },
+   {
+    "key": "23:74",
+    "error": "table 23 unusable"
+   },
+   {
+    "key": "25:28",
+    "error": "table 25 unusable"
+   },
+   {
+    "key": "26:58",
+    "error": "table 26 unusable"
+   },
+   {
+    "key": "26:161",
+    "error": "table 26 unusable"
+   },
+   {
+    "key": "27:43",
+    "error": "table 27 unusable"
+   },
+   {
+    "key": "28:79",
+    "error": "table 28 unusable"
+   },
+   {
+    "key": "30:54",
+    "error": "table 30 unusable"
+   },
+   {
+    "key": "33:70",
+    "error": "table 33 unusable"
+   },
+   {
+    "key": "36:38",
+    "error": "table 36 unusable"
+   },
+   {
+    "key": "37:61",
+    "error": "table 37 unusable"
+   },
+   {
+    "key": "37:164",
+    "error": "table 37 unusable"
+   },
+   {
+    "key": "39:11",
+    "error": "table 39 unusable"
+   },
+   {
+    "key": "40:63",
+    "error": "table 40 unusable"
+   },
+   {
+    "key": "43:11",
+    "error": "table 43 unusable"
+   },
+   {
+    "key": "44:30",
+    "error": "table 44 unusable"
+   },
+   {
+    "key": "47:25",
+    "error": "table 47 unusable"
+   },
+   {
+    "key": "51:30",
+    "error": "table 51 unusable"
+   },
+   {
+    "key": "53:30",
+    "error": "table 53 unusable"
+   },
+   {
+    "key": "55:21",
+    "error": "table 55 unusable"
+   },
+   {
+    "key": "56:49",
+    "error": "table 56 unusable"
+   },
+   {
+    "key": "62:6",
+    "error": "table 62 unusable"
+   },
+   {
+    "key": "68:46",
+    "error": "table 68 unusable"
+   },
+   {
+    "key": "71:7",
+    "error": "table 71 unusable"
+   },
+   {
+    "key": "74:43",
+    "error": "table 74 unusable"
+   },
+   {
+    "key": "77:25",
+    "error": "table 77 unusable"
+   },
+   {
+    "key": "79:41",
+    "error": "table 79 unusable"
+   },
+   {
+    "key": "83:17",
+    "error": "table 83 unusable"
+   },
+   {
+    "key": "88:11",
+    "error": "table 88 unusable"
+   },
+   {
+    "key": "94:4",
+    "error": "table 94 unusable"
+   }
+  ]
+ }
+]
