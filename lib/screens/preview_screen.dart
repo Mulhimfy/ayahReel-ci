@@ -68,6 +68,7 @@ import '../widgets/motion_picker.dart';
 import '../widgets/reel_finish.dart';
 import '../widgets/reel_watermark.dart';
 import '../widgets/shimmer_text.dart';
+import '../widgets/resize_frame.dart';
 import '../widgets/step_dots.dart';
 import '../widgets/surah_title.dart';
 import '../widgets/telegram_invite.dart';
@@ -1480,7 +1481,32 @@ class _PreviewScreenState extends State<PreviewScreen>
   /// finger 1:1, because Align places the child at freeSpace * align —
   /// the same formula FFmpeg uses ((H-h)*yFrac), so where the user
   /// drops the verse is exactly where it lands in the exported mp4.
-  void _onDragUpdate(DragUpdateDetails d, BoxConstraints box) {
+  void _onDragUpdate(DragUpdateDetails d, BoxConstraints box) =>
+      _moveVerseBy(d.delta.dy, box);
+
+  /// The text sizes the slider offers, which a pinch keeps to.
+  static const _textScales = (min: 0.7, max: 1.5);
+
+  /// Set when the verse's own fingers sized it, so lifting them settles
+  /// the size (the lines are cut again for it) and not only the place.
+  bool _verseSized = false;
+
+  void _settleVerse() {
+    if (_verseSized) {
+      _verseSized = false;
+      _setTextScale(_textScale, done: true);
+    }
+    _onDragEnd();
+  }
+
+  /// A double tap on the verse: its text back to its own size.
+  void _resetTextScale() {
+    if (_textScale == 1.0) return;
+    HapticFeedback.selectionClick();
+    _setTextScale(1.0, done: true);
+  }
+
+  void _moveVerseBy(double dy, BoxConstraints box) {
     final overlayH = _overlayHeight ?? box.maxHeight * 0.35;
     final geo = _box;
     // The drag covers whatever the verse is free to move in: the whole
@@ -1491,7 +1517,7 @@ class _PreviewScreenState extends State<PreviewScreen>
     final free = (travel - overlayH).clamp(1.0, double.infinity);
     setState(() {
       _hasDragged = true;
-      _overlayAlign = (_overlayAlign + d.delta.dy / free).clamp(0.0, 1.0);
+      _overlayAlign = (_overlayAlign + dy / free).clamp(0.0, 1.0);
     });
   }
 
@@ -2505,7 +2531,25 @@ class _PreviewScreenState extends State<PreviewScreen>
       alignment: Alignment(0, _overlayAlign * 2 - 1),
       minHeight: 0,
       maxHeight: double.infinity,
-      child: VerseStage(
+      // The verse takes its own fingers, laid out exactly as it was (no
+      // room added round it, so the card sits where the export puts
+      // it): one moves it up and down, two or a corner size its text,
+      // a double tap puts the size back. Crop marks frame it while it
+      // is touched.
+      child: ResizableBox(
+        scale: _textScale,
+        inset: 3,
+        onMove: (d) => _moveVerseBy(d.dy, box),
+        onResize: _busy
+            ? null
+            : (v) {
+                _verseSized = true;
+                _setTextScale(
+                    v.clamp(_textScales.min, _textScales.max), done: false);
+              },
+        onEnd: _settleVerse,
+        onDoubleTap: _busy ? null : _resetTextScale,
+        child: VerseStage(
         clock: _clock,
         units: _units,
         ayahs: _ayahs!,
@@ -2529,6 +2573,7 @@ class _PreviewScreenState extends State<PreviewScreen>
         verseFace: _typography.verse,
         translationFace: _typography.translation,
         onHeight: _onOverlayHeight,
+      ),
       ),
     );
     // Positioned either way, even when the verse has the whole frame:
@@ -2830,8 +2875,8 @@ class _PreviewScreenState extends State<PreviewScreen>
                           ),
                           child: Slider(
                             value: _textScale,
-                            min: 0.7,
-                            max: 1.5,
+                            min: _textScales.min,
+                            max: _textScales.max,
                             activeColor: AppColors.gold,
                             inactiveColor: AppColors.surfaceRaised,
                             semanticFormatterCallback: (v) =>

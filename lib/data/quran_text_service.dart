@@ -388,6 +388,18 @@ abstract final class QuranTextService {
   /// surah cached in one translation would be read straight back in
   /// another — the Arabic would look right and every translation line
   /// would be the language the reader had just switched away from.
+  /// Whether [surah] is on the phone in the edition Settings names, so
+  /// it opens with no network. Al-Fatiha always is.
+  static Future<bool> isOnDisk(int surah) async {
+    if (surah == 1 || cached(surah) != null) return true;
+    try {
+      final f = await _cacheFile(surah, edition);
+      return f.existsSync() && f.lengthSync() > 0;
+    } catch (_) {
+      return false;
+    }
+  }
+
   static Future<File> _cacheFile(int surah, VerseTranslation t) async =>
       File('${(await _cacheDir()).path}/surah_${surah}_qpc_${t.code}.json');
 

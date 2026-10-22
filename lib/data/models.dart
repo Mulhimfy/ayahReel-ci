@@ -76,6 +76,10 @@ final class AyahFiles extends AudioSource {
   const AyahFiles.tarteel(this.folder) : host = tarteelHost;
   const AyahFiles.ksu(this.folder) : host = ksuHost;
 
+  /// Any host: for tests, which serve the files themselves.
+  @visibleForTesting
+  const AyahFiles.at(this.host, this.folder);
+
   Uri url(int surah, int ayah) => Uri.parse('$host/$folder/'
       '${surah.toString().padLeft(3, '0')}'
       '${ayah.toString().padLeft(3, '0')}.mp3');
@@ -198,6 +202,21 @@ class Reciter {
   /// surah-file voice, over a spread of verses for a per-ayah one.
   final double pace;
 
+  /// The voice this is another recording of, by that voice's id; null
+  /// for a voice's first recording (or its only one).
+  ///
+  /// Another recording is a [Reciter] of its own — its own audio, table,
+  /// cache and verification — but the pickers list it under its voice,
+  /// not beside it: the same reciter, another performance, so reels of
+  /// the same verses need not all carry the same sound.
+  /// tool/verify_reciters.py checks that it really is another
+  /// performance and not the same one served from somewhere else.
+  final String? recordingOf;
+
+  /// What sets this recording apart from the voice's others, in a few
+  /// words ("Makkah · 1435"). Null on a voice's first recording.
+  final String? recordingNote;
+
   const Reciter({
     required this.id,
     required this.name,
@@ -207,6 +226,8 @@ class Reciter {
     this.audioAsset,
     this.timings,
     this.pace = 1.0,
+    this.recordingOf,
+    this.recordingNote,
   }) : assert((audioAsset == null) == (timings == null));
 
   bool get hasBundledFatiha => audioAsset != null;

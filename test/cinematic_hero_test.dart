@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ayah_reels/data/scene_catalog.dart';
@@ -44,24 +47,24 @@ void main() {
         library.map((s) => s.id).toList());
   });
 
-  test('a new picture every twelve hours, and every picture before any '
-      'comes round again', () {
-    final library =
-        CinematicHero.library([for (var i = 0; i < 20; i++) scene('s$i')]);
+  test('every visit walks on to the next picture, every one in the '
+      'library before any comes round again', () async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    final dir = Directory.systemTemp.createTempSync('walk');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    SceneCatalog.configureForTest(baseUrl: '', cacheDir: dir);
+    final library = CinematicHero.library(
+        [for (var i = 0; i < 20; i++) scene('s$i', bundled: true)]);
     final seen = <String>{};
-    var t = DateTime(2026, 3, 1, 8);
+    var turn = 7;
     for (var i = 0; i < 20; i++) {
-      seen.add(CinematicHero.pickFor(t, library)!.id);
-      t = t.add(const Duration(hours: 12));
+      final f = (await CinematicHero.onPhoneFrom(turn, library))!;
+      seen.add((f.picture as AssetImage).assetName);
+      turn = f.at + 1;
     }
     expect(seen, hasLength(20));
-    // Within a half-day it holds; across noon it turns.
-    expect(CinematicHero.pickFor(DateTime(2026, 3, 1, 8), library),
-        CinematicHero.pickFor(DateTime(2026, 3, 1, 11, 59), library));
-    expect(CinematicHero.pickFor(DateTime(2026, 3, 1, 8), library),
-        isNot(CinematicHero.pickFor(DateTime(2026, 3, 1, 12), library)));
+    expect(await CinematicHero.onPhoneFrom(0, const []), isNull);
     expect(CinematicHero.slotOf(DateTime(2026, 1, 1, 13)), 1);
-    expect(CinematicHero.pickFor(DateTime.now(), const []), isNull);
   });
 
   test('the bundled shelf turns every twelve hours too, and never on one '
@@ -95,5 +98,39 @@ void main() {
       expect(library.any((s) => s.bundledAsset == asset), isTrue,
           reason: asset);
     }
+  });
+
+  test('a picture not on the phone yet is passed over for the next one '
+      'that is, and the walk goes on from there', () async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    final dir = Directory.systemTemp.createTempSync('hero');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    SceneCatalog.configureForTest(baseUrl: '', cacheDir: dir);
+    final library = [
+      scene('a'),
+      scene('b'),
+      scene('c'),
+      scene('d', bundled: true),
+      scene('e'),
+    ];
+    // 'c' was fetched on an earlier visit.
+    File('${dir.path}/c.jpg').writeAsBytesSync(List.filled(2048, 1));
+
+    // Turn 0 is 'a', not on the phone: the walk finds 'c', at once.
+    final first = (await CinematicHero.onPhoneFrom(0, library))!;
+    expect(first.at, 2);
+    expect((first.picture as FileImage).file.path, endsWith('c.jpg'));
+    // The next visit goes on after it: 'd'.
+    final second = (await CinematicHero.onPhoneFrom(first.at + 1, library))!;
+    expect(second.at, 3);
+    expect((second.picture as AssetImage).assetName,
+        'assets/backgrounds/d.jpg');
+    // And round again, past 'e' and 'a', 'b', which never came down.
+    final third = (await CinematicHero.onPhoneFrom(second.at + 1, library))!;
+    expect(third.at, 2);
+
+    // Nothing on the phone at all: nothing to offer.
+    expect(
+        await CinematicHero.onPhoneFrom(0, [scene('x'), scene('y')]), isNull);
   });
 }

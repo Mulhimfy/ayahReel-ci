@@ -7,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../data/debug_log.dart';
-import '../data/install_date.dart';
 import '../data/rewards_service.dart';
 import '../data/settings_service.dart';
 import '../l10n/l10n.dart';
@@ -35,6 +34,9 @@ class TelegramInviteRecord {
     this.firstShown,
     this.lastShown,
     this.joined = false,
+    this.launches = 0,
+    this.snoozes = 0,
+    this.nextAt,
   });
 
   /// Good moments since this code first ran.
@@ -43,8 +45,17 @@ class TelegramInviteRecord {
   final DateTime? firstShown;
   final DateTime? lastShown;
 
-  /// Tapped Join or "I've joined": never again.
+  /// Joined, "Already joined" or "Don't ask again": never again.
   final bool joined;
+
+  /// Times the app was opened since this code first ran.
+  final int launches;
+
+  /// Times "Not now" was answered (or the invitation waved away).
+  final int snoozes;
+
+  /// Not before this, after a "Not now".
+  final DateTime? nextAt;
 
   TelegramInviteRecord copyWith({
     int? moments,
@@ -52,6 +63,9 @@ class TelegramInviteRecord {
     DateTime? firstShown,
     DateTime? lastShown,
     bool? joined,
+    int? launches,
+    int? snoozes,
+    DateTime? nextAt,
   }) =>
       TelegramInviteRecord(
         moments: moments ?? this.moments,
@@ -59,6 +73,9 @@ class TelegramInviteRecord {
         firstShown: firstShown ?? this.firstShown,
         lastShown: lastShown ?? this.lastShown,
         joined: joined ?? this.joined,
+        launches: launches ?? this.launches,
+        snoozes: snoozes ?? this.snoozes,
+        nextAt: nextAt ?? this.nextAt,
       );
 
   Map<String, dynamic> toJson() => {
@@ -67,6 +84,9 @@ class TelegramInviteRecord {
         if (firstShown != null) 'first': firstShown!.millisecondsSinceEpoch,
         if (lastShown != null) 'last': lastShown!.millisecondsSinceEpoch,
         if (joined) 'joined': true,
+        'launches': launches,
+        'snoozes': snoozes,
+        if (nextAt != null) 'next': nextAt!.millisecondsSinceEpoch,
       };
 
   factory TelegramInviteRecord.fromJson(Map<String, dynamic> j) {
@@ -78,39 +98,79 @@ class TelegramInviteRecord {
       firstShown: at(j['first']),
       lastShown: at(j['last']),
       joined: j['joined'] == true,
+      launches: (j['launches'] as int?) ?? 0,
+      snoozes: (j['snoozes'] as int?) ?? 0,
+      nextAt: at(j['next']),
     );
   }
 }
 
-/// The invitation to the app's Telegram channel, a few seconds after a
-/// good moment ([TelegramMoment]).
+/// What the invitation was answered with.
+@visibleForTesting
+enum TelegramAnswer {
+  /// Join: the channel opens, and it is never asked again.
+  join,
+
+  /// Already a member: never asked again.
+  joined,
+
+  /// Don't ask again: never asked again.
+  never,
+
+  /// Not now — or the invitation waved away: asked again later.
+  notNow,
+}
+
+/// The invitation to the app's Telegram channel.
 ///
-/// Twice in a lifetime at most, both inside one week, and never to
-/// someone new: not on the first open, not at a first badge, but once
-/// the app has been on the phone for [minAge] and its owner has had
-/// [minMoments] good moments in it. The second comes [secondAfter] or
-/// more after the first, and only inside the first one's [window].
-/// Join or "I've joined" ends it for good, and so does the channel
-/// already opened from Settings. It never stacks on another dialog or
-/// sheet, and never shows with the app away; a moment it skips for
-/// that isn't one of its two.
+/// Early, because the people most worth reaching are the ones who have
+/// just found the app: it comes a few seconds after the first good
+/// moment ([TelegramMoment]: a saved reel, a card, a quiz, a badge), or
+/// half a minute into the second time the app is opened if nothing good
+/// has happened yet — never on a first open with nothing done, never
+/// over another dialog or sheet, never in the middle of making
+/// something, and never with the app away.
+///
+/// Answered "Not now", it comes back later, every time: [snoozeSteps]
+/// after the first "Not now", then longer, and then every
+/// [snoozeSteps.last] for as long as it is put off. Join, "Already
+/// joined" or "Don't ask again" end it for good, and so does the
+/// channel already opened from Settings.
 abstract final class TelegramInvite {
   static const url = 'https://t.me/AyahReel';
-  static const minAge = Duration(days: 3);
-  static const minMoments = 3;
-  static const secondAfter = Duration(days: 2);
-  static const window = Duration(days: 7);
-  static const maxShows = 2;
+
+  /// How long a "Not now" holds it off: the first, the second, the
+  /// third, and every one after that.
+  static const snoozeSteps = [
+    Duration(days: 2),
+    Duration(days: 4),
+    Duration(days: 7),
+    Duration(days: 10),
+  ];
+
+  /// Into a launch, before a launch alone may bring it: time to land
+  /// on Home and see what is new before anything asks for anything.
+  static const launchDelay = Duration(seconds: 30);
 
   static const fileName = 'telegram_invite.json';
+
+  /// The invitation itself, for a test to open and answer.
+  @visibleForTesting
+  static Widget dialog() => const _InviteDialog();
 
   static GlobalKey<NavigatorState>? _navigator;
   static TelegramInviteRecord? _record;
   static Timer? _pending;
   static int _badges = 0;
 
-  /// At boot: where to show it, and the badges to follow, every new
-  /// one of which is an achievement moment.
+  /// How long the [snoozes]th "Not now" holds the invitation off.
+  @visibleForTesting
+  static Duration snoozeAfter(int snoozes) =>
+      snoozeSteps[(snoozes - 1).clamp(0, snoozeSteps.length - 1)];
+
+  /// At boot: where to show it, the badges to follow, every new one of
+  /// which is an achievement moment — and this launch, counted, which
+  /// may bring the invitation by itself once the app is settled.
   static Future<void> start(GlobalKey<NavigatorState> navigator) async {
     _navigator = navigator;
     await RewardsService.init();
@@ -120,6 +180,22 @@ abstract final class TelegramInvite {
       if (n > _badges) unawaited(after(TelegramMoment.achievement));
       _badges = n;
     });
+    try {
+      final r = await _load();
+      if (r.joined) return;
+      final next = r.copyWith(launches: r.launches + 1);
+      await _save(next);
+      if (_pending == null && _dueNow(next)) {
+        _pending = Timer(launchDelay, () {
+          _pending = null;
+          // A launch is not a moment: only on Home with nothing open,
+          // never over a reel being made.
+          unawaited(_show(atRest: true));
+        });
+      }
+    } catch (e) {
+      rlog('telegram invite: $e');
+    }
   }
 
   /// A good moment has passed: counted, and followed by the invitation
@@ -130,10 +206,12 @@ abstract final class TelegramInvite {
     if (_navigator == null) return;
     try {
       final r = await _load();
-      if (r.joined || r.shows >= maxShows) return;
+      if (r.joined) return;
       final next = r.copyWith(moments: r.moments + 1);
       await _save(next);
-      if (_pending != null || !_dueNow(next)) return;
+      if (!_dueNow(next)) return;
+      // A moment outranks a launch's wait: it is the better time.
+      _pending?.cancel();
       _pending = Timer(moment.delay, () {
         _pending = null;
         unawaited(_show());
@@ -143,46 +221,52 @@ abstract final class TelegramInvite {
     }
   }
 
-  /// Whether the invitation is due at [now]. [aged]: the app has been
-  /// on the phone for [minAge]. [opened]: the channel was opened from
-  /// Settings. [reelsMade] stands in for the moments of somebody who
-  /// made reels before this code counted any.
+  /// Whether the invitation is due at [now]. [opened]: the channel was
+  /// opened from Settings.
+  ///
+  /// The first time, after the first good moment or from the second
+  /// launch on; after a "Not now", once its hold has run out.
   @visibleForTesting
   static bool due(
     TelegramInviteRecord r,
     DateTime now, {
-    required bool aged,
     required bool opened,
     int reelsMade = 0,
   }) {
-    if (r.joined || opened || r.shows >= maxShows) return false;
-    final first = r.firstShown;
-    if (r.shows == 0 || first == null) {
-      return aged && (r.moments >= minMoments || reelsMade >= minMoments);
+    if (r.joined || opened) return false;
+    if (r.shows == 0) {
+      return r.moments >= 1 || reelsMade >= 1 || r.launches >= 2;
     }
-    final last = r.lastShown ?? first;
-    return now.difference(last) >= secondAfter &&
-        now.difference(first) < window;
+    // Records from before "Not now" came back have no hold written:
+    // theirs runs from the last time it was shown.
+    final last = r.lastShown ?? r.firstShown;
+    final next = r.nextAt ?? last?.add(snoozeAfter(r.snoozes.clamp(1, 99)));
+    return next == null || !now.isBefore(next);
   }
 
-  static bool _dueNow(TelegramInviteRecord r) {
-    final now = DateTime.now();
-    final since = InstallDate.since;
-    return due(
-      r,
-      now,
-      aged: InstallDate.before ||
-          since == null ||
-          now.difference(since) >= minAge,
-      opened: SettingsService.state.value.telegramNudgeSeen,
-      reelsMade: RewardsService.state.value.reelsMade,
-    );
+  /// The record after the invitation shown at [now] is answered.
+  @visibleForTesting
+  static TelegramInviteRecord answered(
+      TelegramInviteRecord r, TelegramAnswer a, DateTime now) {
+    if (a != TelegramAnswer.notNow) return r.copyWith(joined: true);
+    final snoozes = r.snoozes + 1;
+    return r.copyWith(snoozes: snoozes, nextAt: now.add(snoozeAfter(snoozes)));
   }
 
-  static Future<void> _show() async {
+  static bool _dueNow(TelegramInviteRecord r) => due(
+        r,
+        DateTime.now(),
+        opened: SettingsService.state.value.telegramNudgeSeen,
+        reelsMade: RewardsService.state.value.reelsMade,
+      );
+
+  /// [atRest]: only on the screen the app opens on, with nothing pushed
+  /// over it — what a launch asks for, where a moment is its own time.
+  static Future<void> _show({bool atRest = false}) async {
     final nav = _navigator?.currentState;
     final context = _navigator?.currentContext;
     if (nav == null || context == null || !OnScreen.now) return;
+    if (atRest && nav.canPop()) return;
     // Something already asks for the user's attention: the rating ask,
     // a reminder invitation, a sheet they opened. Not over it.
     Route<dynamic>? top;
@@ -194,24 +278,31 @@ abstract final class TelegramInvite {
     final r = await _load();
     if (!_dueNow(r)) return;
     final now = DateTime.now();
-    await _save(r.copyWith(
+    final shown = r.copyWith(
       shows: r.shows + 1,
       firstShown: r.firstShown ?? now,
       lastShown: now,
-    ));
-    rlog('telegram invite: shown (${r.shows + 1} of $maxShows)');
+    );
+    // Written before it is answered, with the hold a "Not now" would
+    // give: an app killed with the invitation up must not show it again
+    // on the very next open.
+    await _save(answered(shown, TelegramAnswer.notNow, now)
+        .copyWith(snoozes: shown.snoozes));
+    rlog('telegram invite: shown (${shown.shows})');
     if (!context.mounted) return;
-    final choice = await showDialog<_Choice>(
+    final choice = await showDialog<TelegramAnswer>(
       context: context,
       builder: (_) => const _InviteDialog(),
     );
-    if (choice == null) return;
-    await _save((await _load()).copyWith(joined: true));
+    final answer = choice ?? TelegramAnswer.notNow;
+    await _save(answered(shown, answer, DateTime.now()));
+    rlog('telegram invite: ${answer.name}');
+    if (answer == TelegramAnswer.notNow) return;
     final s = SettingsService.state.value;
     if (!s.telegramNudgeSeen) {
       unawaited(SettingsService.update(s.copyWith(telegramNudgeSeen: true)));
     }
-    if (choice != _Choice.join) return;
+    if (answer != TelegramAnswer.join) return;
     try {
       final ok = await launchUrl(Uri.parse(url),
           mode: LaunchMode.externalApplication);
@@ -252,8 +343,6 @@ abstract final class TelegramInvite {
       File('${(await getApplicationSupportDirectory()).path}/$fileName');
 }
 
-enum _Choice { join, joined }
-
 class _InviteDialog extends StatelessWidget {
   const _InviteDialog();
 
@@ -264,10 +353,11 @@ class _InviteDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = L10n.of(context);
     final text = Theme.of(context).textTheme;
+    void answer(TelegramAnswer a) => Navigator.of(context).pop(a);
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
+        padding: const EdgeInsets.fromLTRB(24, 28, 24, 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -301,7 +391,7 @@ class _InviteDialog extends StatelessWidget {
               child: FilledButton(
                 style: FilledButton.styleFrom(
                     backgroundColor: _blue, foregroundColor: Colors.white),
-                onPressed: () => Navigator.of(context).pop(_Choice.join),
+                onPressed: () => answer(TelegramAnswer.join),
                 child: Text(l.telegramJoin),
               ),
             ),
@@ -310,17 +400,29 @@ class _InviteDialog extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(_Choice.joined),
-                    child: Text(l.telegramJoined, textAlign: TextAlign.center),
+                    onPressed: () => answer(TelegramAnswer.notNow),
+                    child: Text(l.notNow, textAlign: TextAlign.center),
                   ),
                 ),
                 Expanded(
                   child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(l.notNow, textAlign: TextAlign.center),
+                    onPressed: () => answer(TelegramAnswer.joined),
+                    child: Text(l.telegramJoined, textAlign: TextAlign.center),
                   ),
                 ),
               ],
+            ),
+            // The way out for good, quieter than the rest: a choice to
+            // honour, not to invite.
+            TextButton(
+              onPressed: () => answer(TelegramAnswer.never),
+              style: TextButton.styleFrom(
+                foregroundColor:
+                    Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
+                textStyle: text.labelLarge?.copyWith(fontSize: 12),
+                visualDensity: VisualDensity.compact,
+              ),
+              child: Text(l.telegramNever, textAlign: TextAlign.center),
             ),
           ],
         ),

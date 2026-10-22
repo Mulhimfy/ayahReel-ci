@@ -15,9 +15,11 @@
 # The public repo gets snapshots, not history: each mirrored commit
 # becomes one commit with the same tree and message, authored by the
 # GitHub noreply address, its parent the public branch's previous
-# snapshot. This machine's committer email (git config user.email) is
-# replaced wherever the tree has it. The private history and its author
-# emails stay private. The message ends with the private commit it
+# snapshot. Every private address — this machine's committer email, and
+# every address that authored or committed in the private history, the
+# owner's among them, whoever runs this — is replaced wherever the tree
+# or the message has it, and the push is refused if one is left. The
+# private history and its author emails stay private. The message ends with the private commit it
 # mirrors, so RELEASES.md can name both.
 set -euo pipefail
 
@@ -28,7 +30,26 @@ REMOTE=${PUBLIC_REMOTE:-public}
 NOREPLY='244372596+Mulhimfy@users.noreply.github.com'
 
 SRC=$(git rev-parse --verify "$REF^{commit}")
-ME=$(git config user.email || true)
+
+# The addresses that must not reach the public tree. Not only this
+# machine's: on 2026-10-22 a session whose own address was a noreply one
+# mirrored the owner's (in tool/harvest_scenes.py) because only the
+# runner's was replaced. So every address in the private history goes
+# too. Public noreply addresses stay as they are.
+SCRUB=$(
+  { git config user.email || true
+    git log --format='%ae%n%ce' "$SRC" 2>/dev/null || true
+  } | grep -v -i -e '^$' -e 'noreply' | sort -u || true
+)
+SCRUB_ARGS=()
+while IFS= read -r e; do
+  [ -n "$e" ] && SCRUB_ARGS+=(-e "$e")
+done <<<"$SCRUB"
+scrub() {
+  SCRUB="$SCRUB" NOREPLY="$NOREPLY" perl -pe '
+    BEGIN { @addr = grep { length } split /\n/, $ENV{SCRUB} }
+    for my $a (@addr) { s/\Q$a\E/$ENV{NOREPLY}/g }'
+}
 
 # The mirror's artifacts are public, and GitHub masks secrets only in a
 # job's own log, never in a file the job uploads: on 2026-10-13 an iOS
@@ -48,17 +69,23 @@ export GIT_INDEX_FILE
 GIT_INDEX_FILE=$(mktemp)
 trap 'rm -f "$GIT_INDEX_FILE"' EXIT
 git read-tree "$SRC"
-if [ -n "$ME" ]; then
-  git grep -lF "$ME" "$SRC" -- . 2>/dev/null | sed "s/^$SRC://" |
+if [ ${#SCRUB_ARGS[@]} -gt 0 ]; then
+  # git grep answers 1 when nothing matches, which under pipefail would
+  # end the script here, silently, with nothing pushed.
+  { git grep -lF "${SCRUB_ARGS[@]}" "$SRC" -- . 2>/dev/null || true; } |
+    sed "s/^$SRC://" |
     while IFS= read -r path; do
       mode=$(git ls-tree "$SRC" -- "$path" | cut -d' ' -f1)
-      blob=$(git cat-file blob "$SRC:$path" |
-        ME="$ME" NOREPLY="$NOREPLY" perl -pe 's/\Q$ENV{ME}\E/$ENV{NOREPLY}/g' |
-        git hash-object -w --stdin)
+      blob=$(git cat-file blob "$SRC:$path" | scrub | git hash-object -w --stdin)
       git update-index --cacheinfo "$mode,$blob,$path"
     done
 fi
 TREE=$(git write-tree)
+if [ ${#SCRUB_ARGS[@]} -gt 0 ] &&
+   git grep -qF "${SCRUB_ARGS[@]}" "$TREE" -- . 2>/dev/null; then
+  echo "A private address is still in the tree: not mirrored." >&2
+  exit 1
+fi
 
 PARENT=""
 if git ls-remote --exit-code "$REMOTE" "refs/heads/$BRANCH" >/dev/null 2>&1; then
@@ -70,8 +97,7 @@ if [ -n "$PARENT" ] && [ "$(git rev-parse "$PARENT^{tree}")" = "$TREE" ]; then
   NEW=$PARENT
   echo "public/$BRANCH already has this tree: $NEW"
 else
-  MSG=$(git log -1 --format=%B "$SRC" |
-    ME="$ME" NOREPLY="$NOREPLY" perl -pe 's/\Q$ENV{ME}\E/$ENV{NOREPLY}/g if $ENV{ME}')
+  MSG=$(git log -1 --format=%B "$SRC" | scrub)
   NEW=$(printf '%s\n\nMirrors %s of the private repo.\n' "$MSG" "$SRC" |
     GIT_AUTHOR_NAME=Mulhimfy GIT_AUTHOR_EMAIL="$NOREPLY" \
     GIT_AUTHOR_DATE="$(git log -1 --format=%aI "$SRC")" \

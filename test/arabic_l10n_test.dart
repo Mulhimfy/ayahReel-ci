@@ -27,6 +27,12 @@ void main() {
         expect(l.reciterStyle(r), isNot(r.style),
             reason: '${r.id} is missing a ${lang.code} style');
         expect(l.reciterStyle(r), isNotEmpty);
+        // Another recording's note, beside its chips, is read in the
+        // app's language too.
+        if (r.recordingNote != null) {
+          expect(l.recordingNote(r), isNot(r.recordingNote),
+              reason: '${r.id} is missing a ${lang.code} recording note');
+        }
       }
     }
     // The name itself is only swapped where the names are read in

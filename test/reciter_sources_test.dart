@@ -47,10 +47,39 @@ void main() {
 
   test('a voice added since the tool carries the pace it measured', () {
     for (final r in reciters) {
+      // The EveryAyah voices' paces were set by hand before the tool (see
+      // Reciter.pace) — all but another recording, which came after it.
       final everyAyah = r.everyAyahFolder != null;
-      if (everyAyah) continue; // hand-set before the tool; see Reciter.pace
+      if (everyAyah && r.recordingOf == null) continue;
       final measured = (verified[r.id]['pace'] as num).toDouble();
       expect(r.pace, closeTo(measured, 0.005), reason: r.id);
+    }
+  });
+
+  test('another recording is another performance, not the same one from '
+      'another host', () {
+    // tool/verify_reciters.py compares each one with every other
+    // recording of its voice, waveforms and verse lengths over 160-odd
+    // verses (see 9. in its docstring), and records the verdict against
+    // the source it compared with.
+    for (final r in reciters) {
+      if (r.recordingOf == null) continue;
+      final v = verified[r.id] as Map<String, dynamic>;
+      expect(v['recording_of'], r.recordingOf, reason: r.id);
+      final distinct = v['distinct'] as Map<String, dynamic>?;
+      for (final other in recordingsOf(r)) {
+        if (other.id == r.id) continue;
+        final d = distinct?[other.id] as Map<String, dynamic>?;
+        expect(d, isNotNull,
+            reason: '${r.id} was never compared with ${other.id}');
+        expect(d!['ok'], isTrue, reason: '${r.id} against ${other.id}');
+        expect(d['source'], sourceKey(other),
+            reason: '${other.id} has moved since ${r.id} was compared '
+                'with it');
+        expect(d['wave_same'], 0, reason: '${r.id} against ${other.id}');
+        expect(d['verses'] as int, greaterThanOrEqualTo(40),
+            reason: '${r.id} against ${other.id}');
+      }
     }
   });
 
@@ -83,5 +112,43 @@ void main() {
         expect(base.endsWith('/'), isFalse, reason: r.id);
       }
     }
+  });
+
+  test('another recording hangs under a voice the list has, and says '
+      'what sets it apart', () {
+    final byId = {for (final r in reciters) r.id: r};
+    for (final r in reciters) {
+      final of = r.recordingOf;
+      if (of == null) {
+        expect(r.recordingNote, isNull, reason: r.id);
+        continue;
+      }
+      final voice = byId[of];
+      expect(voice, isNotNull, reason: '${r.id}: no voice $of');
+      // One level only: a recording of a recording would be a card the
+      // pickers never draw.
+      expect(voice!.recordingOf, isNull, reason: r.id);
+      expect(r.name, voice.name, reason: r.id);
+      expect(r.arabicName, voice.arabicName, reason: r.id);
+      expect(r.recordingNote, isNotNull, reason: r.id);
+      expect(r.recordingNote!.trim(), isNotEmpty, reason: r.id);
+      // An alternate is offered for whatever its voice is: it opens on
+      // Al-Fatiha like every voice (above), and lacks nothing the voice
+      // has.
+      for (final s in r.missingSurahs) {
+        expect(voice.hasSurah(s), isFalse, reason: '${r.id} lacks $s');
+      }
+    }
+    expect(voices.every((v) => v.recordingOf == null), isTrue);
+    for (final v in voices) {
+      final all = recordingsOf(v);
+      expect(all.first.id, v.id);
+      for (final r in all) {
+        expect(voiceOf(r).id, v.id);
+        expect(recordingsOf(r).map((x) => x.id), all.map((x) => x.id));
+      }
+    }
+    expect(voices.fold<int>(0, (n, v) => n + recordingsOf(v).length),
+        reciters.length);
   });
 }

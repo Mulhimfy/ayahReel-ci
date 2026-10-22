@@ -9,7 +9,6 @@ import '../l10n/l10n.dart';
 import '../state/creation_state.dart' show accentOnDark, accentOnLight;
 import '../theme/app_theme.dart';
 import 'a11y.dart';
-import 'colour_picker.dart';
 import 'ink_swatch.dart';
 
 /// How the verse moves, in one place: the designed looks, each a card
@@ -147,16 +146,16 @@ class MotionPicker extends StatelessWidget {
 /// colour, the reel's accent, gold until another is chosen — offered here
 /// because this is where what it colours can be seen moving.
 ///
-/// One row, all of it in view: the house gold first, a few colours that
-/// read as light, three of the luminous inks, and any colour mixed.
+/// Light is never a flat colour, so neither is this: the house gold
+/// first, then every luminous ink in one line that scrolls sideways, the
+/// inks drawn for the ground the verse is on leading.
 class MotionColourRow extends StatelessWidget {
   final int accentArgb;
   final VerseInk accentInk;
 
   /// Whether the verse sits on a pale band, where the house gold is the
-  /// deeper one and white would not show.
+  /// deeper one.
   final bool onLight;
-  final ValueChanged<int> onColour;
   final ValueChanged<VerseInk> onInk;
 
   /// Back to the house gold, free to follow the ground again.
@@ -167,41 +166,22 @@ class MotionColourRow extends StatelessWidget {
     required this.accentArgb,
     required this.accentInk,
     required this.onLight,
-    required this.onColour,
     required this.onInk,
     required this.onGold,
   });
-
-  /// The flat colours after the gold: each one a colour light can be.
-  static const flats = [
-    0xFFFFFFFF, // white
-    0xFFF5A8B8, // rose
-    0xFF9FE8C9, // mint
-    0xFF9CC7F5, // sky
-    0xFFC9B8F5, // lavender
-  ];
-
-  /// And the inks: gold leaf, fire, and an iridescence.
-  static const inks = [VerseInk.gilded, VerseInk.ember, VerseInk.iris];
 
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
     final gold = onLight ? accentOnLight : accentOnDark;
-    final flat = [for (final c in flats) if (!(onLight && c == 0xFFFFFFFF)) c];
-    final isGold = accentInk.isNone && accentArgb == gold;
-    final known = isGold ||
-        (accentInk.isNone && flat.contains(accentArgb)) ||
-        inks.contains(accentInk);
-    final named =
-        accentInk.isNone ? l.colourName(accentArgb) : l.inkName(accentInk);
+    final isGold = accentInk.isNone;
+    final named = isGold ? l.colourName(gold) : l.inkName(accentInk);
     final name = named.isEmpty
         ? named
         : named[0].toUpperCase() + named.substring(1);
     final section = l.motionColour;
-    Widget cell(Widget child) => SizedBox(width: 34, height: 34, child: Center(child: child));
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.only(top: 12),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -218,47 +198,29 @@ class MotionColourRow extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 6),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                cell(_Disc(
-                  label: '$section${l.comma} ${l.colourName(gold)}',
-                  selected: isGold,
-                  onTap: onGold,
-                  child: _flatDisc(gold),
-                )),
-                for (final c in flat)
-                  cell(_Disc(
-                    label: '$section${l.comma} ${l.a11yColourSwatch(c)}',
-                    selected: accentInk.isNone && accentArgb == c,
-                    onTap: () => onColour(c),
-                    child: _flatDisc(c),
-                  )),
-                for (final ink in inks)
-                  cell(_Disc(
-                    label: '$section${l.comma} ${l.a11yInkSwatch(ink)}',
-                    selected: accentInk == ink,
-                    onTap: () => onInk(ink),
-                    child: InkDisc(ink: ink, size: 24),
-                  )),
-                cell(CustomColourCircle(
-                  size: 24,
-                  current: accentArgb,
-                  chosen: !known,
-                  onPick: onColour,
-                )),
-              ],
-            ),
+          const SizedBox(height: 4),
+          InkStrip(
+            inks: VerseInk.ordered(onLight: onLight),
+            selected: isGold ? null : accentInk,
+            onPick: onInk,
+            labelOf: (ink) => '$section${l.comma} ${l.a11yInkSwatch(ink)}',
+            leading: [
+              _Disc(
+                label: '$section${l.comma} ${l.colourName(gold)}',
+                selected: isGold,
+                onTap: onGold,
+                child: _goldDisc(gold),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  static Widget _flatDisc(int argb) => Container(
+  /// The house gold, as a disc with its own light: the default, set
+  /// apart from the inks by its shape.
+  static Widget _goldDisc(int argb) => Container(
         width: 24,
         height: 24,
         decoration: BoxDecoration(

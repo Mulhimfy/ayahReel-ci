@@ -5,12 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../data/models.dart';
+import '../data/offline_pack.dart';
 import '../data/quran_verses.dart';
 import '../data/scene_catalog.dart';
 import '../data/settings_service.dart';
 import '../data/verse_lines.dart';
 import '../data/verse_motion.dart';
+import '../data/verse_font.dart';
 import '../data/verse_numbering.dart';
+import '../data/verse_translation.dart';
 import '../l10n/l10n.dart';
 import '../render/ayah_rasterizer.dart';
 import '../render/verse_planner.dart';
@@ -21,6 +24,7 @@ import '../widgets/app_toast.dart';
 import '../widgets/glow_button.dart' show QuietButton;
 import '../widgets/illumination.dart' show SealGlyph;
 import '../widgets/motion_picker.dart' show MotionPresetCard;
+import '../widgets/offline_sheet.dart';
 import '../widgets/surah_title.dart';
 import '../widgets/verse_stage.dart';
 
@@ -41,6 +45,10 @@ import '../widgets/verse_stage.dart';
 /// which carry from reel to reel and launch to launch (`LastChoices`).
 class CustomizeScreen extends StatelessWidget {
   const CustomizeScreen({super.key});
+
+  /// The reel's sceneries turning over line by line, when they do.
+  @visibleForTesting
+  static const groundKey = ValueKey('customize-ground');
 
   @override
   Widget build(BuildContext context) {
@@ -111,17 +119,13 @@ class _Page extends StatelessWidget {
     final c = creationState;
     final lines = s.verseLines > VerseLines.whole;
     const update = CustomizeScreen.update;
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 2, 20, 28),
-      children: [
+    final sections = <Widget>[
         Text(
           l.customizeIntro,
           style: t.bodyMedium?.copyWith(
               fontSize: 13, height: 1.4, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 16),
-        _ReelPreview(settings: s),
-        const SizedBox(height: 20),
 
         // ---- long verses, and the scenery that follows their lines ----
         _Section(
@@ -302,6 +306,14 @@ class _Page extends StatelessWidget {
                   ),
               ],
             ),
+            const SizedBox(height: 10),
+            // What the choice puts on a reel, in one small line: the end
+            // of Ayat al-Kursi with whatever the choice adds lit gold.
+            _NumberingSample(
+              numbering: s.verseNumbering,
+              edition: s.translation,
+              face: c.verseFace,
+            ),
           ],
         ),
         const SizedBox(height: 14),
@@ -316,6 +328,29 @@ class _Page extends StatelessWidget {
               value: s.highQualityVideo,
               onChanged: (on) =>
                   update((x) => x.copyWith(highQualityVideo: on)),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+
+        // ---- everything a reel needs from the network, kept -------------
+        _Section(
+          title: l.offlineSection,
+          children: [
+            ValueListenableBuilder<OfflineProgress>(
+              valueListenable: OfflinePack.state,
+              builder: (context, run, _) => _NavLine(
+                icon: Icons.download_rounded,
+                title: l.offlineTitle,
+                note: run.running
+                    ? l.offlineRunning((run.fraction * 100).floor())
+                    : l.offlineRowNote,
+                busy: run.running,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  showOfflineSheet(context);
+                },
+              ),
             ),
           ],
         ),
@@ -335,9 +370,144 @@ class _Page extends StatelessWidget {
                   },
           ),
         ),
-      ],
+    ];
+    // The reel stays in view while the choices under it scroll: it is
+    // what every one of them is seen on. It gives up half its height as
+    // the page moves, never more, and is drawn whole at every size.
+    return LayoutBuilder(builder: (context, box) {
+      final w = math.min(box.maxWidth * 0.58, 236.0).floorToDouble();
+      final h = (w * 16 / 9).floorToDouble();
+      return CustomScrollView(
+        slivers: [
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _PreviewHeader(
+              settings: s,
+              frameW: w,
+              frameH: h,
+              caption: l.customizePreviewCaption,
+              a11yLabel: l.a11yCustomizePreview,
+            ),
+          ),
+          // One column, not a lazy list: five sections are cheap to lay
+          // out at once, and an exact length keeps the end of the page
+          // where the finger left it (an estimated one shrank under the
+          // pinned reel mid-scroll).
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 6, 20, 28),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: sections,
+              ),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+}
+
+/// The reel at the head of the page, pinned: full size at the top, half
+/// its height once the page has scrolled, the caption under it fading
+/// as it shrinks. Opaque, so the choices pass under it rather than
+/// through it.
+class _PreviewHeader extends SliverPersistentHeaderDelegate {
+  final AppSettings settings;
+  final double frameW;
+  final double frameH;
+  final String caption;
+  final String a11yLabel;
+
+  _PreviewHeader({
+    required this.settings,
+    required this.frameW,
+    required this.frameH,
+    required this.caption,
+    required this.a11yLabel,
+  });
+
+  static const _top = 4.0;
+  static const _bottom = 10.0;
+  static const _captionH = 24.0;
+
+  /// How small the reel gets: half, still big enough to read a line.
+  static const _least = 0.5;
+
+  @override
+  double get maxExtent => _top + frameH + _captionH + _bottom;
+
+  @override
+  double get minExtent => _top + frameH * _least + _bottom;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlaps) {
+    final room = maxExtent - minExtent;
+    final k = room <= 0 ? 0.0 : (shrinkOffset / room).clamp(0.0, 1.0);
+    final scale = 1 - (1 - _least) * k;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.bg,
+        // A hairline once the page runs under it, so the edge reads.
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.stroke.withValues(alpha: k * 0.9),
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: _top),
+          Semantics(
+            image: true,
+            label: a11yLabel,
+            child: ExcludeSemantics(
+              child: SizedBox(
+                width: frameW * scale,
+                height: frameH * scale,
+                child: FittedBox(
+                  child: SizedBox(
+                    width: frameW,
+                    height: frameH,
+                    child: _ReelPreview(
+                        settings: settings, width: frameW, height: frameH),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (k < 1)
+            Expanded(
+              child: Opacity(
+                opacity: (1 - k * 2).clamp(0.0, 1.0),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: ExcludeSemantics(
+                    child: Text(
+                      caption,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontSize: 11.5,
+                            letterSpacing: 0.2,
+                            color: AppColors.textSecondary,
+                          ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
+
+  // The reel also answers to the reel flow's own choices (the motion,
+  // the highlight), which are not in [settings]: every rebuild of the
+  // page is passed on.
+  @override
+  bool shouldRebuild(covariant _PreviewHeader old) => true;
 }
 
 // ---------------------------------------------------------------------
@@ -351,8 +521,11 @@ class _Page extends StatelessWidget {
 /// the next (see [VersePlanner.demo]), so only the timing is invented.
 class _ReelPreview extends StatefulWidget {
   final AppSettings settings;
+  final double width;
+  final double height;
 
-  const _ReelPreview({required this.settings});
+  const _ReelPreview(
+      {required this.settings, required this.width, required this.height});
 
   @override
   State<_ReelPreview> createState() => _ReelPreviewState();
@@ -365,6 +538,11 @@ class _ReelPreviewState extends State<_ReelPreview>
 
   late final AnimationController _c = AnimationController(vsync: this);
   final _clock = ValueNotifier<int>(0);
+
+  /// The line on screen, by its place in the cut: what the scenery
+  /// turns over on when it follows the lines. Moves only when the line
+  /// does, so the ground is rebuilt a few times a verse, not every frame.
+  final _line = ValueNotifier<int>(0);
 
   String? _key;
   Ayah? _ayah;
@@ -390,6 +568,10 @@ class _ReelPreviewState extends State<_ReelPreview>
     _c.addListener(() {
       final d = _c.duration?.inMilliseconds ?? 0;
       _clock.value = (_c.value * d).round();
+      final units = _demo?.units;
+      if (units != null && units.isNotEmpty) {
+        _line.value = VerseUnit.indexAt(units, _clock.value);
+      }
     });
     _plan();
     _restart();
@@ -421,6 +603,7 @@ class _ReelPreviewState extends State<_ReelPreview>
   void dispose() {
     _c.dispose();
     _clock.dispose();
+    _line.dispose();
     super.dispose();
   }
 
@@ -489,109 +672,167 @@ class _ReelPreviewState extends State<_ReelPreview>
 
   @override
   Widget build(BuildContext context) {
-    final l = L10n.of(context);
-    final t = Theme.of(context).textTheme;
     final s = widget.settings;
     final c = creationState;
     final demo = _demo;
     final ayah = _ayah;
     final rec = _rec;
-    return LayoutBuilder(builder: (context, box) {
-      final w = math.min(box.maxWidth * 0.58, 236.0).floorToDouble();
-      final h = (w * 16 / 9).floorToDouble();
-      final frame = Container(
-        width: w,
-        height: h,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(w * 0.075),
-          border: Border.all(color: AppColors.stroke),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.45),
-              blurRadius: 28,
-              offset: const Offset(0, 12),
-            ),
-            BoxShadow(
-              color: AppColors.gold.withValues(alpha: 0.07),
-              blurRadius: 40,
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(w * 0.075),
-          child: MediaQuery(
-            data: MediaQuery.of(context)
-                .copyWith(textScaler: TextScaler.noScaling),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                _Ground(scene: c.background, width: w),
-                if (s.surahTitle)
-                  Align(
-                    alignment: const Alignment(0, -0.76),
-                    child: SurahTitleLine(
-                      surah: 2,
-                      width: w,
-                      edition: s.translation,
+    final w = widget.width;
+    final h = widget.height;
+    // The scenery turns over at every line when it follows them — as a
+    // reel's does — and stays put for the verse when it doesn't.
+    final perLine = s.scenesFollowLines &&
+        s.verseLines > VerseLines.whole &&
+        (demo?.units.length ?? 0) > 1;
+    final grounds = _grounds(c, perLine ? demo!.units.length : 1, w);
+    return Container(
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(w * 0.075),
+        border: Border.all(color: AppColors.stroke),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 28,
+            offset: const Offset(0, 12),
+          ),
+          BoxShadow(
+            color: AppColors.gold.withValues(alpha: 0.07),
+            blurRadius: 40,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(w * 0.075),
+        child: MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: TextScaler.noScaling),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (grounds.length < 2)
+                grounds.first
+              else
+                ValueListenableBuilder<int>(
+                  valueListenable: _line,
+                  builder: (_, line, __) => AnimatedSwitcher(
+                    key: CustomizeScreen.groundKey,
+                    duration: const Duration(milliseconds: 450),
+                    child: KeyedSubtree(
+                      key: ValueKey(line % grounds.length),
+                      child: grounds[line % grounds.length],
                     ),
                   ),
-                if (demo != null && ayah != null && rec != null)
-                  Align(
-                    alignment: Alignment(0, c.overlayAlign * 2 - 1),
-                    child: VerseStage(
-                      clock: _clock,
-                      units: demo.units,
-                      ayahs: _ayahs,
-                      recitation: rec,
-                      motion: c.motion,
-                      words: _words,
-                      highlight: c.wordHighlight,
-                      wordTimes: _times,
-                      width: w,
-                      textColor: Color(c.textArgb),
-                      accent: Color(c.accentArgb),
-                      ink: c.verseInk,
-                      accentInk: c.accentInk,
-                      textScale: c.textScale,
-                      preset: c.textPreset,
-                      onLight: false,
-                      translation: s.translation,
-                      numbering: s.verseNumbering,
-                      showTranslation: !s.verseTranslationOff,
-                      surah: 2,
-                      verseFace: c.verseFace,
-                      translationFace: c.typography.translation,
-                      onHeight: (_) {},
-                    ),
+                ),
+              if (s.surahTitle)
+                Align(
+                  alignment: const Alignment(0, -0.76),
+                  child: SurahTitleLine(
+                    surah: 2,
+                    width: w,
+                    edition: s.translation,
                   ),
-              ],
-            ),
+                ),
+              if (demo != null && ayah != null && rec != null)
+                Align(
+                  alignment: Alignment(0, c.overlayAlign * 2 - 1),
+                  child: VerseStage(
+                    clock: _clock,
+                    units: demo.units,
+                    ayahs: _ayahs,
+                    recitation: rec,
+                    motion: c.motion,
+                    words: _words,
+                    highlight: c.wordHighlight,
+                    wordTimes: _times,
+                    width: w,
+                    textColor: Color(c.textArgb),
+                    accent: Color(c.accentArgb),
+                    ink: c.verseInk,
+                    accentInk: c.accentInk,
+                    textScale: c.textScale,
+                    preset: c.textPreset,
+                    onLight: false,
+                    translation: s.translation,
+                    numbering: s.verseNumbering,
+                    showTranslation: !s.verseTranslationOff,
+                    surah: 2,
+                    verseFace: c.verseFace,
+                    translationFace: c.typography.translation,
+                    onHeight: (_) {},
+                  ),
+                ),
+            ],
           ),
         ),
-      );
-      return Column(
+      ),
+    );
+  }
+
+  /// The grounds the demo deals out, [n] of them at most: the reel's own
+  /// run of sceneries when it has more than one, else the scenery last
+  /// chosen and, after it, the first of its tab's — every one of them a
+  /// poster the app ships, so the page never waits on the network. A
+  /// scenery of the user's own is one ground, with the shipped ones
+  /// after it.
+  List<Widget> _grounds(CreationState c, int n, double w) {
+    final run = c.scenes;
+    if (run.length > 1) {
+      return [
+        for (final b in run.take(math.max(1, n))) _Ground(scene: b, width: w),
+      ];
+    }
+    final first = c.background;
+    final out = <Widget>[_Ground(scene: first, width: w)];
+    if (n < 2) return out;
+    final own = first == null ? null : SceneCatalog.byId(first.id);
+    // Portrait sceneries only: the preview is a full frame, with no
+    // letterbox for a wide one to sit in.
+    final tab = own != null && !own.wide ? own.tab : 'sky';
+    for (final sc in SceneCatalog.inTab(tab)) {
+      if (out.length >= math.min(n, 6)) break;
+      if (sc.id == first?.id || sc.wide) continue;
+      out.add(_Poster(scene: sc));
+    }
+    return out;
+  }
+}
+
+/// A scenery from the catalog, drawn from the poster the app ships for
+/// it, under the reel's scrim.
+class _Poster extends StatelessWidget {
+  final Scene scene;
+
+  const _Poster({required this.scene});
+
+  @override
+  Widget build(BuildContext context) => Stack(
+        fit: StackFit.expand,
         children: [
-          Semantics(
-            image: true,
-            label: l.a11yCustomizePreview,
-            child: ExcludeSemantics(child: Center(child: frame)),
-          ),
-          const SizedBox(height: 10),
-          ExcludeSemantics(
-            child: Text(
-              l.customizePreviewCaption,
-              textAlign: TextAlign.center,
-              style: t.bodySmall?.copyWith(
-                fontSize: 11.5,
-                letterSpacing: 0.2,
-                color: AppColors.textSecondary,
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(scene.gradientArgb[0]),
+                  Color(scene.gradientArgb[1]),
+                ],
               ),
             ),
           ),
+          Image.asset(
+            scene.thumbAsset,
+            fit: BoxFit.cover,
+            excludeFromSemantics: true,
+            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+          ),
+          const DecoratedBox(
+            decoration: BoxDecoration(gradient: AyahRasterizer.scrimGradient),
+          ),
         ],
       );
-    });
-  }
 }
 
 /// The scenery the user last chose, as the preview's ground: the
@@ -1195,6 +1436,211 @@ class _WordChip extends StatelessWidget {
               fontWeight: chosen ? FontWeight.w600 : FontWeight.w400,
               color: chosen ? AppColors.goldBright : AppColors.textPrimary,
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The end of Ayat al-Kursi as a reel card ends it, with whatever the
+/// verse-number choice adds: the numbered sign after the last word, the
+/// reference under it, both, or neither. What was just added glows in
+/// and settles, so a tap on a chip shows what that chip did.
+class _NumberingSample extends StatelessWidget {
+  final VerseNumbering numbering;
+  final VerseTranslation edition;
+  final VerseFace face;
+
+  const _NumberingSample({
+    required this.numbering,
+    required this.edition,
+    required this.face,
+  });
+
+  /// The last words of 2:255.
+  static const _tail = 'وَهُوَ ٱلْعَلِىُّ ٱلْعَظِيمُ';
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    final verse = AppTheme.quran(size: 17, face: face, color: Colors.white);
+    final mark = ayahEndMark(face, 255);
+    final markStyle = AppTheme.quran(size: 17, face: mark.face);
+    final ref = verseReferenceLine(2, 255, edition);
+    return Semantics(
+      label: l.a11yNumberingSample(l.verseNumberingLabel(numbering)),
+      excludeSemantics: true,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 9),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.28),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.stroke.withValues(alpha: 0.7)),
+        ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 260),
+          layoutBuilder: (current, previous) => Stack(
+            alignment: Alignment.center,
+            children: [...previous, if (current != null) current],
+          ),
+          child: Column(
+            key: ValueKey(numbering),
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text.rich(
+                TextSpan(children: [
+                  const TextSpan(text: '… $_tail'),
+                  if (numbering.showsMark)
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: _Lit(
+                        child: Text(
+                          '\u00A0${mark.text}',
+                          textDirection: TextDirection.rtl,
+                          style: verse.copyWith(
+                            fontFamily: markStyle.fontFamily,
+                            fontFamilyFallback: markStyle.fontFamilyFallback,
+                            fontSize: markStyle.fontSize,
+                            color: AppColors.goldBright,
+                          ),
+                        ),
+                      ),
+                    ),
+                ]),
+                textAlign: TextAlign.center,
+                textDirection: TextDirection.rtl,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: verse.copyWith(height: 1.5),
+              ),
+              if (numbering.showsReference && ref.isNotEmpty)
+                _Lit(
+                  child: Text(
+                    ref,
+                    textAlign: TextAlign.center,
+                    textDirection: edition.direction,
+                    style: AppTheme.translation(
+                      size: 11,
+                      arabic: edition.arabicScript,
+                      color: AppColors.goldBright,
+                    ).copyWith(
+                      fontStyle: FontStyle.normal,
+                      letterSpacing: edition.arabicScript ? 0 : 1.0,
+                    ),
+                  ),
+                ),
+              if (numbering == VerseNumbering.off)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    l.numberingNothingAdded,
+                    style: const TextStyle(
+                        fontSize: 10.5, color: AppColors.textSecondary),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Glows in gold once, then settles: how [_NumberingSample] points at
+/// what a choice just added.
+class _Lit extends StatelessWidget {
+  final Widget child;
+
+  const _Lit({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    if (still) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 1, end: 0),
+      duration: const Duration(milliseconds: 1100),
+      curve: Curves.easeOutCubic,
+      child: child,
+      builder: (_, glow, child) => DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.goldBright.withValues(alpha: 0.45 * glow),
+              blurRadius: 14 * glow,
+            ),
+          ],
+        ),
+        child: child,
+      ),
+    );
+  }
+}
+
+/// A choice that opens something, with a line under its name saying
+/// what it does — or how far it has got.
+class _NavLine extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String note;
+  final bool busy;
+  final VoidCallback onTap;
+
+  const _NavLine({
+    required this.icon,
+    required this.title,
+    required this.note,
+    required this.busy,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            children: [
+              Icon(icon, size: 18, color: AppColors.goldBright),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      note,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        height: 1.35,
+                        color: busy
+                            ? AppColors.goldBright
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Icon(Icons.chevron_right_rounded,
+                  color: AppColors.textSecondary),
+            ],
           ),
         ),
       ),

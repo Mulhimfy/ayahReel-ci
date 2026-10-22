@@ -233,15 +233,26 @@ void main() {
     // Says where the choice ends up.
     expect(find.text('Shown on your reels'), findsOneWidget);
 
-    await t.tap(find.text('Mark and reference'));
-    await t.pumpAndSettle();
+    // The reel stays pinned over the head of the page: a chip is
+    // brought clear of it before it is tapped, as a finger would.
+    Future<void> tapChip(String label) async {
+      final top = t.getRect(find.text(label)).top;
+      const clear = 420.0;
+      if (top < clear) {
+        await t.drag(page(), Offset(0, clear - top));
+        await t.pumpAndSettle();
+      }
+      await t.tap(find.text(label));
+      await t.pumpAndSettle();
+    }
+
+    await tapChip('Mark and reference');
     expect(SettingsService.state.value.verseNumbering, VerseNumbering.both);
     // The page stays, marking the new choice, so the next one can be
     // tried at once.
     var picked = t.widget<Text>(find.text('Mark and reference'));
     expect(picked.style?.fontWeight, FontWeight.w600);
-    await t.tap(find.text('Verse-end mark'));
-    await t.pumpAndSettle();
+    await tapChip('Verse-end mark');
     expect(SettingsService.state.value.verseNumbering, VerseNumbering.mark);
     expect(t.widget<Text>(find.text('Verse-end mark')).style?.fontWeight,
         FontWeight.w600);

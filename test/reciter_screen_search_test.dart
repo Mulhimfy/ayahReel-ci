@@ -48,10 +48,12 @@ void main() {
   Finder field() => find.byType(TextField);
 
   testWidgets('past forty voices, a field to search them by', (t) async {
-    expect(reciters.length, greaterThan(40));
+    // Voices, not recordings: a voice's other recordings are chosen on
+    // its card, and are not more reciters to search.
+    expect(voices.length, greaterThan(40));
     await open(t);
     expect(field(), findsOneWidget);
-    expect(find.text(l.searchReciters(reciters.length)), findsOneWidget);
+    expect(find.text(l.searchReciters(voices.length)), findsOneWidget);
     // The upload leads the list while nothing is being looked for.
     expect(find.text(l.useYourOwnAudio), findsOneWidget);
   });
@@ -61,6 +63,7 @@ void main() {
     await open(t);
     await t.enterText(field(), 'alafasy');
     await t.pump();
+    // One card for the voice, however many recordings it has.
     expect(find.text('Mishary Alafasy'), findsOneWidget);
     expect(find.text('Mahmoud Al-Husary'), findsNothing);
     expect(find.text(l.useYourOwnAudio), findsNothing);

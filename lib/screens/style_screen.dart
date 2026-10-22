@@ -365,7 +365,6 @@ class _StyleScreenState extends State<StyleScreen> {
                 accentArgb: creationState.accentArgb,
                 accentInk: creationState.accentInk,
                 onLight: creationState.onLightGround,
-                onColour: creationState.setAccentColor,
                 onInk: creationState.setAccentInk,
                 onGold: creationState.resetAccent,
               ),
@@ -1263,29 +1262,22 @@ class _FaceCard extends StatelessWidget {
   }
 }
 
-/// A small pill with a selected state — the presets, and the blur.
+/// A small pill with a selected state: the presets.
 class _Chip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  final IconData? icon;
-
-  /// What a reader hears, when [label] alone would not say what the
-  /// chip sets.
-  final String? a11yLabel;
 
   const _Chip({
     required this.label,
     required this.selected,
     required this.onTap,
-    this.icon,
-    this.a11yLabel,
   });
 
   @override
   Widget build(BuildContext context) {
     return A11yTap(
-      label: a11yLabel ?? label,
+      label: label,
       selected: selected,
       onTap: onTap,
       child: GestureDetector(
@@ -1305,27 +1297,13 @@ class _Chip extends StatelessWidget {
               width: selected ? 1.5 : 1,
             ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) ...[
-                Icon(icon,
-                    size: 14,
-                    color: selected
-                        ? AppColors.goldBright
-                        : AppColors.textSecondary),
-                const SizedBox(width: 5),
-              ],
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color:
-                      selected ? AppColors.goldBright : AppColors.textSecondary,
-                ),
-              ),
-            ],
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              color: selected ? AppColors.goldBright : AppColors.textSecondary,
+            ),
           ),
         ),
       ),
@@ -1337,12 +1315,11 @@ class _Chip extends StatelessWidget {
 // Colour
 // ---------------------------------------------------------------------
 
-/// The verse's colour, and on a wide card the band's: every colour in
-/// view at once, in two grids that need no scrolling.
+/// The verse's colour, and on a wide card the band's.
 ///
-/// The luminous inks come first, each a disc of its own light; then the
-/// flat colours, two rows of twelve in the palette's own order, and any
-/// colour mixed at the end. The accent — the lit word, the thread, the
+/// The luminous inks come first, in one line of small squares that
+/// scrolls sideways; then the flat colours, two rows of twelve in the
+/// palette's own order, and any colour mixed at the end. The accent — the lit word, the thread, the
 /// light — is the motion's colour now, and is chosen on the motion panel,
 /// where what it colours can be seen moving.
 class _ColourPanel extends StatelessWidget {
@@ -1383,17 +1360,13 @@ class _ColourPanel extends StatelessWidget {
     final custom = s.verseInk.isNone &&
         !flat.any((c) => (c & 0xFFFFFF) == (s.textArgb & 0xFFFFFF));
     return [
-      _Grid(
-        rows: 2,
-        children: [
-          for (final ink in inks)
-            _Cell(
-              label: '$section${l.comma} ${l.a11yInkSwatch(ink)}',
-              selected: s.verseInk == ink,
-              onTap: () => s.setVerseInk(ink),
-              child: (size) => InkDisc(ink: ink, size: size),
-            ),
-        ],
+      // The luminous inks in one line that scrolls, small squares over
+      // the palette rather than two rows of discs on top of it.
+      InkStrip(
+        inks: inks,
+        selected: s.verseInk.isNone ? null : s.verseInk,
+        onPick: s.setVerseInk,
+        labelOf: (ink) => '$section${l.comma} ${l.a11yInkSwatch(ink)}',
       ),
       const _Divider(),
       _Grid(
@@ -1431,11 +1404,23 @@ class _ColourPanel extends StatelessWidget {
     final flat = s.backdrop == LetterboxBackdrop.colour;
     return [
       _MiniHeading(l.styleLuminous,
-          value: glowing ? l.bandGlowName(s.bandGlow) : null),
+          value: glowing
+              ? l.bandGlowName(s.bandGlow)
+              : blurred
+                  ? l.backdropBlur
+                  : null),
       _Grid(
         rows: 2,
         cell: 44,
         children: [
+          // The scenery itself, blurred, leads the luminous grounds: it
+          // is one of them, the one drawn from the picture.
+          _Cell(
+            label: '$section${l.comma} ${l.backdropBlur}',
+            selected: blurred,
+            onTap: () => s.setBackdrop(LetterboxBackdrop.blur),
+            child: (size) => _BlurDisc(size: size),
+          ),
           for (final g in BandGlow.values)
             _Cell(
               label: '$section${l.comma} ${l.bandGlowName(g)}',
@@ -1453,17 +1438,6 @@ class _ColourPanel extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _Chip(
-                label: l.backdropBlur,
-                a11yLabel: '$section${l.comma} ${l.backdropBlur}',
-                icon: Icons.blur_on_rounded,
-                selected: blurred,
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  s.setBackdrop(LetterboxBackdrop.blur);
-                },
-              ),
-              const SizedBox(width: 8),
               for (final c in letterboxBackdropSwatches)
                 SizedBox(
                   width: 34,
@@ -1605,6 +1579,66 @@ class _Ringed extends StatelessWidget {
             ),
           ),
           child: child,
+        ),
+      ),
+    );
+  }
+}
+
+/// The scenery blurred, as a disc: the reel's own picture where there
+/// is one, softened as the band softens it, under a frosted face.
+class _BlurDisc extends StatelessWidget {
+  final double size;
+
+  const _BlurDisc({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    final b = creationState.background;
+    final scene = b == null ? null : SceneCatalog.byId(b.id);
+    final g = b?.gradientArgb ?? const [0xFF2A3446, 0xFF151B26];
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(g[0]), Color(g.length > 1 ? g[1] : g[0])],
+        ),
+      ),
+      child: ClipOval(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (scene != null)
+              ImageFiltered(
+                imageFilter: ui.ImageFilter.blur(
+                    sigmaX: size * 0.12, sigmaY: size * 0.12),
+                child: Image.asset(scene.thumbAsset,
+                    fit: BoxFit.cover,
+                    cacheWidth: 96,
+                    excludeFromSemantics: true,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink()),
+              ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: const Alignment(-0.3, -0.4),
+                  radius: 0.9,
+                  colors: [
+                    Colors.white.withValues(alpha: 0.28),
+                    Colors.white.withValues(alpha: 0.04),
+                  ],
+                ),
+              ),
+            ),
+            Icon(Icons.blur_on_rounded,
+                size: size * 0.5,
+                color: Colors.white.withValues(alpha: 0.85)),
+          ],
         ),
       ),
     );

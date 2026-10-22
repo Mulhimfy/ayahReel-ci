@@ -110,6 +110,8 @@ class _ReciterScreenState extends State<ReciterScreen>
       // The voice the last reel was made with — this session's, or
       // the last launch's (see LastChoices) — is where a new reel
       // starts. Continue is one tap away; any other voice is one tap.
+      // A voice's other recording is kept too: it is the same card,
+      // with that recording's chip lit.
       final last = creationState.reciter;
       if (last != null && !last.isUserAudio && _has(last)) {
         for (final r in reciters) {
@@ -142,12 +144,15 @@ class _ReciterScreenState extends State<ReciterScreen>
       );
       return;
     }
-    final i = reciters.indexWhere((r) => r.id == _selected?.id);
+    final chosen = _selected;
+    final i = chosen == null
+        ? -1
+        : voices.indexWhere((v) => v.id == voiceOf(chosen).id);
     if (i < 0 || tries >= 8) return;
     final pos = _list.position;
     // The upload card leads the list; the extent the list estimates for
     // all of it comes from the cards it has measured.
-    final count = reciters.length + 1;
+    final count = voices.length + 1;
     final each = (pos.maxScrollExtent + pos.viewportDimension) / count;
     final guess = (i + 1) * each - pos.viewportDimension * 0.35;
     _list.jumpTo(guess.clamp(0.0, pos.maxScrollExtent));
@@ -400,9 +405,10 @@ class _ReciterScreenState extends State<ReciterScreen>
     final t = Theme.of(context).textTheme;
     final l = L10n.of(context);
     final searching = _query.trim().isNotEmpty;
+    // One card per voice; its other recordings are chips on the card.
     final shown = searching
-        ? ReciterSearch.filter(reciters, _query, styleOf: l.reciterStyle)
-        : reciters;
+        ? ReciterSearch.filter(voices, _query, styleOf: l.reciterStyle)
+        : voices;
     // The upload is a way past the list, not a voice in it: while a
     // name is being looked for it steps aside.
     final head = searching ? 0 : 1;
@@ -435,10 +441,10 @@ class _ReciterScreenState extends State<ReciterScreen>
               const SizedBox(height: 6),
               Text(l.tapToListen, style: t.bodyMedium),
               const SizedBox(height: 18),
-              if (reciters.length > _searchFrom) ...[
+              if (voices.length > _searchFrom) ...[
                 _SearchField(
                   controller: _search,
-                  hint: l.searchReciters(reciters.length),
+                  hint: l.searchReciters(voices.length),
                   clearLabel: l.clear,
                   onChanged: (v) => setState(() => _query = v),
                 ),
@@ -472,14 +478,36 @@ class _ReciterScreenState extends State<ReciterScreen>
                             onChooseFile: _chooseFile,
                           );
                         }
-                        final r = shown[i - head];
+                        final v = shown[i - head];
                         final s = widget.surah;
+                        final takes = recordingsOf(v);
+                        final sel = _selected;
+                        final chosen = sel != null &&
+                                !sel.isUserAudio &&
+                                voiceOf(sel).id == v.id
+                            ? sel
+                            : null;
+                        final mine = chosen != null;
+                        // The voice can be picked when any recording of
+                        // it has the surah; the card opens on the first
+                        // that does.
+                        final usable = [
+                          for (final r in takes)
+                            if (_has(r)) r,
+                        ];
                         return _ReciterCard(
-                          key: _selected?.id == r.id ? _chosenKey : null,
-                          reciter: r,
-                          selected: _selected?.id == r.id,
-                          onTap: () => _pick(r),
-                          lacking: s == null || r.hasSurah(s)
+                          key: mine ? _chosenKey : null,
+                          reciter: v,
+                          recordings: takes,
+                          chosen: chosen,
+                          usable: {for (final r in usable) r.id},
+                          selected: mine,
+                          onTap: () {
+                            if (usable.isEmpty) return;
+                            _pick(chosen ?? usable.first);
+                          },
+                          onRecording: _pick,
+                          lacking: usable.isNotEmpty || s == null
                               ? null
                               : l.noRecordingOf(l.surahTitle(
                                   QuranRepository.surahInfo(s))),
@@ -752,9 +780,23 @@ class _SourceRow extends StatelessWidget {
 }
 
 class _ReciterCard extends StatelessWidget {
+  /// The voice: its first recording, which names the card.
   final Reciter reciter;
+
+  /// Every recording of the voice, the first first. One chip each when
+  /// there is more than one.
+  final List<Reciter> recordings;
+
+  /// The recording picked, when this card is the chosen voice.
+  final Reciter? chosen;
+
+  /// The ids of the recordings that can be picked here: all of them,
+  /// unless a surah is already chosen that some never recorded.
+  final Set<String> usable;
+
   final bool selected;
   final VoidCallback onTap;
+  final ValueChanged<Reciter> onRecording;
 
   /// Why this voice can't be picked for the surah already chosen, or
   /// null when it can.
@@ -763,14 +805,19 @@ class _ReciterCard extends StatelessWidget {
   const _ReciterCard(
       {super.key,
       required this.reciter,
+      required this.recordings,
+      required this.chosen,
+      required this.usable,
       required this.selected,
       required this.onTap,
+      required this.onRecording,
       this.lacking});
 
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
     final l = L10n.of(context);
+    final playing = chosen ?? reciter;
     // One button per voice: the name, the style, the per-word note,
     // and whether it is the chosen one. The Arabic name beside an
     // English card is the same name again, so it is left to the eye.
@@ -808,80 +855,98 @@ class _ReciterCard extends StatelessWidget {
           onTap: off ? null : onTap,
           child: Padding(
             padding: const EdgeInsets.all(18),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 220),
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: selected
-                        ? AppColors.gold
-                        : AppColors.gold.withValues(alpha: 0.12),
-                  ),
-                  child: Icon(
-                    selected
-                        ? Icons.graphic_eq_rounded
-                        : Icons.play_arrow_rounded,
-                    color: selected
-                        ? const Color(0xFF14100A)
-                        : AppColors.gold,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(l.reciterName(reciter), style: t.titleMedium),
-                      const SizedBox(height: 3),
-                      Text(lacking ?? l.reciterStyle(reciter),
-                          style: t.bodyMedium),
-                      // Only some recordings have released word
-                      // timings, and it is the one thing a card can
-                      // say about a voice that the preview cannot
-                      // play. Kept to a whisper: a line this small is
-                      // a detail on the name, not a second decision.
-                      if (WordAlignService.supports(reciter)) ...[
-                        const SizedBox(height: 5),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.auto_awesome_rounded,
-                              size: 11,
-                              color: AppColors.gold.withValues(alpha: 0.8),
-                            ),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: Text(
-                                l.perWordHighlight,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: t.bodySmall?.copyWith(
-                                  fontSize: 10.5,
-                                  letterSpacing: 0.2,
+                Row(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: selected
+                            ? AppColors.gold
+                            : AppColors.gold.withValues(alpha: 0.12),
+                      ),
+                      child: Icon(
+                        selected
+                            ? Icons.graphic_eq_rounded
+                            : Icons.play_arrow_rounded,
+                        color: selected
+                            ? const Color(0xFF14100A)
+                            : AppColors.gold,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(l.reciterName(reciter), style: t.titleMedium),
+                          const SizedBox(height: 3),
+                          Text(lacking ?? l.reciterStyle(reciter),
+                              style: t.bodyMedium),
+                          // Only some recordings have released word
+                          // timings, and it is the one thing a card can
+                          // say about a voice that the preview cannot
+                          // play. Kept to a whisper: a line this small is
+                          // a detail on the name, not a second decision.
+                          if (WordAlignService.supports(playing)) ...[
+                            const SizedBox(height: 5),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.auto_awesome_rounded,
+                                  size: 11,
                                   color: AppColors.gold.withValues(alpha: 0.8),
                                 ),
-                              ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    l.perWordHighlight,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: t.bodySmall?.copyWith(
+                                      fontSize: 10.5,
+                                      letterSpacing: 0.2,
+                                      color: AppColors.gold.withValues(alpha: 0.8),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                // In Arabic the name IS the Arabic name; repeating it in
-                // the trailing slot would just echo the row.
-                if (!l.usesArabicNames)
-                  ExcludeSemantics(
-                    child: Text(
-                      reciter.arabicName,
-                      style: AppTheme.quran(
-                        size: 15,
-                        color: AppColors.textSecondary,
+                        ],
                       ),
+                    ),
+                    // In Arabic the name IS the Arabic name; repeating it in
+                    // the trailing slot would just echo the row.
+                    if (!l.usesArabicNames)
+                      ExcludeSemantics(
+                        child: Text(
+                          reciter.arabicName,
+                          style: AppTheme.quran(
+                            size: 15,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                // The recordings across the card, under the name: in one
+                // line, clear of the Arabic name at the row's end.
+                if (recordings.length > 1 && !off)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                        start: 62, top: 10),
+                    child: _RecordingChips(
+                      recordings: recordings,
+                      chosen: selected ? chosen : null,
+                      usable: usable,
+                      onPick: onRecording,
                     ),
                   ),
               ],
@@ -890,6 +955,111 @@ class _ReciterCard extends StatelessWidget {
         ),
       ),
       ),
+      ),
+    );
+  }
+}
+
+/// A voice's recordings, one numbered chip each, under its name. The
+/// lit chip is the recording the reel will use; the note beside the
+/// chips says what sets it apart, or what any recording here is for.
+class _RecordingChips extends StatelessWidget {
+  final List<Reciter> recordings;
+  final Reciter? chosen;
+  final Set<String> usable;
+  final ValueChanged<Reciter> onPick;
+
+  const _RecordingChips({
+    required this.recordings,
+    required this.chosen,
+    required this.usable,
+    required this.onPick,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+    final l = L10n.of(context);
+    final note = chosen == null ? null : l.recordingNote(chosen!);
+    final small = t.bodySmall?.copyWith(
+      fontSize: 10.5,
+      letterSpacing: 0.2,
+      color: AppColors.textSecondary,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            ExcludeSemantics(child: Text(l.recordingsLabel, style: small)),
+            const SizedBox(width: 2),
+            for (var i = 0; i < recordings.length; i++)
+              _chip(context, i, recordings[i]),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          note ?? l.recordingsHint,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: small?.copyWith(
+            color: note == null
+                ? AppColors.textSecondary.withValues(alpha: 0.75)
+                : AppColors.gold.withValues(alpha: 0.85),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _chip(BuildContext context, int i, Reciter r) {
+    final l = L10n.of(context);
+    final on = chosen?.id == r.id;
+    final ok = usable.contains(r.id);
+    return Semantics(
+      button: true,
+      selected: on,
+      enabled: ok,
+      label: l.a11yRecording(i + 1, recordings.length, l.recordingNote(r)),
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: ok ? () => onPick(r) : null,
+        // A chip is small to the eye but not to the thumb: the padding
+        // around it takes the tap too.
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            width: 30,
+            height: 24,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: on
+                  ? AppColors.gold
+                  : AppColors.gold.withValues(alpha: ok ? 0.10 : 0.04),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: on
+                    ? AppColors.gold
+                    : AppColors.gold.withValues(alpha: ok ? 0.35 : 0.12),
+              ),
+            ),
+            child: Text(
+              '${i + 1}',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: on
+                    ? const Color(0xFF14100A)
+                    : AppColors.gold.withValues(alpha: ok ? 0.9 : 0.35),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

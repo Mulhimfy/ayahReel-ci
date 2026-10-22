@@ -19,6 +19,10 @@ import 'illumination.dart';
 /// where it lives. When an affordance gets a visible label of its own,
 /// its entry comes out of this list.
 ///
+/// Each in plain words, as short as it can be and still say where the
+/// thing is and what it does: a title that is the thing itself, and one
+/// line under it.
+///
 /// And it has to be worth a scroll. The list reached sixteen entries —
 /// six of them about cards — and a list that long is not a sheet
 /// somebody reads, it is one they close: the two or three gestures
@@ -30,12 +34,15 @@ import 'illumination.dart';
 /// came out is still in [L10n.discovery], so putting one back is one
 /// line.
 const discoveries = <({String id, IconData icon})>[
-  (id: 'verse-to-reel', icon: Icons.auto_stories_outlined),
-  (id: 'living-home', icon: Icons.landscape_outlined),
-  (id: 'hold-to-extend', icon: Icons.touch_app_outlined),
+  (id: 'recordings', icon: Icons.graphic_eq_rounded),
+  (id: 'luminous', icon: Icons.auto_awesome_rounded),
+  (id: 'size-on-reel', icon: Icons.swipe_vertical_rounded),
   (id: 'scene-match', icon: Icons.auto_awesome_outlined),
-  (id: 'drag-verse', icon: Icons.swipe_vertical_rounded),
+  (id: 'verse-to-reel', icon: Icons.auto_stories_outlined),
+  (id: 'hold-to-extend', icon: Icons.touch_app_outlined),
   (id: 'reel-edit', icon: Icons.edit_note_rounded),
+  (id: 'offline', icon: Icons.download_rounded),
+  (id: 'living-home', icon: Icons.landscape_outlined),
   (id: 'card-carry', icon: Icons.style_outlined),
 ];
 

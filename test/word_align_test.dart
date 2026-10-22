@@ -211,6 +211,25 @@ Crashed Command '['./align', '../quran-uthmani.mod.txt']' blah
           isFalse);
     });
 
+    test('a recording is timed only as itself, never as another recording '
+        'of its voice', () {
+      // Word timing is keyed by the recording — its EveryAyah folder for
+      // quran-align, its id for QUL and for the app's own timing — and
+      // two recordings of one voice are two performances, whose words
+      // fall at different moments. So no two of them may ever be handed
+      // the same release file or the same QUL recitation.
+      for (final v in voices) {
+        final timings = <String>[];
+        for (final r in recordingsOf(v)) {
+          final folder = WordAlignService.alignFolderOf(r);
+          if (folder != null) timings.add('quran-align $folder');
+          final qul = QulWords.sources[r.id];
+          if (qul != null) timings.add('qul ${qul.recitation}');
+        }
+        expect(timings.toSet().length, timings.length, reason: v.id);
+      }
+    });
+
     test('an upload never claims timings', () {
       const upload = Reciter(
         id: 'user_x',

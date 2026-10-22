@@ -26,6 +26,7 @@ void main() {
         'Mujawwad · ornate, masterly'),
     _r('bukhatir', 'Salah Bukhatir', 'صلاح بوخاطر'),
     _r('salamah', 'Yaser Salamah', 'ياسر سلامة'),
+    _r('luhaidan', 'Mohammed Al-Luhaidan', 'محمد اللحيدان'),
   ];
   List<String> find(String q, {String Function(Reciter)? styleOf}) =>
       ReciterSearch.filter(list, q, styleOf: styleOf).map((r) => r.id).toList();
@@ -42,6 +43,15 @@ void main() {
     expect(find('Toubayti'), ['thubaiti']);
     expect(find('huthaifi'), ['hudhaify']);
     expect(find('Hussary'), ['husary', 'husary_mujawwad']);
+  });
+
+  test('Al-Luhaidan, as he is written and searched for', () {
+    for (final q in [
+      'luhaidan', 'lohaidan', 'al luhaidan', 'Al-Lohaidan', 'Allohaidan',
+      'Luhaydan', 'muhammad luhaidan', 'اللحيدان', 'لحيدان',
+    ]) {
+      expect(find(q), ['luhaidan'], reason: q);
+    }
   });
 
   test('the article beside a name is not held against it', () {

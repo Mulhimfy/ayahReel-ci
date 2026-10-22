@@ -363,7 +363,7 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
     if (dropped == 0) return;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(toast(
+      ..showSnackBar(_toast(
         L10n.of(context).pickForNewFrame,
         duration: const Duration(seconds: 3),
       ));
@@ -422,7 +422,7 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
       rlog('match: ${picks.length} picks for $surah:$start-$end — '
           '${picks.map((p) => "${p.scene.id}(${p.motif})").join(", ")}');
       if (picks.isEmpty) {
-        messenger.showSnackBar(toast(l.matchedNothing, tone: ToastTone.problem));
+        messenger.showSnackBar(_toast(l.matchedNothing, tone: ToastTone.problem));
         return;
       }
 
@@ -445,7 +445,7 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
         }
       }
       if (resolved.isEmpty) {
-        messenger.showSnackBar(toast(l.matchedNothing, tone: ToastTone.problem));
+        messenger.showSnackBar(_toast(l.matchedNothing, tone: ToastTone.problem));
         return;
       }
 
@@ -476,7 +476,7 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
       HapticFeedback.mediumImpact();
       messenger
         ..hideCurrentSnackBar()
-        ..showSnackBar(toast(
+        ..showSnackBar(_toast(
           l.scenesMatched(resolved.length),
           tone: ToastTone.done,
           duration: const Duration(seconds: 2),
@@ -484,7 +484,7 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
     } catch (e, st) {
       rlogError('scene match', e, st);
       if (mounted) {
-        messenger.showSnackBar(toast(l.matchedNothing, tone: ToastTone.problem));
+        messenger.showSnackBar(_toast(l.matchedNothing, tone: ToastTone.problem));
       }
     } finally {
       if (mounted) setState(() => _matching = false);
@@ -500,6 +500,43 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
       if (!reasons.contains(name)) reasons.add(name);
     }
     return '${l.scenesMatched(_matched.length)} · ${reasons.join(' · ')}';
+  }
+
+  /// How far a notice on this screen rises off the foot: over the
+  /// button there, which a toast at the usual height covered — "three
+  /// sceneries chosen" sat on "Style my reel" and took its taps.
+  static const _overButton = 72.0;
+
+  /// The app's toast, lifted over the button at the foot of this screen.
+  SnackBar _toast(
+    String message, {
+    ToastTone tone = ToastTone.info,
+    Duration duration = const Duration(seconds: 4),
+  }) =>
+      toast(message, tone: tone, duration: duration, above: _overButton);
+
+  /// Every scenery chosen for this reel let go: the run emptied, the
+  /// verses' own choice forgotten, the ring off every tile. Several
+  /// sceneries stays on if it was on, so picking again starts counting
+  /// from one; the button at the foot waits until something is picked.
+  void _resetScenes() {
+    HapticFeedback.mediumImpact();
+    // A download still coming in was picked before the reset, and must
+    // not put its scenery back when it lands.
+    _resets++;
+    creationState.dropScenes((_) => false);
+    setState(() {
+      _matched = const [];
+      _selectedId = null;
+      _selecting = null;
+      _selectingId = null;
+    });
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(_toast(
+        L10n.of(context).sceneryCleared,
+        duration: const Duration(seconds: 2),
+      ));
   }
 
   /// The file behind a catalog scene: the cached one, or a download
@@ -527,7 +564,7 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
         HapticFeedback.lightImpact();
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
-          ..showSnackBar(toast(
+          ..showSnackBar(_toast(
             L10n.of(context).sceneLimit(_sceneLimit),
             duration: const Duration(seconds: 2),
           ));
@@ -568,6 +605,10 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
   /// stale, and must not take the selection back from it.
   int _tapTicket = 0;
 
+  /// Bumped by the reset: every download in flight then is stale, in
+  /// several-sceneries mode too.
+  int _resets = 0;
+
   /// Tapping a scene tile. The work is tracked in [_selecting] so the
   /// Preview button can wait for a download rather than open the screen
   /// on the scenery the user just replaced.
@@ -599,9 +640,11 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
   /// what stops Preview opening on a scenery the user did not pick.
   Future<bool> _selectScene(Scene s) async {
     final ticket = ++_tapTicket;
+    final epoch = _resets;
     // Picking one scenery, only the latest tap counts. Several are
-    // each their own pick, so every download lands.
-    bool stale() => !_multi && ticket != _tapTicket;
+    // each their own pick, so every download lands — unless the reset
+    // came in between.
+    bool stale() => epoch != _resets || (!_multi && ticket != _tapTicket);
     // A wide scenery only reads as intended inside the letterbox card —
     // full-frame would crop a 16:9 shot down to its middle third — so
     // picking one sets the format rather than leaving it to be
@@ -655,7 +698,7 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
       // Selection stays where it was; say so once and move on.
       setState(() => _selectedId = _selected.id);
       ScaffoldMessenger.of(context).showSnackBar(
-        toast(
+        _toast(
           L10n.of(context).sceneDownloadFailed,
           tone: ToastTone.problem,
         ),
@@ -780,7 +823,7 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      toast(L10n.of(context).galleryPickFailed, tone: ToastTone.problem),
+      _toast(L10n.of(context).galleryPickFailed, tone: ToastTone.problem),
     );
   }
 
@@ -825,7 +868,7 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
         // its own has already said so; a wait that ran out has not.
         if (timedOut) {
           ScaffoldMessenger.of(context).showSnackBar(
-            toast(
+            _toast(
               L10n.of(context).sceneDownloadFailed,
               tone: ToastTone.problem,
             ),
@@ -921,7 +964,7 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
                 selected: _custom != null &&
                     (_multi
                         ? _orderOf(_custom!.id) > 0
-                        : _selected.id == _custom!.id),
+                        : _selectedId == _custom!.id),
                 suspended: _suspended,
                 compact: true,
                 onTap: _custom == null
@@ -1048,6 +1091,13 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
                   },
                 ),
                 const Spacer(),
+                // Only while something is chosen: there is nothing to
+                // let go of before that.
+                if (creationState.backgroundChosen &&
+                    creationState.scenes.isNotEmpty) ...[
+                  _ResetPill(onTap: _resetScenes),
+                  const SizedBox(width: 8),
+                ],
                 // A one-verse reel has room for one scenery, so there is
                 // nothing here to offer and no pill for it.
                 if (_sceneLimit > 1)
@@ -1540,6 +1590,45 @@ class _MultiScenePillState extends State<_MultiScenePill>
           ),
         ),
       ),
+      ),
+    );
+  }
+}
+
+/// Lets go of every scenery chosen for the reel: a small round control
+/// beside the several-sceneries pill, its height, the reset glyph alone.
+/// The rail has no room for another word on a small phone, in German
+/// least of all; a reader hears what it does.
+class _ResetPill extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _ResetPill({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    return A11yTap(
+      label: l.resetScenery,
+      hint: l.a11yResetSceneryHint,
+      onTap: onTap,
+      child: Tooltip(
+        message: l.resetScenery,
+        excludeFromSemantics: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.stroke),
+            ),
+            child: const Icon(Icons.refresh_rounded,
+                size: 16, color: AppColors.textSecondary),
+          ),
+        ),
       ),
     );
   }

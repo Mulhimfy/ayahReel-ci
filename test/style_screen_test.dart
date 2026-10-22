@@ -234,18 +234,27 @@ void main() {
     expect(find.text(l.styleAccentColour), findsNothing);
 
     await openTab(t, l.styleTabMotion);
-    const sky = 0xFF9CC7F5;
+    // The motion's colours are light, never flat: the house gold and
+    // the luminous inks, and no flat swatch or mixer among them.
+    for (final c in versePalette) {
+      expect(
+          find.bySemanticsLabel(
+              '${l.motionColour}${l.comma} ${l.a11yColourSwatch(c)}'),
+          findsNothing,
+          reason: '0x${c.toRadixString(16)}');
+    }
     await t.tap(find.bySemanticsLabel(
-        '${l.motionColour}${l.comma} ${l.a11yColourSwatch(sky)}'));
+        '${l.motionColour}${l.comma} ${l.a11yInkSwatch(VerseInk.aurora)}'));
     await settle(t);
-    expect(creationState.accentArgb, sky);
+    expect(creationState.accentInk, VerseInk.aurora);
+    expect(creationState.accentArgb, VerseInk.aurora.base);
     expect(creationState.textArgb, mint, reason: 'verse untouched');
 
     final card = t.widget<AyahOverlay>(find.byType(AyahOverlay).first);
     expect(card.textColor.toARGB32(), mint);
-    expect(card.accent!.toARGB32(), sky);
+    expect(card.accent!.toARGB32(), VerseInk.aurora.base);
 
-    // An ink lights the motion too; the house gold puts it back.
+    // Another ink; then the house gold puts it back.
     await t.tap(find.bySemanticsLabel(
         '${l.motionColour}${l.comma} ${l.a11yInkSwatch(VerseInk.ember)}'));
     await settle(t);
@@ -279,6 +288,17 @@ void main() {
     final h = t.ensureSemantics();
     await open(t);
     await openTab(t, l.styleTabColour);
+    // The inks are one line of small squares that scrolls sideways.
+    final rows = {
+      for (final ink in VerseInk.ordered(onLight: false).take(5))
+        t
+            .getRect(find.bySemanticsLabel(
+                '${l.styleVerseColour}${l.comma} ${l.a11yInkSwatch(ink)}'))
+            .center
+            .dy
+            .round(),
+    };
+    expect(rows.length, 1);
 
     await t.tap(find.bySemanticsLabel(
         '${l.styleVerseColour}${l.comma} ${l.a11yInkSwatch(VerseInk.iris)}'));
@@ -365,6 +385,14 @@ void main() {
     await openTab(t, l.styleTabColour);
     await t.tap(find.text(l.styleBackdropColour));
     await settle(t);
+    // The blur leads the luminous grounds, in their grid, on their row.
+    final blurAt = t.getRect(find.bySemanticsLabel(
+        '${l.styleBackdropColour}${l.comma} ${l.backdropBlur}'));
+    final firstGlowAt = t.getRect(find.bySemanticsLabel(
+        '${l.styleBackdropColour}${l.comma} '
+        '${l.bandGlowName(BandGlow.values.first)}'));
+    expect(blurAt.center.dy, closeTo(firstGlowAt.center.dy, 1));
+    expect(blurAt.center.dx, lessThan(firstGlowAt.center.dx));
     await t.tap(find.bySemanticsLabel(
         '${l.styleBackdropColour}${l.comma} ${l.bandGlowName(BandGlow.aurora)}'));
     await settle(t);

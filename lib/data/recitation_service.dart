@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'debug_log.dart';
 import 'download.dart';
+import 'local_range_client.dart';
 import 'ffmpeg_progress.dart';
 import 'ffmpeg_setup.dart';
 import 'models.dart';
@@ -419,7 +420,7 @@ abstract final class RecitationService {
     int maxMs,
     void Function(double)? onProgress,
   ) async {
-    final client = http.Client();
+    final client = _surahClient(dir, source, surah);
     final url = source.url(surah);
     final Mp3Layout lay;
     final List<AyahTiming> table;
@@ -973,6 +974,145 @@ abstract final class RecitationService {
     return f;
   }
 
+  // ---- kept for offline use --------------------------------------------
+
+  /// Where a surah-file voice's whole [surah] is kept for offline use.
+  static File _wholeFile(Directory dir, int surah) =>
+      File('${dir.path}/whole_$surah.mp3');
+
+  /// A client for [source]'s [surah] that reads the copy kept for
+  /// offline use when there is one, and the network when not.
+  static http.Client _surahClient(
+          Directory dir, SurahFiles source, int surah) =>
+      LocalRangeClient(http.Client(),
+          url: source.url(surah), file: _wholeFile(dir, surah));
+
+  /// Whether a reel of any of [surah] can be made with this voice and no
+  /// network: every verse's file and length on the phone for a per-ayah
+  /// voice, the whole surah and its table for a surah-file one.
+  ///
+  /// Not [thorough], a per-ayah voice is judged by its lengths alone —
+  /// one small file read, where looking at every verse's file is a few
+  /// thousand for the whole Quran: what a screen asks, while the
+  /// download itself looks properly.
+  static Future<bool> isOffline(Reciter reciter, int surah,
+      {bool thorough = true}) async {
+    if (!reciter.hasSurah(surah)) return true;
+    if (surah == 1 && reciter.hasBundledFatiha) return true;
+    final dir = await _reciterDir(reciter.id);
+    final count = surahIndex[surah - 1].ayahCount;
+    final source = reciter.source;
+    if (source is SurahFiles) {
+      final whole = _wholeFile(dir, surah);
+      return whole.existsSync() &&
+          whole.lengthSync() > 0 &&
+          File('${dir.path}/table_$surah.json').existsSync();
+    }
+    if (source is! AyahFiles) return true;
+    final durations = _readDurations(File('${dir.path}/durations_$surah.json'));
+    for (var a = 1; a <= count; a++) {
+      if (durations[a] == null) return false;
+      if (!thorough) continue;
+      final f = File('${dir.path}/parts_$surah/${_ayahFileName(surah, a)}');
+      if (!f.existsSync()) return false;
+    }
+    return thorough || Directory('${dir.path}/parts_$surah').existsSync();
+  }
+
+  /// Brings onto the phone everything a reel of any verses of [surah]
+  /// needs from this voice, so it can be made with no network: each
+  /// verse's file, measured, for a per-ayah voice (a reel then only
+  /// joins the ones it uses, as it always has); the whole surah's file
+  /// and its table for a surah-file voice (a reel then cuts its slice
+  /// from the copy, as it would from the server). Nothing is joined or
+  /// encoded here: an offline download is network and disk, never an
+  /// hour of FFmpeg.
+  ///
+  /// Files already on the phone are not fetched again, so a download
+  /// cut short carries on where it stopped. [cancelled] is asked between
+  /// files. [onProgress] reports 0..1.
+  static Future<void> keepOffline(
+    Reciter reciter,
+    int surah, {
+    void Function(double progress)? onProgress,
+    bool Function()? cancelled,
+  }) async {
+    if (!reciter.hasSurah(surah)) return;
+    if (surah == 1 && reciter.hasBundledFatiha) {
+      onProgress?.call(1);
+      return;
+    }
+    final dir = await _reciterDir(reciter.id);
+    final count = surahIndex[surah - 1].ayahCount;
+    final source = reciter.source;
+    final client = http.Client();
+    try {
+      if (source is SurahFiles) {
+        await _surahTable(source, dir, surah, count);
+        if (cancelled?.call() ?? false) return;
+        final whole = _wholeFile(dir, surah);
+        await _download(client, source.url(surah), whole, 'offline',
+            onFraction: onProgress);
+        // A copy that isn't a constant-bitrate mp3 can't be sliced by
+        // arithmetic, from the phone any more than from the server.
+        try {
+          final head = await whole.openRead(0, 10).fold<List<int>>(
+              [], (a, b) => a..addAll(b));
+          final start = Mp3Layout.id3Size(Uint8List.fromList(head));
+          final body = await whole.openRead(start, start + 8192).fold<
+              List<int>>([], (a, b) => a..addAll(b));
+          Mp3Layout.parse(Uint8List.fromList(head), Uint8List.fromList(body),
+              whole.lengthSync());
+        } catch (e) {
+          _deleteQuietly(whole);
+          throw TroubleException(
+              Trouble.host, 'the surah $surah file kept offline', e);
+        }
+        onProgress?.call(1);
+        return;
+      }
+      if (source is! AyahFiles) return;
+      if (debugFfmpeg == null) await configureFfmpeg();
+      final parts = Directory('${dir.path}/parts_$surah')
+        ..createSync(recursive: true);
+      final durFile = File('${dir.path}/durations_$surah.json');
+      final durations = _readDurations(durFile);
+      var done = 0;
+      // Fewer lanes than a reel's build: this runs behind whatever the
+      // user is doing, and should never be what makes the app feel slow.
+      const lanes = 4;
+      final ayahs = [for (var a = 1; a <= count; a++) a];
+      for (var i = 0; i < ayahs.length; i += lanes) {
+        if (cancelled?.call() ?? false) break;
+        await Future.wait([
+          for (var j = i; j < ayahs.length && j < i + lanes; j++)
+            () async {
+              final a = ayahs[j];
+              final f = File('${parts.path}/${_ayahFileName(surah, a)}');
+              await _download(client, source.url(surah, a), f, 'offline');
+              if (durations[a] == null) {
+                try {
+                  durations[a] = await _probeMs(f);
+                } catch (_) {
+                  _deleteQuietly(f);
+                  rethrow;
+                }
+              }
+              done++;
+              onProgress?.call(done / ayahs.length);
+            }(),
+        ]);
+      }
+      // Merged with what is on the disk now: a reel built meanwhile may
+      // have measured parts of its own.
+      final now = _readDurations(durFile)..addAll(durations);
+      await durFile.writeAsString(
+          jsonEncode({for (final e in now.entries) '${e.key}': e.value}));
+    } finally {
+      client.close();
+    }
+  }
+
   // ---- the verse picker's live recitation ----------------------------
 
   /// One ayah of [surah] on the disk, for the recitation that plays at
@@ -1119,7 +1259,7 @@ abstract final class RecitationService {
     if (known != null) return known;
     Future<(Mp3Layout, List<AyahTiming>)> read() async {
       final count = surahIndex.firstWhere((s) => s.number == surah).ayahCount;
-      final client = http.Client();
+      final client = _surahClient(dir, source, surah);
       try {
         final lay = await Mp3Layout.read(client, source.url(surah));
         final table = SurahSlice.withFileEnd(
@@ -1195,7 +1335,7 @@ abstract final class RecitationService {
       }
       final (lay, table) = await _liveSurah(reciter, source, dir, surah);
       final w = table[ayah - 1];
-      final client = http.Client();
+      final client = _surahClient(dir, source, surah);
       try {
         final at = await SurahSlice.fetch(client, source.url(surah), lay, out,
             fromMs: w.startMs, toMs: w.endMs);

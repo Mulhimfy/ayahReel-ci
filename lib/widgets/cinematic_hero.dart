@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../data/scene_catalog.dart';
 import '../theme/app_theme.dart';
@@ -20,14 +21,14 @@ import 'ambient_motion.dart';
 ///   the grade    the whole frame pulled towards the app's own night
 ///   the scrim    the foot of the frame landed on the page's own colour
 ///
-/// The scenery changes every twelve hours and is drawn from the whole
-/// library of places the app makes reels in — every still photograph
-/// on the nature shelves that is dark enough at the top for the
-/// headline — so the first thing a user sees on opening is a frame of
-/// the thing they are here to make, and no two openings in months show
-/// the same one. A picture not yet on the phone is fetched while a
-/// bundled one stands in for it, and the next one is fetched while
-/// this one is looked at.
+/// The scenery changes with every visit to Home — every launch, and
+/// every return after a while away — and is drawn from the whole
+/// library of places the app makes reels in: every still photograph on
+/// the nature shelves that is dark enough at the top for the headline.
+/// So the first thing a user sees on opening is a frame of the thing
+/// they are here to make, and it is a new one each time. It never waits
+/// on the network: the next picture already on the phone is the one
+/// shown, and the two after it are fetched while it is looked at.
 class CinematicHero extends StatefulWidget {
   /// The page this hero sits at the top of. Scrolling it pushes the
   /// picture back and dims it.
@@ -134,12 +135,6 @@ class CinematicHero extends StatefulWidget {
     return (day * 2 + (now.hour >= 12 ? 1 : 0)).abs();
   }
 
-  /// The picture for [now] out of [library]: a new one every twelve
-  /// hours, and every picture in the library before any comes round
-  /// again.
-  static Scene? pickFor(DateTime now, List<Scene> library) =>
-      library.isEmpty ? null : library[slotOf(now) % library.length];
-
   /// The bundled picture for [now], for when the library's is not at
   /// hand: a new one every twelve hours, the day's from one shelf and
   /// the night's from the other, each shelf walked in turn.
@@ -151,6 +146,35 @@ class CinematicHero extends StatefulWidget {
     final shelf = night ? nightScenes : daytimeScenes;
     return shelf[day.abs() % shelf.length];
   }
+
+  /// The picture for [turn] in [library]'s walk: the first at or after
+  /// that place that is already on the phone — bundled, or fetched
+  /// before — and its place, so the walk goes on from there; null when
+  /// none is. Never waits on the network: the frame changes at once,
+  /// and [CinematicHero.fetch] brings the pictures after it in for the
+  /// turns to come.
+  static Future<({int at, ImageProvider picture})?> onPhoneFrom(
+      int turn, List<Scene> library) async {
+    if (library.isEmpty) return null;
+    final from = turn % library.length;
+    for (var k = 0; k < library.length; k++) {
+      final at = (from + k) % library.length;
+      final s = library[at];
+      if (s.bundled) return (at: at, picture: AssetImage(s.bundledAsset));
+      final f = await SceneCatalog.cachedFile(s);
+      if (f != null) return (at: at, picture: FileImage(f));
+    }
+    return null;
+  }
+
+  /// Where the walk through the library stands, kept between launches
+  /// in a file of its own, so every open of the app shows the next
+  /// picture rather than the last one again.
+  static const turnFile = 'home_picture_turn.txt';
+
+  /// Away at least this long, and coming back is a new visit to Home,
+  /// with a new picture.
+  static const awayForNew = Duration(minutes: 20);
 
   /// [sceneFor] by the hour alone, for callers that only have one.
   static String sceneForHour(int hour) {
@@ -172,10 +196,12 @@ class _CinematicHeroState extends State<CinematicHero>
 
   bool _still = false;
 
-  /// The library's picture for this half-day, once it is at hand;
-  /// until then the bundled shelf stands in.
+  /// The library's picture for this visit, once it is at hand; until
+  /// then the bundled shelf stands in.
   ImageProvider? _picture;
-  int? _slot;
+
+  /// When the app last went out of sight, for [CinematicHero.awayForNew].
+  DateTime? _awayAt;
 
   @override
   void initState() {
@@ -184,23 +210,32 @@ class _CinematicHeroState extends State<CinematicHero>
     unawaited(_look());
   }
 
-  /// The picture is chosen once, when the hero is built — so a Home
-  /// left open overnight would still show yesterday's half-day when
-  /// the phone wakes. Coming back to the app past noon or midnight
-  /// looks again; inside the same half-day there is nothing to do.
+  /// Every visit to Home wears the next picture: a launch, and a return
+  /// after [CinematicHero.awayForNew] or more away. A glance at another
+  /// app and back is the same visit, and keeps its picture.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _awayAt ??= DateTime.now();
+      return;
+    }
     if (state != AppLifecycleState.resumed) return;
-    if (CinematicHero.slotOf(DateTime.now()) != _slot) unawaited(_look());
+    final away = _awayAt;
+    _awayAt = null;
+    if (away != null &&
+        DateTime.now().difference(away) >= CinematicHero.awayForNew) {
+      unawaited(_look());
+    }
   }
 
-  /// Finds the half-day's picture in the library: from the bundle, from
-  /// the cache, or fetched now — and fetches the next half-day's while
-  /// this one is looked at. It waits for the catalog the app reads at
-  /// startup rather than reading it itself, so nothing is spawned on a
-  /// screen's account. Nothing here can bring the screen down: a
-  /// catalog that will not load or a fetch that fails leaves the
-  /// bundled shelf showing, which is a home screen either way.
+  /// Turns to the next picture in the library's walk that is on the
+  /// phone, at once, and fetches the two after it for the visits to
+  /// come. It waits for the catalog the app reads at startup rather
+  /// than reading it itself, so nothing is spawned on a screen's
+  /// account. Nothing here can bring the screen down: a catalog that
+  /// will not load, a file that cannot be written or a fetch that fails
+  /// leaves a picture showing, which is a home screen either way.
   Future<void> _look() async {
     try {
       await SceneCatalog.ready;
@@ -209,35 +244,52 @@ class _CinematicHeroState extends State<CinematicHero>
         for (final t in SceneCatalog.tabOrder) ...SceneCatalog.inTab(t),
       ];
       final library = CinematicHero.library(all);
-      final now = DateTime.now();
-      final slot = CinematicHero.slotOf(now);
-      final pick = CinematicHero.pickFor(now, library);
-      if (pick == null) return;
+      if (library.isEmpty) return;
+      final turn = await _readTurn();
+      final found = await CinematicHero.onPhoneFrom(turn, library);
+      if (!mounted || found == null) return;
+      setState(() => _picture = found.picture);
+      // The walk goes on after what was shown, so the pictures skipped
+      // for not being on the phone yet come round once they are.
+      await _writeTurn(found.at + 1);
       final fetch = CinematicHero.fetch;
-      ImageProvider? picture;
-      if (pick.bundled) {
-        picture = AssetImage(pick.bundledAsset);
-      } else {
-        final file = await SceneCatalog.cachedFile(pick) ??
-            (fetch == null ? null : await fetch(pick));
-        if (file != null) picture = FileImage(file);
-      }
-      if (!mounted) return;
-      if (picture != null && slot != _slot) {
-        setState(() {
-          _picture = picture;
-          _slot = slot;
-        });
-      }
-      final next = CinematicHero.pickFor(
-          now.add(const Duration(hours: 12)), library);
-      if (fetch != null && next != null && !next.bundled) {
+      if (fetch == null) return;
+      for (var k = 1; k <= 2; k++) {
+        final next = library[(found.at + k) % library.length];
+        if (next.bundled || await SceneCatalog.cachedFile(next) != null) {
+          continue;
+        }
         unawaited(fetch(next));
       }
     } catch (_) {
-      // The bundled shelf is already showing.
+      // A picture is already showing.
     }
   }
+
+  /// Where the walk stands. A phone that has never kept it starts at
+  /// the half-day's place, so two new phones do not open on the same
+  /// picture the same morning.
+  static Future<int> _readTurn() async {
+    try {
+      final f = await _turnFile();
+      if (f.existsSync()) {
+        final n = int.tryParse(f.readAsStringSync().trim());
+        if (n != null && n >= 0) return n;
+      }
+    } catch (_) {}
+    return CinematicHero.slotOf(DateTime.now());
+  }
+
+  static Future<void> _writeTurn(int n) async {
+    try {
+      final f = await _turnFile();
+      f.writeAsStringSync('$n', flush: true);
+    } catch (_) {/* the next visit starts from the half-day's place */}
+  }
+
+  static Future<File> _turnFile() async => File(
+      '${(await getApplicationSupportDirectory()).path}/${CinematicHero.turnFile}');
+
 
   @override
   void didChangeDependencies() {

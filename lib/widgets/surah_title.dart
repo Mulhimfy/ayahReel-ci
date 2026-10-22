@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -10,6 +9,7 @@ import '../l10n/l10n.dart';
 import '../render/letterbox_layout.dart';
 import '../theme/app_theme.dart';
 import 'reel_watermark.dart' show ReelWatermarkMark;
+import 'resize_frame.dart';
 
 /// The surah's name as a reel carries it: a heading in gold over the
 /// verses, the way a mushaf heads each surah.
@@ -242,8 +242,9 @@ class ReelSurahTitle extends StatelessWidget {
   });
 
   /// Extra room around the title for a finger, when it can be dragged:
-  /// enough for two of them to land on it for a pinch.
-  static const touchPad = 16.0;
+  /// enough for two of them to land on it for a pinch, and for the
+  /// corner handles that size it with one.
+  static const touchPad = 22.0;
 
   /// Where the title sits until it is moved: high in a full frame, clear
   /// of the feed's own header; in the middle of the band over a
@@ -271,13 +272,17 @@ class ReelSurahTitle extends StatelessWidget {
     final measure = onSize;
     if (measure != null) body = _ReportSize(onChange: measure, child: body);
     if (onDrag != null) {
-      body = _TitleGestures(
+      // One finger moves it, a corner or two fingers size it, a double
+      // tap puts it back; crop marks frame it while it is touched.
+      body = ResizableBox(
         scale: scale,
-        onDrag: onDrag!,
+        onMove: onDrag,
         onResize: onResize,
         onEnd: onDragEnd,
-        onReset: onReset,
-        child: Padding(padding: EdgeInsets.all(pad), child: body),
+        onDoubleTap: onReset,
+        pad: pad,
+        inset: 5,
+        child: body,
       );
     }
     final info = surah >= 1 && surah <= surahIndex.length
@@ -296,72 +301,6 @@ class ReelSurahTitle extends StatelessWidget {
         ),
         child: body,
       ),
-    );
-  }
-}
-
-/// One finger moves the title, two size it, a double tap puts it back.
-///
-/// Stateful for one number: the size the title had when the fingers
-/// came down, which every step of a pinch is measured from. The title is
-/// rebuilt at every step, so a number kept in the build would be the
-/// size of the step before, and a pinch would compound itself.
-class _TitleGestures extends StatefulWidget {
-  final double scale;
-  final ValueChanged<Offset> onDrag;
-  final ValueChanged<double>? onResize;
-  final VoidCallback? onEnd;
-  final VoidCallback? onReset;
-  final Widget child;
-
-  const _TitleGestures({
-    required this.scale,
-    required this.onDrag,
-    required this.onResize,
-    required this.onEnd,
-    required this.onReset,
-    required this.child,
-  });
-
-  @override
-  State<_TitleGestures> createState() => _TitleGesturesState();
-}
-
-class _TitleGesturesState extends State<_TitleGestures> {
-  double _from = 1.0;
-
-  @override
-  Widget build(BuildContext context) {
-    return RawGestureDetector(
-      behavior: HitTestBehavior.opaque,
-      gestures: {
-        // A scale recognizer is a pan recognizer too: one pointer is a
-        // drag, and a second one makes it a pinch, in one gesture.
-        ScaleGestureRecognizer:
-            GestureRecognizerFactoryWithHandlers<ScaleGestureRecognizer>(
-          ScaleGestureRecognizer.new,
-          (r) {
-            r
-              ..gestureSettings = const DeviceGestureSettings(touchSlop: 6)
-              ..onStart = ((_) => _from = widget.scale)
-              ..onUpdate = ((d) {
-                widget.onDrag(d.focalPointDelta);
-                final resize = widget.onResize;
-                if (resize != null && d.pointerCount > 1) {
-                  resize(_from * d.scale);
-                }
-              })
-              ..onEnd = (_) => widget.onEnd?.call();
-          },
-        ),
-        if (widget.onReset != null)
-          DoubleTapGestureRecognizer:
-              GestureRecognizerFactoryWithHandlers<DoubleTapGestureRecognizer>(
-            DoubleTapGestureRecognizer.new,
-            (r) => r.onDoubleTap = widget.onReset,
-          ),
-      },
-      child: widget.child,
     );
   }
 }

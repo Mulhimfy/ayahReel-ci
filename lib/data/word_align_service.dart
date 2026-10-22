@@ -99,10 +99,15 @@ abstract final class WordAlignService {
   static bool supports(Reciter r) =>
       _alignFolderFor(r) != null || QulWords.supports(r);
 
-  /// Whether quran-align's own release times [r] — for tests, which
-  /// keep it apart from the voices QUL times.
-  @visibleForTesting
+  /// Whether quran-align's own release times [r]: tests keep it apart
+  /// from the voices QUL times, and the offline download fetches its one
+  /// file for such a voice.
   static bool alignedByQuranAlign(Reciter r) => _alignFolderFor(r) != null;
+
+  /// The release's file that times [r], or null — for tests, which hold
+  /// every recording of a voice to its own timing.
+  @visibleForTesting
+  static String? alignFolderOf(Reciter r) => _alignFolderFor(r);
 
   /// How many of [all] carry word timings — for tests, which pin the
   /// count so a table edit cannot silently drop a voice.

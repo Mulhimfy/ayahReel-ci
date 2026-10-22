@@ -202,6 +202,115 @@ class L10n {
       '$voice کی آواز میں $surah کی تلاوت موجود نہیں۔\nکوئی اور قاری یا سورت منتخب کریں۔',
       '$voice tidak memiliki rekaman $surah.\nPilih qari atau surah lain.',
       '$voice hat $surah nicht aufgenommen.\nWähle eine andere Stimme oder Sure.');
+  /// The scenery screen's reset: every scenery chosen for this reel let
+  /// go. One word on the pill.
+  String get resetScenery =>
+      _t('Reset', 'إعادة', 'ری سیٹ', 'Atur ulang', 'Zurücksetzen');
+  String get a11yResetSceneryHint => _t(
+      'Clears every scenery chosen for this reel',
+      'يلغي كل المناظر المختارة لهذا المقطع',
+      'اس ریل کے لیے چنے گئے سب مناظر ہٹا دیتا ہے',
+      'Menghapus semua pemandangan yang dipilih untuk reel ini',
+      'Entfernt alle für dieses Reel gewählten Hintergründe');
+
+  /// After the reset: nothing chosen, pick again.
+  String get sceneryCleared => _t(
+      'Cleared. Pick your sceneries again.',
+      'تم المسح. اختر المناظر من جديد.',
+      'صاف ہو گیا۔ مناظر دوبارہ چنیں۔',
+      'Dihapus. Pilih pemandangan lagi.',
+      'Geleert. Wähle die Hintergründe neu.');
+
+  // ---- offline -----------------------------------------------------
+  String get offlineTitle => _t('Download for offline',
+      'تنزيل للاستخدام دون إنترنت', 'آف لائن کے لیے ڈاؤن لوڈ',
+      'Unduh untuk offline', 'Für offline laden');
+  String get offlineSection =>
+      _t('Offline', 'دون إنترنت', 'آف لائن', 'Offline', 'Offline');
+  String get offlineBody => _t(
+      'Make reels with no internet. It downloads while you use the app.',
+      'اصنع مقاطع دون إنترنت. يجري التنزيل وأنت تستخدم التطبيق.',
+      'انٹرنیٹ کے بغیر ریلز بنائیں۔ ڈاؤن لوڈ ایپ چلاتے ہوئے ہوتا رہتا ہے۔',
+      'Buat reel tanpa internet. Unduhan berjalan sambil kamu memakai aplikasi.',
+      'Reels ohne Internet machen. Es lädt, während du die App nutzt.');
+  String get offlineRowNote => _t(
+      'Keep your voice, the verses and the sceneries on the phone',
+      'احفظ صوت قارئك والآيات والمشاهد على هاتفك',
+      'اپنے قاری کی آواز، آیات اور مناظر فون پر رکھیں',
+      'Simpan suara qari, ayat, dan pemandangan di ponsel',
+      'Stimme, Verse und Kulissen auf dem Handy behalten');
+  String get offlineText => _t('Verses and translation', 'الآيات والترجمة',
+      'آیات اور ترجمہ', 'Ayat dan terjemahan', 'Verse und Übersetzung');
+  String offlineTextNote(String size) => _t(
+      'All 114 surahs · $size',
+      'السور كلها، 114 سورة · $size',
+      'تمام 114 سورتیں · $size',
+      'Semua 114 surah · $size',
+      'Alle 114 Suren · $size');
+  String offlineScope(String name) => switch (name) {
+        'none' => _t('None', 'بدون', 'کچھ نہیں', 'Tidak', 'Keine'),
+        'short' =>
+          _t("Juz' 30", 'جزء عمّ', 'پارہ 30', 'Juz 30', "Juz' 30"),
+        _ => _t('Whole Quran', 'القرآن كاملًا', 'پورا قرآن',
+            'Seluruh Al-Qur’an', 'Ganzer Koran'),
+      };
+  String get offlineChangeVoice => _t('Change voice', 'غيّر القارئ',
+      'قاری بدلیں', 'Ganti qari', 'Stimme ändern');
+  String get offlineStills => _t('Still sceneries', 'المناظر الثابتة',
+      'ساکن مناظر', 'Pemandangan diam', 'Stehende Kulissen');
+  String get offlineClips => _t('Moving sceneries', 'المناظر المتحركة',
+      'متحرک مناظر', 'Pemandangan bergerak', 'Bewegte Kulissen');
+  String offlineScenesNote(int n, String size) => _t(
+      '$n · $size', '$n · $size', '$n · $size', '$n · $size', '$n · $size');
+  String offlineTotal(String size) => _t(
+      'About $size · best on Wi-Fi',
+      'نحو $size · الأفضل عبر Wi-Fi',
+      'تقریباً $size · وائی فائی پر بہتر',
+      'Sekitar $size · sebaiknya lewat Wi-Fi',
+      'Etwa $size · am besten im WLAN');
+  String get offlineStart =>
+      _t('Download', 'تنزيل', 'ڈاؤن لوڈ', 'Unduh', 'Laden');
+  String get offlineStop =>
+      _t('Stop', 'إيقاف', 'روکیں', 'Hentikan', 'Stopp');
+  String offlineRunning(int pct) => _t(
+      'Downloading… $pct%',
+      'جارٍ التنزيل… $pct%',
+      'ڈاؤن لوڈ ہو رہا ہے… $pct%',
+      'Mengunduh… $pct%',
+      'Lädt … $pct %');
+  String get offlineOnPhone => _t('On your phone', 'على هاتفك',
+      'آپ کے فون پر', 'Di ponselmu', 'Auf dem Handy');
+  String get offlineDone => _t(
+      'Done. Reels work with no internet now.',
+      'تمّ. تعمل المقاطع الآن دون إنترنت.',
+      'ہو گیا۔ اب ریلز انٹرنیٹ کے بغیر بنیں گی۔',
+      'Selesai. Reel kini bisa dibuat tanpa internet.',
+      'Fertig. Reels gehen jetzt ohne Internet.');
+  String offlineMissed(int n) => _t(
+      '$n files did not come. Tap Download to try them again.',
+      'لم يصل $n ملفًا. اضغط «تنزيل» لإعادة المحاولة.',
+      '$n فائلیں نہیں آئیں۔ دوبارہ کوشش کے لیے ڈاؤن لوڈ دبائیں۔',
+      '$n berkas belum masuk. Ketuk Unduh untuk mencoba lagi.',
+      '$n Dateien kamen nicht. Tippe auf Laden, um es nochmal zu versuchen.');
+  String get offlineNoNet => _t(
+      'No connection. What came down is kept: tap Download to carry on.',
+      'لا يوجد اتصال. ما نُزّل محفوظ: اضغط «تنزيل» لتكمل.',
+      'کنکشن نہیں۔ جو آ گیا وہ محفوظ ہے: جاری رکھنے کے لیے ڈاؤن لوڈ دبائیں۔',
+      'Tidak ada koneksi. Yang sudah masuk tetap tersimpan: ketuk Unduh untuk lanjut.',
+      'Keine Verbindung. Was da ist, bleibt: Tippe auf Laden, um weiterzumachen.');
+  String get offlineFull => _t(
+      'Your phone is full. Free some space, then tap Download to carry on.',
+      'مساحة هاتفك ممتلئة. أفرغ بعض المساحة ثم اضغط «تنزيل» لتكمل.',
+      'فون بھر گیا ہے۔ کچھ جگہ خالی کریں، پھر ڈاؤن لوڈ دبائیں۔',
+      'Ponselmu penuh. Kosongkan sedikit ruang, lalu ketuk Unduh untuk lanjut.',
+      'Dein Handy ist voll. Mach etwas Platz frei und tippe dann auf Laden.');
+  String get offlineStopped => _t(
+      'Stopped. What came down is kept.',
+      'توقّف. ما نُزّل محفوظ.',
+      'روک دیا گیا۔ جو آ گیا وہ محفوظ ہے۔',
+      'Dihentikan. Yang sudah masuk tetap tersimpan.',
+      'Angehalten. Was da ist, bleibt.');
+
   String get noReciterMatch => _t(
       'No reciter by that name',
       'لا يوجد قارئ بهذا الاسم',
@@ -217,6 +326,31 @@ class L10n {
   /// reason to pick one.
   String get perWordHighlight => _t('Per-word highlight', 'تمييز كل كلمة',
       'ہر لفظ نمایاں', 'Sorot per kata', 'Wort-für-Wort-Hervorhebung');
+
+  /// Over the numbered chips of a voice with more than one recording.
+  /// Another recording is the same reciter in another performance, so
+  /// reels of the same verses can sound different.
+  String get recordingsLabel => _t('Recordings', 'التسجيلات', 'ریکارڈنگز',
+      'Rekaman', 'Aufnahmen');
+
+  /// A recording chip, read aloud: which of how many, and what sets it
+  /// apart when the list says.
+  String a11yRecording(int n, int of, String? note) => _t(
+      'Recording $n of $of${note == null ? '' : ', $note'}',
+      'التسجيل $n من $of${note == null ? '' : '، $note'}',
+      'ریکارڈنگ $n از $of${note == null ? '' : '، $note'}',
+      'Rekaman $n dari $of${note == null ? '' : ', $note'}',
+      'Aufnahme $n von $of${note == null ? '' : ', $note'}');
+
+  /// Under the chips, a hint that is only true while the voice has more
+  /// than one: a different recording is a different sound for the same
+  /// verses.
+  String get recordingsHint => _t(
+      'Same voice, another recitation',
+      'الصوت نفسه، تلاوة أخرى',
+      'وہی آواز، دوسری تلاوت',
+      'Suara sama, bacaan lain',
+      'Dieselbe Stimme, eine andere Rezitation');
 
   // ---- creation wizard: your own audio ---------------------------
   String get useYourOwnAudio => _t('Use your own audio', 'استخدم صوتك',
@@ -1510,6 +1644,23 @@ class L10n {
 
   /// Under the heading of those choices: where they end up, since the
   /// menu sits in Settings, a long way from any reel.
+  /// The sample under the verse-number chips, read aloud.
+  String a11yNumberingSample(String choice) => _t(
+      'How the end of a verse looks with: $choice',
+      'شكل نهاية الآية مع: $choice',
+      'آیت کا اختتام اس کے ساتھ: $choice',
+      'Akhir ayat dengan: $choice',
+      'So endet ein Vers mit: $choice');
+
+  /// Under the sample when the choice is Off: the verse ends with its
+  /// last word and nothing after it.
+  String get numberingNothingAdded => _t(
+      'Nothing added',
+      'بلا إضافة',
+      'کچھ شامل نہیں',
+      'Tanpa tambahan',
+      'Nichts dazu');
+
   String get verseNumbersNote => _t(
       'Shown on your reels',
       'تظهر على مقاطعك',
@@ -1753,8 +1904,12 @@ class L10n {
       'Neue Rezitatoren und Funktionen kündigen wir dort zuerst an.');
   String get telegramJoin =>
       _t('Join', 'انضم', 'شامل ہوں', 'Gabung', 'Beitreten');
-  String get telegramJoined => _t("I've joined", 'انضممت بالفعل',
+  String get telegramJoined => _t('Already joined', 'انضممت بالفعل',
       'میں پہلے سے شامل ہوں', 'Sudah bergabung', 'Bin schon dabei');
+
+  /// The invitation's way out for good.
+  String get telegramNever => _t("Don't ask again", 'لا تسألني مرة أخرى',
+      'دوبارہ مت پوچھیں', 'Jangan tanya lagi', 'Nicht mehr fragen');
   String get inviteEarnTitle => _t('Invite someone · earn ✦ 5',
       'ادعُ أحدًا · اكسب ✦ 5', 'کسی کو مدعو کریں · کمائیں ✦ 5',
       'Ajak seseorang · dapat ✦ 5', 'Lade jemanden ein · verdien ✦ 5');
@@ -3489,8 +3644,25 @@ class L10n {
     return table == null ? r.style : (table[r.id] ?? r.style);
   }
 
+  /// What sets a voice's other recording apart, beside its chips. As
+  /// with [reciterStyle], the English lives on the [Reciter].
+  String? recordingNote(Reciter r) {
+    final note = r.recordingNote;
+    if (note == null) return null;
+    return _recordingNotes[lang]?[r.id] ?? note;
+  }
+
+  static const _recordingNotes = <AppLang, Map<String, String>>{
+    AppLang.ar: {'alafasy_2': 'تراويح · كاليفورنيا · 1430'},
+    AppLang.ur: {'alafasy_2': 'تراویح · کیلیفورنیا · 1430'},
+    AppLang.id: {'alafasy_2': 'Tarawih · Kalifornia · 1430'},
+    AppLang.de: {'alafasy_2': 'Tarawih · Kalifornien · 1430'},
+  };
+
   /// English is absent on purpose: its wording lives on the [Reciter]
   /// itself, and a second copy here would be the one that goes stale.
+  /// A voice's other recording ([Reciter.recordingOf]) has its voice's
+  /// line, under its own id.
   static const _reciterStyles = <AppLang, Map<String, String>>{
     AppLang.ar: {
       'alafasy': 'مرتّل · دافئ شجي',
@@ -3602,6 +3774,7 @@ class L10n {
       'muaiqly_mujawwad': 'مجوَّد · متمهّل',
       'albanna_mujawwad': 'مجوَّد · متمهّل',
       'mustafa_ismail_mujawwad': 'مجوَّد · متمهّل',
+      'alafasy_2': 'مرتّل · دافئ شجي',
     },
     AppLang.ur: {
       'alafasy': 'مرتّل · گرم جوش، سُریلا',
@@ -3713,6 +3886,7 @@ class L10n {
       'muaiqly_mujawwad': 'مجوَّد · دھیمی رفتار',
       'albanna_mujawwad': 'مجوَّد · دھیمی رفتار',
       'mustafa_ismail_mujawwad': 'مجوَّد · دھیمی رفتار',
+      'alafasy_2': 'مرتّل · گرم جوش، سُریلا',
     },
     AppLang.id: {
       'alafasy': 'Murattal · hangat, merdu',
@@ -3824,6 +3998,7 @@ class L10n {
       'muaiqly_mujawwad': 'Mujawwad · tempo pelan',
       'albanna_mujawwad': 'Mujawwad · tempo pelan',
       'mustafa_ismail_mujawwad': 'Mujawwad · tempo pelan',
+      'alafasy_2': 'Murattal · hangat, merdu',
     },
     AppLang.de: {
       'alafasy': 'Murattal · warm, melodisch',
@@ -3935,6 +4110,7 @@ class L10n {
       'muaiqly_mujawwad': 'Mujawwad · getragen',
       'albanna_mujawwad': 'Mujawwad · getragen',
       'mustafa_ismail_mujawwad': 'Mujawwad · getragen',
+      'alafasy_2': 'Murattal · warm, melodisch',
     },
   };
 
@@ -5573,36 +5749,30 @@ class L10n {
   /// is one block of text in five languages and not two.
   (String, String) discovery(String id) => switch (id) {
         'verse-to-reel' => (
-            _t('The verse on Home is a door', 'الآية في الرئيسية بابٌ',
-                'ہوم کی آیت ایک دروازہ ہے', 'Ayat di Beranda adalah pintu',
-                'Der Vers auf der Startseite ist eine Tür'),
+            _t('Tap the verse on Home',
+                'اضغط الآية في الرئيسية',
+                'ہوم پر آیت دبائیں',
+                'Ketuk ayat di Beranda',
+                'Tippe auf den Vers der Startseite'),
             _t(
-                'Tap the verse card and the reel for that verse starts '
-                    'itself — voice, scenery and all.',
-                'اضغط بطاقة الآية فيبدأ المقطع بها: الصوت والمشهد وكل شيء.',
-                'آیت والے کارڈ کو چھوئیں اور اسی آیت کی ریل خود بخود شروع '
-                    'ہو جاتی ہے — آواز، منظر، سب کچھ۔',
-                'Ketuk kartu ayat dan reel untuk ayat itu langsung mulai — '
-                    'suara, pemandangan, semuanya.',
-                'Tippe auf die Verskarte und das Reel zu diesem Vers '
-                    'beginnt von selbst — Stimme, Kulisse und alles.'),
+                'It starts a reel of that verse, or a card, with the verse already in it.',
+                'يبدأ به مقطعًا لتلك الآية، أو بطاقة، والآية فيها من الآن.',
+                'اسی آیت کی ریل یا کارڈ شروع ہو جاتا ہے، آیت پہلے سے اس میں ہوتی ہے۔',
+                'Langsung memulai reel atau kartu dari ayat itu, ayatnya sudah ada di dalamnya.',
+                'Es beginnt ein Reel oder eine Karte zu diesem Vers, der Vers ist schon drin.'),
           ),
         'hold-to-extend' => (
-            _t('Hold an ayah to reach it', 'اضغط مطوّلًا لتصل إلى آية',
-                'آیت کو دبا کر رکھیں', 'Tahan satu ayat untuk mencapainya',
-                'Halte einen Vers, um bis dorthin zu gehen'),
+            _t('Hold a verse to select up to it',
+                'اضغط مطوّلًا لتختار حتى آية',
+                'آیت دبا کر رکھیں تو وہاں تک چن لی جائیں',
+                'Tahan satu ayat untuk memilih sampai ke sana',
+                'Halte einen Vers, um bis dorthin zu wählen'),
             _t(
-                'In the verse picker, a tap takes one more ayah. Press and '
-                    'hold a later one and the whole run up to it is chosen.',
-                'في اختيار الآيات، الضغطة تأخذ آية واحدة. اضغط مطوّلًا على '
-                    'آية بعيدة فتُختار كل الآيات حتى تصل إليها.',
-                'آیات چننے میں ایک ٹیپ سے ایک آیت بڑھتی ہے۔ آگے کی کسی آیت '
-                    'کو دبا کر رکھیں تو وہاں تک ساری آیات منتخب ہو جاتی ہیں۔',
-                'Di pemilih ayat, satu ketukan menambah satu ayat. Tekan '
-                    'lama ayat yang jauh, dan seluruh rentang ikut terpilih.',
-                'Im Versauswähler nimmt ein Tippen einen Vers dazu. Halte '
-                    'einen späteren gedrückt, und alles bis dahin ist '
-                    'ausgewählt.'),
+                'In the verse list a tap adds one verse; press and hold a later one to take every verse up to it.',
+                'في قائمة الآيات تضيف النقرة آية واحدة؛ واضغط مطوّلًا على آية لاحقة لتختار كل ما قبلها.',
+                'آیات کی فہرست میں ایک ٹیپ ایک آیت بڑھاتا ہے؛ آگے کی آیت دبا کر رکھیں تو وہاں تک سب چن لی جاتی ہیں۔',
+                'Di daftar ayat, sekali ketuk menambah satu ayat; tahan ayat yang lebih jauh untuk memilih semua sampai ke sana.',
+                'In der Versliste fügt ein Tippen einen Vers hinzu; halte einen späteren, um alle bis dorthin zu wählen.'),
           ),
         'blur-backdrop' => (
             _t('The wide card can stand in its own light',
@@ -5627,21 +5797,17 @@ class L10n {
                     'unscharf statt schwarz.'),
           ),
         'scene-match' => (
-            _t('The verses can pick the scenery', 'الآيات تختار المشهد',
-                'آیات خود منظر چن سکتی ہیں',
-                'Ayat bisa memilih pemandangannya',
-                'Die Verse können die Kulisse wählen'),
+            _t('Let the verses pick the scenery',
+                'دع الآيات تختار المشهد',
+                'آیات کو منظر چننے دیں',
+                'Biarkan ayat memilih pemandangan',
+                'Lass die Verse die Kulisse wählen'),
             _t(
-                'The small spark above the scenery tabs reads what you chose '
-                    'and picks pictures to match it — one per verse.',
-                'الشرارة الصغيرة فوق تبويبات المشاهد تقرأ ما اخترته وتختار '
-                    'صورًا تناسبه، صورة لكل آية.',
-                'مناظر کے ٹیبز کے اوپر چھوٹی چنگاری آپ کی چنی ہوئی آیات پڑھ '
-                    'کر ان سے میل کھاتی تصویریں چنتی ہے — ہر آیت کے لیے ایک۔',
-                'Percikan kecil di atas tab pemandangan membaca pilihanmu '
-                    'lalu memilih gambar yang cocok — satu tiap ayat.',
-                'Der kleine Funke über den Kulissen-Tabs liest deine Auswahl '
-                    'und sucht passende Bilder — eins je Vers.'),
+                'Tap the spark at the start of the scenery tabs: it reads the verses and picks a picture for each.',
+                'اضغط الشرارة في أول تبويبات المشاهد: تقرأ الآيات وتختار صورة لكل منها.',
+                'مناظر کے ٹیبز کے شروع میں چمک دبائیں: یہ آیات پڑھ کر ہر ایک کے لیے تصویر چنتی ہے۔',
+                'Ketuk percikan di awal tab pemandangan: ia membaca ayat dan memilih gambar untuk masing-masing.',
+                'Tippe auf den Funken am Anfang der Kulissen-Tabs: Er liest die Verse und wählt zu jedem ein Bild.'),
           ),
         'hold-day-done' => (
             _t('Hold a day to close it', 'اضغط مطوّلًا على اليوم لإتمامه',
@@ -5662,24 +5828,17 @@ class L10n {
                     'hast.'),
           ),
         'reel-edit' => (
-            _t('A finished reel is still editable',
-                'المقطع المنتهي يبقى قابلًا للتعديل',
-                'مکمل ریل بھی بدلی جا سکتی ہے',
-                'Reel yang sudah jadi masih bisa diubah',
-                'Ein fertiges Reel bleibt änderbar'),
+            _t('Change a finished reel',
+                'عدّل مقطعًا جاهزًا',
+                'تیار ریل میں تبدیلی کریں',
+                'Ubah reel yang sudah jadi',
+                'Ein fertiges Reel ändern'),
             _t(
-                'Open it from $navWorks and the Edit button puts every choice '
-                    'back the way you left it — change one thing, keep the '
-                    'rest.',
-                'افتحه من «$navWorks» وزر التعديل يعيد كل اختياراتك كما تركتها: '
-                    'غيّر شيئًا واحدًا واترك الباقي.',
-                '«$navWorks» سے کھولیں اور تدوین کا بٹن آپ کے سارے انتخاب '
-                    'ویسے ہی واپس لے آتا ہے — ایک چیز بدلیں، باقی رہنے دیں۔',
-                'Buka dari $navWorks, lalu tombol Ubah mengembalikan semua '
-                    'pilihanmu seperti semula — ganti satu hal, sisanya tetap.',
-                'Öffne es unter $navWorks: Der Bearbeiten-Knopf stellt '
-                    'jede Entscheidung wieder her — ändere eine Sache, der '
-                    'Rest bleibt.'),
+                'Open it from My works and tap Edit again: every choice comes back as you left it.',
+                'افتحه من «أعمالي» واضغط «عدّل مجددًا»: تعود كل اختياراتك كما تركتها.',
+                '«میری تخلیقات» سے کھولیں اور «دوبارہ ترمیم» دبائیں: ہر انتخاب ویسا ہی لوٹ آتا ہے جیسا چھوڑا تھا۔',
+                'Buka dari Karya saya lalu ketuk Edit lagi: semua pilihan kembali seperti saat kamu tinggalkan.',
+                'Öffne es in „Meine Werke“ und tippe auf „Nochmal bearbeiten“: Alles ist wieder so, wie du es gelassen hast.'),
           ),
         'drag-verse' => (
             _t('The verse goes where you put it',
@@ -5830,23 +5989,16 @@ class L10n {
           ),
         'card-carry' => (
             _t('Style one card, style them all',
-                'نسّق بطاقةً واحدة، تُنسَّق البقيّة', 'ایک کارڈ سجائیں، سب سج جائیں',
+                'نسّق بطاقةً واحدة، تُنسَّق البقيّة',
+                'ایک کارڈ سجائیں، سب سج جائیں',
                 'Tata satu kartu, semua ikut',
                 'Gestalte eine Karte, gestalte alle'),
             _t(
-                'Get one card the way you want it, then "Apply to every '
-                    'card" — the ground, the frame and the type travel, and '
-                    'the words stay where they are.',
-                'اضبط بطاقة كما تريد ثم "طبّق على كل البطاقات": تنتقل '
-                    'الخلفية والإطار والخط، ويبقى كل نصّ مكانه.',
-                'ایک کارڈ اپنی مرضی کا بنائیں، پھر «سب کارڈز پر لاگو کریں» — '
-                    'پس منظر، فریم اور خط منتقل ہو جاتے ہیں، الفاظ اپنی جگہ '
-                    'رہتے ہیں۔',
-                'Atur satu kartu sesukamu, lalu "Terapkan ke semua kartu" — '
-                    'latar, bingkai, dan hurufnya ikut, kata-katanya tetap.',
-                'Bring eine Karte in Form und dann „Auf alle Karten '
-                    'anwenden“ — Grund, Rahmen und Schrift wandern mit, die '
-                    'Worte bleiben.'),
+                'Get one card right, then tap Apply to every card: the ground, frame and type move over, the words stay.',
+                'اضبط بطاقة ثم اضغط «طبّق على كل البطاقات»: تنتقل الخلفية والإطار والخط، ويبقى النص.',
+                'ایک کارڈ ٹھیک کریں، پھر «سب کارڈز پر لاگو کریں» دبائیں: پس منظر، فریم اور خط منتقل ہوتے ہیں، الفاظ وہی رہتے ہیں۔',
+                'Rapikan satu kartu, lalu ketuk Terapkan ke semua kartu: latar, bingkai, dan huruf ikut pindah, katanya tetap.',
+                'Bring eine Karte in Form und tippe auf „Auf alle Karten anwenden“: Grund, Rahmen und Schrift wandern mit, die Worte bleiben.'),
           ),
         'card-shape' => (
             _t('One card, three shapes', 'بطاقة واحدة بثلاثة مقاسات',
@@ -5888,28 +6040,69 @@ class L10n {
                     'einen Punkt.'),
           ),
         'living-home' => (
-            _t('Home never wears the same picture for long',
-                'الرئيسية لا تثبت على صورة واحدة',
-                'ہوم کی تصویر کبھی ایک سی نہیں رہتی',
-                'Beranda tak pernah lama memakai gambar yang sama',
-                'Die Startseite trägt nie lange dasselbe Bild'),
+            _t('Home changes its picture',
+                'الرئيسية تغيّر صورتها',
+                'ہوم اپنی تصویر بدلتا ہے',
+                'Beranda berganti gambar',
+                'Die Startseite wechselt ihr Bild'),
             _t(
-                'The place behind the greeting changes by itself, drawn '
-                    'from the whole library of scenery — and while you look, '
-                    'it moves ever so slightly: a slow drift, mist and light.',
-                'المشهد خلف التحية يتبدّل وحده من مكتبة المشاهد كلها — '
-                    'وبينما تنظر إليه يتحرّك حركةً خفيفة: انسياب بطيء وضباب '
-                    'وضوء.',
-                'سلام کے پیچھے کا منظر خود بدلتا رہتا ہے، مناظر کے پورے ذخیرے '
-                    'سے — اور دیکھتے دیکھتے ہلکا سا حرکت کرتا ہے: دھیمی روانی، '
-                    'دھند اور روشنی۔',
-                'Pemandangan di balik sapaan berganti sendiri, diambil dari '
-                    'seluruh pustaka pemandangan — dan saat kamu melihatnya, '
-                    'ia bergerak sangat pelan: hanyut, kabut, dan cahaya.',
-                'Der Ort hinter der Begrüßung wechselt von selbst, aus der '
-                    'ganzen Kulissen-Bibliothek — und während du hinsiehst, '
-                    'bewegt er sich ganz leicht: ein langsames Treiben, Nebel '
-                    'und Licht.'),
+                'A new place behind the greeting each time you open the app, from the whole library of sceneries.',
+                'مكان جديد خلف التحية كلما فتحت التطبيق، من مكتبة المشاهد كلها.',
+                'ہر بار ایپ کھولنے پر سلام کے پیچھے نئی جگہ، مناظر کے پورے ذخیرے سے۔',
+                'Tempat baru di balik sapaan setiap kali aplikasi dibuka, dari seluruh pustaka pemandangan.',
+                'Bei jedem Öffnen ein neuer Ort hinter der Begrüßung, aus der ganzen Kulissen-Bibliothek.'),
+          ),
+        'recordings' => (
+            _t('A voice can have more than one recording',
+                'قد يكون للقارئ أكثر من تسجيل',
+                'ایک قاری کی ایک سے زیادہ ریکارڈنگز ہو سکتی ہیں',
+                'Satu qari bisa punya lebih dari satu rekaman',
+                'Eine Stimme kann mehrere Aufnahmen haben'),
+            _t(
+                'Tap a number under the name: the same reciter, another recitation. Reels of the same verses then sound different.',
+                'اضغط رقمًا تحت الاسم: القارئ نفسه بتلاوة أخرى، فتختلف مقاطع الآيات نفسها في صوتها.',
+                'نام کے نیچے کوئی نمبر دبائیں: وہی قاری، دوسری تلاوت۔ یوں ایک ہی آیات کی ریلز الگ سنائی دیتی ہیں۔',
+                'Ketuk angka di bawah nama: qari yang sama, bacaan lain. Reel dari ayat yang sama jadi terdengar berbeda.',
+                'Tippe auf eine Zahl unter dem Namen: derselbe Rezitator, eine andere Rezitation. So klingen Reels derselben Verse verschieden.'),
+          ),
+        'luminous' => (
+            _t('Colours that glow',
+                'ألوان تتوهّج',
+                'چمکتے رنگ',
+                'Warna yang bercahaya',
+                'Farben, die leuchten'),
+            _t(
+                'In Make it yours: the first row under Colour, the colours under Motion, and the wide card’s Background. Swipe a row for more.',
+                'في «اجعله على ذوقك»: الصف الأول تحت «اللون»، وألوان «الحركة»، و«الخلفية» في البطاقة العريضة. اسحب الصف لترى المزيد.',
+                '«اسے اپنا بنائیں» میں: «رنگ» کی پہلی قطار، «حرکت» کے رنگ، اور چوڑے کارڈ کا «پس منظر»۔ مزید کے لیے قطار کھسکائیں۔',
+                'Di Jadikan milikmu: baris pertama di Warna, warna di Gerak, dan Latar kartu lebar. Geser barisnya untuk melihat lebih banyak.',
+                'In „Mach es zu deinem“: die erste Reihe unter Farbe, die Farben unter Bewegung und der Hintergrund der breiten Karte. Wisch für mehr.'),
+          ),
+        'size-on-reel' => (
+            _t('Move and size the verse and the surah name',
+                'حرّك الآية واسم السورة وغيّر حجمهما',
+                'آیت اور سورت کا نام ہلائیں اور ان کا سائز بدلیں',
+                'Geser dan ubah ukuran ayat dan nama surah',
+                'Vers und Surenname verschieben und skalieren'),
+            _t(
+                'On the reel, drag them. Touch one to show its corners, then drag a corner, or pinch. A double tap puts it back.',
+                'في المقطع اسحبهما. المس أحدهما لتظهر زواياه، ثم اسحب زاوية أو قرّب إصبعيك وباعدهما. والنقر مرتين يعيده كما كان.',
+                'ریل پر انہیں کھینچیں۔ کسی کو چھوئیں تو اس کے کونے دکھائی دیں گے، پھر کونا کھینچیں یا چٹکی لیں۔ دو بار تھپتھپانے سے وہ واپس آ جاتا ہے۔',
+                'Di reel, seret keduanya. Sentuh salah satunya untuk memunculkan sudutnya, lalu seret sudut atau cubit. Ketuk dua kali untuk mengembalikannya.',
+                'Zieh sie im Reel. Berühre eines, damit seine Ecken erscheinen, dann zieh eine Ecke oder zieh mit zwei Fingern. Doppeltippen setzt es zurück.'),
+          ),
+        'offline' => (
+            _t('Make reels with no internet',
+                'اصنع مقاطع بلا إنترنت',
+                'انٹرنیٹ کے بغیر ریلز بنائیں',
+                'Buat reel tanpa internet',
+                'Reels ohne Internet machen'),
+            _t(
+                'Settings → Customize → Download for offline keeps your voice, the text and the sceneries on the phone.',
+                'الإعدادات ← تخصيص ← تنزيل للاستخدام دون إنترنت: يبقى صوت قارئك والنص والمشاهد على هاتفك.',
+                'ترتیبات ← حسب ضرورت بنائیں ← آف لائن کے لیے ڈاؤن لوڈ: آپ کے قاری کی آواز، متن اور مناظر فون پر رہتے ہیں۔',
+                'Pengaturan → Sesuaikan → Unduh untuk offline menyimpan suara qari, teks, dan pemandangan di ponsel.',
+                'Einstellungen → Anpassen → Für offline laden behält deine Stimme, den Text und die Kulissen auf dem Handy.'),
           ),
         _ => (id, ''),
       };

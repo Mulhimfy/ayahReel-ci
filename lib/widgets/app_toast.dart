@@ -28,6 +28,7 @@ SnackBar toast(
   Duration duration = const Duration(seconds: 4),
   String? actionLabel,
   VoidCallback? onAction,
+  double above = 0,
 }) {
   return SnackBar(
     behavior: SnackBarBehavior.floating,
@@ -35,7 +36,9 @@ SnackBar toast(
     elevation: 0,
     padding: EdgeInsets.zero,
     clipBehavior: Clip.none,
-    margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+    // [above] lifts it over a button a screen keeps at its foot, which
+    // a floating toast would otherwise sit on and take the taps of.
+    margin: EdgeInsets.fromLTRB(14, 0, 14, 14 + above),
     duration: duration,
     content: AppToast(
       message: message,

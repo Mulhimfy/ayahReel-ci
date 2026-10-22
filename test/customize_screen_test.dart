@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:ayah_reels/data/fatiha_data.dart' show backgrounds;
 import 'package:ayah_reels/data/settings_service.dart';
 import 'package:ayah_reels/data/verse_lines.dart';
 import 'package:ayah_reels/data/verse_motion.dart';
+import 'package:ayah_reels/data/verse_numbering.dart';
 import 'package:ayah_reels/l10n/l10n.dart';
 import 'package:ayah_reels/screens/customize_screen.dart';
 import 'package:ayah_reels/state/creation_state.dart';
@@ -185,5 +187,85 @@ void main() {
     expect(Directionality.of(t.element(find.text('سطرًا سطرًا'))),
         TextDirection.rtl);
     expect(find.byType(VerseStage), findsOneWidget);
+  });
+
+  testWidgets('the reel stays in view at the bottom of the page', (t) async {
+    await open(t);
+    final full = t.getSize(find.byType(VerseStage));
+    await t.drag(page(), const Offset(0, -4000));
+    await t.pumpAndSettle();
+    // Scrolled to the end, the reset button is in view, and so is the
+    // reel: smaller, whole, and still the same verse card.
+    expect(find.text('Back to the defaults'), findsOneWidget);
+    expect(find.byType(VerseStage), findsOneWidget);
+    final reel = t.getRect(find.byType(VerseStage));
+    expect(reel.top, greaterThanOrEqualTo(0));
+    expect(reel.bottom, lessThan(844 * 0.5));
+    // FittedBox scales the card as it is, so it is laid out as before.
+    expect(t.getSize(find.byType(VerseStage)).width,
+        lessThan(full.width + 0.01));
+  });
+
+  testWidgets('scenery by line: the sceneries turn over line by line',
+      (t) async {
+    creationState
+      ..startNewReel()
+      ..setMultiScene(true)
+      ..toggleScene(backgrounds[0], limit: 6)
+      ..toggleScene(backgrounds[1], limit: 6)
+      ..toggleScene(backgrounds[2], limit: 6);
+    addTearDown(() => creationState
+      ..setMultiScene(false)
+      ..startNewReel());
+    // Played, not held: the lines have to come and go.
+    t.view.physicalSize = const Size(390 * 3, 844 * 3);
+    t.view.devicePixelRatio = 3;
+    addTearDown(t.view.resetPhysicalSize);
+    addTearDown(t.view.resetDevicePixelRatio);
+    await t.pumpWidget(MaterialApp(
+      theme: AppTheme.dark(),
+      localizationsDelegates: const [
+        L10n.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: const CustomizeScreen(),
+    ));
+    await t.pump(const Duration(milliseconds: 100));
+    Key? shown() => t
+        .widget<KeyedSubtree>(find.descendant(
+            of: find.byKey(CustomizeScreen.groundKey),
+            matching: find.byType(KeyedSubtree)).last)
+        .key;
+    final seen = <Key?>{shown()};
+    for (var i = 0; i < 40 && seen.length < 2; i++) {
+      await t.pump(const Duration(milliseconds: 500));
+      seen.add(shown());
+    }
+    expect(seen.length, greaterThan(1),
+        reason: 'one scenery the whole verse, with scenery by line on');
+
+    // By verse instead: one scenery for the verse, which never turns.
+    SettingsService.state.value =
+        SettingsService.state.value.copyWith(scenesFollowLines: false);
+    await t.pump(const Duration(milliseconds: 100));
+    expect(find.byKey(CustomizeScreen.groundKey), findsNothing);
+    await t.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('each verse-number chip shows what it adds', (t) async {
+    await open(t);
+    await reach(t, find.text('Verse-end mark'));
+    expect(find.text('Nothing added'), findsOneWidget);
+    await t.tap(find.text('Verse-end mark'));
+    await t.pumpAndSettle();
+    expect(SettingsService.state.value.verseNumbering, VerseNumbering.mark);
+    expect(find.text('Nothing added'), findsNothing);
+    // The sign after the last word: Arabic-Indic 255.
+    expect(find.textContaining('٢٥٥'), findsWidgets);
+    await t.tap(find.text('Reference line'));
+    await t.pumpAndSettle();
+    expect(find.text('Al-Baqarah 2:255'), findsWidgets);
   });
 }
