@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [calib, s0, s1, s2, luhaidan]
+        shard: [p0, p1, f0, f1, f2, c0, c1, c2, meta]
     steps:
       - uses: actions/checkout@v4
       - name: Tools

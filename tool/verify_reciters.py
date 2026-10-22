@@ -59,6 +59,44 @@ the file and the byte arithmetic all agreeing. All of it is checked:
   7. Quality.      Bitrate >= 64 kbps and sample rate >= 22050 Hz.
   8. Pace.         From all 6236 windows.
 
+Another recording of a voice (Reciter.recordingOf) is checked as all of
+the above, as a voice of its own, and then:
+
+  9. Another performance.  It is there so that reels of the same verses
+     need not all carry the same sound, and a copy of the same
+     performance from another host — re-encoded, cut another way, timed
+     by another table — would carry it anyway. So it is compared with
+     every other recording of its voice, on verse 2 of every surah both
+     have (a surah one host filled from the other recording shows there)
+     and SPREAD verses more across the mushaf, 162 in all, each verse cut
+     out exactly as the app plays it in a reel of that verse alone:
+
+       - waveforms: each CHUNK_MS stretch of one recording's verse is
+         looked for anywhere in the other's (normalised correlation at
+         8 kHz, the measure verify_word_timing.py finds our audio inside
+         QUL's with). A verse found at STRONG_PEAK or better is the same
+         audio, however it was encoded or cut; one at SAME_PEAK or better
+         is in doubt.
+       - verse lengths: each verse's sound, from where it first rises over
+         the breath level to where it last falls under it. The same
+         performance keeps its verses' lengths to a few tens of
+         milliseconds — and a host that re-timed it would keep their
+         ratio — where two performances don't (dur_close: the share
+         within 2%, or 60 ms, of the median ratio).
+       - loudness contours, their starts laid together (env_corr).
+
+     A pair passes when no verse is the same audio, no more than
+     MAX_DOUBT_SHARE are in doubt, no more than MAX_DUR_CLOSE of its
+     verses keep the other's length, its contours correlate under
+     MAX_ENV_CORR, and nearly every verse could be compared. When in
+     doubt it is left out. The metrics and the verdict go into the
+     entry's `distinct`, by the other recording's id and with its source;
+     test/reciter_sources_test.dart fails an alternate without a passing
+     record against each of its voice's other recordings as they are now.
+
+     How this was calibrated: CALIBRATION, run with --calibrate.
+     CALIBRATION_NOTES
+
 Results go to tool/reciters_verified.json; test/reciter_sources_test.dart
 refuses a build where a reciter in the app has no passing entry there,
 or where the entry was made for a different source.
@@ -67,6 +105,14 @@ Run:  python3 tool/verify_reciters.py            # every reciter in the app
       python3 tool/verify_reciters.py --only ID  # one (repeatable)
       python3 tool/verify_reciters.py --survey   # every mp3quran Hafs set
                                                  # with timings, app or not
+      python3 tool/verify_reciters.py --compare A B  # two recordings, each
+                                     # an id or a source as source_key
+                                     # writes it ("ayah <base>", ...)
+      python3 tool/verify_reciters.py --calibrate    # 9.'s calibration
+
+9. needs numpy (apt: python3-numpy); the rest needs only python3 and
+ffmpeg. On a machine that can't reach the audio hosts, run it on CI:
+.github/workflows/voices.yml.
 """
 import argparse
 import array

@@ -1,0 +1,20 @@
+surah https://download.quranicaudio.com/qdc/mishari_al_afasy/streaming/mp3 S qul 173
+surah https://download.quranicaudio.com/quran/mishaari_california SSS qul 95
+surah https://cdn.mp3quran.net/audio/abdullah-basfar/r1 SSS mp3quran 60
+surah https://download.quranicaudio.com/quran/abdullaah_basfar SSS qul 163
+surah https://cdn.mp3quran.net/audio/salah-budair/r1 SSS mp3quran 43
+ayah https://quran.ksu.edu.sa/ayat/mp3/husary_qasr_64kbps
+surah https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a SSS qul 122
+surah https://cdn.mp3quran.net/audio/abdullah-matrood/r1 SSS mp3quran 59
+surah https://download.quranicaudio.com/quran/maher_almu3aiqly/year1440 SSS qul 159
+surah https://audio-cdn.tarteel.ai/quran/surah/maherAlMuaiqly/murattal/mp3 SSS qul 65
+surah https://cdn.mp3quran.net/audio/abdulrahman-sudais/r1 SSS mp3quran 54
+surah https://cdn.mp3quran.net/audio/ali-hudhaifi/r1 SSS mp3quran 74
+alafasy
+basfar
+budair
+husary
+matrood
+muaiqly
+sudais
+hudhaify
