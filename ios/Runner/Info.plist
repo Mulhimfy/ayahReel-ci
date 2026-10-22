@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>AyahReel</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>ayah_reels</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<!-- ayahreel://verse/<surah>/<from>[/<to>]: what a tap on the
+	     home-screen widget opens the app with (see WidgetLink.swift and
+	     HomeWidgetService in Dart). -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>com.ayahReel.app.verse</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>ayahreel</string>
+			</array>
+		</dict>
+	</array>
+	<!-- HTTPS only, so exempt. Without this key every upload stalls on
+	     "Missing Compliance" in App Store Connect. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<!-- Instagram's reel composer is reached by URL scheme, and
+	     canOpenURL answers false for any scheme not declared here —
+	     even on a phone with Instagram installed. Without this the
+	     "Make an Instagram Reel" button never appears to work. -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>instagram-reels</string>
+		<string>instagram-stories</string>
+	</array>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<!-- The app never records: these two exist because ffmpeg's libavdevice
+	     references the capture APIs, and ITMS-90683 rejects the binary
+	     without them. Camera was flagged on build 1; microphone is the same
+	     library's other half, added pre-emptively. -->
+	<key>NSCameraUsageDescription</key>
+	<string>AyahReel does not record video. Its video engine links a library that can access the camera, so iOS requires this notice.</string>
+	<!-- The app never asks where the phone is. flutter_timezone's plugin
+	     header carries a stray `#import <CoreLocation/CoreLocation.h>`
+	     (5.1.0) while its implementation touches nothing but NSTimeZone
+	     and NSLocale — the reminder scheduler reads the zone name and
+	     that is all. The import alone is enough for the App Store's
+	     scanner: ITMS-90683 on 1.0.4 build 6. Only the WhenInUse key is
+	     added; with no CLLocationManager anywhere in the binary there is
+	     nothing that could ever want the Always variant, and claiming it
+	     would be a privacy promise the app has no use for. -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>AyahReel does not use your location. Its reminder scheduler links a library that references the location APIs, so iOS requires this notice.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>AyahReel does not record audio. Its video engine links a library that can access the microphone, so iOS requires this notice.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Save your finished reel to your photo library, in an album named Ayah Reels.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Choose a photo or video from your library — as your reel's background, or as the recitation your reel is built on.</string>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>flutter</string>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+</dict>
+</plist>
