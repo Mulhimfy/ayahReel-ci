@@ -920,8 +920,9 @@ SAME_PEAK = 0.6   # a stretch found this well may be the same audio
 STRONG_PEAK = 0.8  # and one found this well is
 # The verdict on a pair, calibrated (see 9.).
 MAX_DOUBT_SHARE = 0.05   # verses whose best stretch is SAME_PEAK or more
-MAX_DUR_CLOSE = 0.5      # verses as long as the other's, give or take 2%
-MAX_ENV_CORR = 0.9       # median loudness-contour correlation
+MAX_WAVE_MEDIAN = 0.25   # the median verse's best stretch
+MAX_DUR_CLOSE = 0.6      # verses as long as the other's, give or take 2%
+MAX_ENV_CORR = 0.5       # median loudness-contour correlation
 
 
 def _np():
@@ -1184,6 +1185,9 @@ def compare(ra, rb, model, sample=None):
                    f'e.g. {same[:4]}')
     if res['wave_doubt'] > MAX_DOUBT_SHARE * n:
         why.append(f'{res["wave_doubt"]} verses nearly the same audio')
+    if res['wave_median'] > MAX_WAVE_MEDIAN:
+        why.append(f'waveforms correlate at {res["wave_median"]} in the '
+                   f'median verse')
     if res['dur_close'] > MAX_DUR_CLOSE:
         why.append(f'{res["dur_close"]:.0%} of verses as long as each other')
     if res['env_corr'] is not None and res['env_corr'] > MAX_ENV_CORR:
