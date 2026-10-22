@@ -1,0 +1,27 @@
+same      ok=False husary                             yah https://everyayah.com/data/Husary_64kbps n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+same      ok=False abdulbasit                         eryayah.com/data/Abdul_Basit_Murattal_64kbps n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+same      ok=False ghamdi                             /quran/surah/ghamadi/murattal/mp3 SSS qul 13 n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+same      ok=False salimi                             rah/mansourAlSalimi/murattal/mp3 SSS qul 179 n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+same      ok=False abdulkareem                        io.com/quran/muhammad_abdulkareem SSS qul 70 n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+same      ok=False abbad                              load.quranicaudio.com/quran/fares SSS qul 14 n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+mixed     ok=False tunaiji                            ah/khalifaAlTunaiji/murattal/mp3 SSS qul 161 n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+mixed     ok=False husary_mujawwad                    /quran/surah/husary/mujawwad/mp3 SSS qul 164 n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+mixed     ok=False dussary                            urah/yasserAlDosari/murattal/mp3 SSS qul 174 n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+different ok=False husary                             husary_mujawwad                              n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+different ok=False abdulbasit                         abdulbasit_mujawwad                          n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+different ok=False minshawi                           minshawi_mujawwad                            n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+different ok=False mustafa_ismail                     mustafa_ismail_mujawwad                      n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+different ok=False muaiqly                            muaiqly_mujawwad                             n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+different ok=False muaiqly                            /quran/maher_almu3aiqly/year1440 SSS qul 159 n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+different ok=False muaiqly                            surah/maherAlMuaiqly/murattal/mp3 SSS qul 65 n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+different ok=False alafasy                            husary                                       n=0 wave=None/None/None same=None doubt=None dur=None±None close=None env=None
+Traceback (most recent call last):
+  File "/home/runner/work/ayahReel-ci/ayahReel-ci/tool/voices_scratch/screen.py", line 239, in <module>
+    calib()
+  File "/home/runner/work/ayahReel-ci/ayahReel-ci/tool/voices_scratch/screen.py", line 231, in calib
+    res = vr.calibrate(model)
+          ^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/ayahReel-ci/ayahReel-ci/tool/verify_reciters.py", line 1208, in calibrate
+    json.dump(out, open(path, 'w', encoding='utf8'), ensure_ascii=False,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/runner/work/ayahReel-ci/ayahReel-ci/build/verify_reciters/calibration.json'
