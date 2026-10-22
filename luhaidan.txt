@@ -1,0 +1,28 @@
+mp3quran: 114/114 files, bad=[] formats=[(128, 44100, False)]
+mp3quran_old: 114/114 files, bad=[] formats=[(128, 44100, False)]
+quranicaudio: 111/114 files, bad=[2, 6, 112] formats=[(128, 44100, False)]
+islamicnetwork: 114/114 files, bad=[] formats=[(64, 22050, False), (128, 44100, False)]
+mp3quran vs mp3quran_old: duration diff median 0 ms, max 0 ms over 114 surahs; worst [(1, 43807.3125, 43807.3125), (2, 6781126.5, 6781126.5), (3, 4005537.9375, 4005537.9375), (4, 4218331.375, 4218331.375)]
+   1: waveform peaks [1.0, 1.0, 1.0] lengths 43807 / 43807 ms
+   108: waveform peaks [1.0, 1.0, 1.0] lengths 21133 / 21133 ms
+   112: waveform peaks [1.0, 1.0, 1.0] lengths 19147 / 19147 ms
+mp3quran vs quranicaudio: duration diff median 25731 ms, max 1176507 ms over 111 surahs; worst [(28, 1664130.5625, 487624.0), (36, 861596.6875, 319503.625), (39, 1302047.3125, 1694798.3125), (9, 2823418.75, 3211702.8125)]
+   1: waveform peaks [0.077, 0.111, 0.084] lengths 43807 / 36623 ms
+   108: waveform peaks [0.21, 0.182, 0.251] lengths 21133 / 14053 ms
+   112: RuntimeError('https://download.quranicaudio.com/quran/muhammad_alhaidan/112.mp3: 404')
+mp3quran vs islamicnetwork: duration diff median 24921 ms, max 1469666 ms over 114 surahs; worst [(6, 3707088.9375, 2237423.1875), (36, 861596.6875, 319503.625), (39, 1302047.3125, 1694806.3125), (9, 2823418.75, 3211702.8125)]
+   1: waveform peaks [0.1, 0.292, 0.127] lengths 43807 / 30693 ms
+   108: waveform peaks [0.21, 0.182, 0.251] lengths 21133 / 14053 ms
+   112: waveform peaks [0.087, 0.239, 0.268] lengths 19147 / 11598 ms
+mp3quran_old vs quranicaudio: duration diff median 25731 ms, max 1176507 ms over 111 surahs; worst [(28, 1664130.5625, 487624.0), (36, 861596.6875, 319503.625), (39, 1302047.3125, 1694798.3125), (9, 2823418.75, 3211702.8125)]
+   1: waveform peaks [0.077, 0.111, 0.084] lengths 43807 / 36623 ms
+   108: waveform peaks [0.21, 0.182, 0.251] lengths 21133 / 14053 ms
+   112: RuntimeError('https://download.quranicaudio.com/quran/muhammad_alhaidan/112.mp3: 404')
+mp3quran_old vs islamicnetwork: duration diff median 24921 ms, max 1469666 ms over 114 surahs; worst [(6, 3707088.9375, 2237423.1875), (36, 861596.6875, 319503.625), (39, 1302047.3125, 1694806.3125), (9, 2823418.75, 3211702.8125)]
+   1: waveform peaks [0.1, 0.292, 0.127] lengths 43807 / 30693 ms
+   108: waveform peaks [0.21, 0.182, 0.251] lengths 21133 / 14053 ms
+   112: waveform peaks [0.087, 0.239, 0.268] lengths 19147 / 11598 ms
+quranicaudio vs islamicnetwork: duration diff median 0 ms, max 1175749 ms over 111 surahs; worst [(28, 487624.0, 1663373.0), (22, 1372680.0, 1482292.1875), (60, 394161.625, 357328.9375), (16, 2418076.6875, 2411467.6875)]
+   1: waveform peaks [0.075, 0.106, 0.059] lengths 36623 / 30693 ms
+   108: waveform peaks [1.0, 1.0, 1.0] lengths 14053 / 14053 ms
+   112: RuntimeError('https://download.quranicaudio.com/quran/muhammad_alhaidan/112.mp3: 404')

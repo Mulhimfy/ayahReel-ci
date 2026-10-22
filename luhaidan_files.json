@@ -1,0 +1,4114 @@
+{
+ "mp3quran": {
+  "1": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 43807.3125,
+   "total": 709922
+  },
+  "2": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 6781126.5,
+   "total": 108507027
+  },
+  "3": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 4005537.9375,
+   "total": 64097612
+  },
+  "4": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 4218331.375,
+   "total": 67502301
+  },
+  "5": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 3497560.8125,
+   "total": 55969978
+  },
+  "6": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 3707088.9375,
+   "total": 59322424
+  },
+  "7": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 4025051.375,
+   "total": 64409823
+  },
+  "8": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1434566.5,
+   "total": 22962065
+  },
+  "9": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2823418.75,
+   "total": 45183701
+  },
+  "10": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2158210.5625,
+   "total": 34540358
+  },
+  "11": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2410919.125,
+   "total": 38583689
+  },
+  "12": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2328424.4375,
+   "total": 37263780
+  },
+  "13": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 949864.4375,
+   "total": 15206826
+  },
+  "14": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1026951.8125,
+   "total": 16440228
+  },
+  "15": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 843937.9375,
+   "total": 13512002
+  },
+  "16": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2205100.375,
+   "total": 35290601
+  },
+  "17": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1796362.4375,
+   "total": 28750800
+  },
+  "18": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1788342.8125,
+   "total": 28622480
+  },
+  "19": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1079823.625,
+   "total": 17286169
+  },
+  "20": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1406719.875,
+   "total": 22516503
+  },
+  "21": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1470772.1875,
+   "total": 23541362
+  },
+  "22": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1433025.25,
+   "total": 22937397
+  },
+  "23": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1364636.6875,
+   "total": 21843196
+  },
+  "24": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1518027.75,
+   "total": 24297437
+  },
+  "25": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 980349.375,
+   "total": 15694593
+  },
+  "26": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1618494.6875,
+   "total": 25904924
+  },
+  "27": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1331513.4375,
+   "total": 21313210
+  },
+  "28": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1664130.5625,
+   "total": 26635086
+  },
+  "29": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1161795.875,
+   "total": 18597743
+  },
+  "30": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 997642.4375,
+   "total": 15971272
+  },
+  "31": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 610220.375,
+   "total": 9772519
+  },
+  "32": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 442200.8125,
+   "total": 7084214
+  },
+  "33": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1475761.625,
+   "total": 23621187
+  },
+  "34": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 998138.75,
+   "total": 15979207
+  },
+  "35": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 876199.125,
+   "total": 14028175
+  },
+  "36": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 861596.6875,
+   "total": 13794534
+  },
+  "37": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1146566.5,
+   "total": 18354067
+  },
+  "38": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 842893.0,
+   "total": 13495267
+  },
+  "39": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1302047.3125,
+   "total": 20841754
+  },
+  "40": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1331800.8125,
+   "total": 21317804
+  },
+  "41": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 959529.75,
+   "total": 15361471
+  },
+  "42": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 979853.0,
+   "total": 15686649
+  },
+  "43": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1005400.8125,
+   "total": 16095424
+  },
+  "44": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 436558.3125,
+   "total": 6993934
+  },
+  "45": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 568790.1875,
+   "total": 9109650
+  },
+  "46": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 720822.8125,
+   "total": 11542166
+  },
+  "47": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 614870.1875,
+   "total": 9846918
+  },
+  "48": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 607451.375,
+   "total": 9728217
+  },
+  "49": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 431830.1875,
+   "total": 6918288
+  },
+  "50": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 438517.5,
+   "total": 7025259
+  },
+  "51": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 408267.75,
+   "total": 6541295
+  },
+  "52": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 367986.8125,
+   "total": 5896782
+  },
+  "53": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 365897.125,
+   "total": 5863349
+  },
+  "54": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 401893.875,
+   "total": 6439299
+  },
+  "55": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 522370.5625,
+   "total": 8366930
+  },
+  "56": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 530520.8125,
+   "total": 8497338
+  },
+  "57": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 632111.0,
+   "total": 10122775
+  },
+  "58": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 545567.3125,
+   "total": 8738088
+  },
+  "59": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 521273.4375,
+   "total": 8349372
+  },
+  "60": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 439275.0625,
+   "total": 7037414
+  },
+  "61": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 264045.6875,
+   "total": 4233724
+  },
+  "62": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 200646.5,
+   "total": 3219347
+  },
+  "63": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 223399.125,
+   "total": 3583399
+  },
+  "64": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 261250.5625,
+   "total": 4189016
+  },
+  "65": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 303777.9375,
+   "total": 4869446
+  },
+  "66": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 303777.9375,
+   "total": 4869450
+  },
+  "67": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 356884.875,
+   "total": 5719153
+  },
+  "68": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 358008.125,
+   "total": 5737127
+  },
+  "69": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 319999.875,
+   "total": 5128999
+  },
+  "70": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 280006.5,
+   "total": 4489109
+  },
+  "71": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 255425.25,
+   "total": 4095787
+  },
+  "72": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 316656.3125,
+   "total": 5075494
+  },
+  "73": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 237244.0625,
+   "total": 3804912
+  },
+  "74": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 307748.5625,
+   "total": 4932990
+  },
+  "75": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 200176.3125,
+   "total": 3211826
+  },
+  "76": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 313025.25,
+   "total": 5017405
+  },
+  "77": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 253884.0625,
+   "total": 4071154
+  },
+  "78": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 214700.375,
+   "total": 3444203
+  },
+  "79": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 210520.8125,
+   "total": 3377340
+  },
+  "80": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 186383.625,
+   "total": 2991127
+  },
+  "81": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 132702.0,
+   "total": 2132235
+  },
+  "82": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 106579.5625,
+   "total": 1714280
+  },
+  "83": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 244636.6875,
+   "total": 3923200
+  },
+  "84": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 137769.75,
+   "total": 2213325
+  },
+  "85": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 134321.625,
+   "total": 2158145
+  },
+  "86": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 82076.6875,
+   "total": 1322226
+  },
+  "87": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 83905.25,
+   "total": 1351481
+  },
+  "88": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 107493.875,
+   "total": 1728911
+  },
+  "89": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 162429.375,
+   "total": 2607865
+  },
+  "90": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 94432.625,
+   "total": 1519919
+  },
+  "91": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 70844.0625,
+   "total": 1142504
+  },
+  "92": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 92656.3125,
+   "total": 1491496
+  },
+  "93": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 53603.25,
+   "total": 866647
+  },
+  "94": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 36545.25,
+   "total": 593723
+  },
+  "95": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 48352.625,
+   "total": 782635
+  },
+  "96": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 77740.375,
+   "total": 1252843
+  },
+  "97": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 40176.3125,
+   "total": 651816
+  },
+  "98": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 106762.4375,
+   "total": 1717204
+  },
+  "99": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 47255.5,
+   "total": 765095
+  },
+  "100": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 52166.5,
+   "total": 843671
+  },
+  "101": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 49789.375,
+   "total": 805635
+  },
+  "102": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 42187.75,
+   "total": 684011
+  },
+  "103": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 22413.0,
+   "total": 367603
+  },
+  "104": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 45453.0,
+   "total": 736251
+  },
+  "105": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 35839.875,
+   "total": 582431
+  },
+  "106": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 32208.9375,
+   "total": 524336
+  },
+  "107": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 39105.25,
+   "total": 634685
+  },
+  "108": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 21133.0,
+   "total": 347131
+  },
+  "109": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 45087.3125,
+   "total": 730404
+  },
+  "110": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 28395.0625,
+   "total": 463316
+  },
+  "111": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 35657.125,
+   "total": 579511
+  },
+  "112": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 19147.75,
+   "total": 315367
+  },
+  "113": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 28029.375,
+   "total": 457467
+  },
+  "114": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 35291.375,
+   "total": 573655
+  }
+ },
+ "mp3quran_old": {
+  "1": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 43807.3125,
+   "total": 709922
+  },
+  "2": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 6781126.5,
+   "total": 108507027
+  },
+  "3": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 4005537.9375,
+   "total": 64097612
+  },
+  "4": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 4218331.375,
+   "total": 67502301
+  },
+  "5": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 3497560.8125,
+   "total": 55969978
+  },
+  "6": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 3707088.9375,
+   "total": 59322424
+  },
+  "7": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 4025051.375,
+   "total": 64409823
+  },
+  "8": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1434566.5,
+   "total": 22962065
+  },
+  "9": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2823418.75,
+   "total": 45183701
+  },
+  "10": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2158210.5625,
+   "total": 34540358
+  },
+  "11": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2410919.125,
+   "total": 38583689
+  },
+  "12": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2328424.4375,
+   "total": 37263780
+  },
+  "13": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 949864.4375,
+   "total": 15206826
+  },
+  "14": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1026951.8125,
+   "total": 16440228
+  },
+  "15": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 843937.9375,
+   "total": 13512002
+  },
+  "16": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2205100.375,
+   "total": 35290601
+  },
+  "17": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1796362.4375,
+   "total": 28750800
+  },
+  "18": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1788342.8125,
+   "total": 28622480
+  },
+  "19": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1079823.625,
+   "total": 17286169
+  },
+  "20": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1406719.875,
+   "total": 22516503
+  },
+  "21": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1470772.1875,
+   "total": 23541362
+  },
+  "22": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1433025.25,
+   "total": 22937397
+  },
+  "23": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1364636.6875,
+   "total": 21843196
+  },
+  "24": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1518027.75,
+   "total": 24297437
+  },
+  "25": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 980349.375,
+   "total": 15694593
+  },
+  "26": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1618494.6875,
+   "total": 25904924
+  },
+  "27": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1331513.4375,
+   "total": 21313210
+  },
+  "28": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1664130.5625,
+   "total": 26635086
+  },
+  "29": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1161795.875,
+   "total": 18597743
+  },
+  "30": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 997642.4375,
+   "total": 15971272
+  },
+  "31": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 610220.375,
+   "total": 9772519
+  },
+  "32": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 442200.8125,
+   "total": 7084214
+  },
+  "33": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1475761.625,
+   "total": 23621187
+  },
+  "34": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 998138.75,
+   "total": 15979207
+  },
+  "35": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 876199.125,
+   "total": 14028175
+  },
+  "36": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 861596.6875,
+   "total": 13794534
+  },
+  "37": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1146566.5,
+   "total": 18354067
+  },
+  "38": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 842893.0,
+   "total": 13495267
+  },
+  "39": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1302047.3125,
+   "total": 20841754
+  },
+  "40": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1331800.8125,
+   "total": 21317804
+  },
+  "41": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 959529.75,
+   "total": 15361471
+  },
+  "42": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 979853.0,
+   "total": 15686649
+  },
+  "43": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1005400.8125,
+   "total": 16095424
+  },
+  "44": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 436558.3125,
+   "total": 6993934
+  },
+  "45": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 568790.1875,
+   "total": 9109650
+  },
+  "46": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 720822.8125,
+   "total": 11542166
+  },
+  "47": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 614870.1875,
+   "total": 9846918
+  },
+  "48": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 607451.375,
+   "total": 9728217
+  },
+  "49": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 431830.1875,
+   "total": 6918288
+  },
+  "50": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 438517.5,
+   "total": 7025259
+  },
+  "51": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 408267.75,
+   "total": 6541295
+  },
+  "52": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 367986.8125,
+   "total": 5896782
+  },
+  "53": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 365897.125,
+   "total": 5863349
+  },
+  "54": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 401893.875,
+   "total": 6439299
+  },
+  "55": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 522370.5625,
+   "total": 8366930
+  },
+  "56": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 530520.8125,
+   "total": 8497338
+  },
+  "57": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 632111.0,
+   "total": 10122775
+  },
+  "58": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 545567.3125,
+   "total": 8738088
+  },
+  "59": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 521273.4375,
+   "total": 8349372
+  },
+  "60": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 439275.0625,
+   "total": 7037414
+  },
+  "61": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 264045.6875,
+   "total": 4233724
+  },
+  "62": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 200646.5,
+   "total": 3219347
+  },
+  "63": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 223399.125,
+   "total": 3583399
+  },
+  "64": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 261250.5625,
+   "total": 4189016
+  },
+  "65": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 303777.9375,
+   "total": 4869446
+  },
+  "66": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 303777.9375,
+   "total": 4869450
+  },
+  "67": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 356884.875,
+   "total": 5719153
+  },
+  "68": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 358008.125,
+   "total": 5737127
+  },
+  "69": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 319999.875,
+   "total": 5128999
+  },
+  "70": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 280006.5,
+   "total": 4489109
+  },
+  "71": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 255425.25,
+   "total": 4095787
+  },
+  "72": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 316656.3125,
+   "total": 5075494
+  },
+  "73": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 237244.0625,
+   "total": 3804912
+  },
+  "74": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 307748.5625,
+   "total": 4932990
+  },
+  "75": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 200176.3125,
+   "total": 3211826
+  },
+  "76": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 313025.25,
+   "total": 5017405
+  },
+  "77": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 253884.0625,
+   "total": 4071154
+  },
+  "78": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 214700.375,
+   "total": 3444203
+  },
+  "79": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 210520.8125,
+   "total": 3377340
+  },
+  "80": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 186383.625,
+   "total": 2991127
+  },
+  "81": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 132702.0,
+   "total": 2132235
+  },
+  "82": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 106579.5625,
+   "total": 1714280
+  },
+  "83": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 244636.6875,
+   "total": 3923200
+  },
+  "84": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 137769.75,
+   "total": 2213325
+  },
+  "85": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 134321.625,
+   "total": 2158145
+  },
+  "86": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 82076.6875,
+   "total": 1322226
+  },
+  "87": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 83905.25,
+   "total": 1351481
+  },
+  "88": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 107493.875,
+   "total": 1728911
+  },
+  "89": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 162429.375,
+   "total": 2607865
+  },
+  "90": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 94432.625,
+   "total": 1519919
+  },
+  "91": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 70844.0625,
+   "total": 1142504
+  },
+  "92": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 92656.3125,
+   "total": 1491496
+  },
+  "93": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 53603.25,
+   "total": 866647
+  },
+  "94": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 36545.25,
+   "total": 593723
+  },
+  "95": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 48352.625,
+   "total": 782635
+  },
+  "96": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 77740.375,
+   "total": 1252843
+  },
+  "97": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 40176.3125,
+   "total": 651816
+  },
+  "98": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 106762.4375,
+   "total": 1717204
+  },
+  "99": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 47255.5,
+   "total": 765095
+  },
+  "100": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 52166.5,
+   "total": 843671
+  },
+  "101": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 49789.375,
+   "total": 805635
+  },
+  "102": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 42187.75,
+   "total": 684011
+  },
+  "103": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 22413.0,
+   "total": 367603
+  },
+  "104": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 45453.0,
+   "total": 736251
+  },
+  "105": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 35839.875,
+   "total": 582431
+  },
+  "106": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 32208.9375,
+   "total": 524336
+  },
+  "107": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 39105.25,
+   "total": 634685
+  },
+  "108": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 21133.0,
+   "total": 347131
+  },
+  "109": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 45087.3125,
+   "total": 730404
+  },
+  "110": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 28395.0625,
+   "total": 463316
+  },
+  "111": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 35657.125,
+   "total": 579511
+  },
+  "112": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 19147.75,
+   "total": 315367
+  },
+  "113": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 28029.375,
+   "total": 457467
+  },
+  "114": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 35291.375,
+   "total": 573655
+  }
+ },
+ "quranicaudio": {
+  "1": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 36631.625,
+   "total": 596096
+  },
+  "2": {
+   "ok": false,
+   "why": "range request answered 404",
+   "kbps": null,
+   "rate": null,
+   "vbr": null,
+   "audio_ms": null,
+   "total": null
+  },
+  "3": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 4151170.5625,
+   "total": 66429056
+  },
+  "4": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 3915519.875,
+   "total": 62658688
+  },
+  "5": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 3197231.0,
+   "total": 51165312
+  },
+  "6": {
+   "ok": false,
+   "why": "range request answered 404",
+   "kbps": null,
+   "rate": null,
+   "vbr": null,
+   "audio_ms": null,
+   "total": null
+  },
+  "7": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 3869022.0,
+   "total": 61913216
+  },
+  "8": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1435088.9375,
+   "total": 22970496
+  },
+  "9": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 3211702.8125,
+   "total": 51396736
+  },
+  "10": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2120306.8125,
+   "total": 33935488
+  },
+  "11": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2158550.1875,
+   "total": 34545792
+  },
+  "12": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2227043.25,
+   "total": 35643520
+  },
+  "13": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1073632.625,
+   "total": 17188992
+  },
+  "14": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1284101.1875,
+   "total": 20555904
+  },
+  "15": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 811415.5,
+   "total": 12992640
+  },
+  "16": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2418076.6875,
+   "total": 38699136
+  },
+  "17": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1735523.25,
+   "total": 27779200
+  },
+  "18": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1577926.5,
+   "total": 25258112
+  },
+  "19": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1215111.8125,
+   "total": 19452032
+  },
+  "20": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1344705.25,
+   "total": 21526656
+  },
+  "21": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1405204.875,
+   "total": 22493312
+  },
+  "22": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1372680.0,
+   "total": 21973120
+  },
+  "23": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1305443.25,
+   "total": 20897920
+  },
+  "24": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1631320.8125,
+   "total": 26112128
+  },
+  "25": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1223993.4375,
+   "total": 19595392
+  },
+  "26": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1499141.1875,
+   "total": 23996544
+  },
+  "27": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1320698.75,
+   "total": 21141632
+  },
+  "28": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 487624.0,
+   "total": 7813248
+  },
+  "29": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1142726.5,
+   "total": 18294912
+  },
+  "30": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 929776.3125,
+   "total": 14887040
+  },
+  "31": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 620564.875,
+   "total": 9939072
+  },
+  "32": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 505495.5,
+   "total": 8097920
+  },
+  "33": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1440835.875,
+   "total": 23064704
+  },
+  "34": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1009867.75,
+   "total": 16169088
+  },
+  "35": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 938657.9375,
+   "total": 15028352
+  },
+  "36": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 319503.625,
+   "total": 5122176
+  },
+  "37": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1071725.6875,
+   "total": 17158272
+  },
+  "38": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 897227.75,
+   "total": 14366848
+  },
+  "39": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1694798.3125,
+   "total": 27127936
+  },
+  "40": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1321482.4375,
+   "total": 21153920
+  },
+  "41": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 933799.125,
+   "total": 14950528
+  },
+  "42": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 916506.0625,
+   "total": 14674048
+  },
+  "43": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 996388.5625,
+   "total": 15952000
+  },
+  "44": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 425247.3125,
+   "total": 6813824
+  },
+  "45": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 548832.625,
+   "total": 8792192
+  },
+  "46": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 725551.0,
+   "total": 11620480
+  },
+  "47": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 764525.6875,
+   "total": 12243072
+  },
+  "48": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 577541.1875,
+   "total": 9250944
+  },
+  "49": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 372088.125,
+   "total": 5963904
+  },
+  "50": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 515892.1875,
+   "total": 8265856
+  },
+  "51": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 386403.25,
+   "total": 6193280
+  },
+  "52": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 380395.0625,
+   "total": 6097024
+  },
+  "53": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 393900.375,
+   "total": 6314112
+  },
+  "54": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 405498.75,
+   "total": 6498432
+  },
+  "55": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 486765.6875,
+   "total": 7798912
+  },
+  "56": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 594259.5625,
+   "total": 9519232
+  },
+  "57": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 736391.8125,
+   "total": 11792512
+  },
+  "58": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 461792.625,
+   "total": 7399552
+  },
+  "59": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 552724.875,
+   "total": 8853632
+  },
+  "60": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 394161.625,
+   "total": 6318208
+  },
+  "61": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 339356.6875,
+   "total": 5439616
+  },
+  "62": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 212427.75,
+   "total": 3410048
+  },
+  "63": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 274207.3125,
+   "total": 4397184
+  },
+  "64": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 336483.25,
+   "total": 5394560
+  },
+  "65": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 296359.125,
+   "total": 4751488
+  },
+  "66": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 388388.5625,
+   "total": 6224000
+  },
+  "67": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 468924.0625,
+   "total": 7514240
+  },
+  "68": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 385175.5,
+   "total": 6172800
+  },
+  "69": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 486530.5625,
+   "total": 7794816
+  },
+  "70": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 333557.5,
+   "total": 5347456
+  },
+  "71": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 250592.625,
+   "total": 4020352
+  },
+  "72": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 307670.1875,
+   "total": 4933760
+  },
+  "73": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 214308.5625,
+   "total": 3438720
+  },
+  "74": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 323291.375,
+   "total": 5183616
+  },
+  "75": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 212976.3125,
+   "total": 3418240
+  },
+  "76": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 289227.75,
+   "total": 4638848
+  },
+  "77": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 288235.0625,
+   "total": 4622464
+  },
+  "78": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 272666.0625,
+   "total": 4372608
+  },
+  "79": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 253439.875,
+   "total": 4065408
+  },
+  "80": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 205061.1875,
+   "total": 3291264
+  },
+  "81": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 130899.5625,
+   "total": 2105472
+  },
+  "82": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 110497.9375,
+   "total": 1777792
+  },
+  "83": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 230739.5625,
+   "total": 3702912
+  },
+  "84": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 159503.625,
+   "total": 2562176
+  },
+  "85": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 131500.375,
+   "total": 2113664
+  },
+  "86": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 86413.0,
+   "total": 1392768
+  },
+  "87": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 93439.875,
+   "total": 1505408
+  },
+  "88": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 129541.1875,
+   "total": 2082944
+  },
+  "89": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 205008.9375,
+   "total": 3291264
+  },
+  "90": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 84924.0625,
+   "total": 1370240
+  },
+  "91": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 66011.375,
+   "total": 1067136
+  },
+  "92": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 105534.6875,
+   "total": 1699968
+  },
+  "93": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 51905.25,
+   "total": 841856
+  },
+  "94": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 36101.1875,
+   "total": 587904
+  },
+  "95": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 48300.375,
+   "total": 782464
+  },
+  "96": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 87484.0625,
+   "total": 1411200
+  },
+  "97": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 43859.5625,
+   "total": 712832
+  },
+  "98": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 106109.375,
+   "total": 1708160
+  },
+  "99": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 41090.5625,
+   "total": 667776
+  },
+  "100": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 55092.1875,
+   "total": 893056
+  },
+  "101": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 68362.4375,
+   "total": 1104000
+  },
+  "102": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 43049.75,
+   "total": 700544
+  },
+  "103": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 19826.8125,
+   "total": 327808
+  },
+  "104": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 40463.625,
+   "total": 657536
+  },
+  "105": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 30719.875,
+   "total": 501888
+  },
+  "106": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 29048.125,
+   "total": 475264
+  },
+  "107": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 39627.75,
+   "total": 645248
+  },
+  "108": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 14053.875,
+   "total": 235648
+  },
+  "109": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 59872.625,
+   "total": 968832
+  },
+  "110": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 18991.0,
+   "total": 315520
+  },
+  "111": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 26906.0625,
+   "total": 440448
+  },
+  "112": {
+   "ok": false,
+   "why": "range request answered 404",
+   "kbps": null,
+   "rate": null,
+   "vbr": null,
+   "audio_ms": null,
+   "total": null
+  },
+  "113": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 21498.75,
+   "total": 354432
+  },
+  "114": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 25782.8125,
+   "total": 424064
+  }
+ },
+ "islamicnetwork": {
+  "1": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 30693.875,
+   "total": 1256835
+  },
+  "2": {
+   "ok": true,
+   "why": null,
+   "kbps": 64,
+   "rate": 22050,
+   "vbr": false,
+   "audio_ms": 6902951.5,
+   "total": 55225948
+  },
+  "3": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 4151170.5625,
+   "total": 67184799
+  },
+  "4": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 3916555.3125,
+   "total": 63430155
+  },
+  "5": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 3197231.0,
+   "total": 51920970
+  },
+  "6": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2237423.1875,
+   "total": 36564041
+  },
+  "7": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 3869022.0,
+   "total": 62669622
+  },
+  "8": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1435088.9375,
+   "total": 23726693
+  },
+  "9": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 3211702.8125,
+   "total": 52152517
+  },
+  "10": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2120306.8125,
+   "total": 34690173
+  },
+  "11": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2158133.8125,
+   "total": 35295403
+  },
+  "12": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2227043.25,
+   "total": 36398826
+  },
+  "13": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1073632.625,
+   "total": 17944237
+  },
+  "14": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1284101.1875,
+   "total": 21311866
+  },
+  "15": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 811415.5,
+   "total": 13760736
+  },
+  "16": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 2411467.6875,
+   "total": 39348751
+  },
+  "17": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1735523.25,
+   "total": 28534515
+  },
+  "18": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1577926.5,
+   "total": 26012939
+  },
+  "19": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1215111.8125,
+   "total": 20207926
+  },
+  "20": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1344705.25,
+   "total": 22281390
+  },
+  "21": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1405204.875,
+   "total": 23249529
+  },
+  "22": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1482292.1875,
+   "total": 24482789
+  },
+  "23": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1305443.25,
+   "total": 21653242
+  },
+  "24": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1631320.8125,
+   "total": 26867250
+  },
+  "25": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1223993.4375,
+   "total": 20350016
+  },
+  "26": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1499141.1875,
+   "total": 24752386
+  },
+  "27": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1320698.75,
+   "total": 21897425
+  },
+  "28": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1663373.0,
+   "total": 27380097
+  },
+  "29": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1142726.5,
+   "total": 19049888
+  },
+  "30": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 929776.3125,
+   "total": 15656408
+  },
+  "31": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 620564.875,
+   "total": 10704076
+  },
+  "32": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 503196.6875,
+   "total": 8823456
+  },
+  "33": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1440835.875,
+   "total": 23819498
+  },
+  "34": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1009867.75,
+   "total": 16924001
+  },
+  "35": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 938657.9375,
+   "total": 15798782
+  },
+  "36": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 319503.625,
+   "total": 5882281
+  },
+  "37": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1071725.6875,
+   "total": 17913739
+  },
+  "38": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 897227.75,
+   "total": 15135104
+  },
+  "39": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1694806.3125,
+   "total": 27883155
+  },
+  "40": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 1321482.4375,
+   "total": 21909968
+  },
+  "41": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 933799.125,
+   "total": 15720969
+  },
+  "42": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 916506.0625,
+   "total": 15443877
+  },
+  "43": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 996388.5625,
+   "total": 16708476
+  },
+  "44": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 425247.3125,
+   "total": 7576000
+  },
+  "45": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 548832.625,
+   "total": 9555353
+  },
+  "46": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 725551.0,
+   "total": 12385566
+  },
+  "47": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 764525.6875,
+   "total": 13009757
+  },
+  "48": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 577541.1875,
+   "total": 10015011
+  },
+  "49": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 372088.125,
+   "total": 6724613
+  },
+  "50": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 515892.1875,
+   "total": 9027633
+  },
+  "51": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 386403.25,
+   "total": 6953885
+  },
+  "52": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 380395.0625,
+   "total": 6857647
+  },
+  "53": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 393900.375,
+   "total": 7073820
+  },
+  "54": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 405498.75,
+   "total": 7259606
+  },
+  "55": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 486765.6875,
+   "total": 8561155
+  },
+  "56": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 594259.5625,
+   "total": 10282780
+  },
+  "57": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 736391.8125,
+   "total": 12559296
+  },
+  "58": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 461792.625,
+   "total": 8161325
+  },
+  "59": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 552724.875,
+   "total": 9617547
+  },
+  "60": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 357328.9375,
+   "total": 6487249
+  },
+  "61": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 339356.6875,
+   "total": 6200247
+  },
+  "62": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 212427.75,
+   "total": 4167361
+  },
+  "63": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 274207.3125,
+   "total": 5156960
+  },
+  "64": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 336483.25,
+   "total": 6154367
+  },
+  "65": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 296359.125,
+   "total": 5511602
+  },
+  "66": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 388388.5625,
+   "total": 6985548
+  },
+  "67": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 468924.0625,
+   "total": 8275392
+  },
+  "68": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 379454.6875,
+   "total": 6842460
+  },
+  "69": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 486530.5625,
+   "total": 8557513
+  },
+  "70": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 333557.5,
+   "total": 6107369
+  },
+  "71": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 250592.625,
+   "total": 4778588
+  },
+  "72": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 307670.1875,
+   "total": 5692749
+  },
+  "73": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 212323.25,
+   "total": 4165821
+  },
+  "74": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 323291.375,
+   "total": 5942980
+  },
+  "75": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 212976.3125,
+   "total": 4176271
+  },
+  "76": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 289227.75,
+   "total": 5397404
+  },
+  "77": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 288235.0625,
+   "total": 5381618
+  },
+  "78": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 272666.0625,
+   "total": 5132152
+  },
+  "79": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 253439.875,
+   "total": 4824232
+  },
+  "80": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 205061.1875,
+   "total": 4049360
+  },
+  "81": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 130899.5625,
+   "total": 2861598
+  },
+  "82": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 110497.9375,
+   "total": 2534978
+  },
+  "83": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 230739.5625,
+   "total": 4460668
+  },
+  "84": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 159503.625,
+   "total": 3319855
+  },
+  "85": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 131500.375,
+   "total": 2871347
+  },
+  "86": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 86413.0,
+   "total": 2149228
+  },
+  "87": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 93439.875,
+   "total": 2261638
+  },
+  "88": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 129541.1875,
+   "total": 2839848
+  },
+  "89": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 205008.9375,
+   "total": 4048657
+  },
+  "90": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 84924.0625,
+   "total": 2125380
+  },
+  "91": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 66011.375,
+   "total": 1822346
+  },
+  "92": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 105534.6875,
+   "total": 2455478
+  },
+  "93": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 51905.25,
+   "total": 1596419
+  },
+  "94": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 36101.1875,
+   "total": 1343435
+  },
+  "95": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 48300.375,
+   "total": 1538705
+  },
+  "96": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 87484.0625,
+   "total": 2166251
+  },
+  "97": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 43859.5625,
+   "total": 1467559
+  },
+  "98": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 106109.375,
+   "total": 2464691
+  },
+  "99": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 41090.5625,
+   "total": 1423221
+  },
+  "100": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 55092.1875,
+   "total": 1647494
+  },
+  "101": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 68362.4375,
+   "total": 1860005
+  },
+  "102": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 43049.75,
+   "total": 1454625
+  },
+  "103": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 19826.8125,
+   "total": 1082674
+  },
+  "104": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 40463.625,
+   "total": 1413177
+  },
+  "105": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 30719.875,
+   "total": 1257112
+  },
+  "106": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 29048.125,
+   "total": 1230364
+  },
+  "107": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 39627.75,
+   "total": 1399810
+  },
+  "108": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 14053.875,
+   "total": 990198
+  },
+  "109": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 59872.625,
+   "total": 1724033
+  },
+  "110": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 18991.0,
+   "total": 1069264
+  },
+  "111": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 26906.0625,
+   "total": 1196164
+  },
+  "112": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 11598.3125,
+   "total": 950869
+  },
+  "113": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 21498.75,
+   "total": 1109454
+  },
+  "114": {
+   "ok": true,
+   "why": null,
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "audio_ms": 25782.8125,
+   "total": 1178064
+  }
+ }
+}
