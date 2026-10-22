@@ -1,0 +1,16 @@
+wrote out/spectro/t_001_007_007.png taraweeh 1:7-7 table 31923-47055 origin 30407
+[mp3float @ 0x5622be7b49c0] invalid new backstep -1
+wrote out/spectro/t_001_001_002.png taraweeh 1:1-2 table 0-11823 origin 0
+wrote out/spectro/t_039_001_001.png taraweeh 39:1-1 table 3802-16954 origin 2299
+wrote out/spectro/t_088_001_002.png taraweeh 88:1-2 table 4986-15362 origin 3474
+[mp3float @ 0x564ae1bc39c0] invalid new backstep -1
+wrote out/spectro/t_002_081_081.png taraweeh 2:81-81 table 1572832-1594797 origin 1571318
+wrote out/spectro/t_055_043_043.png taraweeh 55:43-43 table 368362-385884 origin 366838
+wrote out/spectro/t_019_098_098.png taraweeh 19:98-98 table 1210922-1229905 origin 1209417
+wrote out/spectro/t_002_286_286.png taraweeh 2:286-286 table 7758493-7811482 origin 7756983
+wrote out/spectro/t_114_006_006.png taraweeh 114:6-6 table 35519-42091 origin 34011
+wrote out/spectro/s_001_007.png studio 1:7
+wrote out/spectro/s_039_001.png studio 39:1
+wrote out/spectro/s_088_001.png studio 88:1
+wrote out/spectro/s_002_081.png studio 2:81
+wrote out/spectro/s_055_043.png studio 55:43
