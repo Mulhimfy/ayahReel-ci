@@ -1,0 +1,1012 @@
+[
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 200,
+   "kbps": 64,
+   "rate": "44100"
+  },
+  "voice": "abdulbasit_mujawwad",
+  "spec": "ayah https://everyayah.com/data/AbdulSamad_64kbps_QuranExplorer.Com",
+  "label": "EA AbdulSamad QE",
+  "secs": 1
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 200,
+   "kbps": 64,
+   "rate": "22050"
+  },
+  "voice": "shatri",
+  "spec": "ayah https://everyayah.com/data/Abu_Bakr_Ash-Shaatree_64kbps",
+  "label": "EA Shaatree_64",
+  "secs": 1
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "error": "[Errno 2] No such file or directory: '/home/runner/work/ayahReel-ci/ayahReel-ci/build/verify_reciters/probe/3669.mp3'"
+  },
+  "voice": "rifai",
+  "spec": "ayah https://everyayah.com/data/Hani_Rifai_64kbps",
+  "label": "EA Hani_Rifai_64",
+  "secs": 1
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 404,
+   "kbps": 0,
+   "rate": null
+  },
+  "voice": "akhdar",
+  "spec": "ayah https://everyayah.com/data/Ibrahim_Akhdar_64kbps",
+  "label": "EA Ibrahim_Akhdar_64",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 200,
+   "kbps": 64,
+   "rate": "22050"
+  },
+  "voice": "tablawi",
+  "spec": "ayah https://everyayah.com/data/Mohammad_al_Tablaway_64kbps",
+  "label": "EA Tablaway_64",
+  "secs": 1
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 200,
+   "kbps": 64,
+   "rate": "22050"
+  },
+  "voice": "shuraym",
+  "spec": "ayah https://everyayah.com/data/Saood_ash-Shuraym_64kbps",
+  "label": "EA Shuraym_64",
+  "secs": 1
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 200,
+   "kbps": 64,
+   "rate": "44100"
+  },
+  "voice": "abdulbasit_mujawwad",
+  "spec": "ayah https://quran.ksu.edu.sa/ayat/mp3/AbdulSamad_64kbps",
+  "label": "KSU AbdulSamad_64",
+  "secs": 3
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 404,
+   "kbps": 0,
+   "rate": null
+  },
+  "voice": "tunaiji",
+  "spec": "ayah https://quran.ksu.edu.sa/ayat/mp3/khaleefa_128kbps",
+  "label": "KSU khaleefa_128",
+  "secs": 1
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 200,
+   "kbps": 64,
+   "rate": "44100"
+  },
+  "voice": "ajmi",
+  "spec": "ayah https://quran.ksu.edu.sa/ayat/mp3/Ahmed_ibn_Ali_al-Ajamy_64kbps",
+  "label": "KSU Ajamy_64",
+  "secs": 3
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 200,
+   "kbps": 128,
+   "rate": "44100"
+  },
+  "voice": "dussary",
+  "spec": "ayah https://quran.ksu.edu.sa/ayat/mp3/Yasser_Ad-Dussary_128kbps",
+  "label": "KSU Dussary_128",
+  "secs": 3
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 200,
+   "kbps": 192,
+   "rate": "44100"
+  },
+  "voice": "qasim",
+  "spec": "ayah https://quran.ksu.edu.sa/ayat/mp3/Muhsin_Al_Qasim_192kbps",
+  "label": "KSU Qasim_192",
+  "secs": 3
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 200,
+   "kbps": 192,
+   "rate": "44100"
+  },
+  "voice": "rifai",
+  "spec": "ayah https://quran.ksu.edu.sa/ayat/mp3/Hani_Rifai_192kbps",
+  "label": "KSU Rifai_192",
+  "secs": 4
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 200,
+   "kbps": 192,
+   "rate": "44100"
+  },
+  "voice": "abdulbasit",
+  "spec": "ayah https://audio-cdn.tarteel.ai/quran/abdulBasitMurattal",
+  "label": "TA abdulBasitMurattal",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 200,
+   "kbps": 128,
+   "rate": "44100"
+  },
+  "voice": "alafasy",
+  "spec": "ayah https://audio-cdn.tarteel.ai/quran/alafasy",
+  "label": "TA alafasy",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 200,
+   "kbps": 40,
+   "rate": "24000"
+  },
+  "voice": "husary_mujawwad",
+  "spec": "ayah https://audio-cdn.tarteel.ai/quran/husaryMujawwad",
+  "label": "TA husaryMujawwad",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 200,
+   "kbps": 128,
+   "rate": "44100"
+  },
+  "voice": "shuraym",
+  "spec": "ayah https://audio-cdn.tarteel.ai/quran/saudAlShuraim",
+  "label": "TA saudAlShuraim",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 200,
+   "kbps": 192,
+   "rate": "44100"
+  },
+  "voice": "rifai",
+  "spec": "ayah https://audio.qurancdn.com/Rifai/mp3",
+  "label": "QC Rifai",
+  "secs": 1
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 200,
+   "kbps": 128,
+   "rate": "44100"
+  },
+  "voice": "alafasy",
+  "spec": "ayah https://audio.qurancdn.com/Alafasy/mp3",
+  "label": "QC Alafasy",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "status": 200,
+   "kbps": 128,
+   "rate": "44100"
+  },
+  "voice": "minshawi",
+  "spec": "ayah https://audio.qurancdn.com/Minshawi/Murattal/mp3",
+  "label": "QC Minshawi Murattal",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "husary",
+  "spec": "surah https://cdn.mp3quran.net/audio/mahmoud-husary/r1 SSS mp3quran 118",
+  "label": "MQ 118",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "abdulbasit_mujawwad",
+  "spec": "surah https://cdn.mp3quran.net/audio/abdulbasit-abdulsamad/r1 SSS mp3quran 51",
+  "label": "MQ 51",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "shuraym",
+  "spec": "surah https://cdn.mp3quran.net/audio/saud-shuraim/r1 SSS mp3quran 31",
+  "label": "MQ 31",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "shatri",
+  "spec": "surah https://cdn.mp3quran.net/audio/abubakr-shatri/r1 SSS mp3quran 4",
+  "label": "MQ 4",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 96,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "qatami",
+  "spec": "surah https://cdn.mp3quran.net/audio/nasser-qatami/r1 SSS mp3quran 86",
+  "label": "MQ 86",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 320,
+   "rate": 48000,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "budair",
+  "spec": "surah https://cdn.mp3quran.net/audio/salah-budair/r1 SSS mp3quran 43",
+  "label": "MQ 43",
+  "secs": 1
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "basfar",
+  "spec": "surah https://cdn.mp3quran.net/audio/abdullah-basfar/r1 SSS mp3quran 60",
+  "label": "MQ 60",
+  "secs": 5
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "matrood",
+  "spec": "surah https://cdn.mp3quran.net/audio/abdullah-matrood/r1 SSS mp3quran 59",
+  "label": "MQ 59",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "suesy",
+  "spec": "surah https://cdn.mp3quran.net/audio/ali-souissi/r1 SSS mp3quran 77",
+  "label": "MQ 77",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 320,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "jaber",
+  "spec": "surah https://cdn.mp3quran.net/audio/ali-jaber/r1 SSS mp3quran 76",
+  "label": "MQ 76",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": true,
+   "ok": true,
+   "why": null
+  },
+  "voice": "nufais",
+  "spec": "surah https://cdn.mp3quran.net/audio/ahmad-nufais/r1 SSS mp3quran 259",
+  "label": "MQ 259",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "sudais",
+  "spec": "surah https://audio-cdn.tarteel.ai/quran/surah/abdulrahmanAlSudais/murattal/mp3 SSS qul 3",
+  "label": "QUL 3",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 22050,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "husary",
+  "spec": "surah https://audio-cdn.tarteel.ai/quran/surah/husary/murattal/mp3 SSS qul 6",
+  "label": "QUL 6",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "minshawi",
+  "spec": "surah https://audio-cdn.tarteel.ai/quran/surah/minshawy/murattal/mp3 SSS qul 9",
+  "label": "QUL 9",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "husary",
+  "spec": "surah https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a SSS qul 122",
+  "label": "QUL 122",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 160,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "ajmi",
+  "spec": "surah https://download.quranicaudio.com/quran/ahmed_ibn_3ali_al-3ajamy SSS qul 19",
+  "label": "QUL 19",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "muaiqly",
+  "spec": "surah https://audio-cdn.tarteel.ai/quran/surah/maherAlMuaiqly/murattal/mp3 SSS qul 65",
+  "label": "QUL 65",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "tablawi",
+  "spec": "surah https://download.quranicaudio.com/quran/mohammad_altablawi SSS qul 91",
+  "label": "QUL 91",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 96,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "qatami",
+  "spec": "surah https://download.quranicaudio.com/quran/nasser_bin_ali_alqatami SSS qul 104",
+  "label": "QUL 104",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "alaqimy",
+  "spec": "surah https://download.quranicaudio.com/quran/akram_al_alaqmi SSS qul 127",
+  "label": "QUL 127",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "balilah",
+  "spec": "surah https://download.quranicaudio.com/quran/bandar_baleela/complete SSS qul 160",
+  "label": "QUL 160",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "jibreel",
+  "spec": "surah https://download.quranicaudio.com/quran/muhammad_jibreel/complete SSS qul 169",
+  "label": "QUL 169",
+  "secs": 0
+ },
+ {
+  "verses": 0,
+  "surahs": 0,
+  "failed": 22,
+  "failed_e_g": [
+   "1:2 No module named 'numpy'",
+   "2:2 No module named 'numpy'",
+   "3:2 No module named 'numpy'",
+   "6:2 No module named 'numpy'",
+   "10:2 No module named 'numpy'"
+  ],
+  "ok": false,
+  "why": "no verse could be compared",
+  "format": {
+   "kbps": 128,
+   "rate": 44100,
+   "vbr": false,
+   "ok": true,
+   "why": null
+  },
+  "voice": "nufais",
+  "spec": "surah https://audio-cdn.tarteel.ai/quran/surah/alnufais/murattal/mp3 SSS qul 175",
+  "label": "QUL 175",
+  "secs": 0
+ }
+]
