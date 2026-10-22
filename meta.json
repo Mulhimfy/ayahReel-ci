@@ -1,0 +1,1180 @@
+{
+ "surah https://download.quranicaudio.com/qdc/mishari_al_afasy/streaming/mp3 S qul 173": {
+  "https://download.quranicaudio.com/qdc/mishari_al_afasy/streaming/mp3/1.mp3": {
+   "status": 206,
+   "v2": {
+    "TXXX": "Software | Lavf59.16.100",
+    "TSSE": "Lavf59.16.100"
+   },
+   "v1": {}
+  },
+  "https://download.quranicaudio.com/qdc/mishari_al_afasy/streaming/mp3/2.mp3": {
+   "status": 206,
+   "v2": {
+    "TXXX": "Software | Lavf59.16.100",
+    "TSSE": "Lavf59.16.100"
+   },
+   "v1": {}
+  },
+  "https://download.quranicaudio.com/qdc/mishari_al_afasy/streaming/mp3/36.mp3": {
+   "status": 206,
+   "v2": {
+    "TXXX": "Software | Lavf59.16.100",
+    "TSSE": "Lavf59.16.100"
+   },
+   "v1": {}
+  },
+  "https://download.quranicaudio.com/qdc/mishari_al_afasy/streaming/mp3/112.mp3": {
+   "status": 206,
+   "v2": {
+    "TXXX": "Software | Lavf59.16.100",
+    "TSSE": "Lavf59.16.100"
+   },
+   "v1": {}
+  }
+ },
+ "surah https://download.quranicaudio.com/quran/mishaari_california SSS qul 95": {
+  "https://download.quranicaudio.com/quran/mishaari_california/001.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surat Al-Fatiha",
+    "TPE1": "Mishari Rashid al-`Afasy",
+    "TALB": "Quran - Taraweeh 1430",
+    "TCON": "Quran",
+    "TRCK": "1/114",
+    "COMM": "quranicaudio.com"
+   },
+   "v1": {
+    "title": "Surat Al-Fatiha",
+    "artist": "Mishari Rashid al-`Afasy",
+    "album": "Quran - Taraweeh 1430",
+    "year": "",
+    "comment": "quranicaudio.com"
+   }
+  },
+  "https://download.quranicaudio.com/quran/mishaari_california/002.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surat Al-Baqara",
+    "TPE1": "Mishari Rashid al-`Afasy",
+    "TALB": "Quran - Taraweeh 1430",
+    "TCON": "Quran",
+    "TRCK": "2/114",
+    "COMM": "quranicaudio.com"
+   },
+   "v1": {
+    "title": "Surat Al-Baqara",
+    "artist": "Mishari Rashid al-`Afasy",
+    "album": "Quran - Taraweeh 1430",
+    "year": "",
+    "comment": "quranicaudio.com"
+   }
+  },
+  "https://download.quranicaudio.com/quran/mishaari_california/036.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surat Ya-Seen",
+    "TPE1": "Mishari Rashid al-`Afasy",
+    "TALB": "Quran - Taraweeh 1430",
+    "TCON": "Quran",
+    "TRCK": "36/114",
+    "COMM": "quranicaudio.com"
+   },
+   "v1": {
+    "title": "Surat Ya-Seen",
+    "artist": "Mishari Rashid al-`Afasy",
+    "album": "Quran - Taraweeh 1430",
+    "year": "",
+    "comment": "quranicaudio.com"
+   }
+  },
+  "https://download.quranicaudio.com/quran/mishaari_california/112.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surat Al-Ikhlas",
+    "TPE1": "Mishari Rashid al-`Afasy",
+    "TALB": "Quran - Taraweeh 1430",
+    "TCON": "Quran",
+    "TRCK": "112/114",
+    "COMM": "quranicaudio.com"
+   },
+   "v1": {
+    "title": "Surat Al-Ikhlas",
+    "artist": "Mishari Rashid al-`Afasy",
+    "album": "Quran - Taraweeh 1430",
+    "year": "",
+    "comment": "quranicaudio.com"
+   }
+  }
+ },
+ "surah https://cdn.mp3quran.net/audio/abdullah-basfar/r1 SSS mp3quran 60": {
+  "https://cdn.mp3quran.net/audio/abdullah-basfar/r1/001.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Abdullaah Basfar  Musshaf",
+    "TPE1": "Abdullaah Basfar",
+    "COMM": "﻿www.mp3quran.net",
+    "TCON": "Quran",
+    "TIT2": "Al-Fatihah",
+    "TYER": "2007"
+   },
+   "v1": {
+    "title": "Al-Fatihah",
+    "artist": "Abdullaah Basfar",
+    "album": "Abdullaah Basfar  Musshaf",
+    "year": "2007",
+    "comment": "www.mp3quran.net"
+   }
+  },
+  "https://cdn.mp3quran.net/audio/abdullah-basfar/r1/002.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Abdullaah Basfar  Musshaf",
+    "TPE1": "Abdullaah Basfar",
+    "COMM": "﻿www.mp3quran.net",
+    "TCON": "Quran",
+    "TIT2": "Al-Baqarah",
+    "TYER": "2007"
+   },
+   "v1": {
+    "title": "Al-Baqarah",
+    "artist": "Abdullaah Basfar",
+    "album": "Abdullaah Basfar  Musshaf",
+    "year": "2007",
+    "comment": "www.mp3quran.net"
+   }
+  },
+  "https://cdn.mp3quran.net/audio/abdullah-basfar/r1/036.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Abdullaah Basfar  Musshaf",
+    "TPE1": "Abdullaah Basfar",
+    "COMM": "﻿www.mp3quran.net",
+    "TCON": "Quran",
+    "TIT2": "Ya­Sin",
+    "TYER": "2007"
+   },
+   "v1": {
+    "title": "Ya­Sin",
+    "artist": "Abdullaah Basfar",
+    "album": "Abdullaah Basfar  Musshaf",
+    "year": "2007",
+    "comment": "www.mp3quran.net"
+   }
+  },
+  "https://cdn.mp3quran.net/audio/abdullah-basfar/r1/112.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Abdullaah Basfar  Musshaf",
+    "TPE1": "Abdullaah Basfar",
+    "COMM": "﻿www.mp3quran.net",
+    "TCON": "Quran",
+    "TIT2": "Al-Ikhlas",
+    "TYER": "2007"
+   },
+   "v1": {
+    "title": "Al-Ikhlas",
+    "artist": "Abdullaah Basfar",
+    "album": "Abdullaah Basfar  Musshaf",
+    "year": "2007",
+    "comment": "www.mp3quran.net"
+   }
+  }
+ },
+ "surah https://download.quranicaudio.com/quran/abdullaah_basfar SSS qul 163": {
+  "https://download.quranicaudio.com/quran/abdullaah_basfar/001.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surat Al-Fatiha",
+    "TPE1": "Abdullah Basfar",
+    "TALB": "Quran",
+    "TCON": "Quran",
+    "TRCK": "1/114",
+    "COMM": "quranicaudio.com"
+   },
+   "v1": {
+    "title": "Surat Al-Fatiha",
+    "artist": "Abdullah Basfar",
+    "album": "Quran",
+    "year": "",
+    "comment": "quranicaudio.com"
+   }
+  },
+  "https://download.quranicaudio.com/quran/abdullaah_basfar/002.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surat Al-Baqara",
+    "TPE1": "Abdullah Basfar",
+    "TALB": "Quran",
+    "TCON": "Quran",
+    "TRCK": "2/114",
+    "COMM": "quranicaudio.com"
+   },
+   "v1": {
+    "title": "Surat Al-Baqara",
+    "artist": "Abdullah Basfar",
+    "album": "Quran",
+    "year": "",
+    "comment": "quranicaudio.com"
+   }
+  },
+  "https://download.quranicaudio.com/quran/abdullaah_basfar/036.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surat Ya-Seen",
+    "TPE1": "Abdullah Basfar",
+    "TALB": "Quran",
+    "TCON": "Quran",
+    "TRCK": "36/114",
+    "COMM": "quranicaudio.com"
+   },
+   "v1": {
+    "title": "Surat Ya-Seen",
+    "artist": "Abdullah Basfar",
+    "album": "Quran",
+    "year": "",
+    "comment": "quranicaudio.com"
+   }
+  },
+  "https://download.quranicaudio.com/quran/abdullaah_basfar/112.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surat Al-Ikhlas",
+    "TPE1": "Abdullah Basfar",
+    "TALB": "Quran",
+    "TCON": "Quran",
+    "TRCK": "112/114",
+    "COMM": "quranicaudio.com"
+   },
+   "v1": {
+    "title": "Surat Al-Ikhlas",
+    "artist": "Abdullah Basfar",
+    "album": "Quran",
+    "year": "",
+    "comment": "quranicaudio.com"
+   }
+  }
+ },
+ "surah https://cdn.mp3quran.net/audio/salah-budair/r1 SSS mp3quran 43": {
+  "https://cdn.mp3quran.net/audio/salah-budair/r1/001.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Hafs A'n Asim -  رواية حفص عن عاصم",
+    "TPE1": "Salah Al-Budair - القارئ صلاح البدير",
+    "TXXX": "comment | http://www.mp3quran.net",
+    "TCOM": "",
+    "TCOP": "www.islamway.net@2020",
+    "TPOS": "",
+    "TIT2": "001 - Al-Fatihah (The Opening) سورة الفاتحة",
+    "TDRC": "1443",
+    "TSSE": "Lavf59.27.100"
+   },
+   "v1": {}
+  },
+  "https://cdn.mp3quran.net/audio/salah-budair/r1/002.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Hafs A'n Asim -  رواية حفص عن عاصم",
+    "TPE1": "Salah Al-Budair - القارئ صلاح البدير",
+    "TXXX": "comment | http://www.mp3quran.net",
+    "TCOM": "",
+    "TPOS": "",
+    "TIT2": "002 - Al-Baqarah (The Cow) سورة البقرة",
+    "TDRC": "1443-08-05",
+    "TSSE": "Lavf59.27.100"
+   },
+   "v1": {}
+  },
+  "https://cdn.mp3quran.net/audio/salah-budair/r1/036.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Hafs A'n Asim -  رواية حفص عن عاصم",
+    "TPE1": "Salah Al-Budair - القارئ صلاح البدير",
+    "TXXX": "comment | http://www.mp3quran.net",
+    "TCOM": "",
+    "TPOS": "",
+    "TIT2": "036 - Ya-seen (Ya-seen) سورة يس",
+    "TDRC": "1443-09-05",
+    "TSSE": "Lavf59.27.100"
+   },
+   "v1": {}
+  },
+  "https://cdn.mp3quran.net/audio/salah-budair/r1/112.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Hafs A'n Asim -  رواية حفص عن عاصم",
+    "TPE1": "Salah Al-Budair - القارئ صلاح البدير",
+    "TXXX": "comment | http://www.mp3quran.net",
+    "TCOM": "",
+    "TPOS": "",
+    "TIT2": "112 - Al-Ikhlas (The Sincerity) سورة الإخلاص",
+    "TDRC": "1443-08-05",
+    "TSSE": "Lavf59.27.100"
+   },
+   "v1": {}
+  }
+ },
+ "ayah https://quran.ksu.edu.sa/ayat/mp3/husary_qasr_64kbps": {
+  "https://quran.ksu.edu.sa/ayat/mp3/husary_qasr_64kbps/001001.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "",
+    "TPE1": "",
+    "TALB": "",
+    "COMM": "﻿",
+    "TCON": ""
+   },
+   "v1": {
+    "title": "",
+    "artist": "",
+    "album": "",
+    "year": "",
+    "comment": ""
+   }
+  },
+  "https://quran.ksu.edu.sa/ayat/mp3/husary_qasr_64kbps/002255.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {
+    "title": "",
+    "artist": "",
+    "album": "",
+    "year": "",
+    "comment": ""
+   }
+  },
+  "https://quran.ksu.edu.sa/ayat/mp3/husary_qasr_64kbps/036001.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "",
+    "TPE1": "",
+    "TALB": "",
+    "COMM": "﻿",
+    "TCON": ""
+   },
+   "v1": {
+    "title": "",
+    "artist": "",
+    "album": "",
+    "year": "",
+    "comment": ""
+   }
+  },
+  "https://quran.ksu.edu.sa/ayat/mp3/husary_qasr_64kbps/112001.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "",
+    "TPE1": "",
+    "TALB": "",
+    "COMM": "﻿",
+    "TCON": ""
+   },
+   "v1": {
+    "title": "",
+    "artist": "",
+    "album": "",
+    "year": "",
+    "comment": ""
+   }
+  }
+ },
+ "surah https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a SSS qul 122": {
+  "https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a/001.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surat Al-Fatiha",
+    "TPE1": "Mahmoud Khalil Al-Husary",
+    "TALB": "Quran",
+    "TCON": "Quran",
+    "COMM": "quranicaudio.com",
+    "TRCK": "1/114"
+   },
+   "v1": {
+    "title": "Surat Al-Fatiha",
+    "artist": "Mahmoud Khalil Al-Husary",
+    "album": "Quran",
+    "year": "",
+    "comment": "quranicaudio.com"
+   }
+  },
+  "https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a/002.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surat Al-Baqara",
+    "TPE1": "Mahmoud Khalil Al-Husary",
+    "TALB": "Quran",
+    "TCON": "Quran",
+    "COMM": "quranicaudio.com",
+    "TRCK": "2/114"
+   },
+   "v1": {
+    "title": "Surat Al-Baqara",
+    "artist": "Mahmoud Khalil Al-Husary",
+    "album": "Quran",
+    "year": "",
+    "comment": "quranicaudio.com"
+   }
+  },
+  "https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a/036.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surat Ya-Seen",
+    "TPE1": "Mahmoud Khalil Al-Husary",
+    "TALB": "Quran",
+    "TCON": "Quran",
+    "COMM": "quranicaudio.com",
+    "TRCK": "36/114"
+   },
+   "v1": {
+    "title": "Surat Ya-Seen",
+    "artist": "Mahmoud Khalil Al-Husary",
+    "album": "Quran",
+    "year": "",
+    "comment": "quranicaudio.com"
+   }
+  },
+  "https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a/112.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surat Al-Ikhlas",
+    "TPE1": "Mahmoud Khalil Al-Husary",
+    "TALB": "Quran",
+    "TCON": "Quran",
+    "COMM": "quranicaudio.com",
+    "TRCK": "112/114"
+   },
+   "v1": {
+    "title": "Surat Al-Ikhlas",
+    "artist": "Mahmoud Khalil Al-Husary",
+    "album": "Quran",
+    "year": "",
+    "comment": "quranicaudio.com"
+   }
+  }
+ },
+ "surah https://cdn.mp3quran.net/audio/abdullah-matrood/r1 SSS mp3quran 59": {
+  "https://cdn.mp3quran.net/audio/abdullah-matrood/r1/001.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Abdullah Al-Mattrod Mus'haf",
+    "TPE1": "Abdullah Al-Mattrod",
+    "TXXX": "comment | www.mp3quran.net",
+    "TCON": "Qura'an",
+    "TIT2": "Al-Fatihah",
+    "TDRC": "2007",
+    "TSSE": "Lavf59.27.100"
+   },
+   "v1": {}
+  },
+  "https://cdn.mp3quran.net/audio/abdullah-matrood/r1/002.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Abdullah Al-Mattrod Mus'haf",
+    "TPE1": "Abdullah Al-Mattrod",
+    "TXXX": "comment | www.mp3quran.net",
+    "TCON": "Qura'an",
+    "TIT2": "Al-Baqarah",
+    "TDRC": "2007",
+    "TSSE": "Lavf59.27.100"
+   },
+   "v1": {}
+  },
+  "https://cdn.mp3quran.net/audio/abdullah-matrood/r1/036.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Abdullah Al-Mattrod Mus'haf",
+    "TPE1": "Abdullah Al-Mattrod",
+    "TBPM": "www.TvQuran.com",
+    "TXXX": "comment | http://www.mp3quran.net",
+    "TPE3": "www.TvQuran.com",
+    "TIT1": "www.TvQuran.com",
+    "TCOP": "www.TvQuran.com",
+    "TENC": "www.TvQuran.com",
+    "TCON": "Qura'an",
+    "TKEY": "www.TvQuran.com",
+    "TPUB": "www.TvQuran.com",
+    "TIT3": "www.TvQuran.com",
+    "TIT2": "036-Ya¬Sin",
+    "TDRC": "2012",
+    "TSSE": "Lavf59.27.100"
+   },
+   "v1": {}
+  },
+  "https://cdn.mp3quran.net/audio/abdullah-matrood/r1/112.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Abdullah Almatrood - القارئ عبدالله المطرود",
+    "TPE1": "Abdullah Almatrood - القارئ عبدالله المطرود",
+    "TXXX": "comment | www.mp3uran.net",
+    "TCOP": "www.islamway.com&islam-call.com",
+    "TCON": "Quran",
+    "TIT2": "112 - Al-Ikhlas ( The Sincerity ) سورة الإخلاص",
+    "TDRC": "2011",
+    "TSSE": "Lavf59.27.100"
+   },
+   "v1": {}
+  }
+ },
+ "surah https://download.quranicaudio.com/quran/maher_almu3aiqly/year1440 SSS qul 159": {
+  "https://download.quranicaudio.com/quran/maher_almu3aiqly/year1440/001.mp3": {
+   "status": 206,
+   "v2": {
+    "TYER": "2019",
+    "TDAT": "0331",
+    "TCON": "Vocal",
+    "TPE1": "Shekh Dr. Maher Al-Muaiqly",
+    "TALB": "Hafs Recitation",
+    "TXXX": "Engineer | Recording Studio",
+    "COMM": "Recorded in the year 1430 AH.to 1440The Glorious Quran Recitation Recording is free and is available on the Complex's: http://audio.qurancomplex.gov.sa"
+   },
+   "v1": {
+    "title": "",
+    "artist": "Shekh Dr. Maher Al-Muaiqly",
+    "album": "Hafs Recitation",
+    "year": "2019",
+    "comment": "Recorded in the year 1430 AH.t"
+   }
+  },
+  "https://download.quranicaudio.com/quran/maher_almu3aiqly/year1440/002.mp3": {
+   "status": 206,
+   "v2": {
+    "TCON": "Vocal",
+    "TPE1": "Shekh Dr. Maher Al-Muaiqly",
+    "TALB": "Hafs Recitation",
+    "TYER": "2019",
+    "COMM": "Recorded in the year 1430 AH.to 1440The Glorious Quran Recitation Recording is free and is available on the Complex's: http://audio.qurancomplex.gov.sa"
+   },
+   "v1": {
+    "title": "",
+    "artist": "Shekh Dr. Maher Al-Muaiqly",
+    "album": "Hafs Recitation",
+    "year": "2019",
+    "comment": "Recorded in the year 1430 AH.t"
+   }
+  },
+  "https://download.quranicaudio.com/quran/maher_almu3aiqly/year1440/036.mp3": {
+   "status": 206,
+   "v2": {
+    "TYER": "2019",
+    "TDAT": "0402",
+    "TCON": "Vocal",
+    "TPE1": "Shekh Dr. Maher Al-Muaiqly",
+    "TALB": "Hafs Recitation",
+    "TXXX": "Engineer | Recording Studio",
+    "COMM": "Recorded in the year 1430 AH.to 1440The Glorious Quran Recitation Recording is free and is available on the Complex's: http://audio.qurancomplex.gov.sa"
+   },
+   "v1": {
+    "title": "",
+    "artist": "Shekh Dr. Maher Al-Muaiqly",
+    "album": "Hafs Recitation",
+    "year": "2019",
+    "comment": "Recorded in the year 1430 AH.t"
+   }
+  },
+  "https://download.quranicaudio.com/quran/maher_almu3aiqly/year1440/112.mp3": {
+   "status": 206,
+   "v2": {
+    "TYER": "2019",
+    "TDAT": "0404",
+    "TCON": "Vocal",
+    "TPE1": "Shekh Dr. Maher Al-Muaiqly",
+    "TALB": "Hafs Recitation",
+    "TXXX": "Engineer | Recording Studio",
+    "COMM": "Recorded in the year 1430 AH.to 1440The Glorious Quran Recitation Recording is free and is available on the Complex's: http://audio.qurancomplex.gov.sa"
+   },
+   "v1": {
+    "title": "",
+    "artist": "Shekh Dr. Maher Al-Muaiqly",
+    "album": "Hafs Recitation",
+    "year": "2019",
+    "comment": "Recorded in the year 1430 AH.t"
+   }
+  }
+ },
+ "surah https://audio-cdn.tarteel.ai/quran/surah/maherAlMuaiqly/murattal/mp3 SSS qul 65": {
+  "https://audio-cdn.tarteel.ai/quran/surah/maherAlMuaiqly/murattal/mp3/001.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surah Al-Fatihah",
+    "TPE1": "Maher al-Muaiqly",
+    "TALB": "Quran",
+    "TCON": "Quran",
+    "TRCK": "1/114",
+    "TXXX": "comment | https://qul.tarteel.ai",
+    "TSSE": "Lavf59.16.100"
+   },
+   "v1": {}
+  },
+  "https://audio-cdn.tarteel.ai/quran/surah/maherAlMuaiqly/murattal/mp3/002.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surah Al-Baqarah",
+    "TPE1": "Maher al-Muaiqly",
+    "TALB": "Quran",
+    "TCON": "Quran",
+    "TRCK": "2/114",
+    "TXXX": "comment | https://qul.tarteel.ai",
+    "TSSE": "Lavf59.16.100"
+   },
+   "v1": {}
+  },
+  "https://audio-cdn.tarteel.ai/quran/surah/maherAlMuaiqly/murattal/mp3/036.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surah Ya-Sin",
+    "TPE1": "Maher al-Muaiqly",
+    "TALB": "Quran",
+    "TCON": "Quran",
+    "TRCK": "36/114",
+    "TXXX": "comment | https://qul.tarteel.ai",
+    "TSSE": "Lavf59.16.100"
+   },
+   "v1": {}
+  },
+  "https://audio-cdn.tarteel.ai/quran/surah/maherAlMuaiqly/murattal/mp3/112.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surah Al-Ikhlas",
+    "TPE1": "Maher al-Muaiqly",
+    "TALB": "Quran",
+    "TCON": "Quran",
+    "TRCK": "112/114",
+    "TXXX": "comment | https://qul.tarteel.ai",
+    "TSSE": "Lavf59.16.100"
+   },
+   "v1": {}
+  }
+ },
+ "surah https://cdn.mp3quran.net/audio/abdulrahman-sudais/r1 SSS mp3quran 54": {
+  "https://cdn.mp3quran.net/audio/abdulrahman-sudais/r1/001.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Abdulrahman Alsudaes Musshaf",
+    "TPE1": "Abdulrahman Alsudaes",
+    "TXXX": "comment | www.mp3quran.net",
+    "TCON": "Quran",
+    "TIT2": "Al-Fatihah",
+    "TDRC": "2008",
+    "TSSE": "Lavf59.27.100"
+   },
+   "v1": {}
+  },
+  "https://cdn.mp3quran.net/audio/abdulrahman-sudais/r1/002.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Abdulrahman Alsudaes Musshaf",
+    "TPE1": "Abdulrahman Alsudaes",
+    "TXXX": "comment | www.mp3quran.net",
+    "TCON": "Quran",
+    "TIT2": "Al-Baqarah",
+    "TDRC": "2008",
+    "TSSE": "Lavf59.27.100"
+   },
+   "v1": {}
+  },
+  "https://cdn.mp3quran.net/audio/abdulrahman-sudais/r1/036.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Abdulrahman Alsudaes Musshaf",
+    "TPE1": "Abdulrahman Alsudaes",
+    "TXXX": "comment | www.mp3quran.net",
+    "TCON": "Quran",
+    "TIT2": "Ya­Sin",
+    "TDRC": "2008",
+    "TSSE": "Lavf59.27.100"
+   },
+   "v1": {}
+  },
+  "https://cdn.mp3quran.net/audio/abdulrahman-sudais/r1/112.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Abdulrahman Alsudaes Musshaf",
+    "TPE1": "Abdulrahman Alsudaes",
+    "TXXX": "comment | www.mp3quran.net",
+    "TCON": "Quran",
+    "TIT2": "Al-Ikhlas",
+    "TDRC": "2008",
+    "TSSE": "Lavf59.27.100"
+   },
+   "v1": {}
+  }
+ },
+ "surah https://cdn.mp3quran.net/audio/ali-hudhaifi/r1 SSS mp3quran 74": {
+  "https://cdn.mp3quran.net/audio/ali-hudhaifi/r1/001.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Ali Alhuthaifi Musshaf",
+    "TPE1": "Ali Alhuthaifi القارئ علي الحذيفي",
+    "COMM": "﻿http://www.mp3quran.net",
+    "TCOP": "Reserved For KFGQPC حقوق التسجيل محفوظة لمجمع الملك فهد لطباعة المصحف الشريف",
+    "TCON": "Quran",
+    "TIT2": "001 Al-Fatihah الفاتحة",
+    "TYER": "2020"
+   },
+   "v1": {
+    "title": "001 Al-Fatihah ???????",
+    "artist": "Ali Alhuthaifi ?????? ??? ????",
+    "album": "Ali Alhuthaifi Musshaf",
+    "year": "2020",
+    "comment": "http://www.mp3quran.net"
+   }
+  },
+  "https://cdn.mp3quran.net/audio/ali-hudhaifi/r1/002.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Ali Alhuthaifi Musshaf",
+    "TPE1": "Ali Alhuthaifi القارئ علي الحذيفي",
+    "COMM": "﻿http://www.mp3quran.net",
+    "TCOP": "Reserved For KFGQPC حقوق التسجيل محفوظة لمجمع الملك فهد لطباعة المصحف الشريف",
+    "TCON": "Quran",
+    "TIT2": "002 Al-Baqarah البقرة",
+    "TYER": "2020"
+   },
+   "v1": {
+    "title": "002 Al-Baqarah ??????",
+    "artist": "Ali Alhuthaifi ?????? ??? ????",
+    "album": "Ali Alhuthaifi Musshaf",
+    "year": "2020",
+    "comment": "http://www.mp3quran.net"
+   }
+  },
+  "https://cdn.mp3quran.net/audio/ali-hudhaifi/r1/036.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Ali Alhuthaifi Musshaf",
+    "TPE1": "Ali Alhuthaifi القارئ علي الحذيفي",
+    "COMM": "﻿http://www.mp3quran.net",
+    "TCOP": "Reserved For KFGQPC حقوق التسجيل محفوظة لمجمع الملك فهد لطباعة المصحف الشريف",
+    "TCON": "Quran",
+    "TIT2": "036 Ya-Sin يس",
+    "TYER": "2020"
+   },
+   "v1": {
+    "title": "036 Ya-Sin ??",
+    "artist": "Ali Alhuthaifi ?????? ??? ????",
+    "album": "Ali Alhuthaifi Musshaf",
+    "year": "2020",
+    "comment": "http://www.mp3quran.net"
+   }
+  },
+  "https://cdn.mp3quran.net/audio/ali-hudhaifi/r1/112.mp3": {
+   "status": 206,
+   "v2": {
+    "TALB": "Ali Alhuthaifi Musshaf",
+    "TPE1": "Ali Alhuthaifi القارئ علي الحذيفي",
+    "COMM": "﻿http://www.mp3quran.net",
+    "TCOP": "Reserved For KFGQPC حقوق التسجيل محفوظة لمجمع الملك فهد لطباعة المصحف الشريف",
+    "TCON": "Quran",
+    "TIT2": "112 Al-Ikhlas الإخلاص",
+    "TYER": "2020"
+   },
+   "v1": {
+    "title": "112 Al-Ikhlas ???????",
+    "artist": "Ali Alhuthaifi ?????? ??? ????",
+    "album": "Ali Alhuthaifi Musshaf",
+    "year": "2020",
+    "comment": "http://www.mp3quran.net"
+   }
+  }
+ },
+ "alafasy": {
+  "https://everyayah.com/data/Alafasy_128kbps/001001.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {
+    "title": "",
+    "artist": "Mishary Rashid Alafasy",
+    "album": "VerseByVerseQuran.Com",
+    "year": "",
+    "comment": "Brought to you by Sabbir.com"
+   }
+  },
+  "https://everyayah.com/data/Alafasy_128kbps/002255.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {
+    "title": "",
+    "artist": "Mishary Rashid Alafasy",
+    "album": "VerseByVerseQuran.Com",
+    "year": "",
+    "comment": "Brought to you by Sabbir.com"
+   }
+  },
+  "https://everyayah.com/data/Alafasy_128kbps/036001.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {
+    "title": "",
+    "artist": "Mishary Rashid Alafasy",
+    "album": "VerseByVerseQuran.Com",
+    "year": "",
+    "comment": "Brought to you by Sabbir.com"
+   }
+  },
+  "https://everyayah.com/data/Alafasy_128kbps/112001.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {
+    "title": "",
+    "artist": "Mishary Rashid Alafasy",
+    "album": "VerseByVerseQuran.Com",
+    "year": "",
+    "comment": "Brought to you by Sabbir.com"
+   }
+  }
+ },
+ "basfar": {
+  "https://everyayah.com/data/Abdullah_Basfar_192kbps/001001.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {
+    "title": "001.mp3",
+    "artist": "Abdullah Basfar & Ibrahim Walk",
+    "album": "(C) VerseByVerseQuran.com",
+    "year": "",
+    "comment": "MP3s from archive.org"
+   }
+  },
+  "https://everyayah.com/data/Abdullah_Basfar_192kbps/002255.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {
+    "title": "002d221-286.mp3",
+    "artist": "From 35.01 To 36.02.92",
+    "album": "Splitted by Mp3Splt v. 2.1",
+    "year": "",
+    "comment": "http://mp3splt.sf.net"
+   }
+  },
+  "https://everyayah.com/data/Abdullah_Basfar_192kbps/036001.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {
+    "title": "036a001-015.mp3",
+    "artist": "From 0.09.83 To 0.13.84",
+    "album": "Splitted by Mp3Splt v. 2.1",
+    "year": "",
+    "comment": "http://mp3splt.sf.net"
+   }
+  },
+  "https://everyayah.com/data/Abdullah_Basfar_192kbps/112001.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {
+    "title": "112.mp3",
+    "artist": "From 0.09 To 0.12.62",
+    "album": "Splitted by Mp3Splt v. 2.1",
+    "year": "",
+    "comment": "http://mp3splt.sf.net"
+   }
+  }
+ },
+ "budair": {
+  "https://everyayah.com/data/Salah_Al_Budair_128kbps/001001.mp3": {
+   "status": 206,
+   "v2": {
+    "TRCK": "1",
+    "COMM": "ID3v1 Comment | MP3s from quranicaudio.com",
+    "TCON": "(12)",
+    "TPE1": "Salah al-Budair",
+    "TALB": "(C) VerseByVerseQuran.com Salah al-Budair"
+   },
+   "v1": {
+    "title": "",
+    "artist": "Salah al-Budair",
+    "album": "(C) VerseByVerseQuran.com Sala",
+    "year": "",
+    "comment": "MP3s from quranicaudio.com"
+   }
+  },
+  "https://everyayah.com/data/Salah_Al_Budair_128kbps/002255.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "Surat Al-Baqara",
+    "TRCK": "1",
+    "COMM": "ID3v1 Comment | MP3s from quranicaudio.com",
+    "TCON": "(12)",
+    "TPE1": "Salah al-Budair",
+    "TALB": "(C) VerseByVerseQuran.com Salah al-Budair"
+   },
+   "v1": {
+    "title": "Surat Al-Baqara",
+    "artist": "Salah al-Budair",
+    "album": "(C) VerseByVerseQuran.com Sala",
+    "year": "",
+    "comment": "MP3s from quranicaudio.com"
+   }
+  },
+  "https://everyayah.com/data/Salah_Al_Budair_128kbps/036001.mp3": {
+   "status": 206,
+   "v2": {
+    "COMM": "ID3v1 Comment | MP3s from quranicaudio.com",
+    "TPE1": "Salah al-Budair",
+    "TALB": "(C) VerseByVerseQuran.com Salah al-Budair"
+   },
+   "v1": {
+    "title": "",
+    "artist": "Salah al-Budair",
+    "album": "(C) VerseByVerseQuran.com Sala",
+    "year": "",
+    "comment": "MP3s from quranicaudio.com"
+   }
+  },
+  "https://everyayah.com/data/Salah_Al_Budair_128kbps/112001.mp3": {
+   "status": 206,
+   "v2": {
+    "COMM": "ID3v1 Comment | MP3s from quranicaudio.com",
+    "TPE1": "Salah al-Budair",
+    "TALB": "(C) VerseByVerseQuran.com Salah al-Budair"
+   },
+   "v1": {
+    "title": "",
+    "artist": "Salah al-Budair",
+    "album": "(C) VerseByVerseQuran.com Sala",
+    "year": "",
+    "comment": "MP3s from quranicaudio.com"
+   }
+  }
+ },
+ "husary": {
+  "https://everyayah.com/data/Husary_128kbps/001001.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "001.mp3",
+    "TPE1": "Al Husary",
+    "TALB": "VerseByVerseQuran.Com",
+    "COMM": "http://mp3splt.sf.net"
+   },
+   "v1": {
+    "title": "",
+    "artist": "Husary",
+    "album": "VerseByVerseQuran.com",
+    "year": "",
+    "comment": "AudioIslam.Com MP3s"
+   }
+  },
+  "https://everyayah.com/data/Husary_128kbps/002255.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {
+    "title": "002.mp3",
+    "artist": "Husary",
+    "album": "VerseByVerseQuran.com",
+    "year": "",
+    "comment": "AudioIslam.Com MP3s"
+   }
+  },
+  "https://everyayah.com/data/Husary_128kbps/036001.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "036.mp3",
+    "COMM": "http://mp3splt.sf.net",
+    "TALB": "VerseByVerseQuran.Com",
+    "TPE1": "Al Husary"
+   },
+   "v1": {
+    "title": "036.mp3",
+    "artist": "Husary",
+    "album": "VerseByVerseQuran.com",
+    "year": "",
+    "comment": "AudioIslam.Com MP3s"
+   }
+  },
+  "https://everyayah.com/data/Husary_128kbps/112001.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "112.mp3",
+    "COMM": "http://mp3splt.sf.net",
+    "TCON": "(12)",
+    "TALB": "VerseByVerseQuran.Com",
+    "TPE1": "Al Husary"
+   },
+   "v1": {
+    "title": "112.mp3",
+    "artist": "Husary",
+    "album": "VerseByVerseQuran.com",
+    "year": "",
+    "comment": "AudioIslam.Com MP3s"
+   }
+  }
+ },
+ "matrood": {
+  "https://everyayah.com/data/Abdullah_Matroud_128kbps/001001.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "001 - Al-Fatiha (00.16)",
+    "TRCK": "1",
+    "COMM": "ID3v1 Comment | ······ ······ ····· ···· She",
+    "TCON": "(12)",
+    "TPE1": "Abdullah_Matroud",
+    "TALB": "(C) VerseByVerseQuran.com Abdullah_Matroud"
+   },
+   "v1": {
+    "title": "001 - Al-Fatiha (00.16)",
+    "artist": "Abdullah_Matroud",
+    "album": "(C) VerseByVerseQuran.com Abdu",
+    "year": "",
+    "comment": "······ ······ ····· ···· She"
+   }
+  },
+  "https://everyayah.com/data/Abdullah_Matroud_128kbps/002255.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "002 - Al-Baqara (37.50)",
+    "TRCK": "1",
+    "COMM": "ID3v1 Comment | ······ ······ ····· ···· She",
+    "TCON": "(12)",
+    "TPE1": "Abdullah_Matroud",
+    "TALB": "(C) VerseByVerseQuran.com Abdullah_Matroud"
+   },
+   "v1": {
+    "title": "002 - Al-Baqara (37.50)",
+    "artist": "Abdullah_Matroud",
+    "album": "(C) VerseByVerseQuran.com Abdu",
+    "year": "",
+    "comment": "······ ······ ····· ···· She"
+   }
+  },
+  "https://everyayah.com/data/Abdullah_Matroud_128kbps/036001.mp3": {
+   "status": 206,
+   "v2": {
+    "TIT2": "036 - Ya-seen (04.08)",
+    "TRCK": "1",
+    "COMM": "ID3v1 Comment | ······ ······ ····· ···· She",
+    "TCON": "(12)",
+    "TPE1": "Abdullah_Matroud",
+    "TALB": "(C) VerseByVerseQuran.com Abdullah_Matroud"
+   },
+   "v1": {
+    "title": "036 - Ya-seen (04.08)",
+    "artist": "Abdullah_Matroud",
+    "album": "(C) VerseByVerseQuran.com Abdu",
+    "year": "",
+    "comment": "······ ······ ····· ···· She"
+   }
+  },
+  "https://everyayah.com/data/Abdullah_Matroud_128kbps/112001.mp3": {
+   "status": 206,
+   "v2": {
+    "TRCK": "1",
+    "COMM": "ID3v1 Comment | ······ ······ ····· ···· She",
+    "TCON": "(12)",
+    "TPE1": "Abdullah_Matroud",
+    "TALB": "(C) VerseByVerseQuran.com Abdullah_Matroud"
+   },
+   "v1": {
+    "title": "",
+    "artist": "Abdullah_Matroud",
+    "album": "(C) VerseByVerseQuran.com Abdu",
+    "year": "",
+    "comment": "······ ······ ····· ···· She"
+   }
+  }
+ },
+ "muaiqly": {
+  "https://everyayah.com/data/MaherAlMuaiqly128kbps/001001.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {}
+  },
+  "https://everyayah.com/data/MaherAlMuaiqly128kbps/002255.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {}
+  },
+  "https://everyayah.com/data/MaherAlMuaiqly128kbps/036001.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {}
+  },
+  "https://everyayah.com/data/MaherAlMuaiqly128kbps/112001.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {}
+  }
+ },
+ "sudais": {
+  "https://everyayah.com/data/Abdurrahmaan_As-Sudais_192kbps/001001.mp3": {
+   "status": 206,
+   "v2": {
+    "TPE1": "AbdurRahman As-Sudais",
+    "TALB": "(C) VerseByVerseQuran.com AbdurRahman As-Sudais",
+    "COMM": "Original MP3s from QuranicAudio.com"
+   },
+   "v1": {}
+  },
+  "https://everyayah.com/data/Abdurrahmaan_As-Sudais_192kbps/002255.mp3": {
+   "status": 206,
+   "v2": {
+    "TPE1": "AbdurRahman As-Sudais",
+    "TALB": "(C) VerseByVerseQuran.com AbdurRahman As-Sudais",
+    "COMM": "Original MP3s from QuranicAudio.com"
+   },
+   "v1": {}
+  },
+  "https://everyayah.com/data/Abdurrahmaan_As-Sudais_192kbps/036001.mp3": {
+   "status": 206,
+   "v2": {
+    "TPE1": "AbdurRahman As-Sudais",
+    "TALB": "(C) VerseByVerseQuran.com AbdurRahman As-Sudais",
+    "COMM": "Original MP3s from QuranicAudio.com"
+   },
+   "v1": {}
+  },
+  "https://everyayah.com/data/Abdurrahmaan_As-Sudais_192kbps/112001.mp3": {
+   "status": 206,
+   "v2": {
+    "TPE1": "AbdurRahman As-Sudais",
+    "TALB": "(C) VerseByVerseQuran.com AbdurRahman As-Sudais",
+    "COMM": "Original MP3s from QuranicAudio.com"
+   },
+   "v1": {}
+  }
+ },
+ "hudhaify": {
+  "https://everyayah.com/data/Hudhaify_128kbps/001001.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {
+    "title": "001.mp3",
+    "artist": "Hudhaify",
+    "album": "VerseByVerseQuran.com",
+    "year": "",
+    "comment": "-a"
+   }
+  },
+  "https://everyayah.com/data/Hudhaify_128kbps/002255.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {
+    "title": "002r.mp3",
+    "artist": "Hudhaify",
+    "album": "VerseByVerseQuran.com",
+    "year": "",
+    "comment": "001001.mp3"
+   }
+  },
+  "https://everyayah.com/data/Hudhaify_128kbps/036001.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {
+    "title": "036a.mp3",
+    "artist": "Hudhaify",
+    "album": "VerseByVerseQuran.com",
+    "year": "",
+    "comment": "001001.mp3"
+   }
+  },
+  "https://everyayah.com/data/Hudhaify_128kbps/112001.mp3": {
+   "status": 206,
+   "v2": {},
+   "v1": {
+    "title": "112.mp3",
+    "artist": "Hudhaify",
+    "album": "VerseByVerseQuran.com",
+    "year": "",
+    "comment": "001001.mp3"
+   }
+  }
+ }
+}
