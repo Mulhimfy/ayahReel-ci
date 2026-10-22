@@ -104,6 +104,11 @@ abstract final class WordAlignService {
   @visibleForTesting
   static bool alignedByQuranAlign(Reciter r) => _alignFolderFor(r) != null;
 
+  /// The release's file that times [r], or null — for tests, which hold
+  /// every recording of a voice to its own timing.
+  @visibleForTesting
+  static String? alignFolderOf(Reciter r) => _alignFolderFor(r);
+
   /// How many of [all] carry word timings — for tests, which pin the
   /// count so a table edit cannot silently drop a voice.
   static int supportedCount(Iterable<Reciter> all) =>

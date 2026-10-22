@@ -1205,6 +1205,7 @@ def calibrate(model, pairs=None):
               f"close={res.get('dur_close')} env={res.get('env_corr')}",
               flush=True)
     path = os.path.join(CACHE, 'calibration.json')
+    os.makedirs(CACHE, exist_ok=True)
     json.dump(out, open(path, 'w', encoding='utf8'), ensure_ascii=False,
               indent=1)
     print(f'-> {path}')

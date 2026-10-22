@@ -22,9 +22,9 @@ jobs:
       - name: Tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg >/dev/null
-          python3 -m pip install -q numpy
+          sudo apt-get install -y -qq ffmpeg python3-numpy >/dev/null
           ffmpeg -version | head -1
+          python3 -I -c 'import numpy; print("numpy", numpy.__version__)'
       - name: Run
         env:
           SHARD: ${{ matrix.shard }}

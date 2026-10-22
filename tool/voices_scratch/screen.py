@@ -9,6 +9,7 @@ performance? — and the calibration pairs in full.
 import json
 import os
 import sys
+import threading
 import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
@@ -179,6 +180,9 @@ CANDS = [
 ]
 
 
+_PROBE = threading.Lock()  # vr.probe writes one file per process
+
+
 def fmt(r):
     """The candidate's sound: kbps and rate of a file, and whether it is
     constant-bitrate (surah files must be)."""
@@ -188,7 +192,8 @@ def fmt(r):
             return dict(kbps=lay.get('kbps'), rate=lay.get('rate'),
                         vbr=lay.get('vbr'), ok=lay.get('ok'), why=lay.get('why'))
         st, hdr, b = vr._get(f"{r['base']}/002255.mp3", timeout=60)
-        info = vr.probe(b) if st == 200 else {}
+        with _PROBE:
+            info = vr.probe(b) if st == 200 else {}
         s = (info.get('streams') or [{}])[0]
         return dict(status=st, kbps=int(s.get('bit_rate', 0) or 0) // 1000,
                     rate=s.get('sample_rate'))

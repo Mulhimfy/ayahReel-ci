@@ -47,10 +47,39 @@ void main() {
 
   test('a voice added since the tool carries the pace it measured', () {
     for (final r in reciters) {
+      // The EveryAyah voices' paces were set by hand before the tool (see
+      // Reciter.pace) — all but another recording, which came after it.
       final everyAyah = r.everyAyahFolder != null;
-      if (everyAyah) continue; // hand-set before the tool; see Reciter.pace
+      if (everyAyah && r.recordingOf == null) continue;
       final measured = (verified[r.id]['pace'] as num).toDouble();
       expect(r.pace, closeTo(measured, 0.005), reason: r.id);
+    }
+  });
+
+  test('another recording is another performance, not the same one from '
+      'another host', () {
+    // tool/verify_reciters.py compares each one with every other
+    // recording of its voice, waveforms and verse lengths over 160-odd
+    // verses (see 9. in its docstring), and records the verdict against
+    // the source it compared with.
+    for (final r in reciters) {
+      if (r.recordingOf == null) continue;
+      final v = verified[r.id] as Map<String, dynamic>;
+      expect(v['recording_of'], r.recordingOf, reason: r.id);
+      final distinct = v['distinct'] as Map<String, dynamic>?;
+      for (final other in recordingsOf(r)) {
+        if (other.id == r.id) continue;
+        final d = distinct?[other.id] as Map<String, dynamic>?;
+        expect(d, isNotNull,
+            reason: '${r.id} was never compared with ${other.id}');
+        expect(d!['ok'], isTrue, reason: '${r.id} against ${other.id}');
+        expect(d['source'], sourceKey(other),
+            reason: '${other.id} has moved since ${r.id} was compared '
+                'with it');
+        expect(d['wave_same'], 0, reason: '${r.id} against ${other.id}');
+        expect(d['verses'] as int, greaterThanOrEqualTo(40),
+            reason: '${r.id} against ${other.id}');
+      }
     }
   });
 
