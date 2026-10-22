@@ -1,0 +1,3658 @@
+{
+"surah https://download.quranicaudio.com/quran/mishaari_california SSS qul 95": {
+"1": {
+"start": 0,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 0.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 5793
+},
+"2": {
+"start": 5542,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5542.0,
+"sound_after_cut_ms": null,
+"v1_ms": 9115
+},
+"3": {
+"start": 5666,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5666.0,
+"sound_after_cut_ms": null,
+"v1_ms": 7004
+},
+"4": {
+"start": 5462,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5122.0,
+"sound_after_cut_ms": null,
+"v1_ms": 43469
+},
+"5": {
+"start": 5962,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5472.0,
+"sound_after_cut_ms": null,
+"v1_ms": 28565
+},
+"6": {
+"start": 5201,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4661.0,
+"sound_after_cut_ms": null,
+"v1_ms": 18297
+},
+"7": {
+"start": 5169,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4849.0,
+"sound_after_cut_ms": null,
+"v1_ms": 14697
+},
+"8": {
+"start": 5000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4770.0,
+"sound_after_cut_ms": null,
+"v1_ms": 27723
+},
+"9": {
+"start": 1,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 1.0,
+"sound_after_cut_ms": null,
+"v1_ms": 12302
+},
+"10": {
+"start": 6077,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5447.0,
+"sound_after_cut_ms": null,
+"v1_ms": 11030
+},
+"11": {
+"start": 5511,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5511.0,
+"sound_after_cut_ms": null,
+"v1_ms": 16665
+},
+"12": {
+"start": 6392,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 6142.0,
+"sound_after_cut_ms": null,
+"v1_ms": 11647
+},
+"13": {
+"start": 5189,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5189.0,
+"sound_after_cut_ms": null,
+"v1_ms": 26434
+},
+"14": {
+"start": 5673,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5673.0,
+"sound_after_cut_ms": null,
+"v1_ms": 24735
+},
+"15": {
+"start": 5214,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5214.0,
+"sound_after_cut_ms": null,
+"v1_ms": 12686
+},
+"16": {
+"start": 5310,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5310.0,
+"sound_after_cut_ms": null,
+"v1_ms": 13331
+},
+"17": {
+"start": 5741,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5521.0,
+"sound_after_cut_ms": null,
+"v1_ms": 27672
+},
+"18": {
+"start": 5478,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5478.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10835
+},
+"19": {
+"start": 5553,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5553.0,
+"sound_after_cut_ms": null,
+"v1_ms": 13775
+},
+"20": {
+"start": 5691,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5691.0,
+"sound_after_cut_ms": 1220,
+"v1_ms": 1772
+},
+"21": {
+"start": 5918,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5918.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10938
+},
+"22": {
+"start": 5264,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5264.0,
+"sound_after_cut_ms": null,
+"v1_ms": 11935
+},
+"23": {
+"start": 5865,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5865.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5319
+},
+"24": {
+"start": 5338,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5338.0,
+"sound_after_cut_ms": null,
+"v1_ms": 16386
+},
+"25": {
+"start": 5602,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5342.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10757
+},
+"26": {
+"start": 5871,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5871.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10865
+},
+"27": {
+"start": 6198,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 6198.0,
+"sound_after_cut_ms": null,
+"v1_ms": 13361
+},
+"28": {
+"start": 5832,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5832.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10305
+},
+"29": {
+"start": 5625,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5625.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10303
+},
+"30": {
+"start": 6345,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5735.0,
+"sound_after_cut_ms": null,
+"v1_ms": 11433
+},
+"31": {
+"start": 5722,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5722.0,
+"sound_after_cut_ms": null,
+"v1_ms": 9130
+},
+"32": {
+"start": 5625,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5625.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8977
+},
+"33": {
+"start": 5436,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5436.0,
+"sound_after_cut_ms": null,
+"v1_ms": 16335
+},
+"34": {
+"start": 5760,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5760.0,
+"sound_after_cut_ms": null,
+"v1_ms": 16110
+},
+"35": {
+"start": 5844,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5844.0,
+"sound_after_cut_ms": null,
+"v1_ms": 31075
+},
+"36": {
+"start": 5991,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5701.0,
+"sound_after_cut_ms": null,
+"v1_ms": 4883
+},
+"37": {
+"start": 5945,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5945.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6885
+},
+"38": {
+"start": 6085,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 6085.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8170
+},
+"39": {
+"start": 3802,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 3802.0,
+"sound_after_cut_ms": 4400,
+"v1_ms": 13152
+},
+"40": {
+"start": 5652,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5652.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5125
+},
+"41": {
+"start": 5515,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5515.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5186
+},
+"42": {
+"start": 5905,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5905.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5951
+},
+"43": {
+"start": 5848,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5848.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5153
+},
+"44": {
+"start": 5744,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5744.0,
+"sound_after_cut_ms": 4570,
+"v1_ms": 4605
+},
+"45": {
+"start": 6453,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 6453.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5665
+},
+"46": {
+"start": 5500,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5500.0,
+"sound_after_cut_ms": 4230,
+"v1_ms": 4671
+},
+"47": {
+"start": 4917,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4917.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8320
+},
+"48": {
+"start": 4852,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4852.0,
+"sound_after_cut_ms": 3530,
+"v1_ms": 6673
+},
+"49": {
+"start": 5291,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5291.0,
+"sound_after_cut_ms": null,
+"v1_ms": 17919
+},
+"50": {
+"start": 3780,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 1680.0,
+"sound_after_cut_ms": 3980,
+"v1_ms": 9272
+},
+"51": {
+"start": 5345,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5345.0,
+"sound_after_cut_ms": 2760,
+"v1_ms": 3018
+},
+"52": {
+"start": 5477,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5477.0,
+"sound_after_cut_ms": 420,
+"v1_ms": 3329
+},
+"53": {
+"start": 5025,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5025.0,
+"sound_after_cut_ms": 3460,
+"v1_ms": 3954
+},
+"54": {
+"start": 5367,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5367.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6177
+},
+"55": {
+"start": 6123,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 6123.0,
+"sound_after_cut_ms": 4150,
+"v1_ms": 4338
+},
+"56": {
+"start": 5250,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5250.0,
+"sound_after_cut_ms": 2700,
+"v1_ms": 3207
+},
+"57": {
+"start": 5006,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5006.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8637
+},
+"58": {
+"start": 4781,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4551.0,
+"sound_after_cut_ms": null,
+"v1_ms": 16265
+},
+"59": {
+"start": 4863,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4863.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8529
+},
+"60": {
+"start": 5133,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5133.0,
+"sound_after_cut_ms": null,
+"v1_ms": 68600
+},
+"61": {
+"start": 4524,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4524.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8895
+},
+"62": {
+"start": 4301,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4301.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10602
+},
+"63": {
+"start": 4855,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4855.0,
+"sound_after_cut_ms": null,
+"v1_ms": 20036
+},
+"64": {
+"start": 4222,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4222.0,
+"sound_after_cut_ms": null,
+"v1_ms": 13993
+},
+"65": {
+"start": 4999,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4999.0,
+"sound_after_cut_ms": null,
+"v1_ms": 49948
+},
+"66": {
+"start": 4841,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4841.0,
+"sound_after_cut_ms": null,
+"v1_ms": 14732
+},
+"67": {
+"start": 5155,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5155.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10475
+},
+"68": {
+"start": 4877,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4877.0,
+"sound_after_cut_ms": 3030,
+"v1_ms": 7655
+},
+"69": {
+"start": 5216,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5216.0,
+"sound_after_cut_ms": null,
+"v1_ms": 4802
+},
+"70": {
+"start": 5281,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5281.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6395
+},
+"71": {
+"start": 4602,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4602.0,
+"sound_after_cut_ms": null,
+"v1_ms": 13257
+},
+"72": {
+"start": 4566,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4566.0,
+"sound_after_cut_ms": null,
+"v1_ms": 14346
+},
+"73": {
+"start": 4956,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4956.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3903
+},
+"74": {
+"start": 4758,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4758.0,
+"sound_after_cut_ms": 3090,
+"v1_ms": 3648
+},
+"75": {
+"start": 5291,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5291.0,
+"sound_after_cut_ms": 3620,
+"v1_ms": 4041
+},
+"76": {
+"start": 5097,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5097.0,
+"sound_after_cut_ms": null,
+"v1_ms": 12322
+},
+"77": {
+"start": 4883,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4883.0,
+"sound_after_cut_ms": 2800,
+"v1_ms": 3062
+},
+"78": {
+"start": 5485,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5285.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6894
+},
+"79": {
+"start": 4900,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4900.0,
+"sound_after_cut_ms": 3520,
+"v1_ms": 3757
+},
+"80": {
+"start": 4999,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4999.0,
+"sound_after_cut_ms": 2100,
+"v1_ms": 2681
+},
+"81": {
+"start": 5524,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5524.0,
+"sound_after_cut_ms": 2390,
+"v1_ms": 2835
+},
+"82": {
+"start": 5000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5000.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5493
+},
+"83": {
+"start": 5000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5000.0,
+"sound_after_cut_ms": 1720,
+"v1_ms": 4291
+},
+"84": {
+"start": 5178,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5178.0,
+"sound_after_cut_ms": null,
+"v1_ms": 4944
+},
+"85": {
+"start": 5551,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5131.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6320
+},
+"86": {
+"start": 5564,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5564.0,
+"sound_after_cut_ms": 4620,
+"v1_ms": 4722
+},
+"87": {
+"start": 5268,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5268.0,
+"sound_after_cut_ms": 3470,
+"v1_ms": 3650
+},
+"88": {
+"start": 4986,
+"in_breath": false,
+"cut_in_sound": true,
+"sound_before_ms": 4986.0,
+"sound_after_cut_ms": 100,
+"v1_ms": 5270
+},
+"89": {
+"start": 5130,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5130.0,
+"sound_after_cut_ms": null,
+"v1_ms": 1270
+},
+"90": {
+"start": 5000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5000.0,
+"sound_after_cut_ms": 3140,
+"v1_ms": 3518
+},
+"91": {
+"start": 5115,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5115.0,
+"sound_after_cut_ms": 2660,
+"v1_ms": 2978
+},
+"92": {
+"start": 4800,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4470.0,
+"sound_after_cut_ms": 2900,
+"v1_ms": 3039
+},
+"93": {
+"start": 5155,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5155.0,
+"sound_after_cut_ms": 1330,
+"v1_ms": 1571
+},
+"94": {
+"start": 5196,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5196.0,
+"sound_after_cut_ms": 2860,
+"v1_ms": 3396
+},
+"95": {
+"start": 5068,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5068.0,
+"sound_after_cut_ms": 280,
+"v1_ms": 2506
+},
+"96": {
+"start": 5270,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5270.0,
+"sound_after_cut_ms": 4010,
+"v1_ms": 4307
+},
+"97": {
+"start": 4766,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4766.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6763
+},
+"98": {
+"start": 4779,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4779.0,
+"sound_after_cut_ms": null,
+"v1_ms": 12324
+},
+"99": {
+"start": 4912,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4912.0,
+"sound_after_cut_ms": 4190,
+"v1_ms": 4758
+},
+"100": {
+"start": 5214,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5214.0,
+"sound_after_cut_ms": 2920,
+"v1_ms": 3180
+},
+"101": {
+"start": 5398,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5398.0,
+"sound_after_cut_ms": 1730,
+"v1_ms": 2203
+},
+"102": {
+"start": 5824,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5824.0,
+"sound_after_cut_ms": 2790,
+"v1_ms": 3308
+},
+"103": {
+"start": 5343,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5343.0,
+"sound_after_cut_ms": null,
+"v1_ms": 1309
+},
+"104": {
+"start": 5198,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5198.0,
+"sound_after_cut_ms": 3870,
+"v1_ms": 4278
+},
+"105": {
+"start": 5409,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5019.0,
+"sound_after_cut_ms": 3830,
+"v1_ms": 7320
+},
+"106": {
+"start": 5519,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5519.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2449
+},
+"107": {
+"start": 5132,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5132.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5734
+},
+"108": {
+"start": 5482,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5482.0,
+"sound_after_cut_ms": null,
+"v1_ms": 4548
+},
+"109": {
+"start": 5299,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5299.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3701
+},
+"110": {
+"start": 5295,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5295.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6054
+},
+"111": {
+"start": 5313,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5313.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5718
+},
+"112": {
+"start": 5483,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5483.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3270
+},
+"113": {
+"start": 5145,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5145.0,
+"sound_after_cut_ms": 3170,
+"v1_ms": 3561
+},
+"114": {
+"start": 5373,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5373.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5659
+}
+},
+"ghamdi": {
+"1": {
+"start": 3900,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 60.0,
+"sound_after_cut_ms": 2510,
+"v1_ms": 2660
+},
+"2": {
+"start": 6200,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 720.0,
+"sound_after_cut_ms": null,
+"v1_ms": 7260
+},
+"3": {
+"start": 7420,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 560.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6780
+},
+"4": {
+"start": 9320,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 66.5306122448983,
+"sound_after_cut_ms": null,
+"v1_ms": 37540
+},
+"5": {
+"start": 9360,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 120.40816326530694,
+"sound_after_cut_ms": null,
+"v1_ms": 23380
+},
+"6": {
+"start": 9600,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 95.3061224489793,
+"sound_after_cut_ms": null,
+"v1_ms": 16580
+},
+"7": {
+"start": 10420,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 759.3877551020414,
+"sound_after_cut_ms": null,
+"v1_ms": 8980
+},
+"8": {
+"start": 9680,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 110.81632653061206,
+"sound_after_cut_ms": null,
+"v1_ms": 21740
+},
+"9": {
+"start": 4040,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 110.0,
+"sound_after_cut_ms": null,
+"v1_ms": 12300
+},
+"10": {
+"start": 14260,
+"in_breath": false,
+"cut_in_sound": true,
+"sound_before_ms": 3949.3877551020414,
+"sound_after_cut_ms": 1170,
+"v1_ms": 6560
+},
+"11": {
+"start": 6560,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 760.0,
+"sound_after_cut_ms": 5050,
+"v1_ms": 14040
+},
+"12": {
+"start": 10400,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 735.5102040816328,
+"sound_after_cut_ms": 4370,
+"v1_ms": 8580
+},
+"13": {
+"start": 6420,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 120.0,
+"sound_after_cut_ms": null,
+"v1_ms": 24160
+},
+"14": {
+"start": 6280,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 710.0,
+"sound_after_cut_ms": 4520,
+"v1_ms": 22540
+},
+"15": {
+"start": 10820,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 717.5510204081638,
+"sound_after_cut_ms": 4910,
+"v1_ms": 10960
+},
+"16": {
+"start": 6460,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": null,
+"v1_ms": 12880
+},
+"17": {
+"start": 6220,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 20.0,
+"sound_after_cut_ms": null,
+"v1_ms": 21820
+},
+"18": {
+"start": 9960,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 89.59183673469306,
+"sound_after_cut_ms": null,
+"v1_ms": 9480
+},
+"19": {
+"start": 5540,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 10.0,
+"sound_after_cut_ms": null,
+"v1_ms": 9600
+},
+"20": {
+"start": 5440,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 20.0,
+"sound_after_cut_ms": 1360,
+"v1_ms": 1100
+},
+"21": {
+"start": 9980,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 103.4693877551017,
+"sound_after_cut_ms": null,
+"v1_ms": 8460
+},
+"22": {
+"start": 5460,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 11440
+},
+"23": {
+"start": 5540,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 20.0,
+"sound_after_cut_ms": 4230,
+"v1_ms": 4420
+},
+"24": {
+"start": 9240,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5384.897959183674,
+"sound_after_cut_ms": null,
+"v1_ms": 14180
+},
+"25": {
+"start": 5300,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 10.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8800
+},
+"26": {
+"start": 5840,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 20.0,
+"sound_after_cut_ms": null,
+"v1_ms": 7260
+},
+"27": {
+"start": 9240,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 14.897959183674175,
+"sound_after_cut_ms": 4300,
+"v1_ms": 10680
+},
+"28": {
+"start": 4640,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 0.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6140
+},
+"29": {
+"start": 6180,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 460.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6560
+},
+"30": {
+"start": 10100,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 492.8571428571431,
+"sound_after_cut_ms": null,
+"v1_ms": 6320
+},
+"31": {
+"start": 6000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 520.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5820
+},
+"32": {
+"start": 5860,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 510.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6420
+},
+"33": {
+"start": 6640,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 150.0,
+"sound_after_cut_ms": null,
+"v1_ms": 14600
+},
+"34": {
+"start": 5660,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": null,
+"v1_ms": 14660
+},
+"35": {
+"start": 9640,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 83.06122448979659,
+"sound_after_cut_ms": null,
+"v1_ms": 25640
+},
+"36": {
+"start": 5560,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2479
+},
+"37": {
+"start": 5740,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 50.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5040
+},
+"38": {
+"start": 5800,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5800.0,
+"sound_after_cut_ms": 4720,
+"v1_ms": 7720
+},
+"39": {
+"start": 9500,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 13.673469387755176,
+"sound_after_cut_ms": null,
+"v1_ms": 7200
+},
+"40": {
+"start": 5440,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 0.0,
+"sound_after_cut_ms": 4070,
+"v1_ms": 3920
+},
+"41": {
+"start": 6260,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 20.0,
+"sound_after_cut_ms": 4340,
+"v1_ms": 4280
+},
+"42": {
+"start": 4640,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 0.0,
+"sound_after_cut_ms": 4550,
+"v1_ms": 4660
+},
+"43": {
+"start": 8560,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 60.0,
+"sound_after_cut_ms": null,
+"v1_ms": 4060
+},
+"44": {
+"start": 4920,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 0.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3520
+},
+"45": {
+"start": 4780,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 10.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3259
+},
+"46": {
+"start": 5500,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 5500.0,
+"sound_after_cut_ms": 3910,
+"v1_ms": 2520
+},
+"47": {
+"start": 5880,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": null,
+"v1_ms": 7780
+},
+"48": {
+"start": 5480,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 120.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5040
+},
+"49": {
+"start": 6060,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 110.0,
+"sound_after_cut_ms": null,
+"v1_ms": 14440
+},
+"50": {
+"start": 9220,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 11.020408163265529,
+"sound_after_cut_ms": null,
+"v1_ms": 8160
+},
+"51": {
+"start": 4220,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": 3030,
+"v1_ms": 2720
+},
+"52": {
+"start": 4160,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 70.0,
+"sound_after_cut_ms": 2290,
+"v1_ms": 2360
+},
+"53": {
+"start": 4380,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 70.0,
+"sound_after_cut_ms": 3740,
+"v1_ms": 3620
+},
+"54": {
+"start": 4140,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": 4680,
+"v1_ms": 5180
+},
+"55": {
+"start": 4180,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": 3870,
+"v1_ms": 3800
+},
+"56": {
+"start": 4120,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": 2920,
+"v1_ms": 2860
+},
+"57": {
+"start": 4100,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4100.0,
+"sound_after_cut_ms": 4550,
+"v1_ms": 9000
+},
+"58": {
+"start": 4019,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 3639.0,
+"sound_after_cut_ms": null,
+"v1_ms": 18781
+},
+"59": {
+"start": 7660,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 10.0,
+"sound_after_cut_ms": 4270,
+"v1_ms": 7620
+},
+"60": {
+"start": 4220,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 60.0,
+"sound_after_cut_ms": null,
+"v1_ms": 58640
+},
+"61": {
+"start": 4100,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 3810.0,
+"sound_after_cut_ms": null,
+"v1_ms": 7380
+},
+"62": {
+"start": 5020,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 50.0,
+"sound_after_cut_ms": null,
+"v1_ms": 9520
+},
+"63": {
+"start": 4300,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": null,
+"v1_ms": 18860
+},
+"64": {
+"start": 4200,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 30.0,
+"sound_after_cut_ms": 4880,
+"v1_ms": 14480
+},
+"65": {
+"start": 4180,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 50.0,
+"sound_after_cut_ms": null,
+"v1_ms": 44080
+},
+"66": {
+"start": 4320,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 30.0,
+"sound_after_cut_ms": null,
+"v1_ms": 16380
+},
+"67": {
+"start": 6000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 10.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8180
+},
+"68": {
+"start": 8160,
+"in_breath": false,
+"cut_in_sound": true,
+"sound_before_ms": 3260.0,
+"sound_after_cut_ms": 170,
+"v1_ms": 4660
+},
+"69": {
+"start": 4720,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": 4220,
+"v1_ms": 5080
+},
+"70": {
+"start": 4880,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4880.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6200
+},
+"71": {
+"start": 4960,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 120.0,
+"sound_after_cut_ms": null,
+"v1_ms": 14220
+},
+"72": {
+"start": 5460,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 10.0,
+"sound_after_cut_ms": null,
+"v1_ms": 12480
+},
+"73": {
+"start": 4720,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": 4320,
+"v1_ms": 4260
+},
+"74": {
+"start": 8700,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": 4070,
+"v1_ms": 3940
+},
+"75": {
+"start": 4940,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": 4890,
+"v1_ms": 4980
+},
+"76": {
+"start": 5060,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8300
+},
+"77": {
+"start": 4920,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": 2690,
+"v1_ms": 2420
+},
+"78": {
+"start": 5420,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6060
+},
+"79": {
+"start": 5440,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 50.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3280
+},
+"80": {
+"start": 5660,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2220
+},
+"81": {
+"start": 5560,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2000
+},
+"82": {
+"start": 5720,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 4020
+},
+"83": {
+"start": 5740,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2340
+},
+"84": {
+"start": 5520,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3760
+},
+"85": {
+"start": 5360,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 50.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3780
+},
+"86": {
+"start": 5560,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 30.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3500
+},
+"87": {
+"start": 5600,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 10.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2439
+},
+"88": {
+"start": 5800,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": 3210,
+"v1_ms": 3300
+},
+"89": {
+"start": 5580,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 920
+},
+"90": {
+"start": 6180,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 140.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3980
+},
+"91": {
+"start": 5980,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 60.0,
+"sound_after_cut_ms": 2480,
+"v1_ms": 2320
+},
+"92": {
+"start": 5540,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2220
+},
+"93": {
+"start": 5760,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": 3600,
+"v1_ms": 840
+},
+"94": {
+"start": 5660,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2320
+},
+"95": {
+"start": 5520,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 40.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2080
+},
+"96": {
+"start": 5660,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3340
+},
+"97": {
+"start": 5860,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 120.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6800
+},
+"98": {
+"start": 5720,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 50.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10580
+},
+"99": {
+"start": 5800,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": 4110,
+"v1_ms": 3780
+},
+"100": {
+"start": 5620,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 70.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2620
+},
+"101": {
+"start": 5580,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": 2840,
+"v1_ms": 1120
+},
+"102": {
+"start": 5800,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": 4870,
+"v1_ms": 2080
+},
+"103": {
+"start": 5796,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 366.0,
+"sound_after_cut_ms": 5020,
+"v1_ms": 903
+},
+"104": {
+"start": 5780,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 110.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3380
+},
+"105": {
+"start": 6120,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 4640
+},
+"106": {
+"start": 5500,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 40.0,
+"sound_after_cut_ms": 2940,
+"v1_ms": 3060
+},
+"107": {
+"start": 6080,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 70.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3400
+},
+"108": {
+"start": 6048,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 418.0,
+"sound_after_cut_ms": 4810,
+"v1_ms": 4935
+},
+"109": {
+"start": 5400,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 10.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5360
+},
+"110": {
+"start": 5880,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 390.0,
+"sound_after_cut_ms": 4490,
+"v1_ms": 4977
+},
+"111": {
+"start": 6140,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 20.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5080
+},
+"112": {
+"start": 6111,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 311.0,
+"sound_after_cut_ms": 4170,
+"v1_ms": 2247
+},
+"113": {
+"start": 5817,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 287.0,
+"sound_after_cut_ms": 2790,
+"v1_ms": 3024
+},
+"114": {
+"start": 5640,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 0.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3440
+}
+},
+"salimi": {
+"1": {
+"start": 1440,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 10.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5640
+},
+"2": {
+"start": 5540,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 670.0,
+"sound_after_cut_ms": null,
+"v1_ms": 9680
+},
+"3": {
+"start": 5540,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 720.0,
+"sound_after_cut_ms": null,
+"v1_ms": 9380
+},
+"4": {
+"start": 4900,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 39060
+},
+"5": {
+"start": 5460,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 110.0,
+"sound_after_cut_ms": null,
+"v1_ms": 27600
+},
+"6": {
+"start": 4840,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 70.0,
+"sound_after_cut_ms": null,
+"v1_ms": 14840
+},
+"7": {
+"start": 5560,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 650.0,
+"sound_after_cut_ms": null,
+"v1_ms": 9940
+},
+"8": {
+"start": 5020,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 60.0,
+"sound_after_cut_ms": null,
+"v1_ms": 24140
+},
+"9": {
+"start": 6960,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 120.0,
+"sound_after_cut_ms": null,
+"v1_ms": 14160
+},
+"10": {
+"start": 5500,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 770.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10680
+},
+"11": {
+"start": 5540,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 630.0,
+"sound_after_cut_ms": null,
+"v1_ms": 15480
+},
+"12": {
+"start": 5540,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 660.0,
+"sound_after_cut_ms": null,
+"v1_ms": 11720
+},
+"13": {
+"start": 5700,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 710.0,
+"sound_after_cut_ms": null,
+"v1_ms": 27900
+},
+"14": {
+"start": 5560,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 710.0,
+"sound_after_cut_ms": null,
+"v1_ms": 25440
+},
+"15": {
+"start": 5340,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 630.0,
+"sound_after_cut_ms": null,
+"v1_ms": 12560
+},
+"16": {
+"start": 5160,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 13760
+},
+"17": {
+"start": 5060,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4270.0,
+"sound_after_cut_ms": null,
+"v1_ms": 23280
+},
+"18": {
+"start": 4920,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 9980
+},
+"19": {
+"start": 5040,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 30.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10600
+},
+"20": {
+"start": 5040,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 0.0,
+"sound_after_cut_ms": null,
+"v1_ms": 1280
+},
+"21": {
+"start": 5160,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 110.0,
+"sound_after_cut_ms": null,
+"v1_ms": 9160
+},
+"22": {
+"start": 5300,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": null,
+"v1_ms": 13440
+},
+"23": {
+"start": 5020,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 30.0,
+"sound_after_cut_ms": null,
+"v1_ms": 4080
+},
+"24": {
+"start": 5080,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 50.0,
+"sound_after_cut_ms": null,
+"v1_ms": 15840
+},
+"25": {
+"start": 4900,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 20.0,
+"sound_after_cut_ms": null,
+"v1_ms": 9300
+},
+"26": {
+"start": 4920,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 20.0,
+"sound_after_cut_ms": null,
+"v1_ms": 7340
+},
+"27": {
+"start": 5040,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 30.0,
+"sound_after_cut_ms": null,
+"v1_ms": 13960
+},
+"28": {
+"start": 4880,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 20.0,
+"sound_after_cut_ms": null,
+"v1_ms": 7580
+},
+"29": {
+"start": 5300,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 520.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8860
+},
+"30": {
+"start": 5680,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 770.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10420
+},
+"31": {
+"start": 5240,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 670.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10160
+},
+"32": {
+"start": 5500,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 630.0,
+"sound_after_cut_ms": null,
+"v1_ms": 9860
+},
+"33": {
+"start": 4940,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": null,
+"v1_ms": 17660
+},
+"34": {
+"start": 4880,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 70.0,
+"sound_after_cut_ms": null,
+"v1_ms": 13620
+},
+"35": {
+"start": 4940,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 70.0,
+"sound_after_cut_ms": null,
+"v1_ms": 35580
+},
+"36": {
+"start": 5640,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 690.0,
+"sound_after_cut_ms": null,
+"v1_ms": 4780
+},
+"37": {
+"start": 4940,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 50.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6380
+},
+"38": {
+"start": 5020,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4200.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6200
+},
+"39": {
+"start": 5000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 30.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6880
+},
+"40": {
+"start": 5000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 60.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3520
+},
+"41": {
+"start": 4940,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 50.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3460
+},
+"42": {
+"start": 4780,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 50.0,
+"sound_after_cut_ms": null,
+"v1_ms": 4560
+},
+"43": {
+"start": 5020,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3000
+},
+"44": {
+"start": 4960,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 70.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3480
+},
+"45": {
+"start": 5080,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2260
+},
+"46": {
+"start": 5080,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 70.0,
+"sound_after_cut_ms": null,
+"v1_ms": 4580
+},
+"47": {
+"start": 5060,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 7920
+},
+"48": {
+"start": 4980,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6700
+},
+"49": {
+"start": 5020,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 18220
+},
+"50": {
+"start": 5000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 20.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8360
+},
+"51": {
+"start": 5000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2500
+},
+"52": {
+"start": 4960,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2760
+},
+"53": {
+"start": 4820,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3660
+},
+"54": {
+"start": 5000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5060
+},
+"55": {
+"start": 4920,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3340
+},
+"56": {
+"start": 4940,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 110.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3099
+},
+"57": {
+"start": 5020,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 0.0,
+"sound_after_cut_ms": null,
+"v1_ms": 7780
+},
+"58": {
+"start": 4980,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 20.0,
+"sound_after_cut_ms": null,
+"v1_ms": 19460
+},
+"59": {
+"start": 4960,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 4140.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8460
+},
+"60": {
+"start": 5080,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 61500
+},
+"61": {
+"start": 5040,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 10.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8820
+},
+"62": {
+"start": 4900,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 30.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10200
+},
+"63": {
+"start": 4960,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": null,
+"v1_ms": 23700
+},
+"64": {
+"start": 4960,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 40.0,
+"sound_after_cut_ms": null,
+"v1_ms": 13120
+},
+"65": {
+"start": 5120,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 110.0,
+"sound_after_cut_ms": null,
+"v1_ms": 48640
+},
+"66": {
+"start": 5000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 16920
+},
+"67": {
+"start": 4980,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 10.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8720
+},
+"68": {
+"start": 8260,
+"in_breath": false,
+"cut_in_sound": true,
+"sound_before_ms": 3650.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5140
+},
+"69": {
+"start": 5000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5020
+},
+"70": {
+"start": 5020,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 0.0,
+"sound_after_cut_ms": null,
+"v1_ms": 7820
+},
+"71": {
+"start": 5040,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 130.0,
+"sound_after_cut_ms": null,
+"v1_ms": 17140
+},
+"72": {
+"start": 4900,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 10.0,
+"sound_after_cut_ms": null,
+"v1_ms": 14940
+},
+"73": {
+"start": 5160,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6400
+},
+"74": {
+"start": 4800,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 4560
+},
+"75": {
+"start": 5040,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 130.0,
+"sound_after_cut_ms": null,
+"v1_ms": 7060
+},
+"76": {
+"start": 4940,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 50.0,
+"sound_after_cut_ms": null,
+"v1_ms": 11980
+},
+"77": {
+"start": 5040,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2680
+},
+"78": {
+"start": 5100,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6540
+},
+"79": {
+"start": 4780,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3580
+},
+"80": {
+"start": 4920,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 70.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2160
+},
+"81": {
+"start": 5080,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2400
+},
+"82": {
+"start": 4960,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5760
+},
+"83": {
+"start": 5000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3460
+},
+"84": {
+"start": 5060,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6460
+},
+"85": {
+"start": 5100,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 60.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6360
+},
+"86": {
+"start": 4960,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 50.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6180
+},
+"87": {
+"start": 4920,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 0.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3080
+},
+"88": {
+"start": 4860,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 20.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3320
+},
+"89": {
+"start": 5040,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 1140
+},
+"90": {
+"start": 4940,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 110.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5900
+},
+"91": {
+"start": 4880,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 60.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2380
+},
+"92": {
+"start": 5220,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 140.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2640
+},
+"93": {
+"start": 5020,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 1160
+},
+"94": {
+"start": 4780,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2640
+},
+"95": {
+"start": 4900,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 70.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3820
+},
+"96": {
+"start": 4960,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3580
+},
+"97": {
+"start": 5000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 130.0,
+"sound_after_cut_ms": null,
+"v1_ms": 7920
+},
+"98": {
+"start": 5000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 70.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10820
+},
+"99": {
+"start": 5080,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3960
+},
+"100": {
+"start": 4940,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2640
+},
+"101": {
+"start": 4980,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 70.0,
+"sound_after_cut_ms": null,
+"v1_ms": 1560
+},
+"102": {
+"start": 4920,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2500
+},
+"103": {
+"start": 5040,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 100.0,
+"sound_after_cut_ms": null,
+"v1_ms": 1200
+},
+"104": {
+"start": 5300,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 150.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3500
+},
+"105": {
+"start": 4940,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 90.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5720
+},
+"106": {
+"start": 4980,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 70.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3340
+},
+"107": {
+"start": 4860,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5180
+},
+"108": {
+"start": 5250,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 370.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6888
+},
+"109": {
+"start": 4920,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 20.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5800
+},
+"110": {
+"start": 5000,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 110.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6220
+},
+"111": {
+"start": 4960,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 30.0,
+"sound_after_cut_ms": null,
+"v1_ms": 7140
+},
+"112": {
+"start": 5397,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 277.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2583
+},
+"113": {
+"start": 5166,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 276.0,
+"sound_after_cut_ms": null,
+"v1_ms": 2982
+},
+"114": {
+"start": 12500,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 7745.714285714286,
+"sound_after_cut_ms": null,
+"v1_ms": 4680
+}
+},
+"toure": {
+"1": {
+"start": 361,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 361.0,
+"sound_after_cut_ms": 4560,
+"v1_ms": 4224
+},
+"2": {
+"start": 220,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 220.0,
+"sound_after_cut_ms": 710,
+"v1_ms": 9429
+},
+"3": {
+"start": 320,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 320.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 8148
+},
+"4": {
+"start": 120,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 120.0,
+"sound_after_cut_ms": 4140,
+"v1_ms": 56156
+},
+"5": {
+"start": 260,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 0.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 30411
+},
+"6": {
+"start": 140,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 140.0,
+"sound_after_cut_ms": null,
+"v1_ms": 15936
+},
+"7": {
+"start": 340,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 130.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 13954
+},
+"8": {
+"start": 461,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 461.0,
+"sound_after_cut_ms": null,
+"v1_ms": 27086
+},
+"9": {
+"start": 561,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 561.0,
+"sound_after_cut_ms": null,
+"v1_ms": 14174
+},
+"10": {
+"start": 180,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 180.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 10511
+},
+"11": {
+"start": 340,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 340.0,
+"sound_after_cut_ms": null,
+"v1_ms": 16497
+},
+"12": {
+"start": 140,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 140.0,
+"sound_after_cut_ms": 4570,
+"v1_ms": 10530
+},
+"13": {
+"start": 421,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 421.0,
+"sound_after_cut_ms": 460,
+"v1_ms": 30790
+},
+"14": {
+"start": 220,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 220.0,
+"sound_after_cut_ms": 4660,
+"v1_ms": 24465
+},
+"15": {
+"start": 120,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 120.0,
+"sound_after_cut_ms": null,
+"v1_ms": 15295
+},
+"16": {
+"start": 160,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 160.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 15836
+},
+"17": {
+"start": 280,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 280.0,
+"sound_after_cut_ms": null,
+"v1_ms": 29710
+},
+"18": {
+"start": 260,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 260.0,
+"sound_after_cut_ms": null,
+"v1_ms": 12873
+},
+"19": {
+"start": 501,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 501.0,
+"sound_after_cut_ms": null,
+"v1_ms": 12432
+},
+"20": {
+"start": 881,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 401.0,
+"sound_after_cut_ms": 2030,
+"v1_ms": 961
+},
+"21": {
+"start": 461,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 461.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10170
+},
+"22": {
+"start": 220,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 220.0,
+"sound_after_cut_ms": null,
+"v1_ms": 13253
+},
+"23": {
+"start": 380,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 380.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 3764
+},
+"24": {
+"start": 40,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 40.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 17137
+},
+"25": {
+"start": 240,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 240.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 11592
+},
+"26": {
+"start": 260,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 260.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10871
+},
+"27": {
+"start": 521,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 21.0,
+"sound_after_cut_ms": 4030,
+"v1_ms": 12592
+},
+"28": {
+"start": 721,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 721.0,
+"sound_after_cut_ms": null,
+"v1_ms": 10130
+},
+"29": {
+"start": 440,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 0.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 8529
+},
+"30": {
+"start": 501,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 21.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 10210
+},
+"31": {
+"start": 561,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 561.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8908
+},
+"32": {
+"start": 621,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 1.0,
+"sound_after_cut_ms": null,
+"v1_ms": 9289
+},
+"33": {
+"start": 681,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 31.0,
+"sound_after_cut_ms": 5030,
+"v1_ms": 20460
+},
+"34": {
+"start": 701,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 141.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 15015
+},
+"35": {
+"start": 661,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 111.0,
+"sound_after_cut_ms": null,
+"v1_ms": 40960
+},
+"36": {
+"start": 581,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 91.0,
+"sound_after_cut_ms": 4920,
+"v1_ms": 4304
+},
+"37": {
+"start": 721,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 91.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 5605
+},
+"38": {
+"start": 601,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 601.0,
+"sound_after_cut_ms": null,
+"v1_ms": 9229
+},
+"39": {
+"start": 461,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 461.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8268
+},
+"40": {
+"start": 400,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 0.0,
+"sound_after_cut_ms": 4590,
+"v1_ms": 4525
+},
+"41": {
+"start": 280,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 0.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 3644
+},
+"42": {
+"start": 721,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 61.0,
+"sound_after_cut_ms": 4230,
+"v1_ms": 3763
+},
+"43": {
+"start": 440,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 70.0,
+"sound_after_cut_ms": 3810,
+"v1_ms": 761
+},
+"44": {
+"start": 521,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 101.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 3423
+},
+"45": {
+"start": 641,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 71.0,
+"sound_after_cut_ms": 4400,
+"v1_ms": 4044
+},
+"46": {
+"start": 180,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 180.0,
+"sound_after_cut_ms": 4490,
+"v1_ms": 4424
+},
+"47": {
+"start": 661,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 301.0,
+"sound_after_cut_ms": null,
+"v1_ms": 9629
+},
+"48": {
+"start": 140,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 140.0,
+"sound_after_cut_ms": 1990,
+"v1_ms": 6026
+},
+"49": {
+"start": 220,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 220.0,
+"sound_after_cut_ms": 4060,
+"v1_ms": 15876
+},
+"50": {
+"start": 5,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 5.0,
+"sound_after_cut_ms": null,
+"v1_ms": 7463
+},
+"51": {
+"start": 320,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 320.0,
+"sound_after_cut_ms": 3530,
+"v1_ms": 3063
+},
+"52": {
+"start": 460,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 160.0,
+"sound_after_cut_ms": 2350,
+"v1_ms": 1842
+},
+"53": {
+"start": 280,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 280.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 3303
+},
+"54": {
+"start": 140,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 140.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 5445
+},
+"55": {
+"start": 621,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 211.0,
+"sound_after_cut_ms": 2750,
+"v1_ms": 2222
+},
+"56": {
+"start": 320,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 320.0,
+"sound_after_cut_ms": 3550,
+"v1_ms": 3464
+},
+"57": {
+"start": 641,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 641.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 8928
+},
+"58": {
+"start": 80,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": null,
+"v1_ms": 20001
+},
+"59": {
+"start": 260,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 260.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 9550
+},
+"60": {
+"start": 180,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 180.0,
+"sound_after_cut_ms": 4870,
+"v1_ms": 84964
+},
+"61": {
+"start": 320,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 320.0,
+"sound_after_cut_ms": null,
+"v1_ms": 12613
+},
+"62": {
+"start": 160,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 160.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 12653
+},
+"63": {
+"start": 120,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 120.0,
+"sound_after_cut_ms": null,
+"v1_ms": 33613
+},
+"64": {
+"start": 160,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 160.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 19900
+},
+"65": {
+"start": 180,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 180.0,
+"sound_after_cut_ms": null,
+"v1_ms": 73895
+},
+"66": {
+"start": 280,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 10.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 16436
+},
+"67": {
+"start": 180,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 180.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 10270
+},
+"68": {
+"start": 320,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 320.0,
+"sound_after_cut_ms": 3720,
+"v1_ms": 9710
+},
+"69": {
+"start": 400,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 0.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 5085
+},
+"70": {
+"start": 280,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 280.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6947
+},
+"71": {
+"start": 140,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 140.0,
+"sound_after_cut_ms": null,
+"v1_ms": 16937
+},
+"72": {
+"start": 521,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 521.0,
+"sound_after_cut_ms": null,
+"v1_ms": 14654
+},
+"73": {
+"start": 400,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 400.0,
+"sound_after_cut_ms": 4450,
+"v1_ms": 4204
+},
+"74": {
+"start": 180,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 180.0,
+"sound_after_cut_ms": 3640,
+"v1_ms": 3584
+},
+"75": {
+"start": 0,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 0.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 4484
+},
+"76": {
+"start": 160,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 160.0,
+"sound_after_cut_ms": null,
+"v1_ms": 12212
+},
+"77": {
+"start": 300,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 300.0,
+"sound_after_cut_ms": 3960,
+"v1_ms": 3063
+},
+"78": {
+"start": 561,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 1.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 5655
+},
+"79": {
+"start": 360,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 360.0,
+"sound_after_cut_ms": 4020,
+"v1_ms": 4705
+},
+"80": {
+"start": 320,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 30.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 2963
+},
+"81": {
+"start": 60,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 60.0,
+"sound_after_cut_ms": 4050,
+"v1_ms": 3463
+},
+"82": {
+"start": 140,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 140.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 5876
+},
+"83": {
+"start": 160,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 160.0,
+"sound_after_cut_ms": 2670,
+"v1_ms": 5165
+},
+"84": {
+"start": 140,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 140.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 6326
+},
+"85": {
+"start": 280,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 280.0,
+"sound_after_cut_ms": 590,
+"v1_ms": 6297
+},
+"86": {
+"start": 220,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 220.0,
+"sound_after_cut_ms": 600,
+"v1_ms": 5746
+},
+"87": {
+"start": 200,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 200.0,
+"sound_after_cut_ms": 4360,
+"v1_ms": 3604
+},
+"88": {
+"start": 160,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 160.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 4545
+},
+"89": {
+"start": 280,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 280.0,
+"sound_after_cut_ms": 1620,
+"v1_ms": 1281
+},
+"90": {
+"start": 180,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 180.0,
+"sound_after_cut_ms": null,
+"v1_ms": 4945
+},
+"91": {
+"start": 180,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 180.0,
+"sound_after_cut_ms": 3610,
+"v1_ms": 3203
+},
+"92": {
+"start": 200,
+"in_breath": false,
+"cut_in_sound": false,
+"sound_before_ms": 200.0,
+"sound_after_cut_ms": 4380,
+"v1_ms": 3484
+},
+"93": {
+"start": 340,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 110.0,
+"sound_after_cut_ms": 2190,
+"v1_ms": 1322
+},
+"94": {
+"start": 260,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 260.0,
+"sound_after_cut_ms": 4750,
+"v1_ms": 5866
+},
+"95": {
+"start": 380,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 380.0,
+"sound_after_cut_ms": null,
+"v1_ms": 4504
+},
+"96": {
+"start": 921,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 921.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5245
+},
+"97": {
+"start": 481,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 481.0,
+"sound_after_cut_ms": null,
+"v1_ms": 8067
+},
+"98": {
+"start": 1221,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 1.0,
+"sound_after_cut_ms": null,
+"v1_ms": 15636
+},
+"99": {
+"start": 461,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 461.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 5445
+},
+"100": {
+"start": 441,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 441.0,
+"sound_after_cut_ms": null,
+"v1_ms": 3203
+},
+"101": {
+"start": 561,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 1.0,
+"sound_after_cut_ms": 2420,
+"v1_ms": 1621
+},
+"102": {
+"start": 441,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 441.0,
+"sound_after_cut_ms": 4220,
+"v1_ms": 3483
+},
+"103": {
+"start": 380,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 80.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 2143
+},
+"104": {
+"start": 581,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 21.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5486
+},
+"105": {
+"start": 601,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 601.0,
+"sound_after_cut_ms": null,
+"v1_ms": 7146
+},
+"106": {
+"start": 401,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 401.0,
+"sound_after_cut_ms": 4090,
+"v1_ms": 3303
+},
+"107": {
+"start": 461,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 461.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5425
+},
+"108": {
+"start": 220,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 220.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 6068
+},
+"109": {
+"start": 701,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 41.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5927
+},
+"110": {
+"start": 260,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 260.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6226
+},
+"111": {
+"start": 481,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 481.0,
+"sound_after_cut_ms": null,
+"v1_ms": 6465
+},
+"112": {
+"start": 180,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 180.0,
+"sound_after_cut_ms": 0,
+"v1_ms": 3001
+},
+"113": {
+"start": 380,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 380.0,
+"sound_after_cut_ms": 4420,
+"v1_ms": 3644
+},
+"114": {
+"start": 280,
+"in_breath": true,
+"cut_in_sound": false,
+"sound_before_ms": 280.0,
+"sound_after_cut_ms": null,
+"v1_ms": 5626
+}
+}
+}

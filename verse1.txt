@@ -1,0 +1,25 @@
+surah https://download.quranicaudio.com/quran/mishaari_california SSS qul 95: verse 1 start out of a breath, or cut in sound, in 4 of 114
+    9 {'start': 1, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 1.0, 'sound_after_cut_ms': None, 'v1_ms': 12302}
+    39 {'start': 3802, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 3802.0, 'sound_after_cut_ms': 4400, 'v1_ms': 13152}
+    50 {'start': 3780, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 1680.0, 'sound_after_cut_ms': 3980, 'v1_ms': 9272}
+    88 {'start': 4986, 'in_breath': False, 'cut_in_sound': True, 'sound_before_ms': 4986.0, 'sound_after_cut_ms': 100, 'v1_ms': 5270}
+ghamdi: verse 1 start out of a breath, or cut in sound, in 2 of 114
+    10 {'start': 14260, 'in_breath': False, 'cut_in_sound': True, 'sound_before_ms': 3949.3877551020414, 'sound_after_cut_ms': 1170, 'v1_ms': 6560}
+    68 {'start': 8160, 'in_breath': False, 'cut_in_sound': True, 'sound_before_ms': 3260.0, 'sound_after_cut_ms': 170, 'v1_ms': 4660}
+salimi: verse 1 start out of a breath, or cut in sound, in 2 of 114
+    68 {'start': 8260, 'in_breath': False, 'cut_in_sound': True, 'sound_before_ms': 3650.0, 'sound_after_cut_ms': None, 'v1_ms': 5140}
+    114 {'start': 12500, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 7745.714285714286, 'sound_after_cut_ms': None, 'v1_ms': 4680}
+toure: verse 1 start out of a breath, or cut in sound, in 13 of 114
+    4 {'start': 120, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 120.0, 'sound_after_cut_ms': 4140, 'v1_ms': 56156}
+    6 {'start': 140, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 140.0, 'sound_after_cut_ms': None, 'v1_ms': 15936}
+    22 {'start': 220, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 220.0, 'sound_after_cut_ms': None, 'v1_ms': 13253}
+    46 {'start': 180, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 180.0, 'sound_after_cut_ms': 4490, 'v1_ms': 4424}
+    50 {'start': 5, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 5.0, 'sound_after_cut_ms': None, 'v1_ms': 7463}
+    58 {'start': 80, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 80.0, 'sound_after_cut_ms': None, 'v1_ms': 20001}
+    65 {'start': 180, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 180.0, 'sound_after_cut_ms': None, 'v1_ms': 73895}
+    81 {'start': 60, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 60.0, 'sound_after_cut_ms': 4050, 'v1_ms': 3463}
+    83 {'start': 160, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 160.0, 'sound_after_cut_ms': 2670, 'v1_ms': 5165}
+    89 {'start': 280, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 280.0, 'sound_after_cut_ms': 1620, 'v1_ms': 1281}
+    90 {'start': 180, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 180.0, 'sound_after_cut_ms': None, 'v1_ms': 4945}
+    91 {'start': 180, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 180.0, 'sound_after_cut_ms': 3610, 'v1_ms': 3203}
+    92 {'start': 200, 'in_breath': False, 'cut_in_sound': False, 'sound_before_ms': 200.0, 'sound_after_cut_ms': 4380, 'v1_ms': 3484}
