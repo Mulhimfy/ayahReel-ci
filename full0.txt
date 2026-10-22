@@ -1,0 +1,5 @@
+alafasy_173    vs alafasy        n=162 fail=0 wave=0.152/0.276/0.89 same=2 doubt=0 dur=1.015±0.1043 close=0.136 env=0.128 ok=False why=the same audio in 2 of 162 verses, e.g. ['46:2', '5:47'] (46s)
+basfar_163     vs basfar         n=156 fail=6 wave=0.146/0.237/0.374 same=0 doubt=0 dur=1.127±0.0733 close=0.109 env=0.011 ok=True why=None (47s)
+hudhaify_mq74  vs hudhaify       n=2 fail=160 wave=0.624/0.624/0.624 same=0 doubt=1 dur=1.029±0.0254 close=0.5 env=0.954 ok=False why=only 2 verses compared; 1 verses nearly the same audio; loudness contours correlate at 0.954; 160 verses could not be compared (2s)
+matrood_mq59   vs matrood        n=162 fail=0 wave=0.154/0.216/0.41 same=0 doubt=0 dur=1.03±0.0212 close=0.494 env=0.188 ok=True why=None (37s)
+mustafa_88     vs mustafa_ismail n=162 fail=0 wave=0.245/0.487/0.779 same=0 doubt=4 dur=1.023±0.0119 close=0.735 env=0.863 ok=False why=74% of verses as long as each other (68s)

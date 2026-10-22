@@ -1,0 +1,103 @@
+[
+ {
+  "verses": 162,
+  "surahs": 114,
+  "failed": 0,
+  "wave_median": 0.152,
+  "wave_p90": 0.276,
+  "wave_max": 0.89,
+  "wave_same": 2,
+  "wave_same_e_g": [
+   "46:2",
+   "5:47"
+  ],
+  "wave_doubt": 0,
+  "dur_ratio": 1.015,
+  "dur_spread": 0.1043,
+  "dur_close": 0.136,
+  "env_corr": 0.128,
+  "ok": false,
+  "why": "the same audio in 2 of 162 verses, e.g. ['46:2', '5:47']",
+  "key": "alafasy_173"
+ },
+ {
+  "verses": 156,
+  "surahs": 114,
+  "failed": 6,
+  "failed_e_g": [
+   "28:79 slice answered 416",
+   "30:54 slice answered 416",
+   "33:70 slice answered 416",
+   "37:164 slice answered 416",
+   "68:46 slice answered 416"
+  ],
+  "wave_median": 0.146,
+  "wave_p90": 0.237,
+  "wave_max": 0.374,
+  "wave_same": 0,
+  "wave_doubt": 0,
+  "dur_ratio": 1.127,
+  "dur_spread": 0.0733,
+  "dur_close": 0.109,
+  "env_corr": 0.011,
+  "ok": true,
+  "key": "basfar_163"
+ },
+ {
+  "verses": 2,
+  "surahs": 2,
+  "failed": 160,
+  "failed_e_g": [
+   "1:2 table 1 unusable",
+   "2:2 table 2 unusable",
+   "3:2 table 3 unusable",
+   "4:2 table 4 unusable",
+   "5:2 table 5 unusable"
+  ],
+  "wave_median": 0.624,
+  "wave_p90": 0.624,
+  "wave_max": 0.624,
+  "wave_same": 0,
+  "wave_doubt": 1,
+  "dur_ratio": 1.029,
+  "dur_spread": 0.0254,
+  "dur_close": 0.5,
+  "env_corr": 0.954,
+  "ok": false,
+  "why": "only 2 verses compared; 1 verses nearly the same audio; loudness contours correlate at 0.954; 160 verses could not be compared",
+  "key": "hudhaify_mq74"
+ },
+ {
+  "verses": 162,
+  "surahs": 114,
+  "failed": 0,
+  "wave_median": 0.154,
+  "wave_p90": 0.216,
+  "wave_max": 0.41,
+  "wave_same": 0,
+  "wave_doubt": 0,
+  "dur_ratio": 1.03,
+  "dur_spread": 0.0212,
+  "dur_close": 0.494,
+  "env_corr": 0.188,
+  "ok": true,
+  "key": "matrood_mq59"
+ },
+ {
+  "verses": 162,
+  "surahs": 114,
+  "failed": 0,
+  "wave_median": 0.245,
+  "wave_p90": 0.487,
+  "wave_max": 0.779,
+  "wave_same": 0,
+  "wave_doubt": 4,
+  "dur_ratio": 1.023,
+  "dur_spread": 0.0119,
+  "dur_close": 0.735,
+  "env_corr": 0.863,
+  "ok": false,
+  "why": "74% of verses as long as each other",
+  "key": "mustafa_88"
+ }
+]
