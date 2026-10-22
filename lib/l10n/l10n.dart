@@ -3491,6 +3491,8 @@ class L10n {
 
   /// English is absent on purpose: its wording lives on the [Reciter]
   /// itself, and a second copy here would be the one that goes stale.
+  /// A voice's other recording ([Reciter.recordingOf]) has its voice's
+  /// line, under its own id.
   static const _reciterStyles = <AppLang, Map<String, String>>{
     AppLang.ar: {
       'alafasy': 'مرتّل · دافئ شجي',
@@ -3602,6 +3604,7 @@ class L10n {
       'muaiqly_mujawwad': 'مجوَّد · متمهّل',
       'albanna_mujawwad': 'مجوَّد · متمهّل',
       'mustafa_ismail_mujawwad': 'مجوَّد · متمهّل',
+      'alafasy_2': 'مرتّل · دافئ شجي',
     },
     AppLang.ur: {
       'alafasy': 'مرتّل · گرم جوش، سُریلا',
@@ -3713,6 +3716,7 @@ class L10n {
       'muaiqly_mujawwad': 'مجوَّد · دھیمی رفتار',
       'albanna_mujawwad': 'مجوَّد · دھیمی رفتار',
       'mustafa_ismail_mujawwad': 'مجوَّد · دھیمی رفتار',
+      'alafasy_2': 'مرتّل · گرم جوش، سُریلا',
     },
     AppLang.id: {
       'alafasy': 'Murattal · hangat, merdu',
@@ -3824,6 +3828,7 @@ class L10n {
       'muaiqly_mujawwad': 'Mujawwad · tempo pelan',
       'albanna_mujawwad': 'Mujawwad · tempo pelan',
       'mustafa_ismail_mujawwad': 'Mujawwad · tempo pelan',
+      'alafasy_2': 'Murattal · hangat, merdu',
     },
     AppLang.de: {
       'alafasy': 'Murattal · warm, melodisch',
@@ -3935,6 +3940,7 @@ class L10n {
       'muaiqly_mujawwad': 'Mujawwad · getragen',
       'albanna_mujawwad': 'Mujawwad · getragen',
       'mustafa_ismail_mujawwad': 'Mujawwad · getragen',
+      'alafasy_2': 'Murattal · warm, melodisch',
     },
   };
 

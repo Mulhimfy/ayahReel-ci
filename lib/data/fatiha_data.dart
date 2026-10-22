@@ -1276,6 +1276,29 @@ const reciters = <Reciter>[
     ),
     pace: 3.367,
   ),
+  // ── Other recordings ─────────────────────────────────────────────
+  // Another performance by a voice above, so that reels of the same
+  // verses need not all carry the same sound ([Reciter.recordingOf]).
+  // Each passed tool/verify_reciters.py as a voice of its own — every
+  // file, every table, its pace — and was compared with every other
+  // recording of its voice, waveforms and verse lengths over 162 verses
+  // (9. in its docstring): the same performance from another host,
+  // re-encoded or cut another way, is not another recording. Every
+  // other set of the app's voices with verse files or a verse table was
+  // looked at; the tool's docstring says what was left out and why.
+  Reciter(
+    id: 'alafasy_2',
+    name: 'Mishary Alafasy',
+    arabicName: 'مشاري العفاسي',
+    style: 'Murattal · warm, melodic',
+    source: SurahFiles(
+      'https://download.quranicaudio.com/quran/mishaari_california',
+      timing: QulTiming(95),
+    ),
+    pace: 1.271,
+    recordingOf: 'alafasy',
+    recordingNote: 'Taraweeh · California · 1430',
+  ),
 ];
 
 /// The voices the pickers list: one card per reciter, each its first
