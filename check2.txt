@@ -1,0 +1,4 @@
+ayyub_mq109    PASS 96k/22050 pace=1.405 aligned=0.978 shifted=0.088 basmala1=0 broken=[] problems=[]  (20s)
+budair_mq43    FAIL 320k/44100 pace=0.935 aligned=0.789 shifted=0.105 basmala1=0 broken=[] problems=['alignment: a breath at 79% of 228 boundaries']  (18s)
+husary_qasr    FAIL Nonek/None pace=None aligned=None shifted=None basmala1=None broken=None problems=['64 verse files missing, e.g. [(35, 5), (35, 6), (35, 7), (35, 8), (35, 9), (35, 10), (35, 11), (35, 12)]']  (705s)
+muaiqly_65     FAIL 128k/22050 pace=0.959 aligned=0.893 shifted=0.11 basmala1=13 broken=[] problems=['basmala: folded into verse 1 in 13 surahs, e.g. [2, 3, 7, 11, 13, 19]']  (15s)

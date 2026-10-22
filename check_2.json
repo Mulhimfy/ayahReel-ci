@@ -1,0 +1,196 @@
+{
+ "ayyub_mq109": {
+  "kind": "surah",
+  "base": "https://cdn.mp3quran.net/audio/muhammad-ayyub/r1",
+  "timing": [
+   "mp3quran",
+   109
+  ],
+  "source": "surah https://cdn.mp3quran.net/audio/muhammad-ayyub/r1 SSS mp3quran 109",
+  "problems": [],
+  "broken": [],
+  "pace": 1.405,
+  "formats": [
+   [
+    96,
+    22050
+   ]
+  ],
+  "kbps": 96,
+  "rate": 22050,
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "aligned_share": 0.978,
+  "shifted_share": 0.088,
+  "missed": [
+   "7:2",
+   "12:1",
+   "19:2",
+   "36:2",
+   "112:4"
+  ]
+ },
+ "budair_mq43": {
+  "kind": "surah",
+  "base": "https://cdn.mp3quran.net/audio/salah-budair/r1",
+  "timing": [
+   "mp3quran",
+   43
+  ],
+  "source": "surah https://cdn.mp3quran.net/audio/salah-budair/r1 SSS mp3quran 43",
+  "problems": [
+   "alignment: a breath at 79% of 228 boundaries"
+  ],
+  "broken": [],
+  "pace": 0.935,
+  "formats": [
+   [
+    320,
+    44100
+   ],
+   [
+    320,
+    48000
+   ]
+  ],
+  "kbps": 320,
+  "rate": 44100,
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "aligned_share": 0.789,
+  "shifted_share": 0.105,
+  "missed": [
+   "1:3",
+   "1:4",
+   "1:5",
+   "1:6",
+   "1:7",
+   "2:1",
+   "2:7",
+   "3:191",
+   "3:192",
+   "3:193",
+   "3:197",
+   "3:198",
+   "3:199",
+   "3:200",
+   "7:2",
+   "12:2",
+   "18:4",
+   "19:2",
+   "24:38",
+   "36:2",
+   "36:3",
+   "36:4",
+   "55:2",
+   "55:3",
+   "55:4",
+   "55:7",
+   "55:9",
+   "67:4",
+   "78:2",
+   "78:4",
+   "78:6",
+   "78:14",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:8",
+   "89:11",
+   "97:2",
+   "97:3",
+   "97:4",
+   "97:5",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:2",
+   "114:4",
+   "114:5",
+   "114:6"
+  ]
+ },
+ "husary_qasr": {
+  "kind": "ayah",
+  "base": "https://quran.ksu.edu.sa/ayat/mp3/husary_qasr_64kbps",
+  "source": "ayah https://quran.ksu.edu.sa/ayat/mp3/husary_qasr_64kbps",
+  "problems": [
+   "64 verse files missing, e.g. [(35, 5), (35, 6), (35, 7), (35, 8), (35, 9), (35, 10), (35, 11), (35, 12)]"
+  ],
+  "files_checked": 6236
+ },
+ "muaiqly_65": {
+  "kind": "surah",
+  "base": "https://audio-cdn.tarteel.ai/quran/surah/maherAlMuaiqly/murattal/mp3",
+  "timing": [
+   "qul",
+   65
+  ],
+  "source": "surah https://audio-cdn.tarteel.ai/quran/surah/maherAlMuaiqly/murattal/mp3 SSS qul 65",
+  "problems": [
+   "basmala: folded into verse 1 in 13 surahs, e.g. [2, 3, 7, 11, 13, 19]"
+  ],
+  "broken": [],
+  "pace": 0.959,
+  "formats": [
+   [
+    128,
+    22050
+   ],
+   [
+    128,
+    44100
+   ],
+   [
+    128,
+    48000
+   ]
+  ],
+  "kbps": 128,
+  "rate": 22050,
+  "basmala_in_verse1": 13,
+  "basmala_folded": [
+   2,
+   3,
+   7,
+   11,
+   13,
+   19,
+   26,
+   28,
+   29,
+   30,
+   31,
+   32,
+   60
+  ],
+  "boundaries": 214,
+  "aligned_share": 0.893,
+  "shifted_share": 0.11,
+  "missed": [
+   "1:4",
+   "1:7",
+   "2:253",
+   "3:190",
+   "18:4",
+   "24:37",
+   "36:2",
+   "36:4",
+   "55:3",
+   "55:4",
+   "55:9",
+   "55:18",
+   "55:20",
+   "59:23",
+   "78:2",
+   "78:5",
+   "78:11",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:8",
+   "89:11",
+   "89:12"
+  ]
+ }
+}
