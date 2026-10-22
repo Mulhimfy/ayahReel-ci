@@ -375,6 +375,61 @@
   "rate": 44100,
   "source": "ayah https://everyayah.com/data/Alafasy_128kbps"
  },
+ "alafasy_2": {
+  "aligned_share": 0.965,
+  "base": "https://download.quranicaudio.com/quran/mishaari_california",
+  "basmala_in_verse1": 0,
+  "boundaries": 227,
+  "broken": [],
+  "checked": "2026-10-22",
+  "distinct": {
+   "alafasy": {
+    "dur_close": 0.179,
+    "dur_ratio": 0.962,
+    "dur_spread": 0.0837,
+    "env_corr": 0.173,
+    "failed": 0,
+    "ok": true,
+    "source": "ayah https://everyayah.com/data/Alafasy_128kbps",
+    "surahs": 114,
+    "verses": 162,
+    "wave_doubt": 0,
+    "wave_max": 0.362,
+    "wave_median": 0.145,
+    "wave_p90": 0.253,
+    "wave_same": 0
+   }
+  },
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "2:253",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:12",
+   "112:2",
+   "112:3",
+   "112:4"
+  ],
+  "name": "Mishary Alafasy",
+  "pace": 1.271,
+  "problems": [],
+  "rate": 44100,
+  "recording_of": "alafasy",
+  "shifted_share": 0.141,
+  "source": "surah https://download.quranicaudio.com/quran/mishaari_california SSS qul 95",
+  "timing": [
+   "qul",
+   95
+  ]
+ },
  "alaqimy": {
   "base": "https://everyayah.com/data/Akram_AlAlaqimy_128kbps",
   "checked": "2026-09-29",

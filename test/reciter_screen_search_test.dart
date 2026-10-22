@@ -61,7 +61,11 @@ void main() {
     await open(t);
     await t.enterText(field(), 'alafasy');
     await t.pump();
-    expect(find.text('Mishary Alafasy'), findsOneWidget);
+    // One card for the voice — or, while the list still shows each
+    // recording as a card of its own, one for each of his recordings.
+    final alafasy = reciters.firstWhere((r) => r.id == 'alafasy');
+    expect(find.text('Mishary Alafasy').evaluate().length,
+        inInclusiveRange(1, recordingsOf(alafasy).length));
     expect(find.text('Mahmoud Al-Husary'), findsNothing);
     expect(find.text(l.useYourOwnAudio), findsNothing);
 

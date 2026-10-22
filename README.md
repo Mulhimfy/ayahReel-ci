@@ -412,8 +412,8 @@ shelf     every round kept whole, as its own small constellation —
 
 ## Deliberate limits
 
-- 109 reciters (3 offline + 106 streamed, incl. 6 Mujawwad sets), 5 bundled backgrounds + your own
-  photo/video, 1 translation
+- 109 reciters (3 offline + 106 streamed, incl. 6 Mujawwad sets) and another recording of one of
+  them (Alafasy's Taraweeh of 1430), 5 bundled backgrounds + your own photo/video, 1 translation
 - No signup, no settings, no watermark
 - Next: more translations, transliteration, more word-aligned voices as
   releases against EveryAyah audio appear
