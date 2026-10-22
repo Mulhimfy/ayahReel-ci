@@ -1,0 +1,5 @@
+basfar_mq60    vs basfar         n=162 fail=0 wave=0.147/0.225/0.346 same=0 doubt=0 dur=0.836±0.09 close=0.117 env=0.124 ok=True why=None (48s)
+alafasy_95     vs alafasy        n=162 fail=0 wave=0.145/0.253/0.362 same=0 doubt=0 dur=0.962±0.0837 close=0.179 env=0.173 ok=True why=None (53s)
+muaiqly_159    vs muaiqly        n=162 fail=0 wave=0.12/0.212/0.348 same=0 doubt=0 dur=1.689±0.1094 close=0.111 env=0.041 ok=True why=None (46s)
+husary_122     vs husary         n=162 fail=0 wave=0.166/0.243/0.364 same=0 doubt=0 dur=0.731±0.1029 close=0.105 env=0.066 ok=True why=None (59s)
+sudais_mq54    vs sudais         n=162 fail=0 wave=0.164/0.728/0.982 same=8 doubt=18 dur=1.006±0.0775 close=0.148 env=0.17 ok=False why=the same audio in 8 of 162 verses, e.g. ['13:2', '23:2', '28:2', '42:2']; 18 verses nearly the same audio (41s)
