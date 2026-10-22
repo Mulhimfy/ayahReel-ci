@@ -234,12 +234,15 @@ def app_reciters():
         rid = re.search(r"id: '([^']+)'", block).group(1)
         name = re.search(r"\bname: '([^']+)'", block).group(1)
         ar = re.search(r"arabicName: '([^']+)'", block).group(1)
+        # Another recording of the voice with this id (Reciter.recordingOf).
+        of = re.search(r"recordingOf: '([^']+)'", block)
+        of = of.group(1) if of else None
         m = re.search(r"source: AyahFiles\.(everyAyah|tarteel|ksu)\("
                       r"\s*'([^']+)',?\s*\)", block)
         if m:
             host = AYAH_HOSTS[m.group(1)]
             out.append(dict(id=rid, name=name, ar=ar, kind='ayah',
-                            base=f'{host}/{m.group(2)}',
+                            base=f'{host}/{m.group(2)}', of=of,
                             bundled='audioAsset:' in block))
             continue
         m = re.search(r"source: SurahFiles\(\s*'([^']+)',", block)
@@ -250,7 +253,7 @@ def app_reciters():
         o = re.search(r'openingMs: (\d+)', rest)
         gone = re.search(r'missing: \{([\d,\s]*)\}', rest)
         out.append(dict(id=rid, name=name, ar=ar, kind='surah',
-                        base=m.group(1),
+                        base=m.group(1), of=of,
                         padded='padded: false' not in rest,
                         opening=int(o.group(1)) if o else None,
                         missing=sorted(int(x) for x in re.findall(
@@ -271,6 +274,32 @@ def source_key(r):
             + (f" opening {r['opening']}" if r.get('opening') else '')
             + (f" missing {','.join(map(str, r['missing']))}"
                if r.get('missing') else ''))
+
+
+def recording(text, reciters):
+    """A recording named on the command line: a voice's id, or a source
+    written the way source_key writes one — `ayah <base>`, or `surah
+    <base> SSS|S mp3quran|qul <key> [opening <ms>] [missing <a,b>]` — so
+    a set the app doesn't have can be compared before it is added."""
+    for r in reciters:
+        if r['id'] == text:
+            return r
+    p = text.split()
+    if p and p[0] == 'ayah' and len(p) == 2:
+        return dict(id=text, name=text, ar='', kind='ayah',
+                    base=p[1].rstrip('/'))
+    if p and p[0] == 'surah' and len(p) >= 5 and p[2] in ('SSS', 'S') and \
+            p[3] in ('mp3quran', 'qul'):
+        rest = p[5:]
+        opening = int(rest[rest.index('opening') + 1]) \
+            if 'opening' in rest else None
+        missing = [int(x) for x in rest[rest.index('missing') + 1].split(',')] \
+            if 'missing' in rest else []
+        return dict(id=text, name=text, ar='', kind='surah',
+                    base=p[1].rstrip('/'), padded=p[2] == 'SSS',
+                    timing=(p[3], int(p[4])), opening=opening,
+                    missing=missing)
+    raise SystemExit(f'not a voice or a source: {text!r}')
 
 
 # ---- HTTP ------------------------------------------------------------
@@ -836,6 +865,352 @@ def check_ayah_voice(r, model, full, log):
     return res
 
 
+# ---- another recording (see 9. in the docstring) ---------------------
+
+XRATE = 8000      # what two recordings' waveforms are compared at
+SPREAD = 48       # verses spread over the mushaf, besides every verse 2
+CHUNK_MS = 1500   # a stretch of one recording looked for in the other
+SAME_PEAK = 0.6   # a stretch found this well may be the same audio
+STRONG_PEAK = 0.8  # and one found this well is
+# The verdict on a pair, calibrated (see 9.).
+MAX_DOUBT_SHARE = 0.05   # verses whose best stretch is SAME_PEAK or more
+MAX_DUR_CLOSE = 0.5      # verses as long as the other's, give or take 2%
+MAX_ENV_CORR = 0.9       # median loudness-contour correlation
+
+
+def _np():
+    import numpy as np  # noqa: PLC0415 - only the comparison needs it
+    return np
+
+
+def decode_pcm(mp3_bytes):
+    """[mp3_bytes] decoded mono at XRATE, as 16-bit samples."""
+    np = _np()
+    p = subprocess.run(
+        ['ffmpeg', '-v', 'error', '-f', 'mp3', '-i', '-', '-ac', '1',
+         '-ar', str(XRATE), '-f', 's16le', '-'],
+        input=mp3_bytes, capture_output=True, check=True)
+    return np.frombuffer(p.stdout[:len(p.stdout) // 2 * 2], dtype='<i2')
+
+
+def env_of(pcm):
+    """smooth(envelope()) of the same audio, from its samples: the 100 ms
+    loudness in 10 ms frames, in dB."""
+    np = _np()
+    n = XRATE // 100
+    m = len(pcm) // n
+    x = pcm[:m * n].astype(np.float64).reshape(m, n)
+    c = np.concatenate([[0.0], np.cumsum((x * x).mean(axis=1) + 1)])
+    i = np.arange(m)
+    lo, hi = np.maximum(0, i - 5), np.minimum(m, i + 6)
+    return 10 * np.log10((c[hi] - c[lo]) / (hi - lo))
+
+
+def snap(env, at_ms, before, after):
+    """SurahSlice.snap: the quietest 10 ms of [env] from [before] ms
+    before [at_ms] to [after] ms after it, the nearer of two equals."""
+    i = int(math.floor(abs(at_ms) / 10 + 0.5)) * (1 if at_ms >= 0 else -1)
+    lo = max(0, i - before // 10)
+    hi = min(len(env) - 1, i + after // 10)
+    if lo > hi:
+        return min(max(i, 0), len(env)) * 10
+    best = lo
+    for k in range(lo + 1, hi + 1):
+        if env[k] < env[best] or (env[k] == env[best] and
+                                  abs(k - i) < abs(best - i)):
+            best = k
+    return best * 10
+
+
+def table_rows(r, s):
+    """Surah [s]'s table as the app keeps it (SurahSlice.parseTable, then
+    withFileEnd): [(start, end)] by verse."""
+    t = surah_table(r['timing'], s)
+    if not isinstance(t, list) or len(t) != COUNTS[s - 1]:
+        raise RuntimeError(f'table {s} unusable')
+    rows = [(int(x['start_time']), int(x['end_time'])) for x in t]
+    if rows[-1][1] <= rows[-1][0]:
+        rows[-1] = (rows[-1][0], int(layout(surah_url(r, s))['audio_ms']))
+    return rows
+
+
+def clip(r, s, a):
+    """Verse s:a of recording [r] as the app plays it in a reel of that
+    verse alone — the verse's file, or its slice of the surah's file cut
+    the way SurahSlice.plan cuts it — as (samples at XRATE, envelope,
+    the verse's window in them in ms). Kept in the cache."""
+    np = _np()
+    key = re.sub(r'[^A-Za-z0-9]+', '_', source_key(r))[-120:]
+    path = os.path.join(CACHE, 'clips', key, f'{s:03d}{a:03d}.npz')
+    if os.path.exists(path):
+        z = np.load(path)
+        return z['pcm'], z['env'], (int(z['win'][0]), int(z['win'][1]))
+    if r['kind'] == 'ayah':
+        url = f"{r['base']}/{s:03d}{a:03d}.mp3"
+        for attempt in range(4):
+            status, _, b = _get(url, timeout=120)
+            if status == 200 and b:
+                break
+            time.sleep(5 * (attempt + 1))
+        else:
+            raise RuntimeError(f'{url}: HTTP {status}')
+        pcm = decode_pcm(b)
+        env = env_of(pcm)
+        win = (0, len(env) * 10)
+    else:
+        st, en = table_rows(r, s)[a - 1]
+        url = surah_url(r, s)
+        lay = layout(url)
+        if not lay.get('ok'):
+            raise RuntimeError(f'{url}: {lay.get("why")}')
+        b, origin = fetch_slice(url, lay, st - 1500, en + 1500)
+        pcm = decode_pcm(b)
+        env = env_of(pcm)
+        n = len(env) * 10
+        a0 = snap(env, st - origin, EDGE_MS, SNAP_MS)
+        a1 = min(n, max(snap(env, min(en - origin, n), SNAP_MS, EDGE_MS),
+                        a0 + 150))
+        win = (a0, a1)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    np.savez_compressed(path, pcm=pcm, env=env.astype(np.float32),
+                        win=np.array(win))
+    return pcm, env, win
+
+
+def sound(env, win):
+    """Where the verse's sound is in its window [win]: from the start of
+    the first 50 ms above the breath level (PAUSE_REL of the way up from
+    the clip's silence floor to its speech level) to the end of the last,
+    in ms. None when there is none."""
+    np = _np()
+    floor, speech = levels([float(x) for x in env])
+    thr = floor + PAUSE_REL * (speech - floor)
+    lo, hi = max(0, win[0] // 10), min(len(env), win[1] // 10)
+    above = np.asarray(env[lo:hi]) > thr
+    if len(above) < 5:
+        return None
+    c = np.concatenate([[0], np.cumsum(above)])
+    run = np.nonzero((c[5:] - c[:-5]) == 5)[0]
+    if not len(run):
+        return None
+    return (lo + int(run[0])) * 10, (lo + int(run[-1]) + 5) * 10
+
+
+def ncc(x, y):
+    """Normalised correlation of [x] laid on every stretch of [y] as long
+    as it, as verify_word_timing.ncc measures it."""
+    np = _np()
+    m, n = len(x), len(y)
+    if m < 80 or n < m:
+        return None
+    x = x.astype(np.float64)
+    x = x - x.mean()
+    y = y.astype(np.float64)
+    size = 1 << int(math.ceil(math.log2(n + m)))
+    c = np.fft.irfft(np.fft.rfft(x[::-1], size) * np.fft.rfft(y, size),
+                     size)[m - 1:n]
+    cs = np.concatenate([[0.0], np.cumsum(y * y)])
+    e = cs[m:] - cs[:n - m + 1]
+    xx = float(np.dot(x, x))
+    # Digital silence matches nothing: its energy would only blow up the
+    # transform's rounding noise.
+    return np.where(e > 1e-4 * xx, c / np.sqrt(np.maximum(e * xx, 1e-6)),
+                    0.0)
+
+
+def wave_match(xa, xb):
+    """How well a verse's sound [xa] is found in [xb], the other
+    recording's clip of the same verse: for each CHUNK_MS stretch of it
+    (up to six, from its start to its end) the best |correlation| of the
+    waveforms anywhere in [xb]. Stretches of near-silence (a pause inside
+    the verse) are left out: there is nothing in them to find."""
+    np = _np()
+    sr = XRATE // 1000
+    dur = len(xa) // sr
+    if dur <= CHUNK_MS + 500:
+        spots, span = [0], dur
+    else:
+        span = CHUNK_MS
+        k = int(min(6, max(2, dur // CHUNK_MS)))
+        spots = [round(i * (dur - span) / (k - 1)) for i in range(k)]
+    level = float(np.sqrt(np.mean(xa.astype(np.float64) ** 2))) \
+        if len(xa) else 0.0
+    out = []
+    for c0 in spots:
+        x = xa[c0 * sr:(c0 + span) * sr]
+        rms = float(np.sqrt(np.mean(x.astype(np.float64) ** 2))) \
+            if len(x) else 0.0
+        if rms < 30 or rms < level / 10:
+            continue
+        r = ncc(x, xb)
+        if r is not None and len(r):
+            out.append(float(np.abs(r).max()))
+    return out
+
+
+def env_corr(ea, sa, eb, sb):
+    """Correlation of two verses' loudness contours, their sounds' starts
+    laid together, over the shorter of the two."""
+    np = _np()
+    a = np.asarray(ea[sa[0] // 10:sa[1] // 10], dtype=np.float64)
+    b = np.asarray(eb[sb[0] // 10:sb[1] // 10], dtype=np.float64)
+    n = min(len(a), len(b))
+    if n < 30 or a[:n].std() == 0 or b[:n].std() == 0:
+        return None
+    return float(np.corrcoef(a[:n], b[:n])[0, 1])
+
+
+def distinct_sample(missing, model):
+    """The verses a pair is compared on: verse 2 of every surah both have
+    (a surah one host filled from the other recording shows there), and
+    SPREAD more spread over the mushaf, each 3 to 20 s as the model has
+    it. No verse 1: hosts differ over whether its file holds the
+    basmala."""
+    live = [s for s in range(1, 115) if s not in missing]
+    every = [(s, 2) for s in live]
+    keys = [(s, a) for s in live for a in range(3, COUNTS[s - 1] + 1)
+            if 3000 <= model[(s, a)] <= 20000]
+    step = len(keys) / SPREAD
+    return every + [keys[int(i * step)] for i in range(SPREAD)]
+
+
+def compare(ra, rb, model, sample=None):
+    """Whether [ra] and [rb] are two performances, or one performance
+    twice (see 9.): the metrics, and the verdict as `ok`. [sample]
+    replaces distinct_sample's verses, for a first look."""
+    missing = set(ra.get('missing') or []) | set(rb.get('missing') or [])
+    sample = sample or distinct_sample(missing, model)
+
+    def clips(s_a):
+        s, a = s_a
+        try:
+            return s_a, clip(ra, s, a), clip(rb, s, a), None
+        except Exception as e:  # noqa: BLE001 - one verse, recorded
+            return s_a, None, None, str(e)[:100]
+    rows, failed = [], []
+    sr = XRATE // 1000
+    with ThreadPoolExecutor(4) as ex:
+        for (s, a), ca, cb, err in ex.map(clips, sample):
+            if err:
+                failed.append(f'{s}:{a} {err}')
+                continue
+            (pa, ea, wa), (pb, eb, wb) = ca, cb
+            sa, sb = sound(ea, wa), sound(eb, wb)
+            if not sa or not sb:
+                failed.append(f'{s}:{a} no sound')
+                continue
+            found = wave_match(pa[sa[0] * sr:sa[1] * sr], pb)
+            rows.append(dict(key=f'{s}:{a}', da=sa[1] - sa[0],
+                             db=sb[1] - sb[0], best=max(found, default=0.0),
+                             env=env_corr(ea, sa, eb, sb)))
+    n = len(rows)
+    res = dict(verses=n, surahs=len({x['key'].split(':')[0] for x in rows}),
+               failed=len(failed))
+    if failed:
+        res['failed_e_g'] = failed[:5]
+    if not n:
+        res.update(ok=False, why='no verse could be compared')
+        return res
+    best = sorted(x['best'] for x in rows)
+    res['wave_median'] = round(best[n // 2], 3)
+    res['wave_p90'] = round(best[min(n - 1, int(n * 0.9))], 3)
+    res['wave_max'] = round(best[-1], 3)
+    same = [x['key'] for x in rows if x['best'] >= STRONG_PEAK]
+    res['wave_same'] = len(same)
+    if same:
+        res['wave_same_e_g'] = same[:8]
+    res['wave_doubt'] = sum(SAME_PEAK <= x['best'] < STRONG_PEAK
+                            for x in rows)
+    q = [math.log(x['da'] / x['db']) for x in rows]
+    mid = sorted(q)[n // 2]
+    dev = [abs(v - mid) for v in q]
+    res['dur_ratio'] = round(math.exp(mid), 3)
+    res['dur_spread'] = round(sorted(dev)[n // 2], 4)
+    res['dur_close'] = round(sum(
+        d <= max(0.02, 60 / x['db']) for d, x in zip(dev, rows)) / n, 3)
+    ec = sorted(x['env'] for x in rows if x['env'] is not None)
+    res['env_corr'] = round(ec[len(ec) // 2], 3) if ec else None
+    why = []
+    if n < 40:
+        why.append(f'only {n} verses compared')
+    if same:
+        why.append(f'the same audio in {len(same)} of {n} verses, '
+                   f'e.g. {same[:4]}')
+    if res['wave_doubt'] > MAX_DOUBT_SHARE * n:
+        why.append(f'{res["wave_doubt"]} verses nearly the same audio')
+    if res['dur_close'] > MAX_DUR_CLOSE:
+        why.append(f'{res["dur_close"]:.0%} of verses as long as each other')
+    if res['env_corr'] is not None and res['env_corr'] > MAX_ENV_CORR:
+        why.append(f'loudness contours correlate at {res["env_corr"]}')
+    if res['failed'] > max(3, 0.05 * len(sample)):
+        why.append(f'{res["failed"]} verses could not be compared')
+    res['ok'] = not why
+    if why:
+        res['why'] = '; '.join(why)
+    return res
+
+
+# Pairs the verdict was calibrated on (see 9.): the same recording served
+# by two hosts or cut two ways, and two performances by one reciter.
+CALIBRATION = [
+    ('same', 'husary', 'ayah https://everyayah.com/data/Husary_64kbps'),
+    ('same', 'abdulbasit',
+     'ayah https://everyayah.com/data/Abdul_Basit_Murattal_64kbps'),
+    ('same', 'ghamdi', 'surah https://audio-cdn.tarteel.ai/quran/surah/'
+                       'ghamadi/murattal/mp3 SSS qul 13'),
+    ('same', 'salimi', 'surah https://audio-cdn.tarteel.ai/quran/surah/'
+                       'mansourAlSalimi/murattal/mp3 SSS qul 179'),
+    ('same', 'abdulkareem', 'surah https://download.quranicaudio.com/quran/'
+                            'muhammad_abdulkareem SSS qul 70'),
+    ('same', 'abbad', 'surah https://download.quranicaudio.com/quran/fares '
+                      'SSS qul 14'),
+    # The same recording but for a few surahs, which the host filled from
+    # another take (verify_word_timing.py found them).
+    ('mixed', 'tunaiji', 'surah https://audio-cdn.tarteel.ai/quran/surah/'
+                         'khalifaAlTunaiji/murattal/mp3 SSS qul 161'),
+    ('mixed', 'husary_mujawwad', 'surah https://audio-cdn.tarteel.ai/quran/'
+                                 'surah/husary/mujawwad/mp3 SSS qul 164'),
+    ('mixed', 'dussary', 'surah https://audio-cdn.tarteel.ai/quran/surah/'
+                         'yasserAlDosari/murattal/mp3 SSS qul 174'),
+    ('different', 'husary', 'husary_mujawwad'),
+    ('different', 'abdulbasit', 'abdulbasit_mujawwad'),
+    ('different', 'minshawi', 'minshawi_mujawwad'),
+    ('different', 'mustafa_ismail', 'mustafa_ismail_mujawwad'),
+    ('different', 'muaiqly', 'muaiqly_mujawwad'),
+    ('different', 'muaiqly', 'surah https://download.quranicaudio.com/quran/'
+                             'maher_almu3aiqly/year1440 SSS qul 159'),
+    ('different', 'muaiqly', 'surah https://audio-cdn.tarteel.ai/quran/surah/'
+                             'maherAlMuaiqly/murattal/mp3 SSS qul 65'),
+    ('different', 'alafasy', 'husary'),
+]
+
+
+def calibrate(model, pairs=None):
+    """compare() over CALIBRATION, for setting and checking the verdict."""
+    reciters = app_reciters()
+    out = []
+    for expect, a, b in pairs or CALIBRATION:
+        try:
+            res = compare(recording(a, reciters), recording(b, reciters),
+                          model)
+        except Exception as e:  # noqa: BLE001
+            res = dict(ok=None, why=f'error: {e}')
+        out.append(dict(expect=expect, a=a, b=b, **res))
+        print(f"{expect:<9} ok={res.get('ok')!s:<5} {a[-34:]:<34} "
+              f"{b[-44:]:<44} n={res.get('verses')} "
+              f"wave={res.get('wave_median')}/{res.get('wave_p90')}/"
+              f"{res.get('wave_max')} same={res.get('wave_same')} "
+              f"doubt={res.get('wave_doubt')} "
+              f"dur={res.get('dur_ratio')}±{res.get('dur_spread')} "
+              f"close={res.get('dur_close')} env={res.get('env_corr')}",
+              flush=True)
+    path = os.path.join(CACHE, 'calibration.json')
+    json.dump(out, open(path, 'w', encoding='utf8'), ensure_ascii=False,
+              indent=1)
+    print(f'-> {path}')
+    return out
+
+
 def _survey_one(rd):
     r = dict(id=f'read{rd["id"]}', name=rd['name'], ar=rd['name'],
              kind='surah', base=rd['folder_url'].rstrip('/'),
@@ -883,11 +1258,24 @@ def main():
     ap.add_argument('--full', action='store_true',
                     help='check all 6236 files of every per-ayah voice')
     ap.add_argument('--survey', action='store_true')
+    ap.add_argument('--compare', nargs=2, metavar=('A', 'B'),
+                    help='are two recordings two performances? Each a '
+                         "voice's id or a source as source_key writes it")
+    ap.add_argument('--calibrate', action='store_true',
+                    help='--compare over the pairs the verdict was set on')
     args = ap.parse_args()
     os.makedirs(CACHE, exist_ok=True)
     model = model_ms()
     if args.survey:
         return survey(model)
+    if args.calibrate:
+        return calibrate(model)
+    if args.compare:
+        all_ = app_reciters()
+        res = compare(recording(args.compare[0], all_),
+                      recording(args.compare[1], all_), model)
+        print(json.dumps(res, ensure_ascii=False, indent=1))
+        return
 
     old = json.load(open(OUT)) if os.path.exists(OUT) else {}
     reciters = app_reciters()
@@ -895,6 +1283,11 @@ def main():
     todo = [r for r in reciters if not args.only or r['id'] in args.only]
     for r in todo:
         r['full'] = args.full or r['id'] not in SHIPPED_BEFORE
+        # Another recording is compared with every other recording of its
+        # voice: the voice's first, and its other others.
+        if r.get('of'):
+            r['others'] = [x for x in reciters if x['id'] != r['id'] and
+                           r['of'] in (x['id'], x.get('of'))]
     failed = []
 
     def report(r, res):
@@ -940,6 +1333,20 @@ def check_one(r):
     except Exception as e:  # noqa: BLE001
         res = dict(kind=r['kind'], base=r['base'], source=source_key(r),
                    problems=[str(e)])
+    # 9. Another performance, not the same one from somewhere else.
+    if r.get('of'):
+        res['recording_of'] = r['of']
+        res['distinct'] = {}
+        for o in r.get('others', []):
+            try:
+                d = compare(r, o, model)
+            except Exception as e:  # noqa: BLE001
+                d = dict(ok=False, why=f'error: {e}')
+            d['source'] = source_key(o)
+            res['distinct'][o['id']] = d
+            if not d['ok']:
+                res['problems'].append(f"not another performance than "
+                                       f"{o['id']}: {d.get('why')}")
     res['name'] = r['name']
     res['checked'] = time.strftime('%Y-%m-%d')
     return res

@@ -13,6 +13,10 @@ jobs:
     if: contains(github.event.head_commit.message, '[voices]')
     runs-on: ubuntu-latest
     timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [calib, s0, s1, s2, luhaidan]
     steps:
       - uses: actions/checkout@v4
       - name: Tools
@@ -22,11 +26,14 @@ jobs:
           python3 -m pip install -q numpy
           ffmpeg -version | head -1
       - name: Run
-        run: bash tool/voices_scratch/run.sh
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: bash tool/voices_scratch/run.sh "$SHARD"
       - name: Publish
         if: always()
         env:
           TOKEN: ${{ github.token }}
+          SHARD: ${{ matrix.shard }}
         run: |
           [ -d out ] || exit 0
           cd out
@@ -35,7 +42,7 @@ jobs:
           git config user.email "41898276+github-actions[bot]@users.noreply.github.com"
           git checkout -q -b out
           git add -A
-          git commit -qm "voices run $GITHUB_RUN_ID"
+          git commit -qm "voices run $GITHUB_RUN_ID $SHARD"
           git push -q "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
-            "HEAD:refs/heads/voices-out/$GITHUB_RUN_ID"
-          echo "published voices-out/$GITHUB_RUN_ID"
+            "HEAD:refs/heads/voices-out/$GITHUB_RUN_ID-$SHARD"
+          echo "published voices-out/$GITHUB_RUN_ID-$SHARD"
