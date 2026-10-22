@@ -1,0 +1,18 @@
+same      ok=False husary                             yah https://everyayah.com/data/Husary_64kbps n=162 wave=0.999/1.0/1.0 same=162 doubt=0 dur=1.0±0.0004 close=0.988 env=0.999
+same      ok=False abdulbasit                         eryayah.com/data/Abdul_Basit_Murattal_64kbps n=162 wave=0.997/0.999/1.0 same=162 doubt=0 dur=1.0±0.0005 close=0.981 env=0.998
+same      ok=False ghamdi                             /quran/surah/ghamadi/murattal/mp3 SSS qul 13 n=162 wave=0.995/0.998/0.999 same=162 doubt=0 dur=1.0±0.0 close=0.858 env=0.999
+same      ok=False salimi                             rah/mansourAlSalimi/murattal/mp3 SSS qul 179 n=162 wave=0.996/0.999/1.0 same=162 doubt=0 dur=1.0±0.0 close=0.957 env=0.997
+same      ok=False abdulkareem                        io.com/quran/muhammad_abdulkareem SSS qul 70 n=160 wave=0.962/0.983/0.995 same=160 doubt=0 dur=1.002±0.0035 close=0.938 env=0.974
+same      ok=False abbad                              load.quranicaudio.com/quran/fares SSS qul 14 n=162 wave=0.97/0.992/0.999 same=160 doubt=0 dur=0.995±0.0073 close=0.599 env=0.96
+mixed     ok=False tunaiji                            ah/khalifaAlTunaiji/murattal/mp3 SSS qul 161 n=162 wave=0.999/1.0/1.0 same=155 doubt=2 dur=0.997±0.0026 close=0.932 env=0.991
+mixed     ok=False husary_mujawwad                    /quran/surah/husary/mujawwad/mp3 SSS qul 164 n=162 wave=0.98/0.998/1.0 same=158 doubt=0 dur=1.001±0.0008 close=0.833 env=0.996
+mixed     ok=False dussary                            urah/yasserAlDosari/murattal/mp3 SSS qul 174 n=161 wave=0.982/0.997/0.999 same=160 doubt=0 dur=0.999±0.002 close=0.801 env=0.986
+different ok=True  husary                             husary_mujawwad                              n=162 wave=0.14/0.223/0.42 same=0 doubt=0 dur=0.809±0.108 close=0.16 env=0.11
+different ok=True  abdulbasit                         abdulbasit_mujawwad                          n=162 wave=0.114/0.218/0.523 same=0 doubt=0 dur=0.525±0.1127 close=0.086 env=0.065
+different ok=True  minshawi                           minshawi_mujawwad                            n=162 wave=0.13/0.185/0.427 same=0 doubt=0 dur=0.557±0.1647 close=0.08 env=0.017
+different ok=True  mustafa_ismail                     mustafa_ismail_mujawwad                      n=162 wave=0.119/0.199/0.654 same=0 doubt=1 dur=0.512±0.1554 close=0.043 env=0.027
+different ok=True  muaiqly                            muaiqly_mujawwad                             n=162 wave=0.151/0.242/0.45 same=0 doubt=0 dur=0.59±0.1121 close=0.13 env=0.037
+different ok=True  muaiqly                            /quran/maher_almu3aiqly/year1440 SSS qul 159 n=162 wave=0.145/0.235/0.45 same=0 doubt=0 dur=0.594±0.1068 close=0.111 env=0.041
+different ok=True  muaiqly                            surah/maherAlMuaiqly/murattal/mp3 SSS qul 65 n=162 wave=0.171/0.482/0.641 same=0 doubt=1 dur=0.899±0.0695 close=0.167 env=0.164
+different ok=True  alafasy                            husary                                       n=162 wave=0.147/0.226/0.425 same=0 doubt=0 dur=0.756±0.1248 close=0.086 env=0.077
+-> /home/runner/work/ayahReel-ci/ayahReel-ci/build/verify_reciters/calibration.json
