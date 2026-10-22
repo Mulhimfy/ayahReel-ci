@@ -1,0 +1,42 @@
+Al-Fatiha table: [(0, 5793), (5793, 11823), (11823, 16123), (16123, 20323), (20323, 26590), (26590, 31923), (31923, 47055)] file ms: 47040
+   sound 320-5390 ms (5070 ms) in verses [1]
+   sound 6160-11620 ms (5460 ms) in verses [2]
+   sound 12080-16000 ms (3920 ms) in verses [3]
+   sound 16390-20160 ms (3770 ms) in verses [4]
+   sound 20590-26470 ms (5880 ms) in verses [5]
+   sound 26890-31740 ms (4850 ms) in verses [6]
+   sound 32280-46660 ms (14380 ms) in verses [7]
+620 verses compared; 33 with more sound than their Alafasy (EveryAyah) counterpart predicts:
+   2:10 taraweeh 18700 ms in 2 bursts [(370, 11290), (11760, 19070)], everyayah 13130 ms in 2
+   2:24 taraweeh 21290 ms in 2 bursts [(100, 8800), (9410, 21390)], everyayah 14440 ms in 2
+   2:49 taraweeh 33470 ms in 3 bursts [(90, 11280), (11880, 24650), (25170, 33560)], everyayah 25650 ms in 2
+   2:81 taraweeh 21470 ms in 3 bursts [(70, 710), (1310, 11630), (12370, 21540)], everyayah 17020 ms in 2
+   2:88 taraweeh 12720 ms in 2 bursts [(30, 2810), (3410, 12750)], everyayah 10500 ms in 2
+   14:52 taraweeh 29370 ms in 3 bursts [(60, 8970), (9390, 16120), (16590, 29430)], everyayah 23670 ms in 1
+   18:17 taraweeh 38370 ms in 5 bursts [(40, 10900), (11430, 19570), (20250, 24920), (25360, 29860), (30260, 38410)], everyayah 31870 ms in 4
+   18:20 taraweeh 20150 ms in 2 bursts [(50, 10940), (11410, 20200)], everyayah 14840 ms in 1
+   18:32 taraweeh 20680 ms in 2 bursts [(50, 12660), (13640, 20730)], everyayah 16690 ms in 1
+   18:45 taraweeh 40840 ms in 3 bursts [(50, 13470), (14260, 32680), (33260, 40890)], everyayah 29810 ms in 3
+   18:51 taraweeh 23860 ms in 2 bursts [(150, 9230), (9780, 24010)], everyayah 14790 ms in 1
+   18:53 taraweeh 21190 ms in 3 bursts [(70, 6550), (7050, 10580), (11200, 21260)], everyayah 13890 ms in 3
+   18:55 taraweeh 32870 ms in 3 bursts [(30, 13100), (13590, 21420), (21860, 32900)], everyayah 23690 ms in 2
+   18:87 taraweeh 19260 ms in 2 bursts [(40, 10380), (11120, 19300)], everyayah 14440 ms in 1
+   19:98 taraweeh 17730 ms in 3 bursts [(60, 9910), (10390, 16800), (17170, 17790)], everyayah 13570 ms in 2
+   26:1 taraweeh 10170 ms in 1 bursts [(70, 10240)], everyayah 8040 ms in 1
+   33:73 taraweeh 29630 ms in 3 bursts [(100, 15310), (15940, 23750), (24290, 29730)], everyayah 19530 ms in 2
+   36:9 taraweeh 18340 ms in 2 bursts [(50, 12050), (12590, 18390)], everyayah 14850 ms in 1
+   36:23 taraweeh 24010 ms in 2 bursts [(660, 13670), (14250, 24670)], everyayah 17960 ms in 1
+   36:33 taraweeh 17120 ms in 2 bursts [(50, 9130), (9560, 17170)], everyayah 12940 ms in 1
+   36:36 taraweeh 21060 ms in 2 bursts [(290, 12630), (13060, 21350)], everyayah 15820 ms in 1
+   36:70 taraweeh 16400 ms in 2 bursts [(60, 5310), (5750, 16460)], everyayah 10710 ms in 1
+   36:80 taraweeh 20530 ms in 2 bursts [(60, 6780), (7240, 20590)], everyayah 14050 ms in 1
+   39:1 taraweeh 12660 ms in 2 bursts [(20, 4410), (5320, 12680)], everyayah 7990 ms in 1
+   45:1 taraweeh 5140 ms in 1 bursts [(100, 5240)], everyayah 3860 ms in 1
+   55:43 taraweeh 17050 ms in 3 bursts [(60, 3520), (4120, 7750), (8240, 17110)], everyayah 8510 ms in 1
+   55:74 taraweeh 12520 ms in 1 bursts [(20, 12540)], everyayah 10330 ms in 1
+   55:75 taraweeh 10460 ms in 1 bursts [(50, 10510)], everyayah 8400 ms in 1
+   67:12 taraweeh 18560 ms in 2 bursts [(60, 10020), (10620, 18690)], everyayah 13350 ms in 1
+   67:15 taraweeh 18040 ms in 2 bursts [(140, 10700), (11360, 18180)], everyayah 14590 ms in 2
+   71:28 taraweeh 28240 ms in 2 bursts [(110, 13430), (14120, 28350)], everyayah 16970 ms in 1
+   88:1 taraweeh 4660 ms in 2 bursts [(0, 110), (780, 4660)], everyayah 3330 ms in 1
+   89:30 taraweeh 4890 ms in 1 bursts [(0, 4890)], everyayah 3670 ms in 1
