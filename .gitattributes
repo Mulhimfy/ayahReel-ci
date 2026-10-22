@@ -1,0 +1,34 @@
+# Git normalises text files to CRLF on checkout on Windows, which
+# rewrites this file inside the built bundle and makes every Shorebird
+# patch look like an asset change — 69 carriage returns in a README no
+# code reads, enough to stop a patch that is otherwise Dart-only.
+# The shipped releases carry it with LF, so pin it there.
+assets/**/README.md text eol=lf
+
+# Same reason, different blast radius: GitHub Actions extracts a `run:`
+# block into a shell script on a Linux runner. A stray CR makes every
+# line die as `$'\r': command not found`, so the watcher would fail
+# daily on its own formatting rather than on anything it watches.
+.github/workflows/*.yml text eol=lf
+
+# The same class of bug again, and the one where it would be fatal: a
+# font checked out with CRLF normalisation applied is a corrupt font.
+# Git detects these as binary on its own; saying so is cheap insurance
+# on a repo where a rewritten asset has already cost a release — and
+# the incident that cost it was an image, so the pictures are named
+# here too: 400-odd scene posters and every bundled scenery.
+*.ttf binary
+*.mp3 binary
+*.mp4 binary
+*.jpg binary
+*.jpeg binary
+*.png binary
+
+# And the two shapes the card composer's library ships in. Gzip is
+# binary — Git works that out for itself, and saying so is the same
+# cheap insurance as the line above it — while the index beside it is
+# JSON the app reads byte for byte, so it is pinned to LF like the
+# READMEs at the top of this file: a checkout that rewrote it would
+# change the bundle and stop an otherwise Dart-only patch.
+*.gz binary
+assets/**/*.json text eol=lf

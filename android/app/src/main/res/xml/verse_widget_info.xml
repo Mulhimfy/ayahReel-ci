@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The verse widget. 4x2 cells by default and resizable, down to 2x2
+     and down to one row; the picture is centre-cropped to whatever
+     shape it ends up, so no size is ever a stretched or letterboxed
+     photo. Under three cells wide, or one row tall, VerseWidget draws
+     verse_widget_small instead - the same parts, set smaller - and on
+     one row keeps the verse to two lines and the translation to one.
+     See onAppWidgetOptionsChanged.
+
+     updatePeriodMillis is the floor Android allows (30 min) and is only
+     the safety net: VerseWidget arms an alarm for the actual turn at
+     noon and midnight.
+
+     previewLayout (Android 12+) shows the widget picker the real layout
+     with the defaults baked into verse_widget.xml; older pickers show
+     the app icon. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="40dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
+    android:maxResizeWidth="420dp"
+    android:maxResizeHeight="260dp"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/verse_widget"
+    android:previewLayout="@layout/verse_widget"
+    android:description="@string/widget_description"
+    android:widgetCategory="home_screen" />

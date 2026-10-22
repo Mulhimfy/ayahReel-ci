@@ -1,0 +1,246 @@
+# Harvests new sceneries on runners, where the internet is.
+#
+# The machine these tools are written on reaches GitHub and nothing
+# else, so the stock sites the library comes from (Pexels, Pixabay,
+# Mixkit, Openverse, Wikimedia Commons) are searched, fetched, scored and
+# vetted here instead: one job per picker tab, then one that pools them.
+# Nothing is added to the app. The pool -- every candidate over the
+# library's own floor, with its measurements, a poster and CLIP
+# embeddings -- is published as a pre-release of this repository, and
+# tool/select_new_scenes.py turns it into the list and the review page.
+#
+# What a push's commit message asks for:
+#   [scenes]                    every tab
+#   [scenes:test]               two tabs, two queries per category, end to end
+#   [scenes:extra]              every tab, Pexels clips only, no pool
+#   [scenes:probe]              which browser engine gets through to Pexels
+#   [scenes:pool:<run>]         pool the shard artifacts of an earlier run
+#   [scenes:pool:<run>+<run>]   ... of two runs, e.g. a run and its extra
+# It builds and ships nothing and needs no secret.
+name: Scenes harvest
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+concurrency:
+  group: scenes-harvest-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    if: contains(github.event.head_commit.message, '[scenes') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    outputs:
+      tabs: ${{ steps.p.outputs.tabs }}
+      limit: ${{ steps.p.outputs.limit }}
+      probe: ${{ steps.p.outputs.probe }}
+      only: ${{ steps.p.outputs.only }}
+      nopool: ${{ steps.p.outputs.nopool }}
+      pool_run: ${{ steps.p.outputs.pool_run }}
+      pool_run2: ${{ steps.p.outputs.pool_run2 }}
+    steps:
+      - id: p
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+        run: |
+          pool=$(grep -oE '\[scenes:pool:[0-9]+(\+[0-9]+)?\]' <<<"$MSG" | head -1 || true)
+          if [ -n "$pool" ]; then
+            ids=$(grep -oE '[0-9]+' <<<"$pool" | tr '\n' ' ')
+            set -- $ids
+            echo 'tabs=[]' >> "$GITHUB_OUTPUT"
+            echo "pool_run=$1" >> "$GITHUB_OUTPUT"
+            echo "pool_run2=${2:-}" >> "$GITHUB_OUTPUT"
+          elif grep -qF '[scenes:extra]' <<<"$MSG"; then
+            echo 'tabs=["sky","mountains","desert","water","forest","road","sacred","abstract","aerial","cinematic"]' >> "$GITHUB_OUTPUT"
+            echo 'limit=0' >> "$GITHUB_OUTPUT"
+            echo 'only=pexels-video' >> "$GITHUB_OUTPUT"
+            echo 'nopool=true' >> "$GITHUB_OUTPUT"
+          elif grep -qF '[scenes:probe]' <<<"$MSG"; then
+            echo 'tabs=[]' >> "$GITHUB_OUTPUT"
+            echo 'probe=true' >> "$GITHUB_OUTPUT"
+          elif grep -qF '[scenes:test]' <<<"$MSG"; then
+            echo 'tabs=["desert","aerial"]' >> "$GITHUB_OUTPUT"
+            echo 'limit=2' >> "$GITHUB_OUTPUT"
+          elif grep -qF '[scenes]' <<<"$MSG" || [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            echo 'tabs=["sky","mountains","desert","water","forest","road","sacred","abstract","aerial","cinematic"]' >> "$GITHUB_OUTPUT"
+            echo 'limit=0' >> "$GITHUB_OUTPUT"
+          else
+            echo 'tabs=[]' >> "$GITHUB_OUTPUT"
+          fi
+
+  # Which browser engine gets through to Pexels page after page.
+  probe:
+    needs: plan
+    if: needs.plan.outputs.probe == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tools
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb >/dev/null
+          pip install -q playwright patchright "camoufox[geoip]"
+          python -m playwright install --with-deps chromium firefox >/dev/null
+          python -m patchright install chromium >/dev/null || true
+          python -m camoufox fetch >/dev/null || echo "camoufox fetch failed"
+          which google-chrome || true
+      - name: Probe
+        run: xvfb-run -a python tool/harvest_new_scenes.py probe
+      - name: Publish what came back
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tar -czf scenes-probe.tar.gz -C scenes_out probe
+          TAG="scenes-probe-${GITHUB_SHA::7}"
+          gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" scenes-probe.tar.gz \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease \
+            --title "Scenes probe · ${GITHUB_SHA::7}" \
+            --notes "Which browser engine reaches Pexels from a runner. Diagnostic only; nothing here ships."
+
+  shard:
+    needs: plan
+    if: needs.plan.outputs.tabs != '[]' && needs.plan.outputs.tabs != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        tab: ${{ fromJSON(needs.plan.outputs.tabs) }}
+    env:
+      TAB: ${{ matrix.tab }}
+      SCENES_QUERY_LIMIT: ${{ needs.plan.outputs.limit }}
+      SCENES_ONLY: ${{ needs.plan.outputs.only }}
+      SCENES_CAP_IMAGES: '4000'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tools
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg libgl1 xvfb >/dev/null
+          pip install -q --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          pip install -q numpy pillow playwright ultralytics open_clip_torch
+          python -m playwright install --with-deps chromium >/dev/null
+          ffmpeg -version | head -1
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/huggingface
+          key: clip-ViT-L-14-openai
+      # Pexels and Pixabay are read by a headed browser on a virtual
+      # display: the probe found headless Chromium challenged on most pages
+      # and the same browser headed let through on all of them.
+      - name: Discover
+        env:
+          SCENES_HEADED: '1'
+        run: |
+          set -uo pipefail
+          n=90
+          sites="pexels pixabay open"
+          [ "$SCENES_ONLY" = pexels-video ] && sites="pexels"
+          for site in $sites; do
+            n=$((n + 1))
+            ( xvfb-run -n "$n" -s "-screen 0 1600x1000x24" \
+                python tool/harvest_new_scenes.py discover "$TAB" "$site" 2>&1 | sed "s/^/[$site] /" ) &
+            sleep 2
+          done
+          wait
+          ls -la "scenes_out/$TAB"
+      - name: Fetch and score
+        run: python tool/harvest_new_scenes.py score "$TAB"
+      - name: Vet
+        run: python tool/harvest_new_scenes.py vet "$TAB"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shard-${{ matrix.tab }}
+          path: |
+            scenes_out/${{ matrix.tab }}
+            !scenes_out/${{ matrix.tab }}/frames
+          retention-days: 7
+
+  # Pools whatever shards finished, even when one failed -- but not when
+  # the run was cancelled (always() would keep it going past a cancel).
+  pool:
+    needs: [plan, shard]
+    if: ${{ !cancelled() && needs.plan.outputs.nopool != 'true' && ((needs.plan.outputs.tabs != '[]' && needs.plan.outputs.tabs != '') || needs.plan.outputs.pool_run != '') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tools
+        run: |
+          pip install -q --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          pip install -q numpy pillow open_clip_torch
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/huggingface
+          key: clip-ViT-L-14-openai
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: shard-*
+          path: scenes_out/shards/a
+          run-id: ${{ needs.plan.outputs.pool_run || github.run_id }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        if: needs.plan.outputs.pool_run2 != ''
+        with:
+          pattern: shard-*
+          path: scenes_out/shards/b
+          run-id: ${{ needs.plan.outputs.pool_run2 }}
+          github-token: ${{ github.token }}
+      - name: Pool
+        run: python tool/harvest_new_scenes.py pool
+      # A first choice with the default thresholds, and pictures of the
+      # page it makes; the final choice can be re-run anywhere from the pool.
+      - name: Select and render
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          python tool/select_new_scenes.py scenes_out/pool scenes_out/review --sheets
+          pip install -q playwright
+          python -m playwright install --with-deps chromium >/dev/null
+          python tool/select_new_scenes.py shots scenes_out/review
+          tar -czf scenes-review.tar.gz -C scenes_out review
+      - name: Publish the pool as a pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tar -czf scenes-pool.tar.gz -C scenes_out pool
+          ls -lh scenes-pool.tar.gz
+          extra=""
+          [ -f scenes-review.tar.gz ] && extra="scenes-review.tar.gz"
+          TAG="scenes-pool-${GITHUB_SHA::7}"
+          gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" scenes-pool.tar.gz scenes_out/pool/stats.json $extra \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease \
+            --title "Scenery candidates · ${GITHUB_SHA::7}" \
+            --notes "Candidate sceneries for review: every one over the library's floor, with its measurements, a poster and CLIP embeddings. Nothing here is in the app."
+          echo "https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}" >> "$GITHUB_STEP_SUMMARY"
