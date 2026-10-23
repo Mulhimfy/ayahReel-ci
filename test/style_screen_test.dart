@@ -144,6 +144,7 @@ void main() {
           l.styleTabColour,
           l.styleTabEffects,
           l.styleTabMotion,
+          l.styleTabName,
         ]) {
           // Where an overflow comes from, should one: the widget that
           // made it, out of the error's own report.

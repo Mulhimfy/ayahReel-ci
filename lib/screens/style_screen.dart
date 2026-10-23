@@ -14,6 +14,7 @@ import '../data/quran_repository.dart';
 import '../data/reel_effects.dart';
 import '../data/scene_catalog.dart';
 import '../data/settings_service.dart';
+import '../data/surah_title_look.dart';
 import '../data/verse_font.dart';
 import '../data/verse_ink.dart';
 import '../data/verse_lines.dart';
@@ -29,6 +30,7 @@ import '../widgets/ayah_overlay.dart';
 import '../widgets/band_glow_ground.dart';
 import '../widgets/colour_picker.dart';
 import '../widgets/glow_button.dart';
+import '../widgets/illumination.dart' show Khatam;
 import '../widgets/ink_swatch.dart';
 import '../widgets/measure_height.dart';
 import '../widgets/motion_picker.dart';
@@ -89,7 +91,7 @@ class StyleScreen extends StatefulWidget {
 }
 
 /// Which panel is open under the frame.
-enum _Panel { type, colour, effects, motion }
+enum _Panel { type, colour, effects, motion, title }
 
 /// Which of the reel's colours the palette is setting: the verse's, and
 /// — on a wide card — the band's around it. The accent is the motion's
@@ -205,6 +207,8 @@ class _StyleScreenState extends State<StyleScreen> {
         s
           ..setMotion(VerseMotion.standard)
           ..resetAccent();
+      case _Panel.title:
+        s.setSurahTitleLook(SurahTitleLook.classic);
     }
   }
 
@@ -353,6 +357,7 @@ class _StyleScreenState extends State<StyleScreen> {
             key: ValueKey(_resets),
             effects: creationState.effects,
           ),
+        _Panel.title => _TitlePanel(key: ValueKey(_resets)),
         _Panel.motion => SingleChildScrollView(
             padding: const EdgeInsets.only(top: 12, bottom: 8),
             child: MotionPicker(
@@ -650,6 +655,7 @@ class _StageState extends State<_Stage> {
                   edition: translation,
                   at: s.surahTitleAt,
                   scale: s.surahTitleScale,
+                  look: s.surahTitleLook,
                   letterbox: geo,
                   onLight: ReelDedication.onLightAt(
                       s.surahTitleAt ?? ReelSurahTitle.defaultCentre(geo),
@@ -851,6 +857,7 @@ class _PanelTabs extends StatelessWidget {
           _Panel.colour => l.styleTabColour,
           _Panel.effects => l.styleTabEffects,
           _Panel.motion => l.styleTabMotion,
+          _Panel.title => l.styleTabName,
         };
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -890,7 +897,7 @@ class _PanelTabs extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontSize: 13.5,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.w600,
                                 color: current == p
                                     ? AppColors.goldBright
@@ -1361,9 +1368,9 @@ class _ColourPanel extends StatelessWidget {
     final custom = s.verseInk.isNone &&
         !flat.any((c) => (c & 0xFFFFFF) == (s.textArgb & 0xFFFFFF));
     return [
-      // The luminous inks in one line that scrolls, small squares over
-      // the palette rather than two rows of discs on top of it.
-      InkStrip(
+      // The luminous inks, every one in view: two rows of squares as
+      // wide as the panel allows, over the palette, nothing to scroll.
+      InkGrid(
         inks: inks,
         selected: s.verseInk.isNone ? null : s.verseInk,
         onPick: s.setVerseInk,
@@ -2341,4 +2348,308 @@ class _EffectSlider extends StatelessWidget {
       ),
     );
   }
+}
+
+// ---------------------------------------------------------------------
+// The surah's name
+// ---------------------------------------------------------------------
+
+/// The surah's name: whether the reel carries it, and how — its face,
+/// its colour and its frame, each shown as it would look. Choosing any
+/// of them puts the name on the reel, since that is what choosing it is
+/// for. On the frame above the panel it can still be dragged and
+/// pinched, as on the reel screen.
+class _TitlePanel extends StatelessWidget {
+  const _TitlePanel({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    final s = creationState;
+    final look = s.surahTitleLook;
+    final surah = s.surah >= 1 && s.surah <= 114 ? s.surah : 1;
+    final sample = 'سورة ${QuranRepository.surahInfo(surah).nameArabic}';
+    void set(SurahTitleLook v) {
+      HapticFeedback.selectionClick();
+      s.setSurahTitleLook(v);
+      if (!s.surahTitle) s.setSurahTitle(true);
+    }
+
+    final colourName = look.ink != VerseInk.none
+        ? l.inkName(look.ink)
+        : look.argb == 0
+            ? l.titleGold
+            : l.colourName(look.argb);
+    return _PanelBody(
+      children: [
+        Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(22, 0, 10, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: A11yHeader(
+                  child: Text(
+                    '${l.titleShown.toUpperCase()}  ·  '
+                    '${l.titleFaceName(look.face)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      height: 1.3,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.6,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ),
+              // Held to the height of the heading it ends, so the
+              // panel keeps its rows in view without a scroll.
+              SizedBox(
+                height: 30,
+                child: FittedBox(
+                  child: Switch(
+                    value: s.surahTitle,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    onChanged: (on) {
+                      HapticFeedback.selectionClick();
+                      s.setSurahTitle(on);
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 46,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            children: [
+              for (final f in TitleFace.values)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(end: 8),
+                  child: _TitleFaceCard(
+                    face: f,
+                    sample: sample,
+                    label: l.titleFaceName(f),
+                    selected: look.face == f,
+                    onTap: () => set(look.copyWith(face: f)),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 6),
+        _MiniHeading(l.styleTabColour, value: _cap(colourName)),
+        InkStrip(
+          inks: VerseInk.ordered(onLight: false),
+          selected: look.ink == VerseInk.none ? null : look.ink,
+          onPick: (ink) => set(look.withInk(ink)),
+          labelOf: (ink) =>
+              '${l.styleTabName}${l.comma} ${l.a11yInkSwatch(ink)}',
+          leading: [
+            _Ringed(
+              label: '${l.styleTabName}${l.comma} ${l.titleGold}',
+              selected: look.ink == VerseInk.none && look.argb == 0,
+              onTap: () => set(look.withFlat(0)),
+              child: _SolidDisc(argb: AppColors.goldBright.toARGB32(), size: 24),
+            ),
+            for (final c in SurahTitleLook.flats)
+              _Ringed(
+                label: '${l.styleTabName}${l.comma} ${l.a11yColourSwatch(c)}',
+                selected: look.ink == VerseInk.none && look.argb == c,
+                onTap: () => set(look.withFlat(c)),
+                child: _SolidDisc(argb: c, size: 24),
+              ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        _MiniHeading(l.titleFrameHeading, value: l.titleFrameName(look.frame)),
+        SizedBox(
+          height: 36,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (final f in TitleFrame.values)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  child: _TitleFrameChip(
+                    frame: f,
+                    label: l.titleFrameName(f),
+                    selected: look.frame == f,
+                    onTap: () => set(look.copyWith(frame: f)),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// One face for the name: the surah's own name set in it.
+class _TitleFaceCard extends StatelessWidget {
+  final TitleFace face;
+  final String sample;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _TitleFaceCard({
+    required this.face,
+    required this.sample,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return A11yTap(
+      label: label,
+      selected: selected,
+      onTap: onTap,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColors.gold.withValues(alpha: 0.14)
+                : AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: selected
+                  ? AppColors.gold.withValues(alpha: 0.75)
+                  : AppColors.stroke,
+              width: selected ? 1.5 : 1,
+            ),
+          ),
+          child: ExcludeSemantics(
+            child: Text(
+              sample,
+              maxLines: 1,
+              textDirection: TextDirection.rtl,
+              style: TextStyle(
+                fontFamily: face.arabic,
+                fontSize: 19 * face.scale,
+                height: 1.1,
+                color: selected ? AppColors.goldBright : AppColors.textPrimary,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One frame for the name, drawn small: the rules, the name alone, the
+/// cartouche, the band.
+class _TitleFrameChip extends StatelessWidget {
+  final TitleFrame frame;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _TitleFrameChip({
+    required this.frame,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return A11yTap(
+      label: label,
+      selected: selected,
+      onTap: onTap,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          width: 62,
+          height: 34,
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColors.gold.withValues(alpha: 0.14)
+                : AppColors.surface,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: selected
+                  ? AppColors.gold.withValues(alpha: 0.75)
+                  : AppColors.stroke,
+              width: selected ? 1.5 : 1,
+            ),
+          ),
+          child: CustomPaint(
+            painter: _FrameGlyphPainter(
+              frame,
+              selected ? AppColors.goldBright : AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FrameGlyphPainter extends CustomPainter {
+  final TitleFrame frame;
+  final Color colour;
+
+  const _FrameGlyphPainter(this.frame, this.colour);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    final line = Paint()
+      ..color = colour
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.3
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    // The name, as a short thick stroke in the middle.
+    final name = Paint()
+      ..color = colour
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(c.translate(-9, 0), c.translate(9, 0), name);
+    switch (frame) {
+      case TitleFrame.rules:
+        canvas.drawLine(c.translate(-25, 0), c.translate(-14, 0), line);
+        canvas.drawLine(c.translate(14, 0), c.translate(25, 0), line);
+      case TitleFrame.plain:
+        break;
+      case TitleFrame.cartouche:
+        canvas.drawPath(
+            Khatam.cartouche(Rect.fromCenter(center: c, width: 44, height: 18)),
+            line);
+      case TitleFrame.band:
+        final r = Rect.fromCenter(center: c, width: 46, height: 16);
+        canvas.drawPath(
+          Path()
+            ..moveTo(r.left, c.dy)
+            ..lineTo(r.left + 8, r.top)
+            ..lineTo(r.right - 8, r.top)
+            ..lineTo(r.right, c.dy)
+            ..lineTo(r.right - 8, r.bottom)
+            ..lineTo(r.left + 8, r.bottom)
+            ..close(),
+          line,
+        );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _FrameGlyphPainter old) =>
+      old.frame != frame || old.colour != colour;
 }

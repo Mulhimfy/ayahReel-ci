@@ -7,6 +7,7 @@ import 'dedication.dart';
 import 'reel_effects.dart';
 import 'verse_font.dart';
 import 'verse_ink.dart';
+import 'surah_title_look.dart';
 import 'verse_motion.dart';
 
 /// Everything that went into a reel, so it can be opened again and
@@ -91,6 +92,10 @@ class ReelRecipe {
   /// reel made before it could be.
   final double surahTitleScale;
 
+  /// The surah's name's face, colour and frame; the classic title for a
+  /// reel made before they could change.
+  final SurahTitleLook surahTitleLook;
+
   /// The luminous ground behind a wide card, when [backdrop] is
   /// [LetterboxBackdrop.glow]. A build that predates it reads the
   /// backdrop as a flat colour, and [backdropArgb] holds the ground's
@@ -131,6 +136,7 @@ class ReelRecipe {
     this.surahTitle = false,
     this.surahTitleAt,
     this.surahTitleScale = 1.0,
+    this.surahTitleLook = SurahTitleLook.classic,
     this.bandGlow = BandGlow.midnight,
   });
 
@@ -185,6 +191,9 @@ class ReelRecipe {
         surahTitle: s.surahTitle,
         surahTitleAt: s.surahTitle ? s.surahTitleAt : null,
         surahTitleScale: s.surahTitle ? s.surahTitleScale : 1.0,
+        // Kept whether or not this reel showed the name: it is taste,
+        // and the next reel that shows it should wear it.
+        surahTitleLook: s.surahTitleLook,
         bandGlow: s.bandGlow,
       );
 
@@ -225,6 +234,7 @@ class ReelRecipe {
           'surahTitleAt': [surahTitleAt!.dx, surahTitleAt!.dy],
         if (surahTitle && surahTitleScale != 1.0)
           'surahTitleScale': surahTitleScale,
+        if (!surahTitleLook.isClassic) 'surahTitleLook': surahTitleLook.toJson(),
         if (backdrop == LetterboxBackdrop.glow) 'bandGlow': bandGlow.name,
       };
 
@@ -290,6 +300,7 @@ class ReelRecipe {
         surahTitleScale: ((j['surahTitleScale'] as num?)?.toDouble() ?? 1.0)
             .clamp(CreationState.surahTitleScales.min,
                 CreationState.surahTitleScales.max),
+        surahTitleLook: SurahTitleLook.fromJson(j['surahTitleLook']),
         bandGlow:
             BandGlow.fromName(j['bandGlow'] as String?) ?? BandGlow.midnight,
       );
@@ -324,7 +335,9 @@ class ReelRecipe {
       ..setSurahTitleAt(surahTitleAt);
     if (backdrop == LetterboxBackdrop.colour) s.setBackdropColor(backdropArgb);
     if (backdrop == LetterboxBackdrop.glow) s.setBandGlow(bandGlow);
-    s.setSurahTitleScale(surahTitleScale);
+    s
+      ..setSurahTitleScale(surahTitleScale)
+      ..setSurahTitleLook(surahTitleLook);
     // After the backdrop: setting the backdrop re-derives a default
     // ink and a default accent, and the recipe's own colours have to
     // be the last word.

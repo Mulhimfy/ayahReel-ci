@@ -17,6 +17,7 @@ import '../widgets/badges_sheet.dart';
 import '../widgets/cinematic_hero.dart';
 import '../widgets/create_chooser.dart';
 import '../widgets/day_verse_card.dart';
+import '../widgets/glass_tile.dart';
 import '../widgets/gilded_writing.dart';
 import '../widgets/illumination.dart';
 import '../widgets/reel_thumb.dart';
@@ -94,6 +95,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void _rewardsChanged() {
     if (mounted) setState(() {});
   }
+
+  /// How far the page under the picture rides up over its foot: the
+  /// verse card overlaps the picture by this much.
+  static const _hemLift = 58.0;
 
   /// Reels a user has to have made before the page offers them a
   /// series of reels. Two: the first is finding out what a reel is,
@@ -266,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
         // — the label row, and the widget pill on it — took no taps at
         // all. See [_Lifted].
         _Lifted(
-          by: 58,
+          by: _hemLift,
           child: Stack(
             clipBehavior: Clip.none,
             children: [
@@ -280,11 +285,19 @@ class _HomeScreenState extends State<HomeScreen> {
             // nothing over a hundred and fifty pixels, so the sky
             // arrives instead of starting. It is painted first and
             // everything on the page stands on top of it.
+            //
+            // It begins where this part of the page does — the lift
+            // above the foot of the picture — and it begins clear,
+            // coming up to full over the lift to meet the picture's
+            // own fall to the page colour at the picture's foot. It
+            // used to begin at full strength there, over a picture
+            // still showing through its scrim, and drew a line across
+            // the screen where it started: the "cut" in the picture.
             const Positioned(
               top: 0,
               left: 0,
               right: 0,
-              height: 150,
+              height: _hemLift + 150,
               child: IgnorePointer(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -292,11 +305,23 @@ class _HomeScreenState extends State<HomeScreen> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
+                        Color(0x000D1117),
+                        Color(0x990D1117),
                         AppColors.bg,
-                        Color(0xE60D1117),
+                        Color(0xD90D1117),
+                        Color(0x8C0D1117),
+                        Color(0x380D1117),
                         Color(0x000D1117),
                       ],
-                      stops: [0.0, 0.45, 1.0],
+                      stops: [
+                        0.0,
+                        _hemLift / (_hemLift + 150) * 0.55,
+                        _hemLift / (_hemLift + 150),
+                        0.46,
+                        0.63,
+                        0.81,
+                        1.0,
+                      ],
                     ),
                   ),
                 ),
@@ -1192,7 +1217,12 @@ class _ReelCard extends StatelessWidget {
             ),
           ],
         ),
-        child: ClipRRect(
+        // Under the same glass as My works and the sceneries: it leans
+        // to the finger, the light runs across it, and the slow light
+        // drifts over the row at rest.
+        child: GlassTile(
+          radius: 18,
+          child: ClipRRect(
           borderRadius: _radius,
           child: SizedBox(
             width: width,
@@ -1208,7 +1238,7 @@ class _ReelCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                ReelThumb(reel: reel),
+                GlassDepth(child: ReelThumb(reel: reel)),
                 // Nothing laid over the frame. A reel is a picture of
                 // itself; a mark in the middle of it is a mark over the
                 // one thing the card exists to show.
@@ -1263,6 +1293,7 @@ class _ReelCard extends StatelessWidget {
               ],
             ),
           ),
+        ),
         ),
       ),
       ),

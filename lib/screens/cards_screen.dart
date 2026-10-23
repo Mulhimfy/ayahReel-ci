@@ -18,6 +18,8 @@ import '../theme/app_theme.dart';
 import '../widgets/a11y.dart';
 import '../widgets/ambient_motion.dart';
 import '../widgets/app_toast.dart';
+import '../widgets/arrive.dart';
+import '../widgets/glass_tile.dart';
 import '../widgets/illumination.dart';
 import '../widgets/arena_history.dart';
 import '../widgets/arena_portal.dart';
@@ -390,15 +392,21 @@ class _CardsScreenState extends State<CardsScreen> {
                   padding: const EdgeInsets.fromLTRB(22, 0, 22, 0),
                   itemCount: decks.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemBuilder: (context, i) => _DeckCard(
-                    // Identity, not position: the shelf is
-                    // newest-first, so every export shifts each card
-                    // along one and an unkeyed row would hand each
-                    // card's state to the deck that replaced it.
+                  // Each deck arrives on the shelf as an object, a beat
+                  // after the one before it.
+                  itemBuilder: (context, i) => Arrive(
                     key: ValueKey(decks[i].id),
-                    deck: decks[i],
-                    onTap: () => _openStudio(decks[i]),
-                    onHold: () => _deckMenu(decks[i]),
+                    delay: Duration(milliseconds: 60 * math.min(i, 6)),
+                    child: _DeckCard(
+                      // Identity, not position: the shelf is
+                      // newest-first, so every export shifts each card
+                      // along one and an unkeyed row would hand each
+                      // card's state to the deck that replaced it.
+                      key: ValueKey('deck-${decks[i].id}'),
+                      deck: decks[i],
+                      onTap: () => _openStudio(decks[i]),
+                      onHold: () => _deckMenu(decks[i]),
+                    ),
                   ),
                 ),
               ),
@@ -498,6 +506,11 @@ class _Start extends StatelessWidget {
       onTap: onTap,
       child: Pressable(
         onTap: onTap,
+        // A pane of glass, taking the light in full: it leans to the
+        // finger and the light runs across it.
+        child: GlassTile(
+        radius: 18,
+        surface: GlassSurface.flat,
         child: Container(
           height: 62,
           padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -530,6 +543,7 @@ class _Start extends StatelessWidget {
               ),
             ],
           ),
+        ),
         ),
       ),
     );
@@ -577,7 +591,11 @@ class _DeckCard extends StatelessWidget {
             SizedBox(
               height: height,
               width: height * deck.format.aspect,
-              child: ClipRRect(
+              // Under the same glass as the reels in My works: it leans
+              // to the finger and the light runs across the cover.
+              child: GlassTile(
+                radius: 14,
+                child: ClipRRect(
                 borderRadius: BorderRadius.circular(14),
                 child: Stack(
                   fit: StackFit.expand,
@@ -598,7 +616,8 @@ class _DeckCard extends StatelessWidget {
                         if (f == null || !f.existsSync()) {
                           return const SizedBox.shrink();
                         }
-                        return Image.file(
+                        return GlassDepth(
+                          child: Image.file(
                           f,
                           fit: BoxFit.cover,
                           // The cover is re-rendered under the same
@@ -609,6 +628,7 @@ class _DeckCard extends StatelessWidget {
                           key: ValueKey('${deck.id}-${deck.updatedAt}'),
                           errorBuilder: (_, __, ___) =>
                               const SizedBox.shrink(),
+                          ),
                         );
                       },
                     ),
@@ -653,6 +673,7 @@ class _DeckCard extends StatelessWidget {
                       ),
                   ],
                 ),
+              ),
               ),
             ),
             const SizedBox(height: 7),

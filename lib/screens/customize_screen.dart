@@ -732,6 +732,7 @@ class _ReelPreviewState extends State<_ReelPreview>
                     surah: 2,
                     width: w,
                     edition: s.translation,
+                    look: c.surahTitleLook,
                   ),
                 ),
               if (demo != null && ayah != null && rec != null)

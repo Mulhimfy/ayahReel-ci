@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../data/surah_index.dart';
+import '../data/surah_title_look.dart';
+import '../data/verse_ink.dart';
 import '../data/verse_translation.dart';
 import '../l10n/l10n.dart';
 import '../render/letterbox_layout.dart';
 import '../theme/app_theme.dart';
+import 'illumination.dart' show Khatam;
 import 'reel_watermark.dart' show ReelWatermarkMark;
 import 'resize_frame.dart';
 
@@ -33,12 +36,17 @@ class SurahTitleLine extends StatelessWidget {
   /// On a pale letterbox band: deep gold, and a white halo.
   final bool onLight;
 
+  /// Its face, colour and frame; the title the app has always set until
+  /// another is chosen.
+  final SurahTitleLook look;
+
   const SurahTitleLine({
     super.key,
     required this.surah,
     required this.width,
     required this.edition,
     this.onLight = false,
+    this.look = SurahTitleLook.classic,
   });
 
   /// The width the type sizes below are authored at.
@@ -47,33 +55,76 @@ class SurahTitleLine extends StatelessWidget {
   static SurahInfo? _info(int surah) =>
       surah >= 1 && surah <= surahIndex.length ? surahIndex[surah - 1] : null;
 
+  /// The flat colour the name is set in: the house gold, deeper on a pale
+  /// band, or the colour chosen — taken down toward ink on a pale band,
+  /// where a pale colour would vanish.
+  Color _flat() {
+    if (look.argb == 0) return onLight ? AppColors.goldDeep : AppColors.goldBright;
+    final c = Color(look.argb);
+    return onLight ? Color.lerp(c, const Color(0xFF1B140A), 0.55)! : c;
+  }
+
   @override
   Widget build(BuildContext context) {
     final info = _info(surah);
     if (info == null) return const SizedBox.shrink();
     final s = width / referenceWidth;
-    final gold = onLight ? AppColors.goldDeep : AppColors.goldBright;
+    final ink = look.ink;
+    final inked = ink != VerseInk.none;
+    final colour = inked ? Color(ink.base) : _flat();
+    final haloColour =
+        (onLight ? Colors.white : Colors.black).withValues(alpha: onLight ? 0.75 : 0.6);
     final halo = [
       Shadow(
-        color: (onLight ? Colors.white : Colors.black)
-            .withValues(alpha: onLight ? 0.75 : 0.6),
+        color: haloColour,
         blurRadius: 12 * s,
         offset: Offset(0, 2 * s),
       ),
     ];
-    final arabic = Text(
-      'سورة ${info.nameArabic}',
+    final face = look.face;
+    final arabicStyle = TextStyle(
+      fontFamily: face.arabic,
+      fontSize: 58 * s * face.scale,
+      height: face.height,
+      color: colour,
+      shadows: halo,
+      decoration: TextDecoration.none,
+    );
+    final words = 'سورة ${info.nameArabic}';
+    Widget arabic = Text(
+      words,
       textDirection: TextDirection.rtl,
       maxLines: 1,
-      style: TextStyle(
-        fontFamily: 'ArefRuqaa',
-        fontSize: 58 * s,
-        height: 1.35,
-        color: gold,
-        shadows: halo,
-        decoration: TextDecoration.none,
-      ),
+      style: arabicStyle,
     );
+    if (inked) {
+      // An ink is light, not a colour: its glow under the letters, and
+      // its fill moving across them — the way the verse is inked.
+      arabic = Stack(
+        children: [
+          Text(
+            words,
+            textDirection: TextDirection.rtl,
+            maxLines: 1,
+            style: arabicStyle.copyWith(
+              color: const Color(0x00FFFFFF),
+              shadows: ink.shadows(s * 0.9, halo: haloColour),
+            ),
+          ),
+          ShaderMask(
+            blendMode: BlendMode.srcIn,
+            shaderCallback: (bounds) => ink.gradient.createShader(bounds),
+            child: Text(
+              words,
+              textDirection: TextDirection.rtl,
+              maxLines: 1,
+              style: arabicStyle.copyWith(
+                  color: const Color(0xFFFFFFFF), shadows: const []),
+            ),
+          ),
+        ],
+      );
+    }
     final latin = edition.arabicScript
         ? null
         : Text(
@@ -81,7 +132,7 @@ class SurahTitleLine extends StatelessWidget {
             maxLines: 1,
             textDirection: TextDirection.ltr,
             style: TextStyle(
-              fontFamily: 'Cinzel',
+              fontFamily: face.latin,
               fontSize: 21 * s,
               height: 1.2,
               letterSpacing: 6 * s,
@@ -92,6 +143,37 @@ class SurahTitleLine extends StatelessWidget {
               decoration: TextDecoration.none,
             ),
           );
+    final Widget name = switch (look.frame) {
+      TitleFrame.rules => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _Rule(s: s, colour: colour, towardsName: true, halo: halo),
+            SizedBox(width: 16 * s),
+            arabic,
+            SizedBox(width: 16 * s),
+            _Rule(s: s, colour: colour, towardsName: false, halo: halo),
+          ],
+        ),
+      TitleFrame.plain => arabic,
+      TitleFrame.cartouche => CustomPaint(
+          painter: _CartouchePainter(
+              colour: colour, onLight: onLight, s: s, halo: haloColour),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: 46 * s, vertical: 8 * s),
+            child: arabic,
+          ),
+        ),
+      TitleFrame.band => CustomPaint(
+          painter: _BandPainter(
+              colour: colour, onLight: onLight, s: s, halo: haloColour),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: 74 * s, vertical: 10 * s),
+            child: arabic,
+          ),
+        ),
+    };
     // A title drawn into the export is always laid out left to right,
     // whatever the app's own language, as the mark is: the rules sit
     // either side of the name, and in an RTL app the row would swap
@@ -101,24 +183,157 @@ class SurahTitleLine extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _Rule(s: s, colour: gold, towardsName: true, halo: halo),
-              SizedBox(width: 16 * s),
-              arabic,
-              SizedBox(width: 16 * s),
-              _Rule(s: s, colour: gold, towardsName: false, halo: halo),
-            ],
-          ),
+          name,
           if (latin != null) ...[
-            SizedBox(height: 2 * s),
+            SizedBox(height: (look.frame == TitleFrame.rules ||
+                        look.frame == TitleFrame.plain
+                    ? 2
+                    : 8) *
+                s),
             latin,
           ],
         ],
       ),
     );
   }
+}
+
+/// The name in a cartouche: a rounded frame with pointed shoulders, the
+/// ground inside it darkened a little, and a second, fainter line just
+/// inside the first.
+class _CartouchePainter extends CustomPainter {
+  final Color colour;
+  final bool onLight;
+  final double s;
+  final Color halo;
+
+  const _CartouchePainter({
+    required this.colour,
+    required this.onLight,
+    required this.s,
+    required this.halo,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = (Offset.zero & size).deflate(2 * s);
+    final outer = Khatam.cartouche(rect);
+    canvas.drawPath(
+      outer,
+      Paint()
+        ..color = halo.withValues(alpha: 0.45)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 10 * s),
+    );
+    canvas.drawPath(
+      outer,
+      Paint()
+        ..color = (onLight ? Colors.white : Colors.black)
+            .withValues(alpha: onLight ? 0.35 : 0.30),
+    );
+    canvas.drawPath(
+      outer,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.6 * s
+        ..color = colour,
+    );
+    canvas.drawPath(
+      Khatam.cartouche(rect.deflate(7 * s)),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2 * s
+        ..color = colour.withValues(alpha: 0.45),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _CartouchePainter old) =>
+      old.colour != colour || old.onLight != onLight || old.s != s;
+}
+
+/// The name on a band with pointed ends, as a mushaf heads a surah: a
+/// darkened ground, a line round it and a fainter one inside, and an
+/// eight-pointed star at each end.
+class _BandPainter extends CustomPainter {
+  final Color colour;
+  final bool onLight;
+  final double s;
+  final Color halo;
+
+  const _BandPainter({
+    required this.colour,
+    required this.onLight,
+    required this.s,
+    required this.halo,
+  });
+
+  static Path _shape(Rect r) {
+    final h = r.height / 2;
+    return Path()
+      ..moveTo(r.left, r.center.dy)
+      ..lineTo(r.left + h, r.top)
+      ..lineTo(r.right - h, r.top)
+      ..lineTo(r.right, r.center.dy)
+      ..lineTo(r.right - h, r.bottom)
+      ..lineTo(r.left + h, r.bottom)
+      ..close();
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = (Offset.zero & size).deflate(2 * s);
+    final band = _shape(rect);
+    canvas.drawPath(
+      band,
+      Paint()
+        ..color = halo.withValues(alpha: 0.45)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 12 * s),
+    );
+    canvas.drawPath(
+      band,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: onLight
+              ? [
+                  Colors.white.withValues(alpha: 0.55),
+                  Colors.white.withValues(alpha: 0.30),
+                ]
+              : [
+                  Colors.black.withValues(alpha: 0.42),
+                  Colors.black.withValues(alpha: 0.24),
+                ],
+        ).createShader(rect),
+    );
+    canvas.drawPath(
+      band,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.4 * s
+        ..strokeJoin = StrokeJoin.round
+        ..color = colour,
+    );
+    canvas.drawPath(
+      _shape(rect.deflate(7 * s)),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.1 * s
+        ..strokeJoin = StrokeJoin.round
+        ..color = colour.withValues(alpha: 0.45),
+    );
+    final star = Paint()..color = colour;
+    final r = rect.height * 0.16;
+    final inset = rect.height * 0.55;
+    canvas.drawPath(
+        Khatam.star(Offset(rect.left + inset, rect.center.dy), r), star);
+    canvas.drawPath(
+        Khatam.star(Offset(rect.right - inset, rect.center.dy), r), star);
+  }
+
+  @override
+  bool shouldRepaint(covariant _BandPainter old) =>
+      old.colour != colour || old.onLight != onLight || old.s != s;
 }
 
 /// One of the two rules either side of the name: a line fading in from
@@ -202,6 +417,9 @@ class ReelSurahTitle extends StatelessWidget {
   final VerseTranslation edition;
   final bool onLight;
 
+  /// Its face, colour and frame.
+  final SurahTitleLook look;
+
   /// Where its centre is, as fractions of the frame; null for its place
   /// at the head of the frame (see [defaultCentre]).
   final Offset? at;
@@ -231,6 +449,7 @@ class ReelSurahTitle extends StatelessWidget {
     required this.surah,
     required this.edition,
     this.onLight = false,
+    this.look = SurahTitleLook.classic,
     this.at,
     this.letterbox,
     this.scale = 1.0,
@@ -268,6 +487,7 @@ class ReelSurahTitle extends StatelessWidget {
       width: width * sized,
       edition: edition,
       onLight: onLight,
+      look: look,
     );
     final measure = onSize;
     if (measure != null) body = _ReportSize(onChange: measure, child: body);

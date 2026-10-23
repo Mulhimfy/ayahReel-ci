@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../data/band_glow.dart';
 import '../data/models.dart';
 import '../data/quran_text_service.dart';
+import '../data/surah_title_look.dart';
 import '../data/verse_lines.dart';
 import '../data/reel_effects.dart';
 import '../data/verse_font.dart';
@@ -415,11 +416,16 @@ abstract final class AyahRasterizer {
   static Future<File> rasterizeSurahTitle(int surah,
       {required VerseTranslation edition,
       bool onLight = false,
-      double scale = 1.0}) async {
+      double scale = 1.0,
+      SurahTitleLook look = SurahTitleLook.classic}) async {
     final dir = await renderDir();
     final sized = (scale * 100).round();
+    // The look's code is empty for the title the app has always set,
+    // so every title rendered before the look could change keeps its
+    // file.
     final f = File('${dir.path}/ayah_title_v1_${surah}_${edition.code}'
-        '${onLight ? '_lt' : ''}${sized == 100 ? '' : '_z$sized'}.png');
+        '${onLight ? '_lt' : ''}${sized == 100 ? '' : '_z$sized'}'
+        '${look.isClassic ? '' : '_l${look.code}'}.png');
     if (f.existsSync() && f.lengthSync() > 0) return f;
     final bytes = await widgetToPng(
       MediaQuery(
@@ -436,6 +442,7 @@ abstract final class AyahRasterizer {
               width: exportWidth * sized / 100,
               edition: edition,
               onLight: onLight,
+              look: look,
             ),
           ),
         ),

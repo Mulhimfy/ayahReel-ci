@@ -280,3 +280,154 @@ class MeshGlass extends StatelessWidget {
     );
   }
 }
+
+/// A pill of [MeshGlass] with a glyph and a word on it: the share
+/// buttons, in the same light as Create.
+///
+/// Its own clock, so it can stand anywhere; with the platform asking for
+/// less motion the lights hold still.
+class MeshButton extends StatefulWidget {
+  final String label;
+  final IconData? icon;
+  final MeshPalette palette;
+  final VoidCallback? onPressed;
+  final double height;
+  final bool busy;
+
+  const MeshButton({
+    super.key,
+    required this.label,
+    required this.palette,
+    required this.onPressed,
+    this.icon,
+    this.height = 50,
+    this.busy = false,
+  });
+
+  @override
+  State<MeshButton> createState() => _MeshButtonState();
+}
+
+class _MeshButtonState extends State<MeshButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _clock = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 10),
+  )..repeat();
+
+  bool _still = false;
+  bool _down = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    if (still == _still) return;
+    _still = still;
+    if (still) {
+      _clock.value = 0.3;
+    } else {
+      _clock.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _clock.dispose();
+    super.dispose();
+  }
+
+  void _set(bool down) {
+    if (_down != down && mounted) setState(() => _down = down);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(widget.height / 2);
+    final enabled = widget.onPressed != null && !widget.busy;
+    final glow = widget.palette.lights;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: widget.label,
+      excludeSemantics: true,
+      onTap: enabled ? widget.onPressed : null,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: enabled ? (_) => _set(true) : null,
+        onTapUp: enabled ? (_) => _set(false) : null,
+        onTapCancel: enabled ? () => _set(false) : null,
+        onTap: enabled ? widget.onPressed : null,
+        child: AnimatedScale(
+          scale: _down ? 0.96 : 1,
+          duration: Duration(milliseconds: _down ? 90 : 320),
+          curve: _down ? Curves.easeOut : Curves.easeOutBack,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              boxShadow: [
+                BoxShadow(
+                  color: glow.first.withValues(alpha: 0.38),
+                  blurRadius: 24,
+                  spreadRadius: -6,
+                  offset: const Offset(0, 10),
+                ),
+                BoxShadow(
+                  color: glow.last.withValues(alpha: 0.24),
+                  blurRadius: 20,
+                  spreadRadius: -8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: SizedBox(
+              height: widget.height,
+              child: MeshGlass(
+                palette: widget.palette,
+                clock: _clock,
+                radius: radius,
+                opacity: 0.82,
+                glow: 0.8,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (widget.busy)
+                        const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
+                        )
+                      else if (widget.icon != null)
+                        Icon(widget.icon, size: 18, color: Colors.white),
+                      if (widget.busy || widget.icon != null)
+                        const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          widget.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.2,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(color: Color(0x66000000), blurRadius: 8),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

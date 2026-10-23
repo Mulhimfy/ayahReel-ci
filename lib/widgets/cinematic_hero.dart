@@ -484,6 +484,11 @@ class _Grade extends StatelessWidget {
 /// across the top three-quarters of the screen — the two meet on the
 /// same value, so there is no shade for the join to give itself away
 /// with. Change one without the other and the seam comes back.
+///
+/// The fall to it is long and eased — eight stops on a smooth curve
+/// rather than four on straight lines — so no band of the picture reads
+/// as where it stops: a few steep straight segments are seen as edges,
+/// on a bright desert or a sky most of all.
 class _Scrim extends StatelessWidget {
   const _Scrim();
 
@@ -495,12 +500,15 @@ class _Scrim extends StatelessWidget {
             end: Alignment.bottomCenter,
             colors: [
               Colors.transparent,
-              Colors.black.withValues(alpha: 0.22),
-              AppColors.bg.withValues(alpha: 0.45),
-              AppColors.bg.withValues(alpha: 0.92),
+              Colors.black.withValues(alpha: 0.20),
+              AppColors.bg.withValues(alpha: 0.36),
+              AppColors.bg.withValues(alpha: 0.56),
+              AppColors.bg.withValues(alpha: 0.76),
+              AppColors.bg.withValues(alpha: 0.91),
+              AppColors.bg.withValues(alpha: 0.985),
               AppColors.bg,
             ],
-            stops: const [0.10, 0.42, 0.72, 0.90, 1.0],
+            stops: const [0.10, 0.40, 0.57, 0.69, 0.79, 0.87, 0.94, 1.0],
           ),
         ),
       );

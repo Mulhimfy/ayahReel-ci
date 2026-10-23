@@ -113,6 +113,7 @@ abstract final class LastChoices {
       ..setTranslationFace(r.arabicScriptFace)
       ..setEffects(r.effects)
       ..setMotion(_offered(r.motion))
+      ..setSurahTitleLook(r.surahTitleLook)
       ..restoreColours(r.textArgb, r.accentArgb)
       ..setVerseInk(r.verseInk)
       ..setAccentInk(r.accentInk);

@@ -6,6 +6,7 @@ import '../data/dedication.dart';
 import '../data/models.dart';
 import '../data/reel_effects.dart';
 import '../data/settings_service.dart';
+import '../data/surah_title_look.dart';
 import '../data/verse_font.dart';
 import '../data/verse_ink.dart';
 import '../data/verse_lines.dart';
@@ -268,6 +269,10 @@ class CreationState extends ChangeNotifier {
   /// How much bigger or smaller than its own size the surah's name is
   /// drawn: pinched on the reel screen, 1 until then.
   double _surahTitleScale = 1.0;
+
+  /// The surah's name's face, colour and frame: taste, so it carries from
+  /// one reel to the next like the verse's own.
+  SurahTitleLook _surahTitleLook = SurahTitleLook.classic;
   ReelLayout _layout = ReelLayout.fullFrame;
   bool _roundedCorners = true;
   // The band around a wide card starts as the scenery itself, blurred:
@@ -566,6 +571,14 @@ class CreationState extends ChangeNotifier {
   void setSurahTitleAt(Offset? at) {
     if (_surahTitleAt == at) return;
     _surahTitleAt = at;
+    notifyListeners();
+  }
+
+  SurahTitleLook get surahTitleLook => _surahTitleLook;
+
+  void setSurahTitleLook(SurahTitleLook look) {
+    if (_surahTitleLook == look) return;
+    _surahTitleLook = look;
     notifyListeners();
   }
 

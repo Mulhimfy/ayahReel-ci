@@ -23,6 +23,7 @@ import '../state/creation_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/direct_share_button.dart';
+import '../widgets/arrive.dart';
 import '../widgets/glass_tile.dart';
 import '../widgets/glow_button.dart';
 import '../widgets/tanafus_button.dart';
@@ -1074,7 +1075,12 @@ class _VersesPreview extends StatelessWidget {
       image: true,
       label: l.a11yVersesCard,
       excludeSemantics: true,
-      child: SizedBox(
+      // It arrives swinging up out of depth, and then sits under glass
+      // like the reels beside it: it leans to the finger, the light
+      // runs across it, and the slow light drifts over it at rest.
+      child: Arrive(
+        depth: 0.35,
+        child: SizedBox(
         width: width,
         height: height,
         child: DecoratedBox(
@@ -1093,12 +1099,15 @@ class _VersesPreview extends StatelessWidget {
               ),
             ],
           ),
-          child: ClipRRect(
+          child: GlassTile(
+            radius: width * 0.07,
+            child: ClipRRect(
             borderRadius: radius,
             child: Stack(
               fit: StackFit.expand,
               children: [
-                MediaQuery(
+                GlassDepth(
+                  child: MediaQuery(
                   data: MediaQuery.of(context)
                       .copyWith(textScaler: TextScaler.noScaling),
                   child: FittedBox(
@@ -1110,6 +1119,7 @@ class _VersesPreview extends StatelessWidget {
                       numbers: numbers,
                       live: true,
                     ),
+                  ),
                   ),
                 ),
                 IgnorePointer(
@@ -1133,7 +1143,9 @@ class _VersesPreview extends StatelessWidget {
               ],
             ),
           ),
+          ),
         ),
+      ),
       ),
     );
   }

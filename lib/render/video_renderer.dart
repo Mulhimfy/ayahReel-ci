@@ -15,6 +15,7 @@ import '../data/media_aspect.dart';
 import '../data/models.dart';
 import '../data/quran_text_service.dart';
 import '../data/reel_effects.dart';
+import '../data/surah_title_look.dart';
 import '../data/trouble.dart' show saysOutOfSpace;
 import '../data/verse_font.dart';
 import '../data/verse_follow.dart';
@@ -879,6 +880,9 @@ abstract final class VideoRenderer {
 
     /// How far the surah's name was pinched from its own size.
     double surahTitleScale = 1.0,
+
+    /// Its face, colour and frame.
+    SurahTitleLook surahTitleLook = SurahTitleLook.classic,
     ReelLayout layout = ReelLayout.fullFrame,
     bool roundedCorners = true,
     LetterboxBackdrop backdrop = LetterboxBackdrop.colour,
@@ -1037,6 +1041,8 @@ abstract final class VideoRenderer {
         '${surahTitle ? '_st${surahTitleAt == null ? '' : '${(surahTitleAt.dx * 1000).round()}_${(surahTitleAt.dy * 1000).round()}'}' : ''}'
         // And its size, once pinched from its own.
         '${surahTitle && (surahTitleScale * 100).round() != 100 ? '_sz${(surahTitleScale * 100).round()}' : ''}'
+        // And its look, once it is not the one it always had.
+        '${surahTitle && !surahTitleLook.isClassic ? '_tl${surahTitleLook.code}' : ''}'
         // A phone on the tightest budget encodes lean (see [leanX264]),
         // and the lean reels made before 2026-10-13 were too heavy to
         // play. Keyed as they were, a Save of the same reel would be
@@ -1491,7 +1497,8 @@ abstract final class VideoRenderer {
                 edition: edition ?? QuranTextService.edition,
                 onLight: ReelDedication.onLightAt(titleCentre,
                     onLightGround: onLight, letterbox: letterbox),
-                scale: surahTitleScale))
+                scale: surahTitleScale,
+                look: surahTitleLook))
             .path
         : null;
     _checkCurrent(gen);

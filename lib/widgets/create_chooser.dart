@@ -334,7 +334,12 @@ class _ChooserState extends State<_Chooser> with TickerProviderStateMixin {
         pad.top + 70, (size.height - block - orb - 30) / 2 - 10);
     final left = (size.width - w) / 2;
     final orbAt = Offset(size.width / 2, top + block + 30 + orb / 2);
-    return AnimatedBuilder(
+    // A route of its own has no Material over it, and text with none
+    // falls back to the framework's warning style; a transparent one
+    // hands it the theme's.
+    return Material(
+      type: MaterialType.transparency,
+      child: AnimatedBuilder(
       animation: Listenable.merge([widget.animation, _clock]),
       builder: (context, _) {
         final v = widget.animation.value;
@@ -424,6 +429,7 @@ class _ChooserState extends State<_Chooser> with TickerProviderStateMixin {
           ],
         );
       },
+      ),
     );
   }
 

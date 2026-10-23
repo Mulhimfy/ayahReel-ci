@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -251,6 +253,122 @@ class _InkStripState extends State<InkStrip> {
             ),
           ),
           child: InkSquare(ink: ink, size: s),
+        ),
+      ),
+    );
+  }
+}
+
+/// The luminous inks as squares in [rows] rows sharing the width evenly:
+/// every one in view at once, nothing to scroll to sideways or down, each
+/// as large as the width allows, up to [most].
+///
+/// The verse colour's panel lays them out this way. One line of small
+/// squares that scrolled hid most of them behind the edge; two rows of
+/// wide squares show the whole set, and still leave the panel room for
+/// the flat colours without a scroll.
+class InkGrid extends StatelessWidget {
+  final List<VerseInk> inks;
+  final VerseInk? selected;
+  final ValueChanged<VerseInk> onPick;
+  final String Function(VerseInk ink) labelOf;
+  final int rows;
+
+  /// The largest a square grows, on a wide phone.
+  final double most;
+
+  const InkGrid({
+    super.key,
+    required this.inks,
+    required this.selected,
+    required this.onPick,
+    required this.labelOf,
+    this.rows = 2,
+    this.most = 34,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, box) {
+        const pad = 12.0;
+        final perRow = (inks.length / rows).ceil();
+        final cell = perRow == 0
+            ? most + 6
+            : math.min(most + 6, (box.maxWidth - 2 * pad) / perRow);
+        final size = (cell - 6).clamp(16.0, most);
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var r = 0; r < rows; r++)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (var i = r * perRow;
+                      i < math.min(inks.length, (r + 1) * perRow);
+                      i++)
+                    SizedBox(
+                      width: cell,
+                      height: cell,
+                      child: Center(
+                        child: _InkButton(
+                          ink: inks[i],
+                          on: inks[i] == selected,
+                          size: size,
+                          label: labelOf(inks[i]),
+                          onPick: onPick,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// One ink square that can be picked: a gold ring round the one in use.
+class _InkButton extends StatelessWidget {
+  final VerseInk ink;
+  final bool on;
+  final double size;
+  final String label;
+  final ValueChanged<VerseInk> onPick;
+
+  const _InkButton({
+    required this.ink,
+    required this.on,
+    required this.size,
+    required this.label,
+    required this.onPick,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: on,
+      label: label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onPick(ink);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(size * 0.26 + 3),
+            border: Border.all(
+              color: on ? AppColors.gold : Colors.transparent,
+              width: 1.6,
+            ),
+          ),
+          child: InkSquare(ink: ink, size: size - 4),
         ),
       ),
     );

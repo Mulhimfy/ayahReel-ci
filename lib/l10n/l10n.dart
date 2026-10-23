@@ -11,6 +11,7 @@ import '../data/reel_limits.dart';
 import '../data/settings_service.dart';
 import '../data/store_links.dart';
 import '../data/surah_index.dart';
+import '../data/surah_title_look.dart';
 import '../data/trouble.dart';
 import '../data/verse_ink.dart';
 import '../data/verse_numbering.dart';
@@ -6266,6 +6267,32 @@ class L10n {
       'Blendet ihn im Reel ein oder aus');
 
   // ---- motion ----------------------------------------------------------
+
+  /// The style step's panel for the surah's name.
+  String get styleTabName => _t('Name', 'الاسم', 'نام', 'Nama', 'Name');
+  String get titleShown => _t('Surah name', 'اسم السورة', 'سورت کا نام',
+      'Nama surah', 'Surenname');
+  String get titleGold =>
+      _t('Gold', 'ذهبي', 'سنہرا', 'Emas', 'Gold');
+  String get titleFrameHeading =>
+      _t('Frame', 'الإطار', 'فریم', 'Bingkai', 'Rahmen');
+  String titleFaceName(TitleFace f) => switch (f) {
+        TitleFace.ruqaa => _t('Ruqaa', 'رقعة', 'رقعہ', 'Riqah', 'Ruqaa'),
+        TitleFace.naskh => _t('Naskh', 'نسخ', 'نسخ', 'Naskhi', 'Naschi'),
+        TitleFace.kufi => _t('Kufi', 'كوفي', 'کوفی', 'Kufi', 'Kufi'),
+        TitleFace.diwani =>
+          _t('Calligraphy', 'خط فني', 'خطاطی', 'Kaligrafi', 'Kalligrafie'),
+        TitleFace.bold => _t('Bold', 'عريض', 'موٹا', 'Tebal', 'Fett'),
+      };
+  String titleFrameName(TitleFrame f) => switch (f) {
+        TitleFrame.rules =>
+          _t('Rules', 'خطوط', 'لکیریں', 'Garis', 'Linien'),
+        TitleFrame.plain => _t('None', 'بدون', 'کوئی نہیں', 'Tanpa', 'Ohne'),
+        TitleFrame.cartouche =>
+          _t('Cartouche', 'خرطوشة', 'کارتوش', 'Kartusy', 'Kartusche'),
+        TitleFrame.band =>
+          _t('Heading', 'ترويسة', 'سرخی', 'Kepala', 'Kopfband'),
+      };
 
   String get styleTabMotion =>
       _t('Motion', 'الحركة', 'حرکت', 'Gerak', 'Bewegung');

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -102,8 +103,31 @@ class DayVerseCard extends StatefulWidget {
 }
 
 class _DayVerseCardState extends State<DayVerseCard>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, TickerProviderStateMixin {
   Timer? _turn;
+
+  /// The card's slow clock: the light drifting in its ground, the motes
+  /// rising through it, the medallion turning, and the two points of
+  /// light running round its rim. One turn every fourteen seconds;
+  /// everything on it goes round a whole number of times per turn, so
+  /// nothing jumps when it wraps.
+  late final AnimationController _clock = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 14),
+  )..repeat();
+
+  /// The verse being written in as the card arrives: a short wait for
+  /// the card's own entrance, then the gold flowing in from the right.
+  late final AnimationController _write = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2300),
+  )..forward();
+
+  /// The meaning, coming up under the verse as the writing ends.
+  late final Animation<double> _meaning = _write.drive(
+      CurveTween(curve: const Interval(0.6, 1, curve: Curves.easeOut)));
+
+  bool _still = false;
 
   @override
   void initState() {
@@ -111,6 +135,22 @@ class _DayVerseCardState extends State<DayVerseCard>
     WidgetsBinding.instance.addObserver(this);
     _armTurn();
     _refreshInstalled();
+  }
+
+  /// Less motion asked for: the clock stops and the verse is simply
+  /// there.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    if (still == _still) return;
+    _still = still;
+    if (still) {
+      _clock.stop();
+      _write.value = 1;
+    } else {
+      _clock.repeat();
+    }
   }
 
   @override
@@ -133,6 +173,8 @@ class _DayVerseCardState extends State<DayVerseCard>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _turn?.cancel();
+    _clock.dispose();
+    _write.dispose();
     super.dispose();
   }
 
@@ -160,7 +202,10 @@ class _DayVerseCardState extends State<DayVerseCard>
     final now = DateTime.now();
     final wait = QuranVerses.nextChange(now).difference(now);
     _turn = Timer(wait + const Duration(seconds: 1), () {
-      if (mounted) setState(_armTurn);
+      if (!mounted) return;
+      setState(_armTurn);
+      // A new verse is written in like the first.
+      if (!_still) _write.forward(from: 0);
     });
   }
 
@@ -187,6 +232,7 @@ class _DayVerseCardState extends State<DayVerseCard>
       label: spoken,
       hint: l.a11yMakesVerseReel,
       onTap: () => makeFromVerse(context, v),
+      child: _Lean(
       child: Pressable(
       onTap: () => makeFromVerse(context, v),
       child: DecoratedBox(
@@ -232,6 +278,19 @@ class _DayVerseCardState extends State<DayVerseCard>
               Positioned.fill(
                 child: IgnorePointer(child: _Bloom(strong: jumuah)),
               ),
+              // Light drifting in the ground, gold motes rising through
+              // it, and (six days a week) a medallion turning behind the
+              // verse: all on the one slow clock, behind its own repaint
+              // boundary so the page never repaints with it.
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: RepaintBoundary(
+                    child: CustomPaint(
+                      painter: _GroundPainter(_clock, friday: jumuah),
+                    ),
+                  ),
+                ),
+              ),
               if (jumuah)
                 const PositionedDirectional(
                   top: -34,
@@ -242,8 +301,12 @@ class _DayVerseCardState extends State<DayVerseCard>
                 padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
                 child: jumuah
                     ? _JumuahBody(
-                        verse: v, onMake: () => startVerseReel(context, v))
-                    : _DailyBody(verse: v),
+                        verse: v,
+                        onMake: () => startVerseReel(context, v),
+                        write: _write,
+                        meaning: _meaning,
+                      )
+                    : _DailyBody(verse: v, write: _write, meaning: _meaning),
               ),
               Positioned.fill(
                 child: IlluminatedBorder(
@@ -252,9 +315,25 @@ class _DayVerseCardState extends State<DayVerseCard>
                   color: jumuah ? AppColors.goldBright : AppColors.gold,
                 ),
               ),
+              // Two points of light running round the rim, opposite
+              // each other, once a turn.
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: RepaintBoundary(
+                    child: CustomPaint(
+                      painter: _RimLightPainter(
+                        _clock,
+                        radius: DayVerseCard.radius,
+                        colour: AppColors.goldBright,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
+      ),
       ),
       ),
     );
@@ -271,7 +350,13 @@ VerseTranslation get _edition => SettingsService.state.value.translation;
 
 class _DailyBody extends StatelessWidget {
   final QuranVerse verse;
-  const _DailyBody({required this.verse});
+
+  /// The writing-in, and the meaning's fade under it: see the card.
+  final Animation<double> write;
+  final Animation<double> meaning;
+
+  const _DailyBody(
+      {required this.verse, required this.write, required this.meaning});
 
   @override
   Widget build(BuildContext context) {
@@ -300,36 +385,43 @@ class _DailyBody extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 10),
-        Sheen(
-          period: const Duration(milliseconds: 6400),
-          strength: 0.30,
-          phase: 0.3,
-          child: Text(
-            verse.shown,
-            textAlign: TextAlign.center,
-            textDirection: TextDirection.rtl,
-            style: AppTheme.quran(
-              size: DayVerseCard.arabicSize(verse.shown),
-              color: AppColors.goldBright,
-            ).copyWith(height: 1.5),
+        _WrittenIn(
+          progress: write,
+          child: Sheen(
+            period: const Duration(milliseconds: 6400),
+            strength: 0.30,
+            phase: 0.3,
+            child: Text(
+              verse.shown,
+              textAlign: TextAlign.center,
+              textDirection: TextDirection.rtl,
+              style: AppTheme.quran(
+                size: DayVerseCard.arabicSize(verse.shown),
+                color: AppColors.goldBright,
+              ).copyWith(height: 1.5),
+            ),
           ),
         ),
         if (!l.ar) ...[
           const SizedBox(height: 7),
-          const _Rule(),
+          FadeTransition(opacity: meaning, child: const _Rule()),
           const SizedBox(height: 7),
           // Whole, never cut: a translation that ends in three dots is
           // a promise the card did not keep. The few long verses in
           // the rotation — Ayat al-Kursi, the last of Al-Baqarah —
           // step the type down a size rather than lose their ending.
-          Text(
-            verse.translationIn(_edition),
-            textAlign: TextAlign.center,
-            textDirection: _edition.direction,
-            style: AppTheme.translation(
-              size: verse.translationIn(_edition).length > 200 ? 10.5 : 11.5,
-              arabic: _edition.arabicScript,
-              color: AppColors.textSecondary,
+          FadeTransition(
+            opacity: meaning,
+            child: Text(
+              verse.translationIn(_edition),
+              textAlign: TextAlign.center,
+              textDirection: _edition.direction,
+              style: AppTheme.translation(
+                size:
+                    verse.translationIn(_edition).length > 200 ? 10.5 : 11.5,
+                arabic: _edition.arabicScript,
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
         ],
@@ -347,7 +439,15 @@ class _DailyBody extends StatelessWidget {
 class _JumuahBody extends StatelessWidget {
   final QuranVerse verse;
   final VoidCallback onMake;
-  const _JumuahBody({required this.verse, required this.onMake});
+  final Animation<double> write;
+  final Animation<double> meaning;
+
+  const _JumuahBody({
+    required this.verse,
+    required this.onMake,
+    required this.write,
+    required this.meaning,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -383,38 +483,47 @@ class _JumuahBody extends StatelessWidget {
         // against the left edge.
         SizedBox(
           width: double.infinity,
-          child: Sheen(
-            period: const Duration(milliseconds: 5200),
-            strength: 0.38,
-            phase: 0.15,
-            child: Text(
-              verse.arabic,
-              textAlign: TextAlign.center,
-              textDirection: TextDirection.rtl,
-              style: AppTheme.quran(
-                size: DayVerseCard.arabicSize(verse.arabic),
-                color: AppColors.goldBright,
-              ).copyWith(height: 1.5),
+          child: _WrittenIn(
+            progress: write,
+            child: Sheen(
+              period: const Duration(milliseconds: 5200),
+              strength: 0.38,
+              phase: 0.15,
+              child: Text(
+                verse.arabic,
+                textAlign: TextAlign.center,
+                textDirection: TextDirection.rtl,
+                style: AppTheme.quran(
+                  size: DayVerseCard.arabicSize(verse.arabic),
+                  color: AppColors.goldBright,
+                ).copyWith(height: 1.5),
+              ),
             ),
           ),
         ),
         if (!l.ar) ...[
           const SizedBox(height: 7),
-          const Center(child: _Rule()),
+          FadeTransition(
+              opacity: meaning, child: const Center(child: _Rule())),
           const SizedBox(height: 7),
           // Whole, never cut, exactly as the daily card sets its own:
           // the Salawat is long, so it takes the smaller size rather
           // than lose its ending.
-          SizedBox(
-            width: double.infinity,
-            child: Text(
-              verse.translationIn(_edition),
-              textAlign: TextAlign.center,
-              textDirection: _edition.direction,
-              style: AppTheme.translation(
-                size: verse.translationIn(_edition).length > 200 ? 10.5 : 11.5,
-                arabic: _edition.arabicScript,
-                color: AppColors.textSecondary,
+          FadeTransition(
+            opacity: meaning,
+            child: SizedBox(
+              width: double.infinity,
+              child: Text(
+                verse.translationIn(_edition),
+                textAlign: TextAlign.center,
+                textDirection: _edition.direction,
+                style: AppTheme.translation(
+                  size: verse.translationIn(_edition).length > 200
+                      ? 10.5
+                      : 11.5,
+                  arabic: _edition.arabicScript,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
           ),
@@ -781,4 +890,348 @@ class _LampPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _LampPainter old) => false;
+}
+
+// ---------------------------------------------------------------------
+// The card alive
+// ---------------------------------------------------------------------
+
+/// The verse written in: the letters are there from the first frame,
+/// faint, and the gold flows in behind a soft front that runs the way
+/// Arabic is written — from the right, and a little ahead on the upper
+/// lines — with a glow riding the front while the pen is moving. Once
+/// written it is the plain text again, with nothing laid over it.
+class _WrittenIn extends StatelessWidget {
+  final Animation<double> progress;
+  final Widget child;
+
+  const _WrittenIn({required this.progress, required this.child});
+
+  /// The front's softness, as a share of the sweep.
+  static const _soft = 0.24;
+
+  /// The wait at the start, for the card's own entrance.
+  static const _wait = Interval(0.18, 1);
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: progress,
+      child: child,
+      builder: (context, child) {
+        final raw = progress.value;
+        if (raw >= 1) return child!;
+        final p = Curves.easeInOutSine.transform(_wait.transform(raw));
+        final front = -_soft + p * (1 + 2 * _soft);
+        final a = (front - _soft).clamp(0.0, 1.0);
+        final b = front.clamp(0.0, 1.0);
+        final heat = math.sin(p * math.pi);
+        return Stack(
+          children: [
+            ShaderMask(
+              blendMode: BlendMode.dstIn,
+              shaderCallback: (rect) => LinearGradient(
+                begin: const Alignment(1, -0.8),
+                end: const Alignment(-1, 0.8),
+                colors: const [
+                  Colors.white,
+                  Colors.white,
+                  Color(0x26FFFFFF),
+                  Color(0x26FFFFFF),
+                ],
+                stops: [0, a, b, 1],
+              ).createShader(rect),
+              child: child,
+            ),
+            if (heat > 0.02)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: CustomPaint(
+                    painter: _PenGlowPainter(front: b, heat: heat),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// The glow riding the writing's front.
+class _PenGlowPainter extends CustomPainter {
+  final double front;
+  final double heat;
+
+  const _PenGlowPainter({required this.front, required this.heat});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+    final rect = Offset.zero & size;
+    final lo = (front - 0.07).clamp(0.0, 1.0);
+    final hi = (front + 0.03).clamp(0.0, 1.0);
+    if (hi <= lo) return;
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..blendMode = BlendMode.plus
+        ..shader = LinearGradient(
+          begin: const Alignment(1, -0.8),
+          end: const Alignment(-1, 0.8),
+          colors: [
+            AppColors.goldBright.withValues(alpha: 0),
+            AppColors.goldBright.withValues(alpha: 0.30 * heat),
+            AppColors.goldBright.withValues(alpha: 0),
+          ],
+          stops: [lo, (lo + hi) / 2, hi],
+        ).createShader(rect),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _PenGlowPainter old) =>
+      old.front != front || old.heat != heat;
+}
+
+/// What lives in the card's ground: three soft lights drifting (violet,
+/// sea-green and gold, low enough that the night stays night), gold
+/// motes rising and twinkling, and — six days a week — an eight-pointed
+/// medallion turning slowly behind the verse, half off the card's corner.
+class _GroundPainter extends CustomPainter {
+  final Animation<double> clock;
+  final bool friday;
+
+  _GroundPainter(this.clock, {required this.friday}) : super(repaint: clock);
+
+  static const _lights = [
+    Color(0xFF7A5CFF),
+    Color(0xFF2FB6A0),
+    Color(0xFFE0A93A),
+  ];
+
+  /// Sixteen motes, the same every time: where across the card each
+  /// rises, how many times a turn, how big, and its place in the cycle.
+  static final _motes = [
+    for (var i = 0; i < 16; i++)
+      () {
+        final r = math.Random(i * 7919 + 13);
+        return (
+          x: 0.04 + r.nextDouble() * 0.92,
+          laps: 1 + i % 3,
+          size: 0.6 + r.nextDouble() * 1.3,
+          phase: r.nextDouble(),
+          sway: r.nextDouble() * 2 * math.pi,
+        );
+      }(),
+  ];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+    final t = clock.value;
+    final turn = t * 2 * math.pi;
+
+    for (var i = 0; i < _lights.length; i++) {
+      final ph = i * 2 * math.pi / _lights.length;
+      final c = Offset(
+        size.width * (0.5 + 0.45 * math.sin(turn + ph)),
+        size.height * (0.5 + 0.5 * math.cos(turn + ph * 1.7)),
+      );
+      final r = size.longestSide * 0.55;
+      canvas.drawCircle(
+        c,
+        r,
+        Paint()
+          ..blendMode = BlendMode.screen
+          ..shader = ui.Gradient.radial(c, r, [
+            _lights[i].withValues(alpha: 0.17),
+            _lights[i].withValues(alpha: 0),
+          ]),
+      );
+    }
+
+    if (!friday) {
+      final at = Offset(size.width * 0.93, size.height * 0.16);
+      final r = size.height * 0.62;
+      final ring = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.8
+        ..color = AppColors.gold.withValues(alpha: 0.075);
+      canvas.drawPath(Khatam.seal(at, r, rotation: turn / 8), ring);
+      canvas.drawPath(Khatam.star(at, r * 0.55, rotation: -turn / 8), ring);
+      canvas.drawCircle(at, r * 0.28, ring);
+    }
+
+    for (final m in _motes) {
+      final cycle = (t * m.laps + m.phase) % 1;
+      final y = (1 - cycle) * (size.height + 16) - 8;
+      final x = (m.x + 0.025 * math.sin(turn * 2 + m.sway)) * size.width;
+      final twinkle = 0.5 + 0.5 * math.sin(turn * (3 + m.laps) + m.sway);
+      // Fading in off the foot of the card and out before its top.
+      final edge = math.min(1.0, math.min(cycle / 0.15, (1 - cycle) / 0.25));
+      final alpha = (0.12 + 0.5 * twinkle) * edge.clamp(0.0, 1.0);
+      final p = Offset(x, y);
+      canvas.drawCircle(
+        p,
+        m.size * 3.2,
+        Paint()..color = AppColors.goldBright.withValues(alpha: 0.10 * alpha),
+      );
+      canvas.drawCircle(
+        p,
+        m.size,
+        Paint()
+          ..color = Color.lerp(AppColors.goldBright, Colors.white, 0.35)!
+              .withValues(alpha: alpha),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _GroundPainter old) =>
+      old.clock != clock || old.friday != friday;
+}
+
+/// Two points of light running round the card's rim, opposite each
+/// other, each trailing a fading tail: the frame lit as if a lamp were
+/// carried round it.
+class _RimLightPainter extends CustomPainter {
+  final Animation<double> clock;
+  final BorderRadius radius;
+  final Color colour;
+
+  _RimLightPainter(this.clock, {required this.radius, required this.colour})
+      : super(repaint: clock);
+
+  Size? _for;
+  ui.PathMetric? _rim;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+    if (_for != size) {
+      _for = size;
+      final metrics = (Path()
+            ..addRRect(radius.toRRect((Offset.zero & size).deflate(0.9))))
+          .computeMetrics()
+          .toList();
+      _rim = metrics.isEmpty ? null : metrics.first;
+    }
+    final rim = _rim;
+    if (rim == null) return;
+    final length = rim.length;
+    final tail = length * 0.14;
+    const steps = 7;
+    for (final start in const [0.0, 0.5]) {
+      final head = ((clock.value + start) % 1) * length;
+      for (var j = 0; j < steps; j++) {
+        final from = head - tail + tail * j / steps;
+        final to = head - tail + tail * (j + 1) / steps;
+        final paint = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.6
+          ..strokeCap = StrokeCap.round
+          ..color = colour.withValues(alpha: 0.75 * (j + 1) / steps);
+        _stroke(canvas, rim, from, to, length, paint);
+      }
+      final tip = rim.getTangentForOffset(head);
+      if (tip != null) {
+        canvas.drawCircle(tip.position, 5,
+            Paint()..color = colour.withValues(alpha: 0.22));
+        canvas.drawCircle(tip.position, 1.9,
+            Paint()..color = Color.lerp(colour, Colors.white, 0.5)!);
+      }
+    }
+  }
+
+  /// A stretch of the rim from [from] to [to], either of which may have
+  /// gone round past the start.
+  static void _stroke(Canvas canvas, ui.PathMetric rim, double from, double to,
+      double length, Paint paint) {
+    if (from < 0 && to <= 0) {
+      canvas.drawPath(rim.extractPath(from + length, to + length), paint);
+    } else if (from < 0) {
+      canvas.drawPath(rim.extractPath(from + length, length), paint);
+      canvas.drawPath(rim.extractPath(0, to), paint);
+    } else {
+      canvas.drawPath(rim.extractPath(from, to), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _RimLightPainter old) =>
+      old.clock != clock || old.radius != radius || old.colour != colour;
+}
+
+/// The card leaning toward the finger that rests on it, a few degrees,
+/// and swinging back when it lifts. A finger that moves off is starting
+/// a scroll, and the card lets it go.
+class _Lean extends StatefulWidget {
+  final Widget child;
+  const _Lean({required this.child});
+
+  @override
+  State<_Lean> createState() => _LeanState();
+}
+
+class _LeanState extends State<_Lean> {
+  Offset? _down;
+
+  /// Where the finger is, -1..1 each way across the card.
+  Offset? _at;
+
+  void _press(Offset p) {
+    _down = p;
+    _set(p);
+  }
+
+  void _move(Offset p) {
+    final down = _down;
+    if (down == null) return;
+    if ((p - down).distance > 12) {
+      _release();
+      return;
+    }
+    _set(p);
+  }
+
+  void _set(Offset p) {
+    final size = context.size;
+    if (size == null || size.isEmpty) return;
+    setState(() => _at = Offset(
+          (p.dx / size.width * 2 - 1).clamp(-1.0, 1.0),
+          (p.dy / size.height * 2 - 1).clamp(-1.0, 1.0),
+        ));
+  }
+
+  void _release() {
+    _down = null;
+    if (_at != null) setState(() => _at = null);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final at = still ? Offset.zero : (_at ?? Offset.zero);
+    return Listener(
+      onPointerDown: (e) => _press(e.localPosition),
+      onPointerMove: (e) => _move(e.localPosition),
+      onPointerUp: (_) => _release(),
+      onPointerCancel: (_) => _release(),
+      child: TweenAnimationBuilder<Offset>(
+        tween: Tween(end: at),
+        duration: Duration(milliseconds: _at == null ? 560 : 160),
+        curve: _at == null ? Curves.easeOutBack : Curves.easeOut,
+        builder: (context, o, child) => Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.0009)
+            ..rotateX(-o.dy * 0.07)
+            ..rotateY(o.dx * 0.09),
+          child: child,
+        ),
+        child: widget.child,
+      ),
+    );
+  }
 }
