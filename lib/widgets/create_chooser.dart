@@ -598,6 +598,9 @@ class _TileState extends State<_Tile> {
                     opacity: 0.86,
                     glow: 0.7,
                     child: Stack(
+                      // The pane is the tile's full height; what is on it
+                      // stands in the middle of it, not at its top.
+                      alignment: AlignmentDirectional.centerStart,
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
