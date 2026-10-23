@@ -364,8 +364,18 @@ abstract final class OfflinePack {
       }
     }
 
-    // 3 · the voice, a surah at a time.
+    // 3 · the voice, a surah at a time — and its Al-Fatiha 1:1 first,
+    // the basmala a reel from any surah's first verse opens on, so that
+    // works offline too (see RecitationService.withBasmala).
     tell(OfflineStage.voice, now: true);
+    if (surahs.isNotEmpty &&
+        plan.voice.hasSurah(1) &&
+        !await step(OfflineStage.voice, () async {
+          await RecitationService.load(plan.voice, 1,
+              startAyah: 1, endAyah: 1);
+        }, worth: 0)) {
+      return;
+    }
     for (final s in surahs) {
       final before = done;
       final ok = await step(OfflineStage.voice, () async {
