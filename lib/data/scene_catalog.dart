@@ -462,6 +462,8 @@ abstract final class SceneCatalog {
     _dir = cacheDir;
     _idleTimeout = idle;
     _inFlight.clear();
+    // No poster fetches from a test unless it asks for them.
+    debugPosterBase ??= '';
   }
 
   /// Fetch [s] into the cache, reporting 0..1 as it goes. Returns null
