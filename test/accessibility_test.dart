@@ -196,7 +196,7 @@ void main() {
 
       final greeting = order(t, 'السَّلَامُ عَلَيْكُمْ');
       final headline = order(t, l.beTheReason);
-      final create = order(t, l.createAReel);
+      final create = order(t, l.createButton);
       // Whichever verse card is showing. On a Friday the home screen
       // carries the Jumu'ah card instead of the ordinary one — the
       // test above this pins that card in its own right — and looking

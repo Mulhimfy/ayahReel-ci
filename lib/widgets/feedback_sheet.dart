@@ -202,6 +202,22 @@ class _FeedbackSheetState extends State<_FeedbackSheet> {
                         textAlign: TextAlign.center,
                         style: t.bodyMedium?.copyWith(height: 1.55),
                       ),
+                      // On the sheet anyone opens from Settings, one quiet
+                      // line on what makes a report fixable. The other two
+                      // already know what they are asking about.
+                      if (widget.source == FeedbackSource.settings) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          l.feedbackDetailHint,
+                          textAlign: TextAlign.center,
+                          style: t.bodySmall?.copyWith(
+                            fontSize: 12,
+                            height: 1.45,
+                            color: AppColors.textSecondary
+                                .withValues(alpha: 0.85),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 20),
                       _Field(
                         controller: _message,

@@ -129,6 +129,10 @@ Future<void> openCardStudio(BuildContext context, CardDeck deck,
 class CardsScreen extends StatefulWidget {
   const CardsScreen({super.key});
 
+  /// Asks the tab to show its cards rather than the quiz: bumped when
+  /// Home's Create leads here for a card.
+  static final ValueNotifier<int> cardsRequests = ValueNotifier(0);
+
   @override
   State<CardsScreen> createState() => _CardsScreenState();
 }
@@ -144,6 +148,7 @@ class _CardsScreenState extends State<CardsScreen> {
     super.initState();
     _load();
     CardLibrary.revision.addListener(_load);
+    CardsScreen.cardsRequests.addListener(_showCards);
     // The dot on the tab's glyph has done its work the moment somebody
     // looks. Fire and forget: a lost write costs one more sighting.
     final s = SettingsService.state.value;
@@ -155,7 +160,12 @@ class _CardsScreenState extends State<CardsScreen> {
   @override
   void dispose() {
     CardLibrary.revision.removeListener(_load);
+    CardsScreen.cardsRequests.removeListener(_showCards);
     super.dispose();
+  }
+
+  void _showCards() {
+    if (mounted && _arena) setState(() => _arena = false);
   }
 
   Future<void> _load() async {

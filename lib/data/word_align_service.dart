@@ -99,6 +99,17 @@ abstract final class WordAlignService {
   static bool supports(Reciter r) =>
       _alignFolderFor(r) != null || QulWords.supports(r);
 
+  /// Whether [r] has word timing in [surah]: what a reel of that surah
+  /// can follow word by word. A voice timed only in part has it in some
+  /// surahs and not others — the app's own timing publishes only the
+  /// surahs it could vouch for, and QUL's leaves out the ones its host
+  /// filled from another recording ([QulSource.skip] either way).
+  static bool supportsSurah(Reciter r, int surah) {
+    if (_alignFolderFor(r) != null) return true;
+    final src = QulWords.sourceOf(r);
+    return src != null && !src.skip.contains(surah);
+  }
+
   /// Whether quran-align's own release times [r]: tests keep it apart
   /// from the voices QUL times, and the offline download fetches its one
   /// file for such a voice.

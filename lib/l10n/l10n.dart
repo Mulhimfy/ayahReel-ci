@@ -144,13 +144,57 @@ class L10n {
       'Jadilah sebab hadirnya Al-Qur’an di ponsel seseorang hari ini',
       'Sei der Grund, warum heute Quran auf jemandes Handy landet');
   String get createCardBody => _t(
-      'Quran reels, made beautiful, easy and fast.',
-      'مقاطع قرآنية جميلة، سهلة وسريعة الصنع.',
-      'قرآنی ریلز — خوبصورت، آسان اور تیز۔',
-      'Reel Al-Qur’an yang indah, mudah, dan cepat dibuat.',
-      'Quran-Reels: schön, einfach und schnell gemacht.');
+      'Quran reels, Quran quizzes and Islamic cards, made beautiful, easy '
+          'and fast.',
+      'مقاطع قرآنية ومسابقات قرآنية وبطاقات إسلامية، جميلة وسهلة وسريعة '
+          'الصنع.',
+      'قرآنی ریلز، قرآنی کوئز اور اسلامی کارڈز — خوبصورت، آسان اور تیز۔',
+      'Reel Al-Qur’an, kuis Al-Qur’an, dan kartu Islami yang indah, mudah, '
+          'dan cepat dibuat.',
+      'Quran-Reels, Quran-Quiz und islamische Karten: schön, einfach und '
+          'schnell gemacht.');
   String get createAReel => _t('Create a reel', 'أنشئ مقطعًا', 'ریل بنائیں',
       'Buat reel', 'Reel erstellen');
+
+  /// Home's one button, which opens the choice of what to make.
+  String get createButton =>
+      _t('Create', 'أنشئ', 'بنائیں', 'Buat', 'Erstellen');
+  String get a11yOpensCreateChoice => _t(
+      'Choose a reel, a quiz or a card',
+      'اختر مقطعًا أو مسابقة أو بطاقة',
+      'ریل، کوئز یا کارڈ منتخب کریں',
+      'Pilih reel, kuis, atau kartu',
+      'Reel, Quiz oder Karte wählen');
+  String get createChooserTitle => _t(
+      'What would you like to make?',
+      'ماذا تريد أن تصنع؟',
+      'آپ کیا بنانا چاہیں گے؟',
+      'Mau membuat apa?',
+      'Was möchtest du machen?');
+  String get chooseReel => _t('Quran reel', 'مقطع قرآني', 'قرآنی ریل',
+      'Reel Al-Qur’an', 'Quran-Reel');
+  String get chooseReelLine => _t(
+      'A verse, a voice and a scenery, ready to share',
+      'آية وصوت ومشهد، جاهز للمشاركة',
+      'آیت، آواز اور منظر، شیئر کے لیے تیار',
+      'Ayat, suara, dan pemandangan, siap dibagikan',
+      'Ein Vers, eine Stimme, eine Szenerie, bereit zum Teilen');
+  String get chooseQuiz => _t('Quran quiz', 'مسابقة قرآنية', 'قرآنی کوئز',
+      'Kuis Al-Qur’an', 'Quran-Quiz');
+  String get chooseQuizLine => _t(
+      'Test yourself, or challenge a friend',
+      'اختبر نفسك أو تحدَّ صديقًا',
+      'خود کو آزمائیں یا کسی دوست کو چیلنج کریں',
+      'Uji diri sendiri atau tantang teman',
+      'Teste dich oder fordere jemanden heraus');
+  String get chooseCard => _t('Islamic card', 'بطاقة إسلامية', 'اسلامی کارڈ',
+      'Kartu Islami', 'Islamische Karte');
+  String get chooseCardLine => _t(
+      'A verse or a hadith, beautifully set',
+      'آية أو حديث في تصميم جميل',
+      'آیت یا حدیث، خوبصورت انداز میں',
+      'Ayat atau hadis, ditata dengan indah',
+      'Ein Vers oder Hadith, schön gestaltet');
   String get recentReels => _t('Recent reels', 'أحدث المقاطع', 'حالیہ ریلز',
       'Reel terbaru', 'Neueste Reels');
   String get recentReelsSubtitle => _t(
@@ -1939,16 +1983,24 @@ class L10n {
       'ما الذي يجعله أفضل؟', 'اسے بہتر کیا بنائے گا؟',
       'Apa yang membuat ini lebih baik?', 'Was würde das hier besser machen?');
   String get feedbackSheetBody => _t(
-      'A bug, a reciter you are missing, an idea — say it however it '
-          'comes. Every note is read.',
-      'خلل واجهته، قارئ تفتقده، فكرة خطرت لك — اكتبها كما هي. '
-          'نقرأ كل رسالة.',
-      'کوئی خرابی، کوئی قاری جو آپ کو نہیں مل رہا، کوئی خیال — جیسے آئے '
-          'ویسے لکھ دیں۔ ہر پیغام پڑھا جاتا ہے۔',
-      'Kutu program, qari yang Anda cari, sebuah gagasan — tulis apa '
-          'adanya. Setiap pesan kami baca.',
-      'Ein Fehler, ein Rezitator, den du vermisst, eine Idee — sag es, '
-          'wie es kommt. Jede Nachricht wird gelesen.');
+      'A problem or an idea. Every note is read.',
+      'مشكلة أو فكرة. نقرأ كل رسالة.',
+      'کوئی مسئلہ یا کوئی خیال۔ ہر پیغام پڑھا جاتا ہے۔',
+      'Masalah atau gagasan. Setiap pesan kami baca.',
+      'Ein Problem oder eine Idee. Jede Nachricht wird gelesen.');
+
+  /// The one line over the field on Settings' feedback sheet: what makes
+  /// a report something we can act on.
+  String get feedbackDetailHint => _t(
+      'Reporting a problem? Tell us what happened in as much detail as '
+          'you can, so we can fix it exactly.',
+      'تبلّغ عن مشكلة؟ صف ما حدث بأكبر قدر من التفاصيل لنصلحه بدقة.',
+      'کوئی مسئلہ بتا رہے ہیں؟ جو ہوا، جتنی تفصیل سے ہو سکے لکھیں، تاکہ ہم '
+          'اسے ٹھیک ٹھیک درست کر سکیں۔',
+      'Melaporkan masalah? Ceritakan apa yang terjadi sedetail mungkin, '
+          'agar kami bisa memperbaikinya dengan tepat.',
+      'Du meldest ein Problem? Beschreib so genau wie möglich, was passiert '
+          'ist, damit wir es gezielt beheben können.');
 
   /// The automatic ask. Names what they have already done, because a
   /// question that arrives out of nowhere gets a shrug and one that
@@ -6258,6 +6310,15 @@ class L10n {
       'لفظی وقت والی آواز درکار ہے',
       'Perlu suara dengan waktu per kata',
       'Braucht eine Stimme mit Wort-Timing');
+
+  /// A look tapped that the voice can't play here: said for a moment
+  /// under the cards, in place of the line above.
+  String motionNotForVoice(String look) => _t(
+      '$look isn’t available for this voice',
+      '«$look» غير متاح لهذا الصوت',
+      '«$look» اس آواز کے لیے دستیاب نہیں',
+      '$look tidak tersedia untuk suara ini',
+      '$look gibt es für diese Stimme nicht');
   String get a11yMotionPillHint => _t(
       'Opens the verse motion',
       'يفتح حركة الآية',

@@ -43,15 +43,15 @@ Future<void> openArena(BuildContext context) async {
   if (identical(_arenaRoute, route)) _arenaRoute = null;
 }
 
-/// The setup the lobby opens on: the scope last played, kept, and the
-/// gentlest round in it — the easiest question and the longest clock
-/// ([ArenaSetup.easiestGame], [ArenaSetup.longestSeconds]), whatever was
-/// picked last time.
-ArenaSetup landingArenaSetup(Map<String, String> p,
-    {required bool askMeanings}) {
-  final scope = ArenaScope.fromKey(p['scope'] ?? '') ?? const ArenaScope.juz(30);
+/// The setup the lobby opens on, every time: the gentlest round there
+/// is — Juz' Amma, the easiest question and the longest clock
+/// ([ArenaSetup.easiestGame], [ArenaSetup.longestSeconds]) — whatever was
+/// picked last time. The short surahs are the ones nearly everyone knows,
+/// so a first round is one a newcomer can win; anything harder is one tap
+/// away.
+ArenaSetup landingArenaSetup({required bool askMeanings}) {
   return ArenaSetup(
-    scope: scope,
+    scope: const ArenaScope.juz(30),
     games: const {ArenaSetup.easiestGame},
     seconds: ArenaSetup.longestSeconds,
     count: ArenaChallenge.questions,
@@ -82,10 +82,10 @@ String arenaScopeLabel(L10n l, ArenaScope scope) => switch (scope.kind) {
 /// Tanafus's lobby: how you play, where, what is asked, how long a
 /// question has, and the rounds already played.
 ///
-/// Every choice is on one page. The scope is remembered; the questions
-/// and the clock open on the gentlest round every time (see
-/// [landingArenaSetup]), because the arena is meant to be played, and
-/// a first round that is too hard is the last one. A code — pasted, typed, or
+/// Every choice is on one page, and it opens on the gentlest round every
+/// time — Juz' Amma, a missing word, thirty seconds (see
+/// [landingArenaSetup]) — because the arena is meant to be played, and a
+/// first round that is too hard is the last one. A code — pasted, typed, or
 /// arriving through a link — takes over the page the moment it is
 /// recognised, because a friend's dare is the reason most people will
 /// ever open this screen.
@@ -124,7 +124,7 @@ class _ArenaScreenState extends State<ArenaScreen> {
     await ArenaService.init();
     if (!mounted) return;
     final p = ArenaService.state.value.prefs;
-    final kept = landingArenaSetup(p, askMeanings: true);
+    final kept = landingArenaSetup(askMeanings: true);
     setState(() {
       _scope = kept.scope;
       _seconds = kept.seconds;

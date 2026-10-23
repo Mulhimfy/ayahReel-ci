@@ -337,9 +337,9 @@ void main() {
     await io(t);
   });
 
-  testWidgets('the lobby always opens on the gentlest round: the easiest '
-      'question and the longest clock, the scope as it was left, and a line '
-      'that says it is a Quran quiz', (t) async {
+  testWidgets('the lobby always opens on the gentlest round: Juz\' Amma, '
+      'the easiest question and the longest clock, whatever was left, and a '
+      'line that says it is a Quran quiz', (t) async {
     phone(t);
     await t.runAsync(() => ArenaService.remember({
           'intro': '1',
@@ -368,8 +368,9 @@ void main() {
     expect(ArenaSetup.longestSeconds, ArenaSetup.secondsOptions.last);
     expect(ArenaSetup.byEase.toSet(), ArenaGame.values.toSet());
     expect(ArenaSetup.byEase.first, ArenaSetup.easiestGame);
-    // The scope is kept: Al-Ikhlas, as it was left.
-    expect(find.text(l.localizedSurahName('Al-Ikhlas')), findsWidgets);
+    // Juz' Amma, whatever was left: Al-Ikhlas is not kept.
+    expect(find.text(l.arenaJuzAmma), findsWidgets);
+    expect(find.text(l.localizedSurahName('Al-Ikhlas')), findsNothing);
     await io(t);
   });
 

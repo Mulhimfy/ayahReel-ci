@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ayah_reels/data/models.dart';
+import 'package:ayah_reels/data/verse_numbering.dart';
 import 'package:ayah_reels/state/creation_state.dart' show TextPreset;
 import 'package:ayah_reels/theme/app_theme.dart';
 import 'package:ayah_reels/widgets/ayah_overlay.dart';
@@ -28,6 +29,7 @@ void main() {
               width: 360,
               preset: preset,
               onLight: onLight,
+              numbering: VerseNumbering.off,
             ),
           ),
         ),

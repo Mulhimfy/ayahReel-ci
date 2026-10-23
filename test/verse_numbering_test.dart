@@ -13,14 +13,36 @@ import 'package:ayah_reels/widgets/ayah_overlay.dart';
 
 /// Verse numbers on a reel: the numbered end-of-verse sign after the
 /// Arabic, the reference line under the translation, either or both —
-/// and neither unless the user asks, on Settings' Customize page.
+/// the sign unless the user chooses otherwise, on Settings' Customize
+/// page.
 void main() {
   tearDown(() => SettingsService.state.value = AppSettings.defaults);
 
   group('the setting', () {
-    test('is off by default, and on an install that predates it', () {
-      expect(AppSettings.defaults.verseNumbering, VerseNumbering.off);
+    test('is the verse-end mark by default, and on an install that '
+        'predates it', () {
+      expect(AppSettings.defaults.verseNumbering, VerseNumbering.mark);
       expect(AppSettings.fromJson(const {}).verseNumbering,
+          VerseNumbering.mark);
+    });
+
+    test('an old file\'s "off" was the old default and becomes the mark; '
+        'any other choice it holds stays', () {
+      expect(
+          AppSettings.fromJson(const {'verseNumbering': 'off'}).verseNumbering,
+          VerseNumbering.mark);
+      expect(
+          AppSettings.fromJson(const {'verseNumbering': 'ref'}).verseNumbering,
+          VerseNumbering.reference);
+      expect(
+          AppSettings.fromJson(const {'verseNumbering': 'both'})
+              .verseNumbering,
+          VerseNumbering.both);
+      // Chosen since the new key: off means off.
+      expect(
+          AppSettings.fromJson(
+                  const {'numbering': 'off', 'verseNumbering': 'off'})
+              .verseNumbering,
           VerseNumbering.off);
     });
 

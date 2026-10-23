@@ -119,6 +119,14 @@ class _HomeShellState extends State<HomeShell>
     if (mounted) _select(0);
   }
 
+  /// The Cards tab, open on its cards rather than on the quiz: where
+  /// Home's Create leads for a card.
+  void _showCards() {
+    if (!mounted) return;
+    CardsScreen.cardsRequests.value++;
+    _select(1);
+  }
+
   /// The "Your verses" card, from wherever the shell was.
   void _showVerses() {
     if (!mounted) return;
@@ -292,7 +300,13 @@ class _HomeShellState extends State<HomeShell>
     return IndexedStack(
       index: _index,
       children: [
-        tab(0, HomeScreen(onSeeAllReels: () => _select(2))),
+        tab(
+          0,
+          HomeScreen(
+            onSeeAllReels: () => _select(2),
+            onOpenCards: _showCards,
+          ),
+        ),
         tab(1, const CardsScreen()),
         tab(2, const MyReelsScreen()),
         tab(3, const SettingsScreen()),

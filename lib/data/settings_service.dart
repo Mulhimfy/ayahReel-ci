@@ -231,7 +231,7 @@ class AppSettings {
     this.versesCardNumbers = false,
     this.homeRounds = false,
     this.showSeries = true,
-    this.verseNumbering = VerseNumbering.off,
+    this.verseNumbering = VerseNumbering.mark,
     this.verseTranslationOff = false,
     this.highQualityVideo = false,
     this.verseLines = 1,
@@ -368,7 +368,10 @@ class AppSettings {
         'versesCardNumbers': versesCardNumbers,
         'homeRounds': homeRounds,
         'showSeries': showSeries,
-        'verseNumbering': verseNumbering.code,
+        // Not 'verseNumbering': that key was written on every save with
+        // the old default, off, so it cannot tell a choice from the
+        // default. See [fromJson].
+        'numbering': verseNumbering.code,
         'verseTranslationOff': verseTranslationOff,
         'highQualityVideo': highQualityVideo,
         // Not 'verseLines' and 'surahTitle': the 2026-10-21 preview
@@ -435,10 +438,17 @@ class AppSettings {
         versesCardNumbers: j['versesCardNumbers'] as bool? ?? false,
         homeRounds: j['homeRounds'] as bool? ?? false,
         showSeries: j['showSeries'] as bool? ?? true,
-        // Absent on every install that predates it, and those reels
-        // never carried numbers.
-        verseNumbering:
-            VerseNumbering.fromCode(j['verseNumbering'] as String?),
+        // The verse-end mark by default since 2026-10-23. An install that
+        // predates the new key wrote 'verseNumbering' with the old
+        // default on every save, so its "off" is the default, not a
+        // choice, and becomes the mark; anything else was chosen and
+        // stays.
+        verseNumbering: j.containsKey('numbering')
+            ? VerseNumbering.fromCode(j['numbering'] as String?)
+            : switch (VerseNumbering.fromCode(j['verseNumbering'] as String?)) {
+                VerseNumbering.off => VerseNumbering.mark,
+                final chosen => chosen,
+              },
         // Absent on every install that predates "None": their reels
         // have always carried a translation.
         verseTranslationOff: j['verseTranslationOff'] as bool? ?? false,

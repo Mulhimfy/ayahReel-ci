@@ -11,10 +11,11 @@ import 'verse_translation.dart';
 ///  * the reference — a small "Al-Baqarah 2:255" under the
 ///    translation, for the viewer who wants to find the verse again.
 ///
-/// Off by default: the card has always been the verse and nothing
-/// else, and a reel that suddenly carried numbers after an update
-/// would be a change nobody asked for. Anyone who wants them turns
-/// them on in Settings.
+/// The mark by default (since 2026-10-23): a verse that ends on its
+/// numbered sign reads as a verse of the mushaf, not as a caption, and
+/// tells the viewer where one verse stops and the next begins. Anyone
+/// who wants the card bare, or the reference too, changes it on the
+/// Customize page.
 enum VerseNumbering {
   off('off'),
   mark('mark'),

@@ -84,7 +84,7 @@ class CustomizeScreen extends StatelessWidget {
       s.verseLines == VerseLines.preferred &&
       s.scenesFollowLines &&
       !s.surahTitle &&
-      s.verseNumbering == VerseNumbering.off &&
+      s.verseNumbering == VerseNumbering.mark &&
       !s.highQualityVideo &&
       c.motion == VerseMotion.standard &&
       c.wordHighlight;
@@ -97,7 +97,7 @@ class CustomizeScreen extends StatelessWidget {
       verseLines: VerseLines.preferred,
       scenesFollowLines: true,
       surahTitle: false,
-      verseNumbering: VerseNumbering.off,
+      verseNumbering: VerseNumbering.mark,
       highQualityVideo: false,
     ));
     creationState

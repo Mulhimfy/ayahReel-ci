@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ayah_reels/data/models.dart';
 import 'package:ayah_reels/data/settings_service.dart';
+import 'package:ayah_reels/data/verse_numbering.dart';
 import 'package:ayah_reels/data/verse_translation.dart';
 import 'package:ayah_reels/widgets/ayah_overlay.dart';
 
@@ -41,6 +42,7 @@ void main() {
                 width: 360,
                 translation: VerseTranslation.english,
                 showTranslation: show,
+                numbering: VerseNumbering.off,
               ),
             ),
           ),

@@ -330,11 +330,12 @@ class _StyleScreenState extends State<StyleScreen> {
     );
   }
 
-  /// Whether the chosen voice has word timing: what the trail and the
-  /// unveil need.
+  /// Whether the chosen voice has word timing in the reel's surah: what
+  /// the trail and the unveil need.
   bool get _hasWords =>
       creationState.reciter != null &&
-      WordAlignService.supports(creationState.reciter!);
+      WordAlignService.supportsSurah(
+          creationState.reciter!, creationState.surah);
 
   Widget _panelBody(L10n l) => switch (_panel) {
         _Panel.type => _TypePanel(ayah: _ayah),

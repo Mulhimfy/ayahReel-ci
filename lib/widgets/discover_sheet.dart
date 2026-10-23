@@ -34,7 +34,6 @@ import 'illumination.dart';
 /// came out is still in [L10n.discovery], so putting one back is one
 /// line.
 const discoveries = <({String id, IconData icon})>[
-  (id: 'recordings', icon: Icons.graphic_eq_rounded),
   (id: 'luminous', icon: Icons.auto_awesome_rounded),
   (id: 'size-on-reel', icon: Icons.swipe_vertical_rounded),
   (id: 'scene-match', icon: Icons.auto_awesome_outlined),

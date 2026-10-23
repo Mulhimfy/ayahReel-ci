@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -23,11 +24,11 @@ import 'ink_swatch.dart';
 /// The style step shows it in a panel under its frame, with the motion's
 /// colour under it ([MotionColourRow]); the reel screen in a sheet under
 /// the playing reel.
-class MotionPicker extends StatelessWidget {
+class MotionPicker extends StatefulWidget {
   final VerseMotion motion;
 
-  /// Whether the voice has word timing, without which the trail and
-  /// the unveil have nothing to follow.
+  /// Whether the voice has word timing in the reel's surah, without
+  /// which the trail and the unveil have nothing to follow.
   final bool hasWords;
   final ValueChanged<VerseMotion> onChanged;
 
@@ -51,21 +52,57 @@ class MotionPicker extends StatelessWidget {
     this.below,
   });
 
+  @override
+  State<MotionPicker> createState() => _MotionPickerState();
+}
+
+class _MotionPickerState extends State<MotionPicker> {
+  /// A look tapped that this voice can't play: the note under the cards
+  /// says so for a moment, in place of the usual line, and the card
+  /// shakes its head. Counted, so a second tap shakes it again.
+  MotionPreset? _refused;
+  int _refusals = 0;
+  Timer? _clear;
+
+  @override
+  void dispose() {
+    _clear?.cancel();
+    super.dispose();
+  }
+
   void _set(VerseMotion m) {
     HapticFeedback.selectionClick();
-    onChanged(m);
+    widget.onChanged(m);
+  }
+
+  void _refuse(MotionPreset p) {
+    HapticFeedback.lightImpact();
+    _clear?.cancel();
+    setState(() {
+      _refused = p;
+      _refusals++;
+    });
+    _clear = Timer(const Duration(milliseconds: 2800), () {
+      if (mounted) setState(() => _refused = null);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
     final t = Theme.of(context).textTheme;
-    final chosen = MotionPreset.of(motion);
+    final chosen = MotionPreset.of(widget.motion);
+    final refused = _refused;
+    final note = refused != null
+        ? l.motionNotForVoice(l.motionPresetName(refused.name))
+        : widget.hasWords
+            ? l.motionFollowsWords
+            : l.motionNeedsWords;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (heading)
+        if (widget.heading)
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
             child: Column(
@@ -110,14 +147,21 @@ class MotionPicker extends StatelessWidget {
                     if (i > 0) const SizedBox(width: gap),
                     () {
                       final p = MotionPreset.values[i];
-                      final usable = !p.needsWords || hasWords;
-                      return MotionPresetCard(
-                        preset: p,
-                        width: w,
-                        tint: tint,
-                        selected: chosen == p,
-                        enabled: usable,
-                        onTap: usable ? () => _set(p.motion) : null,
+                      final usable = !p.needsWords || widget.hasWords;
+                      // A look this voice can't play still answers a
+                      // tap: with a word on why, rather than nothing.
+                      return _Shake(
+                        trigger: p == refused ? _refusals : 0,
+                        child: MotionPresetCard(
+                          preset: p,
+                          width: w,
+                          tint: widget.tint,
+                          selected: chosen == p,
+                          enabled: usable,
+                          onTap: usable
+                              ? () => _set(p.motion)
+                              : () => _refuse(p),
+                        ),
                       );
                     }(),
                   ],
@@ -126,17 +170,74 @@ class MotionPicker extends StatelessWidget {
             );
           },
         ),
-        if (below != null) below!,
+        if (widget.below != null) widget.below!,
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-          child: Text(
-            hasWords ? l.motionFollowsWords : l.motionNeedsWords,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-                fontSize: 10.5, height: 1.3, color: AppColors.textSecondary),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            child: Text(
+              note,
+              key: ValueKey(note),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 10.5,
+                height: 1.3,
+                fontWeight:
+                    refused != null ? FontWeight.w600 : FontWeight.w400,
+                color: refused != null
+                    ? AppColors.goldBright
+                    : AppColors.textSecondary,
+              ),
+            ),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// A card shaking its head: a few quick swings either side, dying away,
+/// each time [trigger] changes to something other than zero.
+class _Shake extends StatefulWidget {
+  final int trigger;
+  final Widget child;
+
+  const _Shake({required this.trigger, required this.child});
+
+  @override
+  State<_Shake> createState() => _ShakeState();
+}
+
+class _ShakeState extends State<_Shake> with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 420),
+  );
+
+  @override
+  void didUpdateWidget(covariant _Shake old) {
+    super.didUpdateWidget(old);
+    if (widget.trigger != old.trigger && widget.trigger != 0) {
+      _c.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (context, child) {
+        final v = _c.value;
+        final dx = math.sin(v * math.pi * 6) * (1 - v) * 5;
+        return Transform.translate(offset: Offset(dx, 0), child: child);
+      },
+      child: widget.child,
     );
   }
 }

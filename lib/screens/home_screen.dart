@@ -15,11 +15,10 @@ import '../widgets/ambient_motion.dart';
 import '../widgets/arena_history.dart';
 import '../widgets/badges_sheet.dart';
 import '../widgets/cinematic_hero.dart';
+import '../widgets/create_chooser.dart';
 import '../widgets/day_verse_card.dart';
 import '../widgets/gilded_writing.dart';
-import '../widgets/glow_button.dart';
 import '../widgets/illumination.dart';
-import '../widgets/night_sky.dart';
 import '../widgets/reel_thumb.dart';
 import '../widgets/series_strip.dart';
 import '../widgets/shimmer_text.dart';
@@ -51,7 +50,11 @@ class HomeScreen extends StatefulWidget {
   /// Jumps the shell to the My Reels tab.
   final VoidCallback onSeeAllReels;
 
-  const HomeScreen({super.key, required this.onSeeAllReels});
+  /// Jumps the shell to the Cards tab, on its cards: where Create's
+  /// "Islamic card" leads.
+  final VoidCallback? onOpenCards;
+
+  const HomeScreen({super.key, required this.onSeeAllReels, this.onOpenCards});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -181,6 +184,21 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Create: the choice of a reel, a quiz or a card, growing out of the
+  /// button, and then whichever was chosen.
+  Future<void> _openCreate(Rect from) async {
+    final kind = await showCreateChooser(context, from: from);
+    if (!mounted || kind == null) return;
+    switch (kind) {
+      case CreateKind.reel:
+        _startCreate();
+      case CreateKind.quiz:
+        await openArena(context);
+      case CreateKind.card:
+        widget.onOpenCards?.call();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
@@ -231,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 valueListenable: SettingsService.state,
                 builder: (context, s, _) => _HeroContent(
                   greeting: l.greeting(DateTime.now().hour, name: s.name),
-                  onCreate: _startCreate,
+                  onCreate: _openCreate,
                 ),
               ),
             ),
@@ -429,7 +447,7 @@ class _NoOverscroll extends MaterialScrollBehavior {
 /// read as a header that has been laid on top of it.
 class _HeroContent extends StatelessWidget {
   final String greeting;
-  final VoidCallback onCreate;
+  final ValueChanged<Rect> onCreate;
 
   /// The frame's side margin. The greeting and the cartouche under it
   /// hang out past it by exactly this much — see [_HungToEdge].
@@ -478,8 +496,10 @@ class _HeroContent extends StatelessWidget {
                           maxWidth: MediaQuery.sizeOf(context).width * 0.40),
                       child: Semantics(
                         container: true,
+                        // The salutation stands centred over the
+                        // greeting under it, not pushed to the edge.
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Sheen(
                               period: const Duration(milliseconds: 7000),
@@ -498,6 +518,7 @@ class _HeroContent extends StatelessWidget {
                               greeting,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
                               style: t.titleMedium?.copyWith(
                                 fontSize: 17,
                                 height: 1.25,
@@ -533,9 +554,7 @@ class _HeroContent extends StatelessWidget {
             child: _HungToEdge(child: _StreakCartouche()),
           ),
         ),
-        const SizedBox(height: 26),
-        const _Reveal(delayMs: 70, child: BismillahOrnament(fontSize: 15)),
-        const SizedBox(height: 22),
+        const SizedBox(height: 30),
         // The promise, and now the headline of the screen.
         //
         // It used to sit under the greeting in body type, which made
@@ -589,16 +608,13 @@ class _HeroContent extends StatelessWidget {
         _Reveal(
           delayMs: 240,
           child: ConstrainedBox(
-            // Narrower than the column it sits in. A gold bar running
-            // the full width of a photograph is a banner; a gold bar
-            // the width of the words above it is a door.
-            constraints: const BoxConstraints(maxWidth: 278),
-            child: GlowButton(
-              label: l.createAReel,
-              icon: Icons.add_rounded,
-              breathe: true,
-              pulseSpeed: 1.1,
-              height: 54,
+            // Narrower than the column it sits in: a bar running the
+            // full width of a photograph is a banner; one the width of
+            // the words above it is a door.
+            constraints: const BoxConstraints(maxWidth: 236),
+            child: CreateButton(
+              label: l.createButton,
+              hint: l.a11yOpensCreateChoice,
               onPressed: onCreate,
             ),
           ),
@@ -608,19 +624,23 @@ class _HeroContent extends StatelessWidget {
   }
 }
 
-/// Moves [child] out past the frame's margin to the screen's start
-/// edge — the right edge in Arabic and Urdu.
+/// Moves [child] out past the frame's margin, toward the screen's start
+/// edge — the right edge in Arabic and Urdu — to stand [inset] from it.
 ///
 /// The greeting and the cartouche both hang from this one widget so
 /// they stand on the same line; when the cartouche hung alone and the
 /// greeting kept the margin, the two looked set by different hands.
+/// Not on the edge itself: the salutation pressed against the glass
+/// read as pushed off the page.
 class _HungToEdge extends StatelessWidget {
   final Widget child;
   const _HungToEdge({required this.child});
 
+  static const inset = 16.0;
+
   @override
   Widget build(BuildContext context) {
-    const m = _HeroContent.margin;
+    const m = _HeroContent.margin - inset;
     return Transform.translate(
       offset: Offset(Directionality.of(context) == TextDirection.rtl ? m : -m, 0),
       child: child,

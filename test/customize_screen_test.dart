@@ -257,6 +257,11 @@ void main() {
   testWidgets('each verse-number chip shows what it adds', (t) async {
     await open(t);
     await reach(t, find.text('Verse-end mark'));
+    // The mark is on until chosen otherwise; off adds nothing.
+    expect(SettingsService.state.value.verseNumbering, VerseNumbering.mark);
+    await t.tap(find.text('Off'));
+    await t.pumpAndSettle();
+    expect(SettingsService.state.value.verseNumbering, VerseNumbering.off);
     expect(find.text('Nothing added'), findsOneWidget);
     await t.tap(find.text('Verse-end mark'));
     await t.pumpAndSettle();
