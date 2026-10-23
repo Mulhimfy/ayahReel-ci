@@ -34,24 +34,31 @@ abstract final class QuranRepository {
   /// already one file on disk, and the only thing that ever had to be
   /// worked out about it was where its verses fall. The timing screen
   /// does that and files the result; this hands it straight back.
+  ///
+  /// With [basmala], a recitation of a surah from its verse 1 opens on
+  /// the basmala as the voice recites it, where it has one (see
+  /// [RecitationService.withBasmala]): what a reel of it plays.
   static Future<Recitation> recitation(
     Reciter reciter,
     int surah, {
     int? startAyah,
     int? endAyah,
+    bool basmala = false,
     void Function(double progress)? onProgress,
-  }) {
+  }) async {
     if (reciter.isUserAudio) {
       final rec = UserAudioService.aligned(reciter.id, surah);
       if (rec == null) {
-        return Future.error(
-            StateError('No alignment for ${reciter.id} surah $surah'));
+        throw StateError('No alignment for ${reciter.id} surah $surah');
       }
       onProgress?.call(1);
-      return Future.value(rec);
+      return rec;
     }
-    return RecitationService.load(reciter, surah,
+    final rec = await RecitationService.load(reciter, surah,
         startAyah: startAyah, endAyah: endAyah, onProgress: onProgress);
+    if (!basmala || (startAyah ?? 1) != 1) return rec;
+    return RecitationService.withBasmala(
+        reciter, rec, endAyah ?? rec.lastAyah);
   }
 
   /// Ready-now recitation, if any — for instant duration labels. May

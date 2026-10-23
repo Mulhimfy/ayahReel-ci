@@ -265,9 +265,23 @@ abstract final class PhoneBudget {
   }
 
   /// The app's memory now and at its highest, and what the phone has
-  /// left, in MB — Android only; elsewhere, nothing. Read off /proc,
-  /// which needs no native code a patch could not reach.
+  /// left, in MB. Read off /proc on Android, which needs no native code a
+  /// patch could not reach. On iOS the app's own resident memory and its
+  /// peak, as the runtime reports them (the phone's free memory isn't
+  /// to be had there without native code): an iPhone's lost save used to
+  /// say only "starting", which says nothing about memory at all.
   static Map<String, int> _memoryNow() {
+    if (Platform.isIOS) {
+      try {
+        const mb = 1024 * 1024;
+        return {
+          'rssMb': ProcessInfo.currentRss ~/ mb,
+          'peakMb': ProcessInfo.maxRss ~/ mb,
+        };
+      } catch (_) {
+        return const {};
+      }
+    }
     if (!Platform.isAndroid) return const {};
     try {
       final status = File('/proc/self/status').readAsStringSync();
@@ -482,7 +496,7 @@ abstract final class PhoneBudget {
     _sampler?.cancel();
     // A pass can run for a minute, and the memory climbs inside it:
     // read it again every few seconds, not only between stages.
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || Platform.isIOS) {
       _sampler = Timer.periodic(
           const Duration(seconds: 3), (_) => unawaited(_sample()));
     }

@@ -162,14 +162,27 @@ void main() {
   test('the sizes it says before anything is fetched', () {
     final alafasy = reciters.firstWhere((r) => r.id == 'alafasy');
     expect(OfflinePack.kbpsOf(alafasy), 128);
-    final whole = OfflinePack.voiceBytes(alafasy, OfflineVoice.whole);
-    final short = OfflinePack.voiceBytes(alafasy, OfflineVoice.short);
-    expect(whole, greaterThan(800 * 1000 * 1000));
-    expect(short, lessThan(whole ~/ 10));
-    expect(OfflinePack.voiceBytes(alafasy, OfflineVoice.none), 0);
-    expect(OfflineVoice.short.surahs.first, 78);
-    expect(OfflineVoice.short.surahs.last, 114);
-    expect(OfflineVoice.whole.surahs, hasLength(114));
+    expect(OfflinePack.surahSeconds, hasLength(114));
+    expect(OfflinePack.surahSeconds.fold<int>(0, (a, b) => a + b),
+        closeTo(82324, 5));
+    final all =
+        OfflinePack.voiceBytes(alafasy, [for (var s = 1; s <= 114; s++) s]);
+    final short = OfflinePack.surahsFor(OfflineVoice.short);
+    expect(all, greaterThan(800 * 1000 * 1000));
+    expect(OfflinePack.voiceBytes(alafasy, short), lessThan(all ~/ 10));
+    expect(
+        OfflinePack.voiceBytes(
+            alafasy, OfflinePack.surahsFor(OfflineVoice.none)),
+        0);
+    expect(short.first, 78);
+    expect(short.last, 114);
+    expect(OfflinePack.surahsFor(OfflineVoice.surah, surah: 36), [36]);
+    // A juz is every surah it reaches into, whole.
+    expect(OfflinePack.surahsOfJuz(1), [1, 2]);
+    expect(OfflinePack.surahsOfJuz(15), [17, 18]);
+    expect(OfflinePack.surahsOfJuz(29), [for (var s = 67; s <= 77; s++) s]);
+    expect(OfflinePack.surahsOfJuz(30), short);
+    expect(OfflinePack.surahsFor(OfflineVoice.juz, juz: 30), short);
   });
 
   test('a run with the text already there and nothing else asked ends done',

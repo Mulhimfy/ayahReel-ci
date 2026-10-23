@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 import 'debug_log.dart';
+import 'juz_index.dart';
 import 'models.dart';
 import 'qul_words.dart';
 import 'quran_text_service.dart';
@@ -11,7 +12,12 @@ import 'recitation_service.dart';
 import 'scene_catalog.dart';
 import 'word_align_service.dart';
 
-/// How much of a voice to keep on the phone.
+/// How much of a voice to keep on the phone: one choice at a time.
+///
+/// There is no whole Quran. A thousand megabytes and six thousand files
+/// is an evening of downloading on a phone's connection, and a phone
+/// busy with it is a slower phone for that whole evening; one surah, or
+/// one juz, is a few minutes, and another can follow it.
 enum OfflineVoice {
   /// None of it.
   none,
@@ -20,14 +26,11 @@ enum OfflineVoice {
   /// (78) to An-Nas (114).
   short,
 
-  /// All 114 surahs.
-  whole;
+  /// One surah: [OfflinePlan.surah].
+  surah,
 
-  List<int> get surahs => switch (this) {
-        none => const [],
-        short => [for (var s = 78; s <= 114; s++) s],
-        whole => [for (var s = 1; s <= 114; s++) s],
-      };
+  /// One juz: [OfflinePlan.juz], as the surahs it reaches into.
+  juz,
 }
 
 /// What to bring onto the phone so reels can be made with no network.
@@ -36,28 +39,53 @@ class OfflinePlan {
   final Reciter voice;
   final OfflineVoice scope;
 
-  /// The still sceneries: small, and most of what reels are made on.
+  /// The surah, when [scope] is [OfflineVoice.surah].
+  final int surah;
+
+  /// The juz, when [scope] is [OfflineVoice.juz].
+  final int juz;
+
+  /// The shelf of sceneries to bring down — Sky, Mountains, Water… — or
+  /// null for none. One shelf at a time, for the same reason as the
+  /// voice: the whole library is gigabytes.
+  final String? sceneTab;
+
+  /// Its still sceneries: small, and most of what reels are made on.
   final bool stills;
 
-  /// The moving ones: a few megabytes each.
+  /// Its moving ones: a few megabytes each.
   final bool clips;
 
   const OfflinePlan({
     required this.voice,
-    this.scope = OfflineVoice.whole,
+    this.scope = OfflineVoice.short,
+    this.surah = 1,
+    this.juz = 30,
+    this.sceneTab,
     this.stills = true,
     this.clips = false,
   });
 
+  /// The surahs of the voice the plan asks for.
+  List<int> get surahs =>
+      OfflinePack.surahsFor(scope, surah: surah, juz: juz);
+
   OfflinePlan copyWith({
     Reciter? voice,
     OfflineVoice? scope,
+    int? surah,
+    int? juz,
+    String? sceneTab,
+    bool clearSceneTab = false,
     bool? stills,
     bool? clips,
   }) =>
       OfflinePlan(
         voice: voice ?? this.voice,
         scope: scope ?? this.scope,
+        surah: surah ?? this.surah,
+        juz: juz ?? this.juz,
+        sceneTab: clearSceneTab ? null : (sceneTab ?? this.sceneTab),
         stills: stills ?? this.stills,
         clips: clips ?? this.clips,
       );
@@ -108,8 +136,8 @@ enum OfflineStage {
 
 /// Brings what a reel needs from the network onto the phone, so reels
 /// can be made with none: every surah's text in the translation chosen,
-/// one voice (its short surahs or the whole Quran) with its word
-/// timing, and the sceneries.
+/// a voice (Juz' 30, one surah or one juz of it) with its word timing,
+/// and a shelf of sceneries.
 ///
 /// Built to be invisible while it runs. It is network and disk only —
 /// nothing is decoded or encoded, so nothing here competes with the
@@ -127,22 +155,62 @@ abstract final class OfflinePack {
   /// Asks a run in progress to stop after the files in flight.
   static void stop() => _stop = true;
 
-  /// How long the whole Quran runs, read at the pace the app's duration
-  /// model is calibrated on (see `ReelDuration`), in seconds; and Juz'
-  /// 30. Measured from the text the app ships (assets/quran_search.json).
-  static const wholeSeconds = 82321;
-  static const shortSeconds = 2907;
+  /// How long each surah runs, in seconds, read at the pace the app's
+  /// duration model is calibrated on (see `ReelDuration`): its letters
+  /// and its verse ends, measured from the text the app ships
+  /// (assets/quran_search.json) with that model's own constants. The
+  /// whole Quran comes to 82,324 seconds, Juz' 30 to 2,908.
+  static const surahSeconds = <int>[
+    40, 6287, 3627, 3903, 2906, 3082, 3514, 1318, 2668, 1856,
+    1921, 1786, 854, 865, 768, 1923, 1639, 1622, 1006, 1387,
+    1277, 1296, 1150, 1376, 971, 1549, 1201, 1451, 1058, 859,
+    531, 389, 1389, 879, 786, 793, 1097, 798, 1188, 1259,
+    830, 861, 922, 405, 514, 645, 594, 604, 368, 396,
+    422, 358, 400, 402, 474, 508, 610, 488, 473, 369,
+    234, 187, 194, 267, 286, 261, 341, 353, 318, 271,
+    253, 285, 219, 302, 201, 284, 248, 226, 232, 176,
+    134, 98, 214, 131, 133, 78, 91, 119, 168, 101,
+    76, 97, 51, 33, 46, 88, 32, 101, 45, 51,
+    50, 38, 20, 41, 28, 22, 35, 13, 29, 22,
+    25, 16, 22, 26,
+  ];
 
-  /// About how many bytes [plan] brings down, for the sheet to say
-  /// before anything is fetched: the voice at its bitrate and pace, the
-  /// sceneries by their catalogued sizes. Only an estimate — what is on
-  /// the phone already is subtracted by [missingBytes].
-  static int voiceBytes(Reciter r, OfflineVoice scope) {
-    final seconds = switch (scope) {
-      OfflineVoice.none => 0,
-      OfflineVoice.short => shortSeconds,
-      OfflineVoice.whole => wholeSeconds,
-    };
+  /// The surahs a choice of [scope] asks for. A juz is the surahs it
+  /// reaches into, whole: a reel starts on any verse of them, and a
+  /// surah cut at the juz's edge would be a surah a reel can't finish.
+  static List<int> surahsFor(OfflineVoice scope,
+      {int surah = 1, int juz = 30}) {
+    switch (scope) {
+      case OfflineVoice.none:
+        return const [];
+      case OfflineVoice.short:
+        return [for (var s = 78; s <= 114; s++) s];
+      case OfflineVoice.surah:
+        return [surah.clamp(1, 114)];
+      case OfflineVoice.juz:
+        return surahsOfJuz(juz);
+    }
+  }
+
+  /// The surahs [juz] reaches into, from the one it opens in to the one
+  /// the next juz opens in, unless that one opens with it.
+  static List<int> surahsOfJuz(int juz) {
+    final j = juz.clamp(1, 30);
+    final (first, _) = juzStart(j);
+    if (j == 30) return [for (var s = first; s <= 114; s++) s];
+    final (next, nextAyah) = juzStart(j + 1);
+    final last = nextAyah == 1 ? next - 1 : next;
+    return [for (var s = first; s <= last; s++) s];
+  }
+
+  /// About how many bytes the voice's [surahs] come to, for the sheet to
+  /// say before anything is fetched: their length at the voice's pace
+  /// and bitrate. Only an estimate.
+  static int voiceBytes(Reciter r, List<int> surahs) {
+    var seconds = 0;
+    for (final s in surahs) {
+      if (s >= 1 && s <= 114) seconds += surahSeconds[s - 1];
+    }
     return (seconds * r.pace * kbpsOf(r) * 1000 / 8).round();
   }
 
@@ -159,16 +227,21 @@ abstract final class OfflinePack {
   }
 
   /// The sceneries [plan] asks for that are not on the phone yet.
-  static List<Scene> scenesFor(OfflinePlan plan) => [
-        for (final s in SceneCatalog.all)
-          if (!s.bundled &&
-              (s.isVideo ? plan.clips : plan.stills) &&
-              !SceneCatalog.isReadySync(s))
-            s,
-      ];
+  static List<Scene> scenesFor(OfflinePlan plan) {
+    final tab = plan.sceneTab;
+    if (tab == null) return const [];
+    return [
+      for (final s in SceneCatalog.inTab(tab))
+        if (!s.bundled &&
+            (s.isVideo ? plan.clips : plan.stills) &&
+            !SceneCatalog.isReadySync(s))
+          s,
+    ];
+  }
 
-  static int sceneBytes({required bool clips}) => [
-        for (final s in SceneCatalog.all)
+  /// What one shelf's still or moving sceneries come to, all of them.
+  static int sceneBytes({required String tab, required bool clips}) => [
+        for (final s in SceneCatalog.inTab(tab))
           if (!s.bundled && s.isVideo == clips) s.bytes,
       ].fold(0, (a, b) => a + b);
 
@@ -188,7 +261,7 @@ abstract final class OfflinePack {
     _stop = false;
     var missed = 0;
     var inARow = 0;
-    final surahs = plan.scope.surahs
+    final surahs = plan.surahs
         .where((s) => plan.voice.hasSurah(s))
         .toList(growable: false);
     final scenes = scenesFor(plan);
@@ -254,8 +327,9 @@ abstract final class OfflinePack {
       return true;
     }
 
-    rlog('offline: ${plan.voice.id} ${plan.scope.name}, '
-        '${scenes.length} sceneries');
+    rlog('offline: ${plan.voice.id} ${plan.scope.name} '
+        '(${surahs.length} surahs), ${plan.sceneTab ?? 'no'} sceneries '
+        '(${scenes.length})');
     tell(OfflineStage.text, now: true);
 
     // 1 · the text, in the translation chosen. Two at a time.
@@ -345,17 +419,18 @@ abstract final class OfflinePack {
     for (var s = 1; s <= 114; s++) {
       if (await QuranTextService.isOnDisk(s)) text++;
     }
-    final surahs =
-        plan.scope.surahs.where((s) => plan.voice.hasSurah(s)).toList();
+    final surahs = plan.surahs.where((s) => plan.voice.hasSurah(s)).toList();
     var voice = 0;
     for (final s in surahs) {
       if (await RecitationService.isOffline(plan.voice, s, thorough: false)) {
         voice++;
       }
     }
+    final tab = plan.sceneTab;
     final asked = [
-      for (final s in SceneCatalog.all)
-        if (!s.bundled && (s.isVideo ? plan.clips : plan.stills)) s,
+      if (tab != null)
+        for (final s in SceneCatalog.inTab(tab))
+          if (!s.bundled && (s.isVideo ? plan.clips : plan.stills)) s,
     ];
     final ready = asked.where(SceneCatalog.isReadySync).length;
     return (

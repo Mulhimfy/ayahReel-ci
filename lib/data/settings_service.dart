@@ -195,6 +195,12 @@ class AppSettings {
   /// verse.
   final bool scenesFollowLines;
 
+  /// Whether a reel that opens a surah on its first verse opens on the
+  /// basmala, as the voice recites it (see `RecitationService
+  /// .withBasmala`). On until turned off: a surah begun without it is
+  /// begun the way no reciter begins it.
+  final bool basmala;
+
   /// Whether a new reel carries the surah's name at its head. Off until
   /// the user turns it on.
   final bool surahTitle;
@@ -236,6 +242,7 @@ class AppSettings {
     this.highQualityVideo = false,
     this.verseLines = 1,
     this.scenesFollowLines = true,
+    this.basmala = true,
     this.surahTitle = false,
   });
 
@@ -291,6 +298,7 @@ class AppSettings {
     bool? highQualityVideo,
     int? verseLines,
     bool? scenesFollowLines,
+    bool? basmala,
     bool? surahTitle,
   }) {
     return AppSettings(
@@ -332,6 +340,7 @@ class AppSettings {
       highQualityVideo: highQualityVideo ?? this.highQualityVideo,
       verseLines: verseLines ?? this.verseLines,
       scenesFollowLines: scenesFollowLines ?? this.scenesFollowLines,
+      basmala: basmala ?? this.basmala,
       surahTitle: surahTitle ?? this.surahTitle,
     );
   }
@@ -380,6 +389,7 @@ class AppSettings {
         // them over these. No store build ever wrote either.
         'linesAtOnce': verseLines,
         'scenesFollowLines': scenesFollowLines,
+        'basmala': basmala,
         'surahName': surahTitle,
       };
 
@@ -457,6 +467,8 @@ class AppSettings {
         // [toJson] for why these two keys are new ones.
         verseLines: ((j['linesAtOnce'] as num?)?.toInt() ?? 1).clamp(0, 3),
         scenesFollowLines: j['scenesFollowLines'] as bool? ?? true,
+        // Absent on every install that predates it: on.
+        basmala: j['basmala'] as bool? ?? true,
         surahTitle: j['surahName'] as bool? ?? false,
       );
 }

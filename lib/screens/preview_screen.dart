@@ -208,6 +208,11 @@ class _PreviewScreenState extends State<PreviewScreen>
   // Loaded by _boot(); the screen shows a preparing state until then.
   List<Ayah>? _ayahs;
   Recitation? _recitation;
+
+  /// The basmala's card, for a reel that opens a surah on verse 1: Al-
+  /// Fatiha 1:1 in the reel's edition. Null for any other reel, and when
+  /// the recording came without one (see [Recitation.opensWithBasmala]).
+  Ayah? _basmala;
   double _prepProgress = 0;
   String? _prepError;
 
@@ -215,8 +220,24 @@ class _PreviewScreenState extends State<PreviewScreen>
   /// whether it asks to be reported. See [Trouble].
   Trouble _prepTrouble = Trouble.device;
 
-  int get _segStartMs => _recitation!.timing(_startAyah).startMs;
+  /// Where the reel starts: at the basmala, when it opens a surah on
+  /// verse 1 and the recording carries one.
+  int get _segStartMs => _recitation!.startOf(_startAyah);
   int get _segEndMs => _recitation!.timing(_endAyah).endMs;
+
+  /// Whether this reel opens on the basmala: from a surah's verse 1, in
+  /// any surah but Al-Fatiha (whose verse 1 is the basmala) and At-Tawbah
+  /// (which has none), with Settings' basmala on.
+  bool get _wantsBasmala =>
+      _startAyah == 1 &&
+      _surah != 1 &&
+      _surah != 9 &&
+      !_reciter.isUserAudio &&
+      SettingsService.state.value.basmala;
+
+  /// The basmala's card, when the recording carries the basmala.
+  Ayah? get _basmalaCard =>
+      _recitation?.opensWithBasmala ?? false ? _basmala : null;
 
   /// Whether this reel can be cut short at all. Only a recording the
   /// user brought in has a length worth trimming: an app voice runs
@@ -559,6 +580,17 @@ class _PreviewScreenState extends State<PreviewScreen>
     try {
       ayahs = await QuranRepository.ayahsOf(_surah);
       rlog('boot: text ready (${ayahs.length} ayahs)');
+      // The basmala a surah opens with, for a reel from its verse 1:
+      // Al-Fatiha's first verse, bundled, so it never waits or fails on
+      // the network. Without it the reel is the one it always was.
+      if (_wantsBasmala) {
+        try {
+          final fatiha = await QuranRepository.ayahsOf(1);
+          if (fatiha.isNotEmpty) _basmala = fatiha.first;
+        } catch (e) {
+          rlog('boot: no basmala text: $e');
+        }
+      }
     } catch (e, st) {
       // Kept out of rlog: that is compiled away in release, and a boot
       // that fails on a user's phone is exactly the one nobody can see.
@@ -584,6 +616,7 @@ class _PreviewScreenState extends State<PreviewScreen>
         // a long surah no longer downloads the whole thing.
         startAyah: _startAyah,
         endAyah: _endAyah,
+        basmala: _wantsBasmala && _basmala != null,
         onProgress: (p) {
           if (mounted && _recitation == null) {
             setState(() => _prepProgress = p);
@@ -639,7 +672,7 @@ class _PreviewScreenState extends State<PreviewScreen>
         return;
       }
       if (end > ayahs.length) end = ayahs.length;
-      final startMs = rec.timing(_startAyah).startMs;
+      final startMs = rec.startOf(_startAyah);
       while (end > _startAyah &&
           rec.timing(end).endMs - startMs > _maxReelMs) {
         end--;
@@ -1263,10 +1296,15 @@ class _PreviewScreenState extends State<PreviewScreen>
       if (!VideoRenderer.encodingOnHardware && _jobProgress < 1 - pace) {
         rlog('render: Save during the eager render '
             '(${(_jobProgress * 100).round()}%) — starting it over for it');
+        PhoneBudget.exportStage('eager render restarted');
         _dropRender(restart: false);
       } else {
         rlog('render: Save joins the eager render '
             '(${(_jobProgress * 100).round()}%)');
+        // Its stages were passed before the save began, so without this
+        // a save lost in the rest of its encode reads as "starting".
+        PhoneBudget.exportStage(
+            'joined the eager render at ${(_jobProgress * 100).round()}%');
         _jobForeground = true;
         _renderProgress = _jobProgress;
         _takeForForeground();
@@ -1374,6 +1412,7 @@ class _PreviewScreenState extends State<PreviewScreen>
         surahTitleAt: _titleAt,
         surahTitleScale: _titleScale,
         surahTitleLook: creationState.surahTitleLook,
+        basmala: _basmalaCard,
         layout: _layout,
         roundedCorners: _rounded,
         backdrop: _backdrop,
@@ -2574,6 +2613,7 @@ class _PreviewScreenState extends State<PreviewScreen>
         verseFace: _typography.verse,
         translationFace: _typography.translation,
         onHeight: _onOverlayHeight,
+        basmala: _basmalaCard,
       ),
       ),
     );

@@ -296,9 +296,20 @@ class L10n {
         'none' => _t('None', 'بدون', 'کچھ نہیں', 'Tidak', 'Keine'),
         'short' =>
           _t("Juz' 30", 'جزء عمّ', 'پارہ 30', 'Juz 30', "Juz' 30"),
-        _ => _t('Whole Quran', 'القرآن كاملًا', 'پورا قرآن',
-            'Seluruh Al-Qur’an', 'Ganzer Koran'),
+        'surah' => _t('A surah', 'سورة', 'ایک سورت', 'Satu surah',
+            'Eine Sure'),
+        _ => _t('A juz', 'جزء', 'ایک پارہ', 'Satu juz', 'Ein Juz'),
       };
+
+  /// A juz chosen for offline, by its number.
+  String offlineJuzNumber(int juz) => _t("Juz' $juz", 'الجزء $juz',
+      'پارہ $juz', 'Juz $juz', "Juz' $juz");
+  String get offlinePickJuz => _t('Choose a juz', 'اختر جزءًا',
+      'پارہ منتخب کریں', 'Pilih juz', 'Juz wählen');
+
+  /// The shelf of sceneries to keep on the phone, one at a time.
+  String get offlineScenes => _t('Sceneries', 'المشاهد', 'مناظر',
+      'Pemandangan', 'Kulissen');
   String get offlineChangeVoice => _t('Change voice', 'غيّر القارئ',
       'قاری بدلیں', 'Ganti qari', 'Stimme ändern');
   String get offlineStills => _t('Still sceneries', 'المناظر الثابتة',
@@ -6267,6 +6278,17 @@ class L10n {
       'Blendet ihn im Reel ein oder aus');
 
   // ---- motion ----------------------------------------------------------
+
+  /// Customize: the basmala before a surah's first verse.
+  String get basmalaTitle => _t('Basmala before verse 1',
+      'البسملة قبل الآية الأولى', 'پہلی آیت سے پہلے بسم اللہ',
+      'Basmalah sebelum ayat 1', 'Basmala vor Vers 1');
+  String get basmalaNote => _t(
+      'A reel from a surah’s first verse opens with the reciter’s own basmala',
+      'المقطع من أول آية في السورة يبدأ ببسملة القارئ نفسه',
+      'سورت کی پہلی آیت سے ریل قاری کی اپنی بسم اللہ سے شروع ہوتی ہے',
+      'Reel dari ayat pertama surah dibuka dengan basmalah sang qari',
+      'Ein Reel ab dem ersten Vers einer Sure beginnt mit der Basmala des Rezitators');
 
   /// The style step's panel for the surah's name.
   String get styleTabName => _t('Name', 'الاسم', 'نام', 'Nama', 'Name');

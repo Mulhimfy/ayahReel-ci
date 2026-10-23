@@ -38,6 +38,10 @@ abstract final class ReelDuration {
   /// Milliseconds per Arabic letter, at a typical murattal pace.
   static const _perLetterMs = 230;
 
+  /// The basmala at the same pace: its nineteen letters and one verse's
+  /// end (`lettersIn` of Al-Fatiha 1:1 as the app has it).
+  static const basmalaMs = 1200 + 230 * 19;
+
   /// The end of a verse, whatever its length: the reciter's breath and
   /// the gap before the next one.
   static const _perAyahMs = 1200;

@@ -133,7 +133,7 @@ abstract final class ScenePlan {
       units: units,
     );
     final segMs = recitation.timing(endAyah).endMs -
-        recitation.timing(startAyah).startMs;
+        recitation.startOf(startAyah);
     final n = sceneCount.clamp(1, maxScenes(slots.length, segMs: segMs));
     final w = _weightsFor(n, weights);
     return pacing == ScenePacing.even
@@ -160,7 +160,10 @@ abstract final class ScenePlan {
     return [
       for (var a = startAyah; a <= endAyah; a++)
         (
-          startMs: recitation.timing(a).startMs,
+          // A reel that opens on the basmala has it on verse 1's scene.
+          startMs: a == startAyah
+              ? recitation.startOf(a)
+              : recitation.timing(a).startMs,
           endMs: recitation.timing(a).endMs,
           ayah: a,
         ),
@@ -335,7 +338,7 @@ abstract final class ScenePlan {
     int startAyah,
     int endAyah,
   ) {
-    final segStart = rec.timing(startAyah).startMs;
+    final segStart = rec.startOf(startAyah);
     final segEnd = rec.timing(endAyah).endMs;
     final edges = _slice(segStart, segEnd, weights);
     final cuts = <SceneCut>[];

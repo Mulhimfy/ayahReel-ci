@@ -61,6 +61,12 @@ class VerseStage extends StatefulWidget {
   /// The card's laid-out height, as [MeasureHeight] reports it.
   final ValueChanged<double> onHeight;
 
+  /// The basmala's text, for the unit numbered 0 a reel opening a surah
+  /// on verse 1 starts with: Al-Fatiha 1:1 in the reel's edition, set
+  /// bare (no verse number, no reference — it is no verse of this
+  /// surah). Null where there is none.
+  final Ayah? basmala;
+
   const VerseStage({
     super.key,
     required this.clock,
@@ -86,6 +92,7 @@ class VerseStage extends StatefulWidget {
     required this.verseFace,
     required this.translationFace,
     required this.onHeight,
+    this.basmala,
   });
 
   @override
@@ -173,7 +180,10 @@ class _VerseStageState extends State<VerseStage> {
     final ms = widget.clock.value;
     final i = VerseUnit.indexAt(widget.units, ms);
     final u = widget.units[i];
-    final ayah = widget.ayahs[u.ayah - 1];
+    final bare = u.ayah == 0;
+    final basmala = widget.basmala;
+    if (bare && basmala == null) return const SizedBox.shrink();
+    final ayah = bare ? basmala! : widget.ayahs[u.ayah - 1];
     final w = VerseFollow.at(_windowsOf(i), ms);
     final into = (ms - u.startMs).clamp(0, u.durationMs);
     final m = widget.motion;
@@ -188,7 +198,7 @@ class _VerseStageState extends State<VerseStage> {
       preset: widget.preset,
       onLight: widget.onLight,
       translation: widget.translation,
-      numbering: widget.numbering,
+      numbering: bare ? VerseNumbering.off : widget.numbering,
       showTranslation: widget.showTranslation,
       surah: widget.surah,
       verseFace: widget.verseFace,

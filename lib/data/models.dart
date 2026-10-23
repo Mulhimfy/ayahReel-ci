@@ -310,6 +310,17 @@ class Recitation {
     assert(covers(ayah, ayah), 'ayah $ayah outside $firstAyah..$lastAyah');
     return timings[ayah - firstAyah];
   }
+
+  /// Whether the recording opens on the basmala, before its verse 1: a
+  /// window numbered 0 at its head (see `RecitationService.withBasmala`).
+  bool get opensWithBasmala => timings.isNotEmpty && timings.first.ayah == 0;
+
+  /// Where a reel of [startAyah] onward starts in this recording: at the
+  /// basmala when it opens a surah on verse 1 and the recording carries
+  /// one, else at the verse itself.
+  int startOf(int startAyah) => startAyah == 1 && opensWithBasmala
+      ? timings.first.startMs
+      : timing(startAyah).startMs;
 }
 
 @immutable

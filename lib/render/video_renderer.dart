@@ -883,6 +883,11 @@ abstract final class VideoRenderer {
 
     /// Its face, colour and frame.
     SurahTitleLook surahTitleLook = SurahTitleLook.classic,
+
+    /// The basmala's card (Al-Fatiha 1:1 in the reel's edition), for a
+    /// reel that opens a surah on verse 1 with a recording that carries
+    /// the basmala (see [Recitation.opensWithBasmala]). Null otherwise.
+    Ayah? basmala,
     ReelLayout layout = ReelLayout.fullFrame,
     bool roundedCorners = true,
     LetterboxBackdrop backdrop = LetterboxBackdrop.colour,
@@ -927,7 +932,14 @@ abstract final class VideoRenderer {
 
     // Segment of the recording covered by the chosen ayah range, up
     // to wherever the user cut it.
-    final segStartMs = recitation.timing(startAyah).startMs;
+    // The basmala, when the reel opens on it: drawn as a unit of its
+    // own before verse 1, which only the unit path does.
+    final opening = startAyah == 1 && recitation.opensWithBasmala
+        ? basmala
+        : null;
+    final segStartMs = opening != null
+        ? recitation.startOf(startAyah)
+        : recitation.timing(startAyah).startMs;
     final rangeEndMs = recitation.timing(end).endMs;
     final trimmed = trimEndMs != null && trimEndMs < rangeEndMs;
     final segEndMs = trimmed ? trimEndMs : rangeEndMs;
@@ -974,7 +986,9 @@ abstract final class VideoRenderer {
         // The light takes the accent's colour since 2026-10-21; a glint
         // cached in gold under another accent is drawn again.
         '${motion.light && !AyahOverlay.isHouseGold(AyahOverlay.lightTintOf(Color(accentArgb), accentInk)) ? '_gc' : ''}'
-        '${motion.followsWords ? '_w${_highlightFingerprint(words)}' : ''}';
+        '${motion.followsWords ? '_w${_highlightFingerprint(words)}' : ''}'
+        // Opening on the basmala: a card more, and every verse later.
+        '${opening != null ? '_bs${recitation.timings.first.endMs}' : ''}';
     // The letterbox card's shape, corners and backdrop all change the
     // finished picture, so they all belong in the key; full-frame
     // renders carry a single 'f' and are unaffected.
@@ -1333,7 +1347,9 @@ abstract final class VideoRenderer {
     // Only for a reel whose verses are cut into lines or move: every
     // other reel takes the path below exactly as it always has.
     var shows = const <_UnitShow>[];
-    final byUnits = (lines != null && !lines.isEmpty) || !motion.isNone;
+    final byUnits = (lines != null && !lines.isEmpty) ||
+        !motion.isNone ||
+        opening != null;
     var fromMemo = false;
     // The memo holds clips, and a clip is a card *and* the moment it
     // shows: the same verses and styling read by another voice (or by
@@ -1363,12 +1379,13 @@ abstract final class VideoRenderer {
         highlight: highlight,
         words: words,
         wordTimes: wordTimes,
+        basmala: opening,
         keepGoing: () => gen == _generation,
         onUnit: showPrep && onProgress != null
             ? (v) => onProgress(v * _prepShare)
             : null,
         draw: (ayah, part, name,
-                {lit, dim, glint = false, measure = false}) =>
+                {lit, dim, glint = false, measure = false, bare = false}) =>
             AyahRasterizer.rasterizeUnit(
               ayah,
               part: part,
@@ -1386,10 +1403,10 @@ abstract final class VideoRenderer {
               onLight: onLight,
               typography: typography,
               edition: edition,
-              numbering: numbering,
+              numbering: bare ? VerseNumbering.off : numbering,
               showTranslation: showTranslation,
               surah: recitation.surah,
-              fileTag: tag,
+              fileTag: bare ? '${tag}b_' : tag,
             ),
       );
       _checkCurrent(gen);
@@ -2567,12 +2584,21 @@ abstract final class VideoRenderer {
                 {({int start, int end})? lit,
                 int? dim,
                 bool glint,
-                bool measure})
+                bool measure,
+                bool bare})
         draw,
     required bool Function() keepGoing,
     void Function(double done)? onUnit,
+
+    /// The basmala's card, for the unit numbered 0 a reel opening a
+    /// surah on verse 1 starts with; drawn bare (no verse number, no
+    /// reference). Without it that unit is left out.
+    Ayah? basmala,
   }) async {
-    final units = VerseUnit.of(recitation, startAyah, endAyah, lines);
+    final units = [
+      for (final u in VerseUnit.of(recitation, startAyah, endAyah, lines))
+        if (u.ayah != 0 || basmala != null) u,
+    ];
     final follow = highlight ?? words;
     final needRows = motion.thread || motion.light;
     final clips = <_OverlayClip>[];
@@ -2580,7 +2606,8 @@ abstract final class VideoRenderer {
     for (var i = 0; i < units.length; i++) {
       if (!keepGoing()) throw const RenderCancelled();
       final u = units[i];
-      final ayah = ayahs[u.ayah - 1];
+      final bare = u.ayah == 0;
+      final ayah = bare ? basmala! : ayahs[u.ayah - 1];
       final verseStart = recitation.timing(u.ayah).startMs;
       final windows = VerseFollow.of(
         unit: u,
@@ -2599,7 +2626,10 @@ abstract final class VideoRenderer {
         var c = drawn[w.key];
         if (c == null) {
           final r = await draw(ayah, u.part, w.key,
-              lit: w.lit, dim: w.dimFrom, measure: needRows && rows.isEmpty);
+              lit: w.lit,
+              dim: w.dimFrom,
+              measure: needRows && rows.isEmpty,
+              bare: bare);
           if (needRows && rows.isEmpty) rows = r.rows;
           c = (file: r.file, height: r.height);
           drawn[w.key] = c;
@@ -2611,7 +2641,8 @@ abstract final class VideoRenderer {
       }
       File? glint;
       if (motion.light && rows.isNotEmpty) {
-        glint = (await draw(ayah, u.part, 'glint', glint: true)).file;
+        glint =
+            (await draw(ayah, u.part, 'glint', glint: true, bare: bare)).file;
       }
       final times = u.timesIn(wordTimes?[u.ayah], verseStart);
       final voiced = VerseRows.voicedIn(u.durationMs);
@@ -2696,7 +2727,8 @@ abstract final class VideoRenderer {
       words: words,
       wordTimes: wordTimes,
       keepGoing: () => true,
-      draw: (ayah, part, name, {lit, dim, glint = false, measure = false}) =>
+      draw: (ayah, part, name,
+              {lit, dim, glint = false, measure = false, bare = false}) =>
           AyahRasterizer.rasterizeUnit(
         ayah,
         part: part,

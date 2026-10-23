@@ -6,12 +6,15 @@ import 'package:flutter/services.dart';
 import '../data/fatiha_data.dart';
 import '../data/models.dart';
 import '../data/offline_pack.dart';
+import '../data/scene_catalog.dart';
+import '../data/surah_index.dart';
 import '../l10n/l10n.dart';
 import '../screens/reciter_screen.dart';
 import '../state/creation_state.dart';
 import '../theme/app_theme.dart';
 import 'a11y.dart';
 import 'glow_button.dart';
+import 'surah_picker_sheet.dart';
 
 /// Opens the offline download as the app's standard bottom sheet.
 Future<void> showOfflineSheet(BuildContext context) {
@@ -93,6 +96,34 @@ class _OfflineSheetState extends State<OfflineSheet> {
     _measure();
   }
 
+  /// A surah of the voice: the picker, its unrecorded surahs shut.
+  Future<void> _pickSurah() async {
+    HapticFeedback.selectionClick();
+    final pick = await showSurahPicker(context,
+        unavailable: _plan.voice.missingSurahs);
+    if (pick != null && mounted) {
+      _set(_plan.copyWith(scope: OfflineVoice.surah, surah: pick.number));
+    }
+  }
+
+  /// A juz of the voice: thirty numbers in a grid.
+  Future<void> _pickJuz() async {
+    HapticFeedback.selectionClick();
+    final juz = await showModalBottomSheet<int>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (_) => _JuzGrid(
+        chosen: _plan.scope == OfflineVoice.juz ? _plan.juz : null,
+      ),
+    );
+    if (juz != null && mounted) {
+      _set(_plan.copyWith(scope: OfflineVoice.juz, juz: juz));
+    }
+  }
+
   Future<void> _changeVoice() async {
     HapticFeedback.selectionClick();
     final picked = await Navigator.of(context).push<Reciter>(
@@ -129,24 +160,24 @@ class _OfflineSheetState extends State<OfflineSheet> {
 
     // What is still to come, by part.
     final textLeft = have == null || have.text < 114 ? OfflinePack.textBytes : 0;
-    final voiceAll = OfflinePack.voiceBytes(p.voice, p.scope);
+    final voiceAll = OfflinePack.voiceBytes(p.voice, p.surahs);
     final voiceLeft = have == null || have.voiceOf == 0
         ? voiceAll
         : (voiceAll * (1 - have.voice / have.voiceOf)).round();
     // Each row says its own size whether or not it is ticked, so the
     // choice is made knowing it.
     final stills = OfflinePack.scenesFor(
-        OfflinePlan(voice: p.voice, stills: true, clips: false));
+        p.copyWith(stills: true, clips: false));
     final clips = OfflinePack.scenesFor(
-        OfflinePlan(voice: p.voice, stills: false, clips: true));
+        p.copyWith(stills: false, clips: true));
     final stillsLeft = stills.fold(0, (a, s) => a + s.bytes);
     final clipsLeft = clips.fold(0, (a, s) => a + s.bytes);
     final stillCount = stills.length;
     final clipCount = clips.length;
     final total = textLeft +
         voiceLeft +
-        (p.stills ? stillsLeft : 0) +
-        (p.clips ? clipsLeft : 0);
+        (p.sceneTab != null && p.stills ? stillsLeft : 0) +
+        (p.sceneTab != null && p.clips ? clipsLeft : 0);
 
     return SafeArea(
       top: false,
@@ -194,34 +225,52 @@ class _OfflineSheetState extends State<OfflineSheet> {
                   _VoiceRow(
                     plan: p,
                     busy: busy,
-                    sizeOf: (scope) =>
-                        size(OfflinePack.voiceBytes(p.voice, scope)),
+                    sizeOf: (scope) => size(OfflinePack.voiceBytes(
+                        p.voice,
+                        OfflinePack.surahsFor(scope,
+                            surah: p.surah, juz: p.juz))),
                     done: have != null &&
                         have.voiceOf > 0 &&
                         have.voice == have.voiceOf,
                     onScope: (s) => _set(p.copyWith(scope: s)),
+                    onSurah: _pickSurah,
+                    onJuz: _pickJuz,
                     onChange: busy ? null : _changeVoice,
                   ),
                   const _Gap(),
-                  _Row(
-                    icon: Icons.image_outlined,
-                    title: l.offlineStills,
-                    note: l.offlineScenesNote(stillCount, size(stillsLeft)),
-                    done: stillCount == 0,
-                    doneLabel: l.offlineOnPhone,
-                    trailing: _Tick(on: p.stills),
-                    onTap: busy ? null : () => _set(p.copyWith(stills: !p.stills)),
+                  _SceneShelves(
+                    chosen: p.sceneTab,
+                    busy: busy,
+                    onPick: (tab) => _set(tab == null
+                        ? p.copyWith(clearSceneTab: true)
+                        : p.copyWith(sceneTab: tab)),
                   ),
-                  const _Gap(),
-                  _Row(
-                    icon: Icons.movie_creation_outlined,
-                    title: l.offlineClips,
-                    note: l.offlineScenesNote(clipCount, size(clipsLeft)),
-                    done: clipCount == 0,
-                    doneLabel: l.offlineOnPhone,
-                    trailing: _Tick(on: p.clips),
-                    onTap: busy ? null : () => _set(p.copyWith(clips: !p.clips)),
-                  ),
+                  if (p.sceneTab != null) ...[
+                    const _Gap(),
+                    _Row(
+                      icon: Icons.image_outlined,
+                      title: l.offlineStills,
+                      note: l.offlineScenesNote(stillCount, size(stillsLeft)),
+                      done: stillCount == 0,
+                      doneLabel: l.offlineOnPhone,
+                      trailing: _Tick(on: p.stills),
+                      onTap: busy
+                          ? null
+                          : () => _set(p.copyWith(stills: !p.stills)),
+                    ),
+                    const _Gap(),
+                    _Row(
+                      icon: Icons.movie_creation_outlined,
+                      title: l.offlineClips,
+                      note: l.offlineScenesNote(clipCount, size(clipsLeft)),
+                      done: clipCount == 0,
+                      doneLabel: l.offlineOnPhone,
+                      trailing: _Tick(on: p.clips),
+                      onTap: busy
+                          ? null
+                          : () => _set(p.copyWith(clips: !p.clips)),
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   if (busy) ...[
                     ClipRRect(
@@ -405,14 +454,17 @@ class _Tick extends StatelessWidget {
       );
 }
 
-/// The voice: whose, and how much of it — none, Juz' 30, or the whole
-/// Quran, each with its size.
+/// The voice: whose, and how much of it — none, Juz' 30, one surah or
+/// one juz, each with its size. One at a time: a surah or a juz is a few
+/// minutes' download, where the whole Quran was an evening's.
 class _VoiceRow extends StatelessWidget {
   final OfflinePlan plan;
   final bool busy;
   final bool done;
   final String Function(OfflineVoice scope) sizeOf;
   final ValueChanged<OfflineVoice> onScope;
+  final VoidCallback onSurah;
+  final VoidCallback onJuz;
   final VoidCallback? onChange;
 
   const _VoiceRow({
@@ -421,6 +473,8 @@ class _VoiceRow extends StatelessWidget {
     required this.done,
     required this.sizeOf,
     required this.onScope,
+    required this.onSurah,
+    required this.onJuz,
     required this.onChange,
   });
 
@@ -484,10 +538,29 @@ class _VoiceRow extends StatelessWidget {
                 if (s != OfflineVoice.values.first) const SizedBox(width: 6),
                 Expanded(
                   child: _ScopeChip(
-                    label: l.offlineScope(s.name),
-                    size: s == OfflineVoice.none ? null : sizeOf(s),
+                    label: switch (s) {
+                      OfflineVoice.surah when plan.scope == s =>
+                        l.localizedSurahName(
+                            surahIndex[plan.surah - 1].nameEnglish),
+                      OfflineVoice.juz when plan.scope == s =>
+                        l.offlineJuzNumber(plan.juz),
+                      _ => l.offlineScope(s.name),
+                    },
+                    size: s == OfflineVoice.none ||
+                            ((s == OfflineVoice.surah ||
+                                    s == OfflineVoice.juz) &&
+                                plan.scope != s)
+                        ? null
+                        : sizeOf(s),
+                    more: s == OfflineVoice.surah || s == OfflineVoice.juz,
                     chosen: plan.scope == s,
-                    onTap: busy ? null : () => onScope(s),
+                    onTap: busy
+                        ? null
+                        : switch (s) {
+                            OfflineVoice.surah => onSurah,
+                            OfflineVoice.juz => onJuz,
+                            _ => () => onScope(s),
+                          },
                   ),
                 ),
               ],
@@ -505,11 +578,15 @@ class _ScopeChip extends StatelessWidget {
   final bool chosen;
   final VoidCallback? onTap;
 
+  /// Opens a choice of its own: a small chevron says so.
+  final bool more;
+
   const _ScopeChip({
     required this.label,
     required this.size,
     required this.chosen,
     required this.onTap,
+    this.more = false,
   });
 
   @override
@@ -534,21 +611,237 @@ class _ScopeChip extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Text(label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: chosen ? FontWeight.w600 : FontWeight.w400,
-                      color: chosen
-                          ? AppColors.goldBright
-                          : AppColors.textPrimary)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight:
+                                chosen ? FontWeight.w600 : FontWeight.w400,
+                            color: chosen
+                                ? AppColors.goldBright
+                                : AppColors.textPrimary)),
+                  ),
+                  if (more)
+                    Icon(Icons.expand_more_rounded,
+                        size: 14,
+                        color: chosen
+                            ? AppColors.goldBright
+                            : AppColors.textSecondary),
+                ],
+              ),
               if (size != null)
                 Text(size!,
                     style: const TextStyle(
                         fontSize: 10.5, color: AppColors.textSecondary)),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The shelves of sceneries, one to bring down at a time: Sky,
+/// Mountains, Water… each with how many it holds, or none.
+class _SceneShelves extends StatelessWidget {
+  final String? chosen;
+  final bool busy;
+  final ValueChanged<String?> onPick;
+
+  const _SceneShelves({
+    required this.chosen,
+    required this.busy,
+    required this.onPick,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    final t = Theme.of(context).textTheme;
+    final tabs = SceneCatalog.tabs;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 11, 0, 12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceRaised.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.landscape_outlined,
+                  size: 19, color: AppColors.gold),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(l.offlineScenes,
+                    style: t.bodyMedium?.copyWith(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 34,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsetsDirectional.only(end: 14),
+              children: [
+                _ShelfChip(
+                  label: l.offlineScope('none'),
+                  chosen: chosen == null,
+                  onTap: busy ? null : () => onPick(null),
+                ),
+                for (final tab in tabs)
+                  _ShelfChip(
+                    label: '${l.sceneTab(tab)} · '
+                        '${SceneCatalog.inTab(tab).where((s) => !s.bundled).length}',
+                    chosen: chosen == tab,
+                    onTap: busy ? null : () => onPick(tab),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ShelfChip extends StatelessWidget {
+  final String label;
+  final bool chosen;
+  final VoidCallback? onTap;
+
+  const _ShelfChip({
+    required this.label,
+    required this.chosen,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(end: 6),
+      child: Semantics(
+        button: true,
+        selected: chosen,
+        inMutuallyExclusiveGroup: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: chosen
+                  ? AppColors.gold.withValues(alpha: 0.16)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(17),
+              border: Border.all(
+                  color: chosen ? AppColors.gold : AppColors.stroke),
+            ),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: chosen ? FontWeight.w600 : FontWeight.w400,
+                color: chosen ? AppColors.goldBright : AppColors.textPrimary,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The thirty juz, to pick one.
+class _JuzGrid extends StatelessWidget {
+  final int? chosen;
+
+  const _JuzGrid({required this.chosen});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    final t = Theme.of(context).textTheme;
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 38,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.stroke,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            A11yHeader(
+              child: Text(l.offlinePickJuz,
+                  textAlign: TextAlign.center, style: t.titleMedium),
+            ),
+            const SizedBox(height: 12),
+            GridView.count(
+              crossAxisCount: 6,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              children: [
+                for (var j = 1; j <= 30; j++)
+                  Semantics(
+                    button: true,
+                    selected: chosen == j,
+                    label: l.offlineJuzNumber(j),
+                    excludeSemantics: true,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => Navigator.of(context).pop(j),
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: chosen == j
+                              ? AppColors.gold.withValues(alpha: 0.18)
+                              : AppColors.surfaceRaised,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                              color: chosen == j
+                                  ? AppColors.gold
+                                  : AppColors.stroke),
+                        ),
+                        child: Text(
+                          '$j',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: chosen == j
+                                ? AppColors.goldBright
+                                : AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
         ),
       ),
     );

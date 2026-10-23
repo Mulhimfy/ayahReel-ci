@@ -15,6 +15,7 @@ import 'local_range_client.dart';
 import 'ffmpeg_progress.dart';
 import 'ffmpeg_setup.dart';
 import 'models.dart';
+import 'reel_duration.dart';
 import 'reel_limits.dart';
 import 'surah_index.dart';
 import 'surah_slice.dart';
@@ -213,6 +214,128 @@ abstract final class RecitationService {
       job.unlisten(onProgress);
       _inFlight.remove(key);
     }
+  }
+
+  // ---- the basmala before a surah's first verse ------------------------
+
+  /// What the files [withBasmala] makes are named for: bump it if how
+  /// they are made ever changes.
+  static const _basmalaVersion = 'b1';
+
+  static final _withBasmala = <String, Recitation>{};
+
+  /// [rec] with the basmala before its verse 1, as the reciter recites
+  /// it, for a reel that opens a surah on its first verse: one file, the
+  /// basmala then the verses, with the basmala's window numbered 0 at its
+  /// head and every verse's moved along after it (see
+  /// [Recitation.startOf]). Up to verse [end] only: what the reel plays.
+  ///
+  /// The basmala is the voice's own Al-Fatiha 1:1, which is the basmala
+  /// and nothing else in the mushaf; a surah-file voice whose table puts
+  /// the isti'adha in that window has it cut off by the slice itself
+  /// (`SurahFiles.openingMs`). Two things leave a reel as it was, with no
+  /// basmala, rather than risk a wrong one:
+  ///
+  ///  * a surah that has none (At-Tawbah), Al-Fatiha (whose verse 1 is
+  ///    the basmala), the user's own recording, a recording that doesn't
+  ///    start at verse 1;
+  ///  * a 1:1 that doesn't sound like the basmala alone: far shorter or
+  ///    longer than the basmala runs at the voice's pace, as a take that
+  ///    opens with the isti'adha does. Measured against
+  ///    [ReelDuration.basmalaMs], which every voice's pace is calibrated
+  ///    on.
+  ///
+  /// Failing to fetch it is the same: a reel without a basmala is the
+  /// reel the app always made; a reel that fails because of one is not.
+  static Future<Recitation> withBasmala(
+      Reciter reciter, Recitation rec, int end) async {
+    if (reciter.isUserAudio ||
+        rec.surah == 1 ||
+        rec.surah == 9 ||
+        rec.opensWithBasmala ||
+        rec.timings.isEmpty ||
+        rec.firstAyah != 1) {
+      return rec;
+    }
+    final last = math.min(end, rec.lastAyah);
+    final key = '${rec.audioPath}|$last';
+    final hit = _withBasmala[key];
+    if (hit != null && File(hit.audioPath).existsSync()) return hit;
+    try {
+      final b = await _basmalaOf(reciter);
+      if (b == null) return rec;
+      final cutMs = rec.timing(last).endMs;
+      final out =
+          File('${rec.audioPath}.$_basmalaVersion-$last.$_joinExt');
+      final lead = File('${out.path}.lead');
+      if (!out.existsSync() || !lead.existsSync()) {
+        final leadMs = b.endMs - b.startMs;
+        await _encode(
+          '-ss ${b.startMs / 1000} -to ${b.endMs / 1000} -i "${b.path}" '
+          '-to ${cutMs / 1000} -i "${rec.audioPath}" '
+          // Each brought to one rate and layout first: a basmala from
+          // one host and verses from another need not agree on either.
+          '-filter_complex "'
+          '[0:a]aresample=44100,aformat=sample_fmts=fltp:channel_layouts=stereo[b];'
+          '[1:a]aresample=44100,aformat=sample_fmts=fltp:channel_layouts=stereo[v];'
+          '[b][v]concat=n=2:v=0:a=1[a]" -map "[a]"',
+          out,
+          expectedMs: leadMs + cutMs,
+          what: 'basmala before surah ${rec.surah}',
+        );
+        await lead.writeAsString('$leadMs');
+      }
+      final leadMs = int.tryParse((await lead.readAsString()).trim());
+      if (leadMs == null || leadMs <= 0) return rec;
+      final verse1 = rec.timing(1).startMs + leadMs;
+      final derived = Recitation(
+        reciterId: rec.reciterId,
+        surah: rec.surah,
+        audioPath: out.path,
+        timings: [
+          // The basmala holds the screen until verse 1 begins.
+          AyahTiming(0, 0, verse1),
+          for (final t in rec.timings)
+            if (t.ayah <= last)
+              AyahTiming(t.ayah, t.startMs + leadMs, t.endMs + leadMs),
+        ],
+        // Times taken against the surah's own file land this much later
+        // in this one.
+        originMs: rec.originMs == null ? null : rec.originMs! - leadMs,
+      );
+      _withBasmala[key] = derived;
+      rlog('rec: basmala ${leadMs}ms before ${rec.surah}:1-$last '
+          '(${reciter.id})');
+      return derived;
+    } catch (e, st) {
+      rlogError('rec: basmala for ${reciter.id} ${rec.surah}', e, st);
+      return rec;
+    }
+  }
+
+  /// The basmala as [reciter] recites it — the window of its Al-Fatiha
+  /// 1:1 — or null when it can't be had or doesn't sound like the
+  /// basmala alone (see [withBasmala]).
+  static Future<({String path, int startMs, int endMs})?> _basmalaOf(
+      Reciter reciter) async {
+    if (!reciter.hasSurah(1)) return null;
+    final Recitation fatiha;
+    try {
+      fatiha = await load(reciter, 1, startAyah: 1, endAyah: 1);
+    } catch (e) {
+      rlog('rec: no basmala for ${reciter.id}: $e');
+      return null;
+    }
+    if (fatiha.timings.isEmpty || !fatiha.covers(1, 1)) return null;
+    final w = fatiha.timing(1);
+    final expected = ReelDuration.basmalaMs * reciter.pace;
+    final d = w.durationMs;
+    if (d < expected * 0.4 || d > expected * 1.75) {
+      rlog('rec: ${reciter.id} 1:1 runs ${d}ms against about '
+          '${expected.round()}ms for the basmala — left out');
+      return null;
+    }
+    return (path: fatiha.audioPath, startMs: w.startMs, endMs: w.endMs);
   }
 
   /// Whether [rec] can answer a request for [start]..[end]: it covers

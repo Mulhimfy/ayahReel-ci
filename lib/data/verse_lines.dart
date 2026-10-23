@@ -1079,7 +1079,10 @@ class VerseUnit {
     ];
   }
 
-  /// The verse's units over `[startAyah, endAyah]`, in order and gapless.
+  /// The verse's units over `[startAyah, endAyah]`, in order and gapless
+  /// — led, for a reel that opens a surah on verse 1 with a recording
+  /// that carries the basmala, by the basmala's own unit, numbered 0
+  /// (see [Recitation.opensWithBasmala]).
   static List<VerseUnit> of(
     Recitation rec,
     int startAyah,
@@ -1087,6 +1090,10 @@ class VerseUnit {
     VerseLinePlan? plan,
   ) {
     final out = <VerseUnit>[];
+    if (startAyah == 1 && rec.opensWithBasmala) {
+      final b = rec.timings.first;
+      out.add(VerseUnit(0, null, b.startMs, b.endMs));
+    }
     for (var a = startAyah; a <= endAyah; a++) {
       final parts = plan?.partsOf(a);
       if (parts == null || parts.isEmpty) {

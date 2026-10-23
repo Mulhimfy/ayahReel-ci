@@ -83,6 +83,7 @@ class CustomizeScreen extends StatelessWidget {
   static bool isDefault(AppSettings s, CreationState c) =>
       s.verseLines == VerseLines.preferred &&
       s.scenesFollowLines &&
+      s.basmala &&
       !s.surahTitle &&
       s.verseNumbering == VerseNumbering.mark &&
       !s.highQualityVideo &&
@@ -96,6 +97,7 @@ class CustomizeScreen extends StatelessWidget {
     SettingsService.update(SettingsService.state.value.copyWith(
       verseLines: VerseLines.preferred,
       scenesFollowLines: true,
+      basmala: true,
       surahTitle: false,
       verseNumbering: VerseNumbering.mark,
       highQualityVideo: false,
@@ -290,6 +292,14 @@ class _Page extends StatelessWidget {
               note: l.surahNameNote,
               value: s.surahTitle,
               onChanged: (on) => update((x) => x.copyWith(surahTitle: on)),
+            ),
+            const _Rule(),
+            _SwitchLine(
+              icon: Icons.auto_stories_outlined,
+              title: l.basmalaTitle,
+              note: l.basmalaNote,
+              value: s.basmala,
+              onChanged: (on) => update((x) => x.copyWith(basmala: on)),
             ),
             const _Rule(),
             _Label(l.verseNumbersTitle, note: l.verseNumbersNote),
