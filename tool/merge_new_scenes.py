@@ -1,6 +1,15 @@
 """Merge the published new scenes into AyahReel's catalog and posters.
 
 python3 -I merge_scenes.py <repo> <manifest new_scenes.json> <built.json> <posters dir>
+
+Since 2026-10-23 most posters are served rather than carried in the app:
+every poster lives on the scenes repository's gh-pages branch, under
+posters/<id>.<ext> (https://mulhimfy.github.io/ayah-reels-scenes/posters),
+and only the bundled sceneries' and each tab's first eighteen stay in
+assets/scene_thumbs; the rest carry "pa": false in catalog.json. After a
+merge, push the new posters to gh-pages too, and mark the ones past each
+tab's first screen "pa": false and delete them here (see
+`SceneCatalog.posterOf` and test/cards_screen_test.dart).
 """
 import json
 import os

@@ -512,6 +512,37 @@ reels, one pass, FFmpeg 6.1.1 on the runner (`desk-previews.yml`,
   tightest budgets only (`sceneThreads` set), where that decode has one
   or two threads and memory is what runs out; measure on a phone first.
 
+## 2026-10-23: an iPhone's save lost at "starting"
+
+One note, iOS 16.2 (build 20C65), `version: 1.0.9`, `code: 2026-10-14`,
+176 reels made, source `exportTrouble`, "My reel didn't save":
+
+    tight, 1 lost · lost: the app closed while a reel was saving (starting)
+
+Nothing more could be said, for two reasons now fixed in Dart
+(`code: 2026-10-23`):
+
+- **iOS recorded no memory.** `PhoneBudget._memoryNow` read only Linux's
+  /proc, so an iPhone's note never had `app … MB`. It now reads the app's
+  resident memory and its peak from the runtime (`ProcessInfo.currentRss`
+  and `maxRss`; the phone's free memory needs native code iOS doesn't
+  give a patch), and the 3-second reading runs on iOS too.
+- **"starting" hid a joined render.** The stage is written by the render
+  as it draws cards and runs passes. A Save that joins the eager render
+  already encoding (or restarts it) starts the record after those stages
+  have passed, so a death in the rest of that encode read "starting".
+  The join now writes `joined the eager render at N%`, the restart
+  `eager render restarted`.
+
+What it likely was: an iPhone on `tight` (under 4.6 GB, so an XR, 11 or
+older) encodes in the app, on x264, beside the preview; dying in the
+first seconds of the encode, with no `hidden` mark, is the system ending
+a foreground app for memory (jetsam). The 1.0.10 store build keeps the
+screen on during a save (`isIdleTimerDisabled`), which rules out the
+auto-lock half of it. If the next iPhone notes say `joined the eager
+render` with a high peak, the lever is the same as on Android: plan iOS
+saves one step smaller (`tightest`) when the phone is under 4 GB.
+
 ## What a note says since 2026-10-08
 
 While a foreground save runs, `PhoneBudget` writes its stage and the

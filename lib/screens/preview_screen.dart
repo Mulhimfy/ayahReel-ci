@@ -33,6 +33,7 @@ import '../data/series_library.dart';
 import '../data/reminder_service.dart';
 import '../data/review_prompt.dart';
 import '../data/rewards_service.dart';
+import '../data/platform_share.dart';
 import '../data/settings_service.dart';
 import '../data/share_origin.dart';
 import '../data/verse_font.dart';
@@ -59,10 +60,9 @@ import '../widgets/band_glow_ground.dart';
 import '../widgets/feedback_sheet.dart';
 import '../widgets/rate_sheet.dart';
 import '../widgets/dedicate_sheet.dart';
-import '../widgets/direct_share_button.dart';
 import '../widgets/glow_button.dart';
+import '../widgets/share_to.dart';
 import '../widgets/hashtags_sheet.dart';
-import '../widgets/instagram_choice.dart';
 import '../widgets/measure_height.dart';
 import '../widgets/motion_picker.dart';
 import '../widgets/reel_finish.dart';
@@ -78,7 +78,7 @@ import 'home_shell.dart';
 
 /// An app Share can hand the finished reel to directly, skipping the
 /// OS share sheet. Null anywhere below means the sheet itself.
-enum _DirectShare { whatsapp, instagramReel, instagramStory }
+enum _DirectShare { whatsapp, instagramReel, instagramStory, tiktok, youtube }
 
 /// Screen 4 of 4. The reel plays immediately: this is the aha moment.
 /// Verse text is driven live off the same timing table the exporter
@@ -1865,21 +1865,8 @@ class _PreviewScreenState extends State<PreviewScreen>
 
   /// [origin] anchors the iOS share sheet and is measured at tap time,
   /// not here: the render in between can take long enough that relying
-  /// on the button still being laid out is not safe.
-  /// "To Instagram": asks story or reel, then makes the reel and hands
-  /// it to that composer. Nothing is rendered until the answer is in,
-  /// so a dismissed question costs nothing.
-  Future<void> _toInstagram(BuildContext buttonContext) async {
-    final target = await showInstagramChoice(buttonContext);
-    if (target == null || !mounted || _busy) return;
-    await _export(
-      shareAfter: true,
-      direct: target == InstagramTarget.story
-          ? _DirectShare.instagramStory
-          : _DirectShare.instagramReel,
-    );
-  }
-
+  /// on the button still being laid out is not safe. [direct] sends the
+  /// reel straight into one app — picked from Share to — instead.
   Future<void> _export({
     required bool shareAfter,
     _DirectShare? direct,
@@ -2009,16 +1996,66 @@ class _PreviewScreenState extends State<PreviewScreen>
             }
           case _DirectShare.instagramReel:
           case _DirectShare.instagramStory:
+            // The caption box Instagram opens on is empty: the line and
+            // its tags are on the clipboard, one paste away.
+            await PlatformShare.copy(PlatformShare.caption(
+                ShareTarget.instagramReel,
+                line: caption,
+                surahName: _surahName));
             handed = direct == _DirectShare.instagramStory
                 ? await InstagramShare.shareStoryVideo(file)
                 : await InstagramShare.shareReel(file);
-            if (!handed && mounted) {
+            if (mounted) {
               messenger.showSnackBar(
-                toast(
-                  L10n.current.instagramUnavailable,
-                  tone: ToastTone.problem,
-                ),
+                handed
+                    ? toast(L10n.current.shareCaptionCopied,
+                        tone: ToastTone.done)
+                    : toast(
+                        L10n.current.instagramUnavailable,
+                        tone: ToastTone.problem,
+                      ),
               );
+            }
+          case _DirectShare.tiktok:
+          case _DirectShare.youtube:
+            final target = direct == _DirectShare.tiktok
+                ? ShareTarget.tiktok
+                : ShareTarget.youtube;
+            final app = target == ShareTarget.tiktok
+                ? 'TikTok'
+                : L10n.current.shareToYouTube;
+            final text = PlatformShare.caption(target,
+                line: caption, surahName: _surahName);
+            await PlatformShare.copy(text);
+            if (Platform.isIOS) {
+              // iOS hands neither app a video from another app without
+              // its own SDK: the reel goes into the library, where the
+              // app's picker shows it first, and the app is opened.
+              final inGallery = (saved?.inGallery ?? false) ||
+                  await _writeToGallery(file, saved);
+              handed = inGallery && await PlatformShare.send(target, file);
+              if (handed && mounted) {
+                messenger.showSnackBar(toast(
+                  L10n.current.shareOpenHint(app),
+                  tone: ToastTone.done,
+                  duration: const Duration(seconds: 9),
+                ));
+              }
+            } else {
+              handed = await PlatformShare.send(target, file,
+                  text: text, title: '$_surahName · ${_reciter.name}');
+              if (handed && mounted) {
+                messenger.showSnackBar(toast(
+                  L10n.current.shareCaptionCopied,
+                  tone: ToastTone.done,
+                ));
+              }
+            }
+            if (!handed && mounted) {
+              messenger.showSnackBar(toast(
+                L10n.current.shareAppMissing(app),
+                tone: ToastTone.problem,
+              ));
             }
           case null:
             break;
@@ -3023,72 +3060,68 @@ class _PreviewScreenState extends State<PreviewScreen>
                     ],
                     const SizedBox(height: 10),
                   ],
-                  // Builder so the share sheet's iOS anchor is this
-                  // button, measured before the render starts.
-                  Builder(
-                    builder: (buttonContext) => GlowButton(
-                      label: l.share,
-                      icon: Icons.ios_share_rounded,
-                      busy: _rendering,
-                      height: 46,
-                      breathe: true,
-                      // A fifth quicker than the house rate: this is
-                      // the end of the flow, and the one button left
-                      // to press should feel a shade more eager.
-                      pulseSpeed: 1.2,
-                      onPressed: !ready || _busy || blocked
-                          ? null
-                          : () => _export(
-                                shareAfter: true,
-                                origin: shareOriginOf(buttonContext),
-                              ),
-                    ),
+                  // The share sheet, and beside it Share to: every app a
+                  // reel can go straight into, in a panel rising out of
+                  // the button, each in its own app's colours. One button
+                  // where there were a row of them.
+                  Row(
+                    children: [
+                      Expanded(
+                        // Builder so the share sheet's iOS anchor is this
+                        // button, measured before the render starts.
+                        child: Builder(
+                          builder: (buttonContext) => GlowButton(
+                            label: l.share,
+                            icon: Icons.ios_share_rounded,
+                            busy: _rendering,
+                            height: 46,
+                            dense: true,
+                            breathe: true,
+                            // A fifth quicker than the house rate: this is
+                            // the end of the flow, and the one button left
+                            // to press should feel a shade more eager.
+                            pulseSpeed: 1.2,
+                            onPressed: !ready || _busy || blocked
+                                ? null
+                                : () => _export(
+                                      shareAfter: true,
+                                      origin: shareOriginOf(buttonContext),
+                                    ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ShareToButton(
+                          targets: [
+                            if (igOn) ...[
+                              ShareTarget.instagramReel,
+                              ShareTarget.instagramStory,
+                            ],
+                            ShareTarget.tiktok,
+                            ShareTarget.youtube,
+                            if (waOn) ShareTarget.whatsapp,
+                          ],
+                          onPick: !ready || _busy || blocked
+                              ? null
+                              : (t) => _export(
+                                    shareAfter: true,
+                                    direct: switch (t) {
+                                      ShareTarget.instagramReel =>
+                                        _DirectShare.instagramReel,
+                                      ShareTarget.instagramStory =>
+                                        _DirectShare.instagramStory,
+                                      ShareTarget.tiktok => _DirectShare.tiktok,
+                                      ShareTarget.youtube =>
+                                        _DirectShare.youtube,
+                                      ShareTarget.whatsapp =>
+                                        _DirectShare.whatsapp,
+                                    },
+                                  ),
+                        ),
+                      ),
+                    ],
                   ),
-                  // The straight-to-an-app shortcuts, side by side
-                  // under Share and each in its own app's colours, so
-                  // the hand finds the right one without reading.
-                  // Instagram leads: what this screen just made is a
-                  // reel, and that button opens the editor reels are
-                  // posted from. Alone, either takes the whole row.
-                  if (igOn || waOn) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        // "Story or reel?" is asked in a small panel
-                        // that rises out of this button: the same reel
-                        // can be either, and only the user knows which.
-                        if (igOn)
-                          Expanded(
-                            child: Builder(
-                              builder: (buttonContext) => DirectShareButton(
-                                label: l.sendToInstagram,
-                                icon: Icons.movie_creation_outlined,
-                                leading: const InstagramGlyph(),
-                                colors: instagramMesh,
-                                onPressed: !ready || _busy || blocked
-                                    ? null
-                                    : () => _toInstagram(buttonContext),
-                              ),
-                            ),
-                          ),
-                        if (igOn && waOn) const SizedBox(width: 8),
-                        if (waOn)
-                          Expanded(
-                            child: DirectShareButton(
-                              label: l.sendToWhatsApp,
-                              icon: Icons.send_rounded,
-                              colors: whatsappMesh,
-                              onPressed: !ready || _busy || blocked
-                                  ? null
-                                  : () => _export(
-                                        shareAfter: true,
-                                        direct: _DirectShare.whatsapp,
-                                      ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
                   const SizedBox(height: 8),
                   QuietButton(
                     label: l.saveToDevice,

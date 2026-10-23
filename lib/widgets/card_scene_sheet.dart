@@ -6,6 +6,7 @@ import '../l10n/l10n.dart';
 import '../theme/app_theme.dart';
 import 'a11y.dart';
 import 'glass_tile.dart';
+import 'scene_poster_image.dart';
 
 /// The scenery library, for a card.
 ///
@@ -271,14 +272,10 @@ class _Tile extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Image.asset(
-                      scene.thumbAsset,
-                      fit: BoxFit.cover,
-                      // A poster that is missing is a poster: the
-                      // gradient under it is measured from the scenery
-                      // itself.
-                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                    ),
+                    // A poster that is missing is a poster: the
+                    // gradient under it is measured from the scenery
+                    // itself.
+                    ScenePosterImage(scene),
                   ],
                 ),
               ),

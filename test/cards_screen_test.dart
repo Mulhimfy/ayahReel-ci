@@ -198,8 +198,21 @@ void main() {
     expect(SceneCatalog.all.where((s) => s.wide), isNotEmpty);
     for (final scene in SceneCatalog.all) {
       expect(scene.thumbAsset, anyOf(endsWith('.jpg'), endsWith('.webp')));
-      expect(File(scene.thumbAsset).existsSync(), isTrue,
-          reason: '${scene.id} has no poster');
+      // Carried in the app, or served by name and kept once seen —
+      // never neither, and never both.
+      expect(File(scene.thumbAsset).existsSync(), scene.posterInApp,
+          reason: '${scene.id}: poster in the app is ${scene.posterInApp}');
+    }
+    // The bundled sceneries keep theirs: a phone that has never been
+    // online still draws every scenery it can use.
+    for (final scene in SceneCatalog.all.where((s) => s.bundled)) {
+      expect(scene.posterInApp, isTrue, reason: scene.id);
+    }
+    // And each tab opens on posters it carries: its first screenful.
+    for (final tab in SceneCatalog.tabs) {
+      final first = SceneCatalog.leadersFirst(tab, SceneCatalog.inTab(tab))
+          .take(12);
+      expect(first.every((s) => s.posterInApp), isTrue, reason: tab);
     }
   });
 

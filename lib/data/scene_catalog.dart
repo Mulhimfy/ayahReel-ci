@@ -2,12 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'dart:ui' as ui;
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
 import 'debug_log.dart';
+import 'download.dart';
 import 'models.dart';
 
 /// One scenery in the library.
@@ -42,9 +46,17 @@ class Scene {
   /// files, so later sceneries live on later ones (see `releases`).
   final String? release;
 
-  /// The bundled poster's format. Later sceneries carry WebP posters,
-  /// about half the bytes of the JPEG ones at the same size.
+  /// The poster's format. Later sceneries carry WebP posters, about
+  /// half the bytes of the JPEG ones at the same size.
   final String posterExt;
+
+  /// Whether the poster is carried in the app. Only the bundled
+  /// sceneries' and the first screen of each tab are: the rest are
+  /// served (see [SceneCatalog.posterOf]) and kept once seen, which takes
+  /// about twenty megabytes out of the app's download — a scenery that
+  /// isn't bundled needs the network to be used at all, so its poster
+  /// needing it once costs nothing that wasn't already the case.
+  final bool posterInApp;
 
   const Scene({
     required this.id,
@@ -57,6 +69,7 @@ class Scene {
     required this.bundled,
     this.release,
     this.posterExt = 'jpg',
+    this.posterInApp = true,
   });
 
   factory Scene.fromJson(Map<String, dynamic> j) => Scene(
@@ -70,9 +83,13 @@ class Scene {
         bundled: j['bundled'] as bool? ?? false,
         release: j['release'] as String?,
         posterExt: j['poster'] as String? ?? 'jpg',
+        posterInApp: j['pa'] as bool? ?? true,
       );
 
   String get thumbAsset => 'assets/scene_thumbs/$id.$posterExt';
+
+  /// The poster's file name, served and cached alike.
+  String get posterName => '$id.$posterExt';
   String get bundledAsset => 'assets/backgrounds/$id.$ext';
   String get fileName => '$id.$ext';
 
@@ -315,6 +332,76 @@ abstract final class SceneCatalog {
     return d;
   }
 
+  // ── posters ───────────────────────────────────────────────────────
+
+  /// Where the posters the app doesn't carry are served: every
+  /// scenery's, by [Scene.posterName], from the scenes repository's
+  /// GitHub Pages site.
+  static const posterBase =
+      'https://mulhimfy.github.io/ayah-reels-scenes/posters';
+
+  /// Stands in for [posterBase] under test; empty fetches nothing.
+  @visibleForTesting
+  static String? debugPosterBase;
+
+  /// The poster for [s]: the one in the app, or the served one, kept on
+  /// the phone after the first look. Callers draw [Scene.gradientArgb]
+  /// under it and give the image an error builder: a poster that can't
+  /// be had yet (no network on a first look) leaves the gradient, which
+  /// is measured from the scenery itself.
+  static ImageProvider posterOf(Scene s) =>
+      s.posterInApp ? AssetImage(s.thumbAsset) : ScenePoster(s);
+
+  static final Map<String, Future<Uint8List?>> _posters = {};
+
+  /// Posters fetched at once, at most: a tab opens on a screenful.
+  static const _posterLanes = 6;
+  static int _posterBusy = 0;
+  static final _posterQueue = <Completer<void>>[];
+  static http.Client? _posterClient;
+
+  /// [s]'s served poster: off the phone when it was seen before, else
+  /// fetched and kept. Null when it can't be had. Never throws.
+  static Future<Uint8List?> posterBytes(Scene s) =>
+      _posters[s.id] ??= _posterBytes(s).whenComplete(() {
+        // A block, not an arrow: see [download] for why.
+        _posters.remove(s.id);
+      });
+
+  static Future<Uint8List?> _posterBytes(Scene s) async {
+    try {
+      final dir = Directory('${(await _cacheDir()).path}/posters');
+      if (!dir.existsSync()) dir.createSync(recursive: true);
+      final f = File('${dir.path}/${s.posterName}');
+      if (f.existsSync() && f.lengthSync() > 0) return await f.readAsBytes();
+      final base = debugPosterBase ?? posterBase;
+      if (base.isEmpty) return null;
+      if (_posterBusy >= _posterLanes) {
+        final turn = Completer<void>();
+        _posterQueue.add(turn);
+        await turn.future;
+      }
+      _posterBusy++;
+      try {
+        final client = _posterClient ??= http.Client();
+        final res =
+            await Download.get(client, Uri.parse('$base/${s.posterName}'));
+        if (res.statusCode != 200 || res.bodyBytes.isEmpty) return null;
+        // Written aside and renamed, as the sceneries are.
+        final part = File('${f.path}.part');
+        await part.writeAsBytes(res.bodyBytes, flush: true);
+        await part.rename(f.path);
+        return res.bodyBytes;
+      } finally {
+        _posterBusy--;
+        if (_posterQueue.isNotEmpty) _posterQueue.removeAt(0).complete();
+      }
+    } catch (e) {
+      rlog('poster ${s.id}: $e');
+      return null;
+    }
+  }
+
   /// The downloaded file for [s], or null if it has never been fetched.
   /// Bundled scenes return null — they are assets, not cache.
   static Future<File?> cachedFile(Scene s) async {
@@ -533,4 +620,37 @@ abstract final class SceneCatalog {
       }
     } catch (_) {/* the storage sheet re-measures either way */}
   }
+}
+
+/// A scenery's served poster as an image: the copy kept on the phone, or
+/// fetched once and kept (see [SceneCatalog.posterBytes]). One per
+/// scenery, keyed by its id, so the image cache holds it like any other.
+@immutable
+class ScenePoster extends ImageProvider<ScenePoster> {
+  final Scene scene;
+
+  const ScenePoster(this.scene);
+
+  @override
+  Future<ScenePoster> obtainKey(ImageConfiguration configuration) =>
+      SynchronousFuture<ScenePoster>(this);
+
+  @override
+  ImageStreamCompleter loadImage(ScenePoster key, ImageDecoderCallback decode) =>
+      MultiFrameImageStreamCompleter(codec: _load(decode), scale: 1.0);
+
+  Future<ui.Codec> _load(ImageDecoderCallback decode) async {
+    final bytes = await SceneCatalog.posterBytes(scene);
+    if (bytes == null || bytes.isEmpty) {
+      throw StateError('no poster for ${scene.id} yet');
+    }
+    return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is ScenePoster && other.scene.id == scene.id;
+
+  @override
+  int get hashCode => scene.id.hashCode;
 }

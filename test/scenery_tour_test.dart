@@ -9,8 +9,8 @@ import 'package:ayah_reels/state/creation_state.dart';
 import 'package:ayah_reels/theme/app_theme.dart';
 
 /// The scenery screen carries four controls a first-time user has no
-/// way to guess at — the tab rail, the multi-scene pill, the frame, and
-/// what the wide card opens up. The walkthrough is what tells them, and
+/// way to guess at — the places with the pill that chooses for you, the
+/// multi-scene pill, the frame, and the reset. The walkthrough is what tells them, and
 /// it has exactly one chance: it is shown on the first visit and never
 /// again. These pin that it comes up, walks in order, cannot be
 /// dropped part-way, and marks itself seen at the end.
@@ -52,26 +52,26 @@ void main() {
   testWidgets('first visit is walked through, in order', (t) async {
     await open(t);
 
-    expect(find.text('Pick a mood'), findsOneWidget);
+    expect(find.text('Choose a place'), findsOneWidget);
     expect(find.text('1 of 4'), findsOneWidget);
 
     await t.tap(find.text('OK'));
     await t.pump();
-    expect(find.text('More than one scene'), findsOneWidget);
+    expect(find.text('A scenery for each verse'), findsOneWidget);
 
     await t.tap(find.text('OK'));
     await t.pump();
-    expect(find.text('The frame'), findsOneWidget);
+    expect(find.text('Full screen or wide card'), findsOneWidget);
 
     await t.tap(find.text('OK'));
     await t.pump();
-    expect(find.text('Corners and edges'), findsOneWidget);
-    expect(find.textContaining('next screen'), findsOneWidget);
+    expect(find.text('Start over'), findsOneWidget);
+    expect(find.textContaining('Clears every scenery'), findsOneWidget);
 
     await t.tap(find.text('Got it'));
     await t.pump();
 
-    expect(find.text('Corners and edges'), findsNothing);
+    expect(find.text('Start over'), findsNothing);
     expect(SettingsService.state.value.sceneryTourDone, isTrue);
   });
 
@@ -85,12 +85,12 @@ void main() {
     await t.tapAt(const Offset(12, 12));
     await t.pump();
 
-    expect(find.text('Pick a mood'), findsOneWidget);
+    expect(find.text('Choose a place'), findsOneWidget);
     expect(SettingsService.state.value.sceneryTourDone, isFalse);
 
     await t.tap(find.text('OK'));
     await t.pump();
-    expect(find.text('More than one scene'), findsOneWidget);
+    expect(find.text('A scenery for each verse'), findsOneWidget);
   });
 
   testWidgets('a second visit is left alone', (t) async {
@@ -98,7 +98,7 @@ void main() {
         AppSettings.defaults.copyWith(sceneryTourDone: true);
     await open(t);
 
-    expect(find.text('Pick a mood'), findsNothing);
+    expect(find.text('Choose a place'), findsNothing);
     // The screen itself is untouched by the walkthrough's absence.
     expect(find.text('Choose the scenery'), findsOneWidget);
   });

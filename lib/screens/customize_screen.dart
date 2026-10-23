@@ -27,6 +27,7 @@ import '../widgets/motion_picker.dart' show MotionPresetCard;
 import '../widgets/offline_sheet.dart';
 import '../widgets/surah_title.dart';
 import '../widgets/verse_stage.dart';
+import '../widgets/scene_poster_image.dart';
 
 /// Settings → Customize: how every reel is made, on a page of its own.
 ///
@@ -833,12 +834,7 @@ class _Poster extends StatelessWidget {
               ),
             ),
           ),
-          Image.asset(
-            scene.thumbAsset,
-            fit: BoxFit.cover,
-            excludeFromSemantics: true,
-            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-          ),
+          ScenePosterImage(scene),
           const DecoratedBox(
             decoration: BoxDecoration(gradient: AyahRasterizer.scrimGradient),
           ),
@@ -864,10 +860,9 @@ class _Ground extends StatelessWidget {
     Widget fallback(BuildContext _, Object __, StackTrace? ___) =>
         const SizedBox.shrink();
     Widget? picture;
-    final thumb = b.isUserFile ? null : SceneCatalog.byId(b.id)?.thumbAsset;
+    final thumb = b.isUserFile ? null : SceneCatalog.byId(b.id);
     if (thumb != null) {
-      picture = Image.asset(thumb,
-          fit: BoxFit.cover, excludeFromSemantics: true, errorBuilder: fallback);
+      picture = ScenePosterImage(thumb);
     } else if (b.isImage && b.imageAsset.isNotEmpty) {
       picture = Image.asset(b.imageAsset,
           fit: BoxFit.cover,

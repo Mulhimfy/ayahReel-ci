@@ -5,6 +5,7 @@ import UIKit
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   /// Held for the engine's life, with the handler on it.
   private var renderChannel: FlutterMethodChannel?
+  private var appsChannel: FlutterMethodChannel?
 
   override func application(
     _ application: UIApplication,
@@ -44,6 +45,32 @@ import UIKit
         result(true)
       }
       renderChannel = channel
+    }
+    // The reel screen's Share to, for TikTok and YouTube: neither takes
+    // a video from another app on iOS without its own SDK and a client
+    // key, so Dart saves the reel to the library first and this opens
+    // the app by the first of its schemes that answers. The schemes are
+    // listed in Info.plist's LSApplicationQueriesSchemes.
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "AyahReelApps") {
+      let channel = FlutterMethodChannel(
+        name: "ayahreel/apps", binaryMessenger: registrar.messenger())
+      channel.setMethodCallHandler { call, result in
+        guard call.method == "open" else {
+          result(FlutterMethodNotImplemented)
+          return
+        }
+        let urls = (call.arguments as? [String: Any])?["urls"] as? [String] ?? []
+        for raw in urls {
+          guard let url = URL(string: raw), UIApplication.shared.canOpenURL(url)
+          else { continue }
+          UIApplication.shared.open(url, options: [:]) { opened in
+            result(opened)
+          }
+          return
+        }
+        result(false)
+      }
+      appsChannel = channel
     }
   }
 }

@@ -52,6 +52,10 @@
 	<array>
 		<string>instagram-reels</string>
 		<string>instagram-stories</string>
+		<string>snssdk1233</string>
+		<string>tiktok</string>
+		<string>snssdk1180</string>
+		<string>youtube</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>

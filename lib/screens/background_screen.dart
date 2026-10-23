@@ -29,6 +29,7 @@ import '../widgets/glow_button.dart';
 import '../widgets/how_to_sheet.dart';
 import '../widgets/step_dots.dart';
 import 'style_screen.dart';
+import '../widgets/scene_poster_image.dart';
 
 /// Screen 3 of 5. One decision: the scenery.
 /// A grid of bundled sceneries plus the user's own photo/video. The
@@ -221,6 +222,7 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
   final _railKey = GlobalKey();
   final _multiKey = GlobalKey();
   final _frameKey = GlobalKey();
+  final _resetKey = GlobalKey();
 
   /// Whether the walkthrough is on screen. Held back until the catalog
   /// has landed: the tab rail is empty — and so has nothing to point
@@ -892,7 +894,11 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
         SettingsService.state.value.copyWith(sceneryTourDone: true));
   }
 
-  /// What the first-run walkthrough says, in the order it says it.
+  /// What the first-run walkthrough says, in the order it says it: the
+  /// places and the pill that chooses for you, several sceneries, the
+  /// frame, and — when something is chosen to clear — the reset. Each
+  /// one line on what the control does here, nothing about the screens
+  /// after this one.
   List<CoachStep> _tourSteps(L10n l) => [
         CoachStep(
           target: _railKey,
@@ -909,12 +915,10 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
           title: l.tourFrameTitle,
           body: l.tourFrameBody,
         ),
-        // What the wide card opens up is set on the next screen; this
-        // says so, standing by the pills that open it.
         CoachStep(
-          target: _frameKey,
-          title: l.tourFinishTitle,
-          body: l.tourFinishBody,
+          target: _resetKey,
+          title: l.tourResetTitle,
+          body: l.tourResetBody,
         ),
       ];
 
@@ -1095,7 +1099,10 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
                 // let go of before that.
                 if (creationState.backgroundChosen &&
                     creationState.scenes.isNotEmpty) ...[
-                  _ResetPill(onTap: _resetScenes),
+                  KeyedSubtree(
+                    key: _resetKey,
+                    child: _ResetPill(onTap: _resetScenes),
+                  ),
                   const SizedBox(width: 8),
                 ],
                 // A one-verse reel has room for one scenery, so there is
@@ -1915,8 +1922,7 @@ class _SceneTile extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Image.asset(scene.thumbAsset,
-                        fit: BoxFit.cover, excludeFromSemantics: true),
+                    ScenePosterImage(scene),
                   ],
                 ),
               ),

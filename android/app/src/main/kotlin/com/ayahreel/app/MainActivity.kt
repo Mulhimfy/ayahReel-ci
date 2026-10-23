@@ -150,6 +150,24 @@ class MainActivity : FlutterActivity() {
                 }
             }
 
+        // Straight into another app's composer with the reel: TikTok's
+        // editor, YouTube's upload screen. An ACTION_SEND pinned to each
+        // of the packages Dart lists, in turn, as a share sheet's row for
+        // that app would send it; false when none of them takes it, and
+        // Dart opens the share sheet instead.
+        MethodChannel(messenger, "ayahreel/apps")
+            .setMethodCallHandler { call, result ->
+                if (call.method != "shareVideo") {
+                    result.notImplemented(); return@setMethodCallHandler
+                }
+                val packages = call.argument<List<String>>("packages") ?: emptyList()
+                val text = call.argument<String>("text") ?: ""
+                val title = call.argument<String>("title") ?: ""
+                withSharedUri(call.argument<String>("path"), result) { uri ->
+                    packages.any { pkg -> sendTo(pkg, uri, text, title) }
+                }
+            }
+
         MethodChannel(messenger, "ayahreel/instagram")
             .setMethodCallHandler { call, result ->
                 val appId = call.argument<String>("appId") ?: ""
@@ -394,6 +412,34 @@ class MainActivity : FlutterActivity() {
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         return listOf(toStories, toStory).any { intent -> launch(intent) }
+    }
+
+    /**
+     * ACTION_SEND of the reel at [uri] to [pkg], with [text] and [title]
+     * for an app that reads them; false when [pkg] isn't there to take
+     * it. The read grant is explicit as well as flagged, as Instagram's
+     * is: the receiver is a separate app reading a uri our provider owns.
+     */
+    private fun sendTo(pkg: String, uri: Uri, text: String, title: String): Boolean {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = MP4
+            setPackage(pkg)
+            putExtra(Intent.EXTRA_STREAM, uri)
+            clipData = ClipData.newRawUri("reel", uri)
+            if (text.isNotEmpty()) putExtra(Intent.EXTRA_TEXT, text)
+            if (title.isNotEmpty()) {
+                putExtra(Intent.EXTRA_TITLE, title)
+                putExtra(Intent.EXTRA_SUBJECT, title)
+            }
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        if (packageManager.resolveActivity(intent, 0) == null) return false
+        try {
+            grantUriPermission(pkg, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        } catch (_: Exception) {
+            // The flag on the intent still carries the grant.
+        }
+        return launch(intent)
     }
 
     /** ACTION_SEND of [uri] as [mime], pinned to Instagram. */

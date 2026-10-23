@@ -41,6 +41,7 @@ import '../widgets/verse_stage.dart';
 import '../widgets/step_dots.dart';
 import 'background_screen.dart';
 import 'preview_screen.dart';
+import '../widgets/scene_poster_image.dart';
 
 /// The style step: everything about how a reel *looks* that is not
 /// what is in the picture.
@@ -499,9 +500,9 @@ class _StageState extends State<_Stage> {
                 )
               : null);
     } else {
-      final poster = SceneCatalog.byId(b.id)?.thumbAsset;
+      final poster = SceneCatalog.byId(b.id);
       top = poster != null
-          ? Image.asset(poster, fit: BoxFit.cover, excludeFromSemantics: true)
+          ? ScenePosterImage(poster)
           : (b.isImage && b.imageAsset.isNotEmpty
               ? Image.asset(b.imageAsset,
                   fit: BoxFit.cover, excludeFromSemantics: true)
@@ -1625,11 +1626,7 @@ class _BlurDisc extends StatelessWidget {
               ImageFiltered(
                 imageFilter: ui.ImageFilter.blur(
                     sigmaX: size * 0.12, sigmaY: size * 0.12),
-                child: Image.asset(scene.thumbAsset,
-                    fit: BoxFit.cover,
-                    cacheWidth: 96,
-                    excludeFromSemantics: true,
-                    errorBuilder: (_, __, ___) => const SizedBox.shrink()),
+                child: ScenePosterImage(scene, cacheWidth: 96),
               ),
             DecoratedBox(
               decoration: BoxDecoration(

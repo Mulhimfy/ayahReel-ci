@@ -384,8 +384,22 @@ abstract final class OfflinePack {
       if (!ok) return;
     }
 
-    // 4 · the sceneries, stills first. Three at a time.
+    // 4 · the sceneries, stills first. Three at a time. The shelf's
+    // posters go first: small, and what the picker shows offline.
     tell(OfflineStage.scenes, now: true);
+    final shelf = plan.sceneTab;
+    if (shelf != null) {
+      final posters = [
+        for (final s in SceneCatalog.inTab(shelf))
+          if (!s.posterInApp) s,
+      ];
+      for (var i = 0; i < posters.length && !_stop; i += 6) {
+        await Future.wait([
+          for (var k = i; k < posters.length && k < i + 6; k++)
+            SceneCatalog.posterBytes(posters[k]),
+        ]);
+      }
+    }
     for (var i = 0; i < scenes.length; i += 3) {
       final ok = await Future.wait([
         for (var k = i; k < scenes.length && k < i + 3; k++)

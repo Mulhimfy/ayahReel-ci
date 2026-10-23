@@ -790,62 +790,60 @@ class L10n {
   String tourStepOf(int step, int total) => _t('$step of $total',
       '$step من $total', '$total میں سے $step', '$step dari $total',
       '$step von $total');
-  String get tourThemesTitle => _t('Pick a mood', 'اختر الأجواء',
-      'ماحول چنیں', 'Pilih suasana', 'Stimmung wählen');
+  String get tourThemesTitle => _t('Choose a place', 'اختر مكانًا',
+      'جگہ چنیں', 'Pilih tempat', 'Wähl einen Ort');
   String get tourThemesBody => _t(
-      'Sky, mountains, mosques, nature… tap a tab to browse it, '
-          'then choose the scenery you like.',
-      'سماء، جبال، مساجد، طبيعة… انقر على تبويب لتصفّح مشاهده، '
-          'ثم اختر المشهد الذي يعجبك.',
-      'آسمان، پہاڑ، مساجد، فطرت… کسی ٹیب کو ٹیپ کر کے دیکھیں، '
-          'پھر جو منظر پسند آئے وہ چن لیں۔',
-      'Langit, gunung, masjid, alam… ketuk satu tab untuk menjelajah, '
-          'lalu pilih pemandangan yang Anda suka.',
-      'Himmel, Berge, Moscheen, Natur … tipp einen Reiter an, um ihn zu '
-          'durchstöbern, und wähl dann die Kulisse, die dir gefällt.');
-  String get tourMultiTitle => _t('More than one scene', 'أكثر من مشهد',
-      'ایک سے زیادہ مناظر', 'Lebih dari satu adegan', 'Mehr als eine Szene');
+      'Nearly 1,900 sceneries by place: sky, water, mountains, sacred '
+          'places and more. Tap one to set it behind your verses. The '
+          'first pill picks one for each verse by itself.',
+      'قرابة 1900 مشهد حسب المكان: سماء، ماء، جبال، أماكن مقدسة وغيرها. '
+          'انقر مشهدًا ليظهر خلف آياتك. وأول زر يختار لكل آية مشهدًا '
+          'بنفسه.',
+      'جگہ کے حساب سے تقریباً 1900 مناظر: آسمان، پانی، پہاڑ، مقدس مقامات '
+          'اور بہت کچھ۔ کسی منظر کو ٹیپ کریں تو وہ آیات کے پیچھے آ جائے۔ '
+          'پہلا بٹن ہر آیت کے لیے خود منظر چنتا ہے۔',
+      'Hampir 1.900 pemandangan menurut tempat: langit, air, gunung, '
+          'tempat suci, dan lainnya. Ketuk satu untuk memasangnya di '
+          'belakang ayat. Tombol pertama memilihkan satu untuk tiap ayat.',
+      'Fast 1.900 Kulissen nach Ort: Himmel, Wasser, Berge, heilige Orte '
+          'und mehr. Tippe eine an, um sie hinter deine Verse zu legen. '
+          'Der erste Knopf wählt selbst eine für jeden Vers.');
+  String get tourMultiTitle => _t('A scenery for each verse',
+      'مشهد لكل آية', 'ہر آیت کے لیے منظر', 'Pemandangan per ayat',
+      'Eine Kulisse je Vers');
   String get tourMultiBody => _t(
-      'Turn this on to pick several sceneries — your reel moves '
-          'through them in the order you tap them.',
-      'شغّل هذا لاختيار عدة مشاهد — يمرّ المقطع عليها بالترتيب '
-          'الذي نقرتها به.',
-      'کئی مناظر چننے کے لیے یہ آن کریں — ریل انہی کی ترتیب سے گزرے گی '
-          'جس ترتیب سے آپ نے ٹیپ کیا۔',
-      'Aktifkan ini untuk memilih beberapa pemandangan — reel Anda '
-          'melewatinya sesuai urutan ketukan Anda.',
-      'Schalte das ein, um mehrere Kulissen zu wählen — dein Reel läuft '
-          'in der Reihenfolge durch, in der du sie antippst.');
-  String get tourFrameTitle => _t('The frame', 'الإطار', 'فریم', 'Bingkai',
-      'Der Rahmen');
+      'Turn this on and tap several: the reel moves through them, verse '
+          'by verse or line by line, in the order you tap them.',
+      'فعّل هذا وانقر عدة مشاهد: يمرّ المقطع عليها آيةً آيةً أو سطرًا '
+          'سطرًا، بالترتيب الذي نقرتها به.',
+      'اسے آن کر کے کئی منظر ٹیپ کریں: ریل انہی میں آیت بہ آیت یا سطر بہ '
+          'سطر اسی ترتیب سے گزرے گی جس سے آپ نے ٹیپ کیا۔',
+      'Aktifkan ini lalu ketuk beberapa: reel berpindah di antaranya, '
+          'ayat demi ayat atau baris demi baris, sesuai urutan ketukan.',
+      'Schalte das ein und tippe mehrere an: das Reel geht sie Vers für '
+          'Vers oder Zeile für Zeile durch, in deiner Reihenfolge.');
+  String get tourFrameTitle => _t('Full screen or wide card',
+      'ملء الشاشة أو بطاقة عريضة', 'پوری اسکرین یا چوڑا کارڈ',
+      'Layar penuh atau kartu lebar', 'Vollbild oder breite Karte');
   String get tourFrameBody => _t(
-      'Full frame fills the screen with your scenery. Wide card '
-          'keeps a horizontal video its own shape, with the verse '
-          'below it.',
-      '«ملء الإطار» يملأ الشاشة بالمشهد. «بطاقة عريضة» تُبقي الفيديو '
-          'الأفقي بشكله، والآية تحته.',
-      '«پورا فریم» منظر سے سکرین بھر دیتا ہے۔ «چوڑا کارڈ» افقی ویڈیو کو '
-          'اس کی اپنی شکل میں رکھتا ہے، اور آیت اس کے نیچے آتی ہے۔',
-      '"Bingkai penuh" memenuhi layar dengan pemandangan. "Kartu lebar" '
-          'menjaga bentuk video horizontal, dengan ayat di bawahnya.',
-      '„Vollbild“ füllt den Bildschirm mit deiner Kulisse. „Breite Karte“ '
-          'lässt einem Querformat-Video seine Form, mit dem Vers darunter.');
-  String get tourFinishTitle => _t('Corners and edges', 'الزوايا والحواف',
-      'کونے اور کنارے', 'Sudut dan tepi', 'Ecken und Kanten');
-  String get tourFinishBody => _t(
-      "With the wide card, the space above and below it is your "
-          "scenery, blurred. Its colours and rounded corners are on the "
-          "next screen.",
-      'مع البطاقة العريضة يملأ مشهدك نفسه، مضبَّبًا، ما فوقها وما تحتها. '
-          'ألوانها وزواياها الدائرية في الشاشة التالية.',
-      'چوڑے کارڈ کے ساتھ اوپر نیچے کی جگہ آپ کا منظر ہی دھندلا ہو کر بھرتا '
-          'ہے۔ اس کے رنگ اور گول کونے اگلی سکرین پر ہیں۔',
-      'Dengan kartu lebar, ruang di atas dan bawahnya diisi pemandangan '
-          'Anda yang diburamkan. Warna dan sudut membulatnya ada di layar '
-          'berikutnya.',
-      'Mit der breiten Karte füllt deine Kulisse, unscharf, den Raum '
-          'darüber und darunter. Farben und abgerundete Ecken findest du '
-          'auf dem nächsten Bildschirm.');
+      'Full screen fills the frame with the scenery. Wide card keeps a '
+          'landscape video whole, with the verse beneath it.',
+      '«ملء الشاشة» يملأ الإطار بالمشهد. «البطاقة العريضة» تُبقي الفيديو '
+          'الأفقي كاملًا والآية تحته.',
+      '«پوری اسکرین» فریم کو منظر سے بھر دیتی ہے۔ «چوڑا کارڈ» افقی ویڈیو '
+          'کو پورا رکھتا ہے، اور آیت اس کے نیچے۔',
+      '"Layar penuh" mengisi bingkai dengan pemandangan. "Kartu lebar" '
+          'menjaga video horizontal tetap utuh, dengan ayat di bawahnya.',
+      '„Vollbild“ füllt den Rahmen mit der Kulisse. „Breite Karte“ lässt '
+          'ein Querformat-Video ganz, mit dem Vers darunter.');
+  String get tourResetTitle => _t('Start over', 'ابدأ من جديد',
+      'دوبارہ شروع کریں', 'Mulai lagi', 'Neu anfangen');
+  String get tourResetBody => _t(
+      'Clears every scenery chosen for this reel.',
+      'يزيل كل المشاهد المختارة لهذا المقطع.',
+      'اس ریل کے لیے چنے گئے سب مناظر ہٹا دیتا ہے۔',
+      'Menghapus semua pemandangan yang dipilih untuk reel ini.',
+      'Entfernt alle für dieses Reel gewählten Kulissen.');
 
   // ---- creation wizard: several sceneries ------------------------
   String get multipleScenes => _t('Multiple scenes', 'مشاهد متعددة',
@@ -6278,6 +6276,45 @@ class L10n {
       'Blendet ihn im Reel ein oder aus');
 
   // ---- motion ----------------------------------------------------------
+
+  /// The reel screen's button that opens the apps a reel can go
+  /// straight to.
+  String get shareTo =>
+      _t('Share to', 'شارك إلى', 'شیئر کریں', 'Bagikan ke', 'Teilen in');
+  String get shareToInstagramReel => _t('Instagram Reel', 'ريلز إنستغرام',
+      'انسٹاگرام ریل', 'Reel Instagram', 'Instagram-Reel');
+  String get shareToInstagramStory => _t('Instagram Story',
+      'قصة إنستغرام', 'انسٹاگرام اسٹوری', 'Story Instagram', 'Instagram-Story');
+  String get shareToYouTube => _t('YouTube Shorts', 'يوتيوب شورتس',
+      'یوٹیوب شارٹس', 'YouTube Shorts', 'YouTube Shorts');
+  String get shareToCaptionNote => _t(
+      'The reel goes straight in, its caption and hashtags copied',
+      'يُرسل المقطع مباشرة، مع نسخ الوصف والوسوم',
+      'ریل سیدھی جاتی ہے، کیپشن اور ہیش ٹیگز کاپی ہو جاتے ہیں',
+      'Reel langsung masuk, keterangan dan tagarnya tersalin',
+      'Das Reel geht direkt hinein, Text und Hashtags kopiert');
+  String get shareCaptionCopied => _t(
+      'Caption and hashtags copied: paste them in',
+      'نُسخ الوصف والوسوم: الصقها هناك',
+      'کیپشن اور ہیش ٹیگز کاپی ہو گئے: وہاں پیسٹ کریں',
+      'Keterangan dan tagar tersalin: tempelkan di sana',
+      'Text und Hashtags kopiert: dort einfügen');
+  String shareOpenHint(String app) => _t(
+      'Saved to your gallery. In $app, tap + and pick the newest video; '
+          'the caption and hashtags are copied.',
+      'حُفظ في معرضك. في $app اضغط + واختر أحدث فيديو؛ الوصف والوسوم منسوخة.',
+      'گیلری میں محفوظ ہو گئی۔ $app میں + دبائیں اور تازہ ترین ویڈیو چنیں؛ '
+          'کیپشن اور ہیش ٹیگز کاپی ہیں۔',
+      'Tersimpan di galeri. Di $app, ketuk + lalu pilih video terbaru; '
+          'keterangan dan tagar sudah tersalin.',
+      'In der Galerie gespeichert. Tippe in $app auf + und wähle das neueste '
+          'Video; Text und Hashtags sind kopiert.');
+  String shareAppMissing(String app) => _t(
+      '$app isn’t on this phone',
+      '$app غير مثبّت على هذا الهاتف',
+      '$app اس فون پر نہیں ہے',
+      '$app tidak ada di ponsel ini',
+      '$app ist nicht auf diesem Handy');
 
   /// Customize: the basmala before a surah's first verse.
   String get basmalaTitle => _t('Basmala before verse 1',

@@ -133,5 +133,11 @@
         <package android:name="com.whatsapp" />
         <package android:name="com.whatsapp.w4b" />
         <package android:name="com.instagram.android" />
+        <!-- The reel screen's Share to: TikTok (global, Asia, Lite) and
+             YouTube, each sent the reel with ACTION_SEND. -->
+        <package android:name="com.zhiliaoapp.musically" />
+        <package android:name="com.ss.android.ugc.trill" />
+        <package android:name="com.zhiliaoapp.musically.go" />
+        <package android:name="com.google.android.youtube" />
     </queries>
 </manifest>
