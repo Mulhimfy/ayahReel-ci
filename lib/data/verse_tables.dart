@@ -74,9 +74,13 @@ abstract final class VerseTables {
   static Future<Map<int, List<AyahTiming>>> _table(String table) async {
     final done = _decoded[table];
     if (done != null) return done;
+    // A block, not an arrow: the arrow would hand whenComplete the
+    // removed future, this very one, and it would wait on itself.
     return _pending[table] ??= _get(table)
         .then((t) => _decoded[table] = t)
-        .whenComplete(() => _pending.remove(table));
+        .whenComplete(() {
+      _pending.remove(table);
+    });
   }
 
   static Future<Map<int, List<AyahTiming>>> _get(String table) async {
