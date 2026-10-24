@@ -14,7 +14,7 @@ void main() {
     games: {ArenaGame.completeVerse, ArenaGame.whichSurah},
   );
   ArenaAnswer ans(bool ok) =>
-      ArenaAnswer(chosen: 0, correct: ok, timeLeft: 0.5, points: ok ? 150 : 0);
+      ArenaAnswer(chosen: 0, correct: ok, points: ok ? 150 : 0);
   // Seven right of ten: ✓ ✓ ✗ ✓ ✓ ✓ ✗ ✓ ✓ ✗
   final result = ArenaResult(setup: setup, seed: 1, answers: [
     for (final ok in [true, true, false, true, true, true, false, true, true, false])

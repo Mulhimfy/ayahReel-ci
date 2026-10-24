@@ -19,7 +19,6 @@ void main() {
   const setup = ArenaSetup(
     scope: ArenaScope.juz(30),
     games: {ArenaGame.missingWord, ArenaGame.orderWords},
-    seconds: 15,
     askMeanings: false,
   );
 
@@ -31,7 +30,6 @@ void main() {
             ArenaAnswer(
                 chosen: i,
                 correct: i < right,
-                timeLeft: 0.5,
                 points: i < right ? score ~/ right : 0),
         ],
       );
@@ -82,7 +80,6 @@ void main() {
     // The round can be rebuilt from what was kept.
     expect(top.setup.scope, const ArenaScope.juz(30));
     expect(top.setup.games, setup.games);
-    expect(top.setup.seconds, 15);
     expect(top.setup.askMeanings, isFalse);
     expect(top.result.score, top.score);
     expect(top.challenge?.score, 1100);

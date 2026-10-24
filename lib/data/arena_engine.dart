@@ -105,13 +105,14 @@ class ArenaScope {
 }
 
 /// Everything that decides which questions a round asks.
+///
+/// A round has no clock: since 2026-10-24 every question waits for its
+/// answer, however long it takes. Codes still carry the two bits the
+/// clock was, for the phones that still have one (see
+/// `ArenaChallenge.code`).
 class ArenaSetup {
   final ArenaScope scope;
   final Set<ArenaGame> games;
-
-  /// The clock on an ordinary question. Ordering words gets half as
-  /// much again; a fact gets a little less.
-  final int seconds;
   final int count;
 
   /// Whether a surah's name may be asked for by its meaning. Off for
@@ -121,22 +122,14 @@ class ArenaSetup {
   const ArenaSetup({
     required this.scope,
     required this.games,
-    this.seconds = defaultSeconds,
     this.count = 10,
     this.askMeanings = true,
   });
 
-  /// The clocks a round can be set to, and the one a round read back
-  /// without one was played on.
-  static const secondsOptions = [10, 15, 20, 30];
-  static const defaultSeconds = 20;
-
-  /// What the lobby opens on, every time: the longest clock, and the
-  /// easiest question there is to answer. People found the arena hard
-  /// on its old opening (every kind of question, twenty seconds each),
-  /// so a first round is now the gentlest one, and anything harder is
-  /// one tap away.
-  static const longestSeconds = 30;
+  /// What the lobby opens on, every time: the easiest question there
+  /// is to answer. People found the arena hard on its old opening
+  /// (every kind of question, twenty seconds each), so a first round is
+  /// now the gentlest one, and anything harder is one tap away.
   static const easiestGame = ArenaGame.missingWord;
 
   /// The kinds of question from the easiest to answer to the hardest:
@@ -152,30 +145,15 @@ class ArenaSetup {
     ArenaGame.surahFacts,
   ];
 
-  /// [seconds] as the index a code carries, 0..3; anything the list
-  /// does not hold rounds to the nearest it does.
-  int get secondsIndex {
-    var best = 0;
-    for (var i = 1; i < secondsOptions.length; i++) {
-      if ((secondsOptions[i] - seconds).abs() <
-          (secondsOptions[best] - seconds).abs()) {
-        best = i;
-      }
-    }
-    return best;
-  }
-
   ArenaSetup copyWith({
     ArenaScope? scope,
     Set<ArenaGame>? games,
-    int? seconds,
     int? count,
     bool? askMeanings,
   }) =>
       ArenaSetup(
         scope: scope ?? this.scope,
         games: games ?? this.games,
-        seconds: seconds ?? this.seconds,
         count: count ?? this.count,
         askMeanings: askMeanings ?? this.askMeanings,
       );
@@ -263,9 +241,6 @@ class ArenaQuestion {
   /// The index of the right option; -1 for ordering, which has none.
   final int answer;
 
-  /// How long the clock gives.
-  final int seconds;
-
   const ArenaQuestion({
     required this.game,
     required this.surah,
@@ -277,7 +252,6 @@ class ArenaQuestion {
     this.order = const [],
     this.options = const [],
     this.answer = -1,
-    required this.seconds,
   });
 
   /// The fact's meaning, in [lang]; only for a name question.
@@ -584,15 +558,6 @@ class _Maker {
 
   _Maker(this.corpus, this.setup, this.rnd);
 
-  int seconds(ArenaGame game) {
-    final base = setup.seconds;
-    return switch (game) {
-      ArenaGame.orderWords => base + base ~/ 2,
-      ArenaGame.surahFacts => math.max(8, base - 5),
-      _ => base,
-    };
-  }
-
   ArenaQuestion? make(ArenaGame game) {
     // A handful of random draws; a scope this small that none of them
     // lands is a scope this game has run dry in.
@@ -691,7 +656,6 @@ class _Maker {
       text: v.tokens.sublist(0, cut).join(' '),
       options: options,
       answer: index,
-      seconds: seconds(ArenaGame.completeVerse),
     );
   }
 
@@ -766,7 +730,6 @@ class _Maker {
       blank: blank,
       options: options,
       answer: index,
-      seconds: seconds(ArenaGame.missingWord),
     );
   }
 
@@ -791,7 +754,6 @@ class _Maker {
       text: v.text,
       options: options,
       answer: index,
-      seconds: seconds(ArenaGame.whichSurah),
     );
   }
 
@@ -872,7 +834,6 @@ class _Maker {
       text: v.text,
       options: options,
       answer: index,
-      seconds: seconds(ArenaGame.nextVerse),
     );
   }
 
@@ -915,7 +876,6 @@ class _Maker {
       ayah: v.ayah,
       tokens: tokens,
       order: order,
-      seconds: seconds(ArenaGame.orderWords),
     );
   }
 
@@ -943,7 +903,6 @@ class _Maker {
   }
 
   ArenaQuestion? _factOf(ArenaFactKind kind, int surah) {
-    final secs = seconds(ArenaGame.surahFacts);
     ArenaQuestion q(List<ArenaOption> options, int answer) => ArenaQuestion(
           game: ArenaGame.surahFacts,
           surah: surah,
@@ -951,7 +910,6 @@ class _Maker {
           fact: kind,
           options: options,
           answer: answer,
-          seconds: secs,
         );
     switch (kind) {
       case ArenaFactKind.verseCount:
@@ -1029,23 +987,17 @@ class _Maker {
 
 /// What a question is worth.
 ///
-/// A right answer is a hundred, up to fifty more for the time left on
-/// the clock, and a run of right answers multiplies it: three in a row
-/// is a quarter more, five in a row half again. A wrong answer, or the
-/// clock running out, is nothing — and ends the run.
+/// A right answer is a hundred and fifty, and a run of right answers
+/// multiplies it: three in a row is a quarter more, five in a row half
+/// again. A wrong answer is nothing, and ends the run. There is no clock
+/// to beat any more (2026-10-24): a hundred and fifty is what the
+/// quickest answer earned while there was one, so scores, bests and
+/// codes from then still compare with today's.
 abstract final class ArenaScoring {
-  static const base = 100;
-  static const speedBonus = 50;
+  static const right = 150;
 
-  static int points({
-    required bool correct,
-    required double timeLeft,
-    required int combo,
-  }) {
-    if (!correct) return 0;
-    final raw = base + (speedBonus * timeLeft.clamp(0.0, 1.0)).round();
-    return (raw * multiplier(combo)).round();
-  }
+  static int points({required bool correct, required int combo}) =>
+      correct ? (right * multiplier(combo)).round() : 0;
 
   /// [combo] counts this answer: the third right in a row is 3.
   static double multiplier(int combo) => combo >= 5
@@ -1058,7 +1010,7 @@ abstract final class ArenaScoring {
   static int maxFor(int questions) {
     var total = 0;
     for (var i = 1; i <= questions; i++) {
-      total += points(correct: true, timeLeft: 1, combo: i);
+      total += points(correct: true, combo: i);
     }
     return total;
   }
@@ -1066,32 +1018,28 @@ abstract final class ArenaScoring {
 
 /// How one question went.
 class ArenaAnswer {
-  /// The option tapped; -1 for the clock running out, or an ordering.
+  /// The option tapped; 0 for an ordering. -1 only in a round kept from
+  /// before 2026-10-24, when a clock could run out.
   final int chosen;
   final bool correct;
-
-  /// Fraction of the clock left when it was answered, 0..1.
-  final double timeLeft;
   final int points;
 
   const ArenaAnswer({
     required this.chosen,
     required this.correct,
-    required this.timeLeft,
     required this.points,
   });
 
   Map<String, dynamic> toJson() => {
         'c': chosen,
         'ok': correct,
-        't': timeLeft,
         'p': points,
       };
 
+  /// Reads a kept answer; an older one's time left (`t`) is let go.
   static ArenaAnswer fromJson(Map<String, dynamic> j) => ArenaAnswer(
         chosen: j['c'] as int? ?? -1,
         correct: j['ok'] as bool? ?? false,
-        timeLeft: (j['t'] as num?)?.toDouble() ?? 0,
         points: j['p'] as int? ?? 0,
       );
 }

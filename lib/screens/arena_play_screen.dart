@@ -19,8 +19,9 @@ import 'arena_result_screen.dart';
 
 /// A round, being played.
 ///
-/// One question at a time, a ring burning down beside it, and four
-/// things to tap — or a tray of words to put back in order. A right
+/// One question at a time, with no clock: it waits for its answer
+/// (2026-10-24). Four things to tap — or a tray of words to put back
+/// in order. A right
 /// answer throws gold; a wrong one shakes and lights the right one so
 /// the verse is learned either way.
 class ArenaPlayScreen extends StatefulWidget {
@@ -51,8 +52,7 @@ class ArenaPlayScreen extends StatefulWidget {
   State<ArenaPlayScreen> createState() => _ArenaPlayScreenState();
 }
 
-class _ArenaPlayScreenState extends State<ArenaPlayScreen>
-    with SingleTickerProviderStateMixin {
+class _ArenaPlayScreenState extends State<ArenaPlayScreen> {
   ArenaRound? _round;
   int _i = 0;
   final List<ArenaAnswer> _answers = [];
@@ -62,14 +62,8 @@ class _ArenaPlayScreenState extends State<ArenaPlayScreen>
   int _chosen = -1;
   bool _correct = false;
   int _gained = 0;
-  bool _timedOut = false;
   List<int> _placed = const [];
 
-  late final AnimationController _clock = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 20),
-    value: 1,
-  );
   Timer? _advance;
   bool _finished = false;
   final _burst = BurstController();
@@ -83,9 +77,6 @@ class _ArenaPlayScreenState extends State<ArenaPlayScreen>
   @override
   void initState() {
     super.initState();
-    _clock.addStatusListener((s) {
-      if (s == AnimationStatus.dismissed && !_revealed) _timeout();
-    });
     unawaited(_load());
   }
 
@@ -104,7 +95,6 @@ class _ArenaPlayScreenState extends State<ArenaPlayScreen>
   @override
   void dispose() {
     _advance?.cancel();
-    _clock.dispose();
     _burst.dispose();
     _shake.dispose();
     _glint.dispose();
@@ -117,28 +107,17 @@ class _ArenaPlayScreenState extends State<ArenaPlayScreen>
       _chosen = -1;
       _correct = false;
       _gained = 0;
-      _timedOut = false;
       _placed = const [];
     });
-    // The clock runs under reduced motion too: it is the round's
-    // rule, not its decoration. The ring it drives simply moves less.
-    _clock
-      ..duration = Duration(seconds: _q.seconds)
-      ..value = 1
-      ..reverse(from: 1);
   }
 
   void _settle({required bool correct, required int chosen, Offset? at}) {
     if (_revealed) return;
-    _clock.stop();
-    final timeLeft = _clock.value.clamp(0.0, 1.0);
     _combo = correct ? _combo + 1 : 0;
-    final points = ArenaScoring.points(
-        correct: correct, timeLeft: timeLeft, combo: _combo);
+    final points = ArenaScoring.points(correct: correct, combo: _combo);
     _answers.add(ArenaAnswer(
       chosen: chosen,
       correct: correct,
-      timeLeft: timeLeft,
       points: points,
     ));
     setState(() {
@@ -159,12 +138,6 @@ class _ArenaPlayScreenState extends State<ArenaPlayScreen>
       Duration(milliseconds: correct ? 1500 : 2100),
       _next,
     );
-  }
-
-  void _timeout() {
-    if (!mounted || _round == null) return;
-    setState(() => _timedOut = true);
-    _settle(correct: false, chosen: -1);
   }
 
   void _answer(int i, Offset? at) => _settle(correct: i == _q.answer, chosen: i, at: at);
@@ -231,9 +204,7 @@ class _ArenaPlayScreenState extends State<ArenaPlayScreen>
 
   Future<void> _leave() async {
     final l = L10n.of(context);
-    final wasRunning = _clock.isAnimating;
-    _clock.stop();
-    // The step to the next question waits for the answer too: left
+    // The step to the next question waits for the answer: left
     // running, the round would play on (and could end) behind it.
     final advancing = _advance != null;
     _advance?.cancel();
@@ -262,8 +233,6 @@ class _ArenaPlayScreenState extends State<ArenaPlayScreen>
       Navigator.of(context).pop();
     } else if (advancing) {
       _advance = Timer(const Duration(milliseconds: 600), _next);
-    } else if (wasRunning && !_revealed) {
-      _clock.reverse(from: _clock.value);
     }
   }
 
@@ -342,9 +311,8 @@ class _ArenaPlayScreenState extends State<ArenaPlayScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _ClockRow(
-          clock: _clock,
-          seconds: q.seconds,
+        _PromptRow(
+          number: _i + 1,
           prompt: arenaPromptFor(l, q),
           streak: _combo,
           gained: _revealed ? _gained : 0,
@@ -357,7 +325,6 @@ class _ArenaPlayScreenState extends State<ArenaPlayScreen>
             q: q,
             revealed: _revealed,
             correct: _correct,
-            timedOut: _timedOut,
             placed: _placed,
             onUnplace: _unplace,
           ),
@@ -397,7 +364,6 @@ class _ArenaPlayScreenState extends State<ArenaPlayScreen>
           const SizedBox(height: 6),
           _Verdict(
             correct: _correct,
-            timedOut: _timedOut,
             reference: arenaReferenceOf(l, q),
           ),
         ],
@@ -488,7 +454,6 @@ class ArenaReplayScreen extends StatelessWidget {
                           q: q,
                           revealed: true,
                           correct: answer.correct,
-                          timedOut: answer.chosen < 0,
                           placed: q.game == ArenaGame.orderWords ? q.order : const [],
                           onUnplace: (_) {},
                         ),
@@ -514,7 +479,6 @@ class ArenaReplayScreen extends StatelessWidget {
                         const SizedBox(height: 6),
                         _Verdict(
                           correct: answer.correct,
-                          timedOut: answer.chosen < 0,
                           reference: arenaReferenceOf(l, q),
                           hint: false,
                         ),
@@ -629,18 +593,18 @@ class _Top extends StatelessWidget {
   }
 }
 
-/// The ring, the prompt, and — when there is one — the run.
-class _ClockRow extends StatelessWidget {
-  final Animation<double> clock;
-  final int seconds;
+/// The question's number in its ring, the prompt, and — when there is
+/// one — the run. The ring burned down with a clock until rounds lost
+/// theirs (2026-10-24); it stands whole now, a seal for the number.
+class _PromptRow extends StatelessWidget {
+  final int number;
   final String prompt;
   final int streak;
   final int gained;
   final GlintController glint;
 
-  const _ClockRow({
-    required this.clock,
-    required this.seconds,
+  const _PromptRow({
+    required this.number,
     required this.prompt,
     required this.streak,
     required this.gained,
@@ -653,30 +617,22 @@ class _ClockRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        AnimatedBuilder(
-          animation: clock,
-          builder: (context, _) {
-            final left = (clock.value * seconds).ceil();
-            return Semantics(
-              label: l.a11ySecondsLeft(left),
-              liveRegion: true,
-              excludeSemantics: true,
-              child: TimerRing(
-                remaining: clock,
-                size: 62,
-                stroke: 4.2,
-                child: Text(
-                  '$left',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                    color: clock.value < 0.25 ? ArenaPalette.wrong : AppColors.textPrimary,
-                  ),
-                ),
+        // The top bar already says which question of how many.
+        ExcludeSemantics(
+          child: TimerRing(
+            remaining: const AlwaysStoppedAnimation(1.0),
+            size: 62,
+            stroke: 4.2,
+            child: Text(
+              '$number',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                fontFeatures: [FontFeature.tabularFigures()],
+                color: AppColors.textPrimary,
               ),
-            );
-          },
+            ),
+          ),
         ),
         const SizedBox(width: 14),
         Expanded(
@@ -778,7 +734,6 @@ class ArenaQuestionCard extends StatelessWidget {
   final ArenaQuestion q;
   final bool revealed;
   final bool correct;
-  final bool timedOut;
   final List<int> placed;
   final ValueChanged<int> onUnplace;
 
@@ -787,7 +742,6 @@ class ArenaQuestionCard extends StatelessWidget {
     required this.q,
     required this.revealed,
     required this.correct,
-    required this.timedOut,
     required this.placed,
     required this.onUnplace,
   });
@@ -1382,15 +1336,13 @@ class _SealBadgePainter extends CustomPainter {
       old.color != color || old.filled != filled;
 }
 
-/// Right, not this one, or out of time — and where the verse is.
+/// Right, or not this one — and where the verse is.
 class _Verdict extends StatelessWidget {
   final bool correct;
-  final bool timedOut;
   final String reference;
   final bool hint;
   const _Verdict({
     required this.correct,
-    required this.timedOut,
     required this.reference,
     this.hint = true,
   });
@@ -1398,11 +1350,7 @@ class _Verdict extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
-    final word = correct
-        ? l.arenaRight
-        : timedOut
-            ? l.arenaTimeUp
-            : l.arenaNotThis;
+    final word = correct ? l.arenaRight : l.arenaNotThis;
     return A11yLive(
       child: Rise(
         from: 8,

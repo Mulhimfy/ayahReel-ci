@@ -413,7 +413,6 @@ void main() {
     const setup = ArenaSetup(
       scope: ArenaScope.juz(30),
       games: {ArenaGame.missingWord},
-      seconds: 15,
       askMeanings: false,
     );
     ArenaService.reset();
@@ -430,7 +429,7 @@ void main() {
           ArenaResult(setup: setup, seed: 3, answers: [
             for (var i = 0; i < 10; i++)
               ArenaAnswer(
-                  chosen: i, correct: i < 8, timeLeft: 0.5, points: i < 8 ? 120 : 0),
+                  chosen: i, correct: i < 8, points: i < 8 ? 120 : 0),
           ]),
           mode: ArenaMode.solo,
         ));

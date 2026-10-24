@@ -193,7 +193,6 @@ void main() {
                     ? round.questions[i].answer
                     : (round.questions[i].answer + 1) % 4,
                 correct: i < right,
-                timeLeft: 0.4 + 0.05 * i,
                 points: i < right ? 120 + 8 * i : 0),
         ],
       );
@@ -295,7 +294,7 @@ void main() {
     await t.tap(find.text(L10n.en.arenaIntroGo));
     await settle(800);
     await shoot('05_lobby_solo');
-    await scrollTo(find.text(L10n.en.arenaSecondsTitle));
+    await scrollTo(find.text(L10n.en.arenaBegin));
     await shoot('06_lobby_solo_lower');
     await scrollTo(find.text(L10n.en.arenaRecent));
     await settle(900);
@@ -306,7 +305,7 @@ void main() {
     await settle(500);
     const c = ArenaChallenge(
       setup:
-          ArenaSetup(scope: ArenaScope.surah(67), games: allGames, seconds: 15),
+          ArenaSetup(scope: ArenaScope.surah(67), games: allGames),
       seed: 4242,
       score: 1320,
       correct: 8,

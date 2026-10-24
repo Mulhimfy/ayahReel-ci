@@ -322,9 +322,10 @@ arena's own colour and weather, the most alive thing on the tab.
 
 ```
 lobby     play now, or beat a code; the whole Quran, a juz or a surah;
-          which of six games; seconds per question (10 · 15 · 20 · 30)
-round     ten questions under a ring that burns down; a right answer
-          throws gold, a wrong one lights the right answer
+          which of six games; no clock (since 2026-10-24)
+round     ten questions, each waiting for its answer, its number in a
+          ring; a right answer throws gold, a wrong one lights the
+          right answer
 result    the round drawn as a constellation, the score in one small
           line under it, the code with its three steps, the story,
           the share sheet, the review behind a gold button

@@ -4,7 +4,7 @@
 /// the parameters off most of them, so a score travels the one way
 /// that survives every app between two phones: a short code the
 /// friend types into the arena. It names the round exactly — scope,
-/// clock, games, seed — and the score and count it was played to, so
+/// games, seed — and the score and count it was played to, so
 /// the friend plays the very same ten questions and the app can say
 /// who won. See `ArenaRound.generate` for why the seed is enough.
 ///
@@ -34,6 +34,12 @@ class ArenaChallenge {
   /// Codes are cut for a round of this many questions.
   static const questions = 10;
 
+  /// What a code says in the two bits that were the round's clock
+  /// before rounds lost theirs (2026-10-24): 3, the longest of 10, 15,
+  /// 20 and 30 seconds, for a friend whose app still has a clock. This
+  /// app reads the bits and lets them go.
+  static const _oldClock = 3;
+
   static const _alphabet = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
   /// The code, grouped for the eye: `K7X2-9QPM-4R2A`.
@@ -46,7 +52,7 @@ class ArenaChallenge {
     w.put(mask, 6);
     w.put(setup.scope.kind.index, 2);
     w.put(setup.scope.value, 7);
-    w.put(setup.secondsIndex, 2);
+    w.put(_oldClock, 2);
     w.put(setup.askMeanings ? 1 : 0, 1);
     w.put(seed, ArenaRound.seedBits);
     w.put(score.clamp(0, 4095), 12);
@@ -77,7 +83,7 @@ class ArenaChallenge {
     final mask = r.take(6);
     final kind = r.take(2);
     final value = r.take(7);
-    final seconds = r.take(2);
+    r.take(2); // the old clock, see [_oldClock]
     final meanings = r.take(1);
     final seed = r.take(ArenaRound.seedBits);
     final score = r.take(12);
@@ -102,7 +108,6 @@ class ArenaChallenge {
       setup: ArenaSetup(
         scope: scope,
         games: games,
-        seconds: ArenaSetup.secondsOptions[seconds],
         count: questions,
         askMeanings: meanings == 1,
       ),

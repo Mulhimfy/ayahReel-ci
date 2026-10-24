@@ -126,7 +126,7 @@ void main() {
       const setup = ArenaSetup(
           scope: ArenaScope.juz(30), games: {ArenaGame.missingWord});
       const result = ArenaResult(setup: setup, seed: 9, answers: [
-        ArenaAnswer(chosen: 0, correct: true, timeLeft: 0.5, points: 100),
+        ArenaAnswer(chosen: 0, correct: true, points: 100),
       ]);
       await ArenaService.record(result,
           mode: ArenaMode.solo, verses: [(112, 1), (112, 2), (36, 58)]);

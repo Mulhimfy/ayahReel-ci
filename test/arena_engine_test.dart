@@ -241,7 +241,6 @@ void main() {
             expect(q.fact, isNot(ArenaFactKind.nameMeaning));
           }
       }
-      expect(q.seconds, greaterThanOrEqualTo(8));
     }
 
     test('is the same round for the same seed, and a different one for '
@@ -295,26 +294,23 @@ void main() {
       var asked = 0;
       final byGame = <ArenaGame, int>{};
       for (final scope in scopes) {
-        for (final seconds in ArenaSetup.secondsOptions) {
-          for (var seed = 0; seed < 6; seed++) {
-            final setup = ArenaSetup(
-                scope: scope,
-                games: allGames,
-                seconds: seconds,
-                askMeanings: seed.isEven);
-            final round = ArenaRound.generate(corpus, setup, seed * 7919);
-            expect(round.questions, isNotEmpty, reason: '$scope $seconds');
-            for (final q in round.questions) {
-              verify(q, setup);
-              asked++;
-              byGame[q.game] = (byGame[q.game] ?? 0) + 1;
-            }
+        // The same six rounds a scope had when each was also played at
+        // four clocks, which never changed a question.
+        for (var seed = 0; seed < 6; seed++) {
+          final setup = ArenaSetup(
+              scope: scope, games: allGames, askMeanings: seed.isEven);
+          final round = ArenaRound.generate(corpus, setup, seed * 7919);
+          expect(round.questions, isNotEmpty, reason: '$scope $seed');
+          for (final q in round.questions) {
+            verify(q, setup);
+            asked++;
+            byGame[q.game] = (byGame[q.game] ?? 0) + 1;
           }
         }
       }
-      expect(asked, greaterThan(1200));
+      expect(asked, greaterThan(300));
       for (final g in allGames) {
-        expect(byGame[g], greaterThan(50), reason: '${g.name} rarely asked');
+        expect(byGame[g], greaterThan(12), reason: '${g.name} rarely asked');
       }
     });
 
@@ -337,35 +333,6 @@ void main() {
       expect(tiny.questions.length, lessThanOrEqualTo(10));
     });
 
-    test('the clock is the setup\'s, and the same round at any clock', () {
-      const scope = ArenaScope.juz(30);
-      for (final seconds in ArenaSetup.secondsOptions) {
-        final round = ArenaRound.generate(corpus,
-            ArenaSetup(scope: scope, games: allGames, seconds: seconds), 5);
-        for (final q in round.questions) {
-          final expected = switch (q.game) {
-            ArenaGame.orderWords => seconds + seconds ~/ 2,
-            ArenaGame.surahFacts => seconds - 5 < 8 ? 8 : seconds - 5,
-            _ => seconds,
-          };
-          expect(q.seconds, expected, reason: q.game.name);
-        }
-      }
-      // The clock never changes the questions: a code with a slower
-      // clock is still the same ten.
-      final a = ArenaRound.generate(corpus,
-          const ArenaSetup(scope: scope, games: allGames, seconds: 10), 5);
-      final b = ArenaRound.generate(corpus,
-          const ArenaSetup(scope: scope, games: allGames, seconds: 30), 5);
-      expect([for (final q in a.questions) '${q.surah}:${q.ayah}'],
-          [for (final q in b.questions) '${q.surah}:${q.ayah}']);
-      // Nearest clock for a value the list does not hold.
-      expect(const ArenaSetup(scope: scope, games: allGames, seconds: 17)
-          .secondsIndex, 1);
-      expect(const ArenaSetup(scope: scope, games: allGames, seconds: 45)
-          .secondsIndex, 3);
-    });
-
     test('a known seed makes a known round — the codes depend on it', () {
       // Pinned so a change to the generator that would break every
       // challenge code in the wild is a failing test, not a surprise.
@@ -382,13 +349,13 @@ void main() {
   });
 
   group('scoring', () {
-    test('rewards speed and a run', () {
-      expect(ArenaScoring.points(correct: false, timeLeft: 1, combo: 9), 0);
-      expect(ArenaScoring.points(correct: true, timeLeft: 0, combo: 1), 100);
-      expect(ArenaScoring.points(correct: true, timeLeft: 1, combo: 1), 150);
-      expect(ArenaScoring.points(correct: true, timeLeft: 0.5, combo: 2), 125);
-      expect(ArenaScoring.points(correct: true, timeLeft: 1, combo: 3), 188);
-      expect(ArenaScoring.points(correct: true, timeLeft: 1, combo: 5), 225);
+    test('rewards a right answer and a run, with no clock to beat', () {
+      expect(ArenaScoring.points(correct: false, combo: 9), 0);
+      expect(ArenaScoring.points(correct: true, combo: 1), 150);
+      expect(ArenaScoring.points(correct: true, combo: 2), 150);
+      expect(ArenaScoring.points(correct: true, combo: 3), 188);
+      expect(ArenaScoring.points(correct: true, combo: 5), 225);
+      // What a perfect round was worth with a clock: bests still compare.
       expect(ArenaScoring.maxFor(10), 150 * 2 + 188 * 2 + 225 * 6);
     });
 
@@ -397,10 +364,10 @@ void main() {
         setup: ArenaSetup(scope: ArenaScope.quran(), games: allGames),
         seed: 1,
         answers: [
-          ArenaAnswer(chosen: 0, correct: true, timeLeft: 1, points: 150),
-          ArenaAnswer(chosen: 1, correct: true, timeLeft: 0.5, points: 125),
-          ArenaAnswer(chosen: -1, correct: false, timeLeft: 0, points: 0),
-          ArenaAnswer(chosen: 2, correct: true, timeLeft: 0.2, points: 110),
+          ArenaAnswer(chosen: 0, correct: true, points: 150),
+          ArenaAnswer(chosen: 1, correct: true, points: 125),
+          ArenaAnswer(chosen: -1, correct: false, points: 0),
+          ArenaAnswer(chosen: 2, correct: true, points: 110),
         ],
       );
       expect(r.score, 385);
@@ -411,6 +378,11 @@ void main() {
       final json = r.answers.map((a) => a.toJson()).toList();
       expect(ArenaAnswer.fromJson(json[2]).chosen, -1);
       expect(ArenaAnswer.fromJson(json[0]).points, 150);
+      // An answer kept from when rounds had a clock still reads.
+      final old = ArenaAnswer.fromJson(
+          {'c': -1, 'ok': false, 't': 0.0, 'p': 0});
+      expect(old.chosen, -1);
+      expect(old.correct, isFalse);
     });
 
     test('tiers', () {
@@ -419,8 +391,7 @@ void main() {
             seed: 1,
             answers: [
               for (var i = 0; i < asked; i++)
-                ArenaAnswer(
-                    chosen: 0, correct: i < right, timeLeft: 0, points: 0),
+                ArenaAnswer(chosen: 0, correct: i < right, points: 0),
             ],
           );
       expect(of(10, 10).tier, 4);

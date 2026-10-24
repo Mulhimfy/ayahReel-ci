@@ -4517,10 +4517,6 @@ class L10n {
   String get arenaMakkah => _t('Makkah', 'مكة', 'مکہ', 'Makkah', 'Mekka');
   String get arenaMadinah =>
       _t('Madinah', 'المدينة', 'مدینہ', 'Madinah', 'Medina');
-  String get arenaSecondsTitle => _t('Seconds per question', 'ثوانٍ لكل سؤال',
-      'فی سوال سیکنڈ', 'Detik per pertanyaan', 'Sekunden pro Frage');
-  String arenaSecondsValue(int n) =>
-      _t('$n s', '$n ث', '$n س', '$n dtk', '$n s');
   String get arenaBegin =>
       _t('Begin', 'ابدأ', 'شروع کریں', 'Mulai', 'Beginnen');
   String get arenaHaveCode => _t('Have a code?', 'لديك رمز؟', 'کوڈ ہے؟',
@@ -4579,8 +4575,6 @@ class L10n {
       _t('Right', 'صحيح', 'صحیح', 'Benar', 'Richtig');
   String get arenaNotThis =>
       _t('Not this one', 'ليست هذه', 'یہ نہیں', 'Bukan ini', 'Nicht dieses');
-  String get arenaTimeUp =>
-      _t('Time’s up', 'انتهى الوقت', 'وقت ختم', 'Waktu habis', 'Zeit um');
   String get arenaTheAnswer =>
       _t('The answer', 'الإجابة', 'جواب', 'Jawabannya', 'Die Antwort');
   String get arenaYourAnswer =>
@@ -4833,15 +4827,18 @@ class L10n {
       'جو اچھی طرح یاد ہو اس سے شروع کریں۔ جب چاہیں بدل سکتے ہیں۔',
       'Mulai dari yang kamu hafal. Bisa diganti kapan saja.',
       'Fang mit einer an, die du gut kennst. Du kannst sie jederzeit ändern.');
-  String get arenaGuidePlayTitle => _t('Answer 10 quick questions',
-      'أجب عن عشرة أسئلة سريعة', 'دس فوری سوالوں کے جواب دیں',
-      'Jawab 10 soal singkat', 'Beantworte 10 schnelle Fragen');
+  String get arenaGuidePlayTitle => _t('Answer 10 questions',
+      'أجب عن عشرة أسئلة', 'دس سوالوں کے جواب دیں', 'Jawab 10 soal',
+      'Beantworte 10 Fragen');
   String get arenaGuidePlayBody => _t(
-      'The faster you answer, the more points you score.',
-      'كلما أسرعت في الإجابة زادت نقاطك.',
-      'جتنی جلدی جواب دیں گے، اتنے زیادہ پوائنٹس ملیں گے۔',
-      'Makin cepat menjawab, makin banyak poinmu.',
-      'Je schneller du antwortest, desto mehr Punkte bekommst du.');
+      'No clock: take your time. Right answers in a row score more.',
+      'بلا وقت محدد، فخذ وقتك. والإجابات الصحيحة المتتالية تزيد نقاطك.',
+      'کوئی وقت کی پابندی نہیں، آرام سے جواب دیں۔ لگاتار صحیح جواب زیادہ '
+          'پوائنٹس دیتے ہیں۔',
+      'Tanpa batas waktu, santai saja. Jawaban benar beruntun dapat poin '
+          'lebih.',
+      'Keine Uhr: Lass dir Zeit. Richtige Antworten in Folge bringen mehr '
+          'Punkte.');
   String get arenaGuideCodeTitle => _t('Get your card and your code',
       'احصل على بطاقتك ورمزك', 'اپنا کارڈ اور کوڈ پائیں',
       'Dapatkan kartu dan kodemu', 'Hol dir deine Karte und deinen Code');
@@ -5100,8 +5097,6 @@ class L10n {
           'finden, Sure benennen');
   String get a11yAnswersWith => _t('Answers with this', 'يجيب بهذا',
       'یہ جواب دیتا ہے', 'Menjawab dengan ini', 'Antwortet damit');
-  String a11ySecondsLeft(int s) => _t('$s seconds left', 'بقيت $s ثوانٍ',
-      '$s سیکنڈ باقی', '$s detik tersisa', 'Noch $s Sekunden');
   String get a11yPlacesWord => _t('Places this word next', 'يضع هذه الكلمة تاليًا',
       'یہ لفظ اگلا رکھتا ہے', 'Menempatkan kata ini berikutnya',
       'Setzt dieses Wort als nächstes');

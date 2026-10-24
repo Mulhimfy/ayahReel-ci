@@ -21,7 +21,6 @@ void main() {
       setup: ArenaSetup(
         scope: ArenaScope.juz(30),
         games: {ArenaGame.completeVerse, ArenaGame.orderWords},
-        seconds: 30,
         askMeanings: false,
       ),
       seed: 777777,
@@ -35,12 +34,26 @@ void main() {
     expect(back.setup.scope, const ArenaScope.juz(30));
     expect(back.setup.games,
         {ArenaGame.completeVerse, ArenaGame.orderWords});
-    expect(back.setup.seconds, 30);
     expect(back.setup.askMeanings, isFalse);
     expect(back.setup.count, ArenaChallenge.questions);
     expect(back.seed, 777777);
     expect(back.score, 1480);
     expect(back.correct, 8);
+    // Rounds have no clock now, and a code says 30 seconds where the
+    // clock was: the very code this round made at 30 seconds before,
+    // so a friend's app that still has a clock plays it at its longest.
+    expect(code, '8MYT-YY65-E8G9');
+  });
+
+  test('a code cut while rounds had a clock is the same round today', () {
+    // The round above as an older app cut it at 10 seconds.
+    final old = ArenaChallenge.parse('8MY2-YY65-E8G1')!;
+    expect(old.setup.scope, const ArenaScope.juz(30));
+    expect(old.setup.games, {ArenaGame.completeVerse, ArenaGame.orderWords});
+    expect(old.setup.askMeanings, isFalse);
+    expect(old.seed, 777777);
+    expect(old.score, 1480);
+    expect(old.correct, 8);
   });
 
   test('every corner of the space round-trips', () {
@@ -61,7 +74,6 @@ void main() {
         setup: ArenaSetup(
           scope: scope,
           games: picked,
-          seconds: ArenaSetup.secondsOptions[rnd.nextInt(4)],
           askMeanings: rnd.nextBool(),
         ),
         seed: rnd.nextInt(ArenaRound.seedLimit),
@@ -72,7 +84,6 @@ void main() {
       expect(back, isNotNull, reason: c.code);
       expect(back!.setup.scope, scope);
       expect(back.setup.games, picked);
-      expect(back.setup.seconds, c.setup.seconds);
       expect(back.setup.askMeanings, c.setup.askMeanings);
       expect(back.seed, c.seed);
       expect(back.score, c.score);

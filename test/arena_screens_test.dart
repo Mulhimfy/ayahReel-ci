@@ -286,7 +286,7 @@ void main() {
     await io(t);
   });
 
-  testWidgets('the lobby: two ways in, three places, a clock, and a code '
+  testWidgets('the lobby: two ways in, three places, no clock, and a code '
       'that opens the door', (t) async {
     phone(t);
     await t.runAsync(introSeen);
@@ -299,14 +299,10 @@ void main() {
     expect(find.text(l.arenaWholeQuran), findsOneWidget);
     expect(find.text(l.arenaJuzAmma), findsOneWidget);
     expect(find.text(l.arenaPickSurah), findsOneWidget);
-    await scrollTo(t, find.text(l.arenaSecondsTitle));
-    for (final s in ArenaSetup.secondsOptions) {
-      expect(find.text(l.arenaSecondsValue(s)), findsOneWidget);
-    }
-    await t.tap(find.text(l.arenaSecondsValue(10)));
-    await t.pump(const Duration(milliseconds: 300));
     await scrollTo(t, find.text(l.arenaBegin));
     expect(find.text(l.arenaBegin), findsOneWidget);
+    // Rounds have no clock, so the lobby has none to set.
+    expect(find.text('Seconds per question'), findsNothing);
     await scrollTo(t, find.text(l.arenaRecent));
     expect(find.text(l.arenaNoRounds), findsOneWidget);
     await t.drag(find.byType(Scrollable).first, const Offset(0, 1600));
@@ -321,7 +317,7 @@ void main() {
     await t.pump(const Duration(milliseconds: 300));
     expect(find.text(l.arenaHaveCode), findsOneWidget);
     const c = ArenaChallenge(
-      setup: ArenaSetup(scope: ArenaScope.surah(67), games: allGames, seconds: 15),
+      setup: ArenaSetup(scope: ArenaScope.surah(67), games: allGames),
       seed: 4242,
       score: 1320,
       correct: 8,
@@ -331,15 +327,14 @@ void main() {
     await t.pump(const Duration(milliseconds: 300));
     expect(find.text(l.arenaCodeFromSomeone), findsOneWidget);
     expect(find.textContaining(l.arenaCodeToBeat(1320)), findsOneWidget);
-    expect(find.textContaining(l.arenaSecondsValue(15)), findsOneWidget);
     await scrollTo(t, find.text(l.arenaPlayCode));
     expect(find.text(l.arenaPlayCode), findsOneWidget);
     await io(t);
   });
 
-  testWidgets('the lobby always opens on the gentlest round: Juz\' Amma, '
-      'the easiest question and the longest clock, whatever was left, and a '
-      'line that says it is a Quran quiz', (t) async {
+  testWidgets('the lobby always opens on the gentlest round: Juz\' Amma '
+      'and the easiest question, whatever was left (a clock kept from '
+      'before included), and a line that says it is a Quran quiz', (t) async {
     phone(t);
     await t.runAsync(() => ArenaService.remember({
           'intro': '1',
@@ -356,16 +351,11 @@ void main() {
             .ancestor(of: find.text(label), matching: find.byType(A11yTap))
             .first)
         .selected!;
-    await scrollTo(t, find.text(l.arenaSecondsTitle));
+    await scrollTo(t, find.text(l.arenaGameName(ArenaSetup.easiestGame)));
     for (final g in ArenaGame.values) {
       expect(lit(l.arenaGameName(g)), g == ArenaSetup.easiestGame,
           reason: '$g');
     }
-    for (final s in ArenaSetup.secondsOptions) {
-      expect(lit(l.arenaSecondsValue(s)), s == ArenaSetup.longestSeconds,
-          reason: '$s s');
-    }
-    expect(ArenaSetup.longestSeconds, ArenaSetup.secondsOptions.last);
     expect(ArenaSetup.byEase.toSet(), ArenaGame.values.toSet());
     expect(ArenaSetup.byEase.first, ArenaSetup.easiestGame);
     // Juz' Amma, whatever was left: Al-Ikhlas is not kept.
@@ -560,13 +550,12 @@ void main() {
     await io(t);
   });
 
-  testWidgets('the clock is the setup\'s, and running out is a wrong '
-      'answer', (t) async {
+  testWidgets('a question has no clock: it waits for its answer however '
+      'long that takes', (t) async {
     phone(t);
     const setup = ArenaSetup(
         scope: ArenaScope.juz(30),
         games: {ArenaGame.whichSurah},
-        seconds: 10,
         count: 1);
     await t.pumpWidget(host(const ArenaPlayScreen(
       setup: setup,
@@ -575,13 +564,13 @@ void main() {
     )));
     await io(t);
     await t.pump(const Duration(milliseconds: 300));
-    expect(find.text('10'), findsOneWidget);
-    await t.pump(const Duration(seconds: 11));
-    expect(find.text(l.arenaTimeUp), findsOneWidget);
-    await t.pump(const Duration(seconds: 3));
+    // A minute on, still asking: nothing ran out, nothing was settled.
+    await t.pump(const Duration(seconds: 60));
     await io(t);
-    expect(find.byType(ArenaResultScreen), findsOneWidget);
-    expect(find.textContaining(l.arenaRightOf(0, 1)), findsWidgets);
+    expect(find.byType(ArenaPlayScreen), findsOneWidget);
+    expect(find.byType(ArenaResultScreen), findsNothing);
+    expect(find.text(l.arenaNotThis), findsNothing);
+    expect(find.text(l.arenaRight), findsNothing);
     await t.pump(const Duration(seconds: 2));
     await io(t);
   });
@@ -601,7 +590,6 @@ void main() {
             ArenaAnswer(
                 chosen: round.questions[i].answer,
                 correct: i < right,
-                timeLeft: 0.5,
                 points: i < right ? 125 : 0),
         ],
       );

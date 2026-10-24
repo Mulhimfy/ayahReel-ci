@@ -434,8 +434,7 @@ class _ArenaResultScreenState extends State<ArenaResultScreen> {
                             ),
                             Text(
                               '${l.arenaRightOf(r.correct, r.asked)} · '
-                              '${arenaScopeLabel(l, r.setup.scope)} · '
-                              '${l.arenaSecondsValue(r.setup.seconds)}',
+                              '${arenaScopeLabel(l, r.setup.scope)}',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                   fontSize: 12.5, color: AppColors.textSecondary),
@@ -1477,10 +1476,9 @@ class _Chosen extends StatelessWidget {
     final c = chosen;
     final String what;
     TextStyle style = struck;
-    if (answer.chosen < 0) {
-      what = l.arenaTimeUp;
-      style = label;
-    } else if (c == null) {
+    // No option chosen (in a round kept from when rounds had a clock,
+    // one that ran out): only that it wasn't this.
+    if (answer.chosen < 0 || c == null) {
       return Text(l.arenaNotThis, style: label);
     } else if (chosenSurah != null) {
       what = l.arabicScript

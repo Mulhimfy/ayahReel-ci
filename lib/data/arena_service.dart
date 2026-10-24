@@ -30,8 +30,8 @@ class ArenaState {
   /// The last rounds, newest first.
   final List<ArenaRecord> history;
 
-  /// What the lobby was last set to — scope, seconds, games, the
-  /// player's name — so it opens where it was left; and the one-time
+  /// What the lobby was last set to — scope, games, the player's
+  /// name — so it opens where it was left; and the one-time
   /// notes that have been shown.
   final Map<String, String> prefs;
 
@@ -103,7 +103,6 @@ class ArenaRecord {
   final String scopeKey;
   final int seed;
   final Set<ArenaGame> games;
-  final int seconds;
   final bool askMeanings;
   final List<ArenaAnswer> answers;
   final DateTime at;
@@ -132,7 +131,6 @@ class ArenaRecord {
     required this.scopeKey,
     required this.seed,
     required this.games,
-    required this.seconds,
     required this.askMeanings,
     required this.answers,
     required this.at,
@@ -151,7 +149,6 @@ class ArenaRecord {
         scopeKey: scopeKey,
         seed: seed,
         games: games,
-        seconds: seconds,
         askMeanings: askMeanings,
         answers: answers,
         at: at,
@@ -180,7 +177,6 @@ class ArenaRecord {
   ArenaSetup get setup => ArenaSetup(
         scope: ArenaScope.fromKey(scopeKey) ?? const ArenaScope.quran(),
         games: games.isEmpty ? {ArenaGame.missingWord} : games,
-        seconds: seconds,
         count: ArenaChallenge.questions,
         askMeanings: askMeanings,
       );
@@ -205,7 +201,6 @@ class ArenaRecord {
         'scope': scopeKey,
         'seed': seed,
         'games': [for (final g in games) g.name],
-        'seconds': seconds,
         'meanings': askMeanings,
         'answers': [for (final a in answers) a.toJson()],
         'at': at.toIso8601String(),
@@ -238,7 +233,6 @@ class ArenaRecord {
             for (final v in ArenaGame.values)
               if (v.name == g) v,
         },
-        seconds: j['seconds'] as int? ?? ArenaSetup.defaultSeconds,
         askMeanings: j['meanings'] as bool? ?? true,
         answers: [
           for (final a in (j['answers'] as List? ?? const []))
@@ -325,7 +319,6 @@ abstract final class ArenaService {
       scopeKey: result.setup.scope.key,
       seed: result.seed,
       games: result.setup.games,
-      seconds: result.setup.seconds,
       askMeanings: result.setup.askMeanings,
       answers: result.answers,
       at: at,

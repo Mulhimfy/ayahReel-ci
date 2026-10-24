@@ -44,16 +44,15 @@ Future<void> openArena(BuildContext context) async {
 }
 
 /// The setup the lobby opens on, every time: the gentlest round there
-/// is — Juz' Amma, the easiest question and the longest clock
-/// ([ArenaSetup.easiestGame], [ArenaSetup.longestSeconds]) — whatever was
-/// picked last time. The short surahs are the ones nearly everyone knows,
+/// is — Juz' Amma and the easiest question ([ArenaSetup.easiestGame]),
+/// with no clock, as every round has none — whatever was picked last
+/// time. The short surahs are the ones nearly everyone knows,
 /// so a first round is one a newcomer can win; anything harder is one tap
 /// away.
 ArenaSetup landingArenaSetup({required bool askMeanings}) {
   return ArenaSetup(
     scope: const ArenaScope.juz(30),
     games: const {ArenaSetup.easiestGame},
-    seconds: ArenaSetup.longestSeconds,
     count: ArenaChallenge.questions,
     askMeanings: askMeanings,
   );
@@ -100,7 +99,6 @@ class _ArenaScreenState extends State<ArenaScreen> {
   ArenaMode _mode = ArenaMode.solo;
   ArenaScope _scope = const ArenaScope.juz(30);
   Set<ArenaGame> _games = const {ArenaSetup.easiestGame};
-  int _seconds = ArenaSetup.longestSeconds;
   final _code = TextEditingController();
   ArenaChallenge? _challenge;
   String _sender = '';
@@ -127,7 +125,6 @@ class _ArenaScreenState extends State<ArenaScreen> {
     final kept = landingArenaSetup(askMeanings: true);
     setState(() {
       _scope = kept.scope;
-      _seconds = kept.seconds;
       _games = kept.games;
     });
     _takePending();
@@ -188,7 +185,6 @@ class _ArenaScreenState extends State<ArenaScreen> {
   ArenaSetup get _setup => ArenaSetup(
         scope: _scope,
         games: _games,
-        seconds: _seconds,
         count: ArenaChallenge.questions,
         askMeanings: !_l.ar,
       );
@@ -378,20 +374,6 @@ class _ArenaScreenState extends State<ArenaScreen> {
                                     ),
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          Rise(
-                            delay: const Duration(milliseconds: 300),
-                            child: _Section(
-                              title: l.arenaSecondsTitle,
-                              child: _SecondsRow(
-                                seconds: _seconds,
-                                onSelect: (v) {
-                                  HapticFeedback.selectionClick();
-                                  setState(() => _seconds = v);
-                                },
-                              ),
-                            ),
-                          ),
                         ],
                         const SizedBox(height: 20),
                         Rise(
@@ -486,8 +468,7 @@ class _ArenaScreenState extends State<ArenaScreen> {
                   Expanded(
                     child: Text(
                       '${l.arenaCodeToBeat(c.score)} · '
-                      '${arenaScopeLabel(l, c.setup.scope)} · '
-                      '${l.arenaSecondsValue(c.setup.seconds)}',
+                      '${arenaScopeLabel(l, c.setup.scope)}',
                       style: const TextStyle(
                           fontSize: 12.5,
                           color: AppColors.textPrimary,
@@ -1116,32 +1097,6 @@ class _GameChips extends StatelessWidget {
             dim: !feasible.contains(g),
             onTap: () => onToggle(g),
           ),
-      ],
-    );
-  }
-}
-
-/// How long a question has: four pills, the chosen one lit.
-class _SecondsRow extends StatelessWidget {
-  final int seconds;
-  final ValueChanged<int> onSelect;
-  const _SecondsRow({required this.seconds, required this.onSelect});
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L10n.of(context);
-    return Row(
-      children: [
-        for (final v in ArenaSetup.secondsOptions) ...[
-          if (v != ArenaSetup.secondsOptions.first) const SizedBox(width: 8),
-          Expanded(
-            child: _Pill(
-              label: l.arenaSecondsValue(v),
-              on: v == seconds,
-              onTap: () => onSelect(v),
-            ),
-          ),
-        ],
       ],
     );
   }
