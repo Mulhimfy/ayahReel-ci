@@ -242,7 +242,6 @@ class _ArenaScreenState extends State<ArenaScreen> {
     try {
       unawaited(ArenaService.remember({
         'scope': _scope.key,
-        'seconds': '$_seconds',
         'games': _games.map((g) => g.name).join(','),
       }));
       final me = SettingsService.state.value.name.trim();
