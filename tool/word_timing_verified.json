@@ -1,0 +1,4271 @@
+{
+ "estimate": {
+  "breath_group_right_word": 0.716,
+  "folds": [
+   [
+    "abdulkareem",
+    "albanna",
+    "ghamdi",
+    "nufais",
+    "toure"
+   ],
+   [
+    "ajmi",
+    "dussary",
+    "husary_mujawwad",
+    "salimi",
+    "tunaiji"
+   ]
+  ],
+  "held_out": {
+   "fitted": {
+    "median": 382,
+    "n": 2894,
+    "p75": 792,
+    "p90": 1567,
+    "within_150": 0.261,
+    "within_250": 0.368
+   },
+   "letters": {
+    "median": 921,
+    "n": 2894,
+    "p75": 2181,
+    "p90": 5194,
+    "within_150": 0.124,
+    "within_250": 0.19
+   },
+   "letters_pauses": {
+    "median": 410,
+    "n": 2894,
+    "p75": 904,
+    "p90": 1820,
+    "within_150": 0.256,
+    "within_250": 0.365
+   }
+  },
+  "held_out_by_style": {
+   "fitted mujawwad": {
+    "median": 687,
+    "n": 389,
+    "p75": 1302,
+    "p90": 2306,
+    "within_150": 0.165,
+    "within_250": 0.239
+   },
+   "fitted murattal": {
+    "median": 350,
+    "n": 2505,
+    "p75": 723,
+    "p90": 1356,
+    "within_150": 0.276,
+    "within_250": 0.388
+   },
+   "fitted verses of 12 words or fewer": {
+    "median": 321,
+    "n": 596,
+    "p75": 601,
+    "p90": 1165,
+    "within_150": 0.28,
+    "within_250": 0.404
+   },
+   "letters mujawwad": {
+    "median": 2347,
+    "n": 389,
+    "p75": 5947,
+    "p90": 11692,
+    "within_150": 0.046,
+    "within_250": 0.08
+   },
+   "letters murattal": {
+    "median": 827,
+    "n": 2505,
+    "p75": 1843,
+    "p90": 4266,
+    "within_150": 0.136,
+    "within_250": 0.207
+   },
+   "letters verses of 12 words or fewer": {
+    "median": 377,
+    "n": 596,
+    "p75": 847,
+    "p90": 1597,
+    "within_150": 0.263,
+    "within_250": 0.393
+   },
+   "letters_pauses mujawwad": {
+    "median": 776,
+    "n": 389,
+    "p75": 1536,
+    "p90": 2325,
+    "within_150": 0.157,
+    "within_250": 0.231
+   },
+   "letters_pauses murattal": {
+    "median": 377,
+    "n": 2505,
+    "p75": 813,
+    "p90": 1609,
+    "within_150": 0.271,
+    "within_250": 0.386
+   },
+   "letters_pauses verses of 12 words or fewer": {
+    "median": 316,
+    "n": 596,
+    "p75": 754,
+    "p90": 1434,
+    "within_150": 0.294,
+    "within_250": 0.428
+   }
+  },
+  "skipped": {
+   "count": 0,
+   "repeat": 37
+  },
+  "verses": 268,
+  "voices": [
+   "abdulkareem",
+   "ajmi",
+   "albanna",
+   "dussary",
+   "ghamdi",
+   "husary_mujawwad",
+   "nufais",
+   "salimi",
+   "toure",
+   "tunaiji"
+  ],
+  "weights": {
+   "final": 2.808,
+   "ghunna": 0.425,
+   "letters": 1.0,
+   "long_madd": 5.782,
+   "madd": 0.0,
+   "shadda": 0.995,
+   "tanween": 2.327,
+   "word": 2.761
+  }
+ },
+ "runtime": {
+  "gross_check": {
+   "ms": 1000,
+   "rel": 0.05,
+   "rule": "|(f - o) - (E - F)| <= max(ms, rel * (E - F)), E = the last QUL word end; a verse failing it gets no word highlight"
+  },
+  "lame_bias_ms": "-1105000/sampleRate when the file opens with a LAME/Info frame, else 0 (what a slice decode lacks against the whole file)",
+  "map_rel": 0.35,
+  "map_run_frames": 5,
+  "offset": "word start = s - offset_ms[surah] - (window start in our file's time: originMs + cutStart + window start + lame bias)",
+  "onset": "o = 10*k ms for the first 10 ms frame k of the verse window's envelope (SurahSlice.envelopeOf) with frames k..k+MAP_RUN-1 all above quietBelow(that envelope, MAP_REL); f = 10*(j+1) for the last frame j ending such a run",
+  "qul_times": "word start = s - (window start in the file's time: originMs + cutStart + window start + lame bias)",
+  "shift": "word start = o + (s - F) + bias_ms; F = the first QUL word start of the verse, s each word's",
+  "text": "n = the largest QUL word position of the verse (largest end index for ayah spans); the app words if n equals their count, else the same with one JOINS pair counted as one word, whichever count is n; else no word highlight"
+ },
+ "text": {
+  "bada_in_text": [
+   "13:37",
+   "2:181",
+   "8:6"
+  ],
+  "by_recitation": {
+   "129": {
+    "counts_differ_from_13": [],
+    "mismatched": {
+     "37:130": "il_yasin"
+    },
+    "verses_with_words": 6236
+   },
+   "13": {
+    "counts_differ_from_13": [],
+    "mismatched": {
+     "37:130": "il_yasin"
+    },
+    "verses_with_words": 6236
+   },
+   "14": {
+    "counts_differ_from_13": [
+     "2:181",
+     "8:6",
+     "13:37",
+     "37:130"
+    ],
+    "mismatched": {
+     "13:37": "bada",
+     "2:181": "bada",
+     "8:6": "bada"
+    },
+    "verses_with_words": 6236
+   },
+   "159": {
+    "counts_differ_from_13": [
+     "2:181",
+     "8:6",
+     "13:37",
+     "37:130"
+    ],
+    "mismatched": {
+     "13:37": "bada",
+     "2:181": "bada",
+     "8:6": "bada"
+    },
+    "verses_with_words": 6236
+   },
+   "161": {
+    "counts_differ_from_13": [],
+    "mismatched": {
+     "37:130": "il_yasin"
+    },
+    "verses_with_words": 6236
+   },
+   "164": {
+    "counts_differ_from_13": [],
+    "mismatched": {
+     "37:130": "il_yasin"
+    },
+    "verses_with_words": 6236
+   },
+   "170": {
+    "counts_differ_from_13": [
+     "2:181",
+     "8:6",
+     "13:37",
+     "37:130"
+    ],
+    "mismatched": {
+     "13:37": "bada",
+     "2:181": "bada",
+     "8:6": "bada"
+    },
+    "verses_with_words": 6236
+   },
+   "172": {
+    "counts_differ_from_13": [
+     "2:181",
+     "8:6",
+     "13:37",
+     "37:130"
+    ],
+    "mismatched": {
+     "13:37": "bada",
+     "2:181": "bada",
+     "8:6": "bada"
+    },
+    "verses_with_words": 6236
+   },
+   "174": {
+    "counts_differ_from_13": [],
+    "mismatched": {
+     "37:130": "il_yasin"
+    },
+    "verses_with_words": 6236
+   },
+   "175": {
+    "counts_differ_from_13": [],
+    "mismatched": {
+     "37:130": "il_yasin"
+    },
+    "verses_with_words": 6236
+   },
+   "179": {
+    "counts_differ_from_13": [
+     "22:5"
+    ],
+    "mismatched": {
+     "22:5": "unfit",
+     "37:130": "il_yasin"
+    },
+    "verses_with_words": 6236
+   },
+   "19": {
+    "counts_differ_from_13": [],
+    "mismatched": {},
+    "verses_with_words": 2952
+   },
+   "65": {
+    "counts_differ_from_13": [],
+    "mismatched": {
+     "37:130": "il_yasin"
+    },
+    "verses_with_words": 6236
+   },
+   "70": {
+    "counts_differ_from_13": [],
+    "mismatched": {
+     "37:130": "il_yasin"
+    },
+    "verses_with_words": 6235
+   }
+  },
+  "joins": {
+   "bada": "بَعْدَ مَا",
+   "il_yasin": "إِلْ يَاسِينَ"
+  }
+ },
+ "voices": {
+  "abbad": {
+   "kind": "ayah",
+   "name": "Fares Abbad",
+   "qul": {
+    "surah 14": {
+     "mismatched": {
+      "13:37": "bada",
+      "2:181": "bada",
+      "8:6": "bada"
+     },
+     "odd": {
+      "gap": [
+       "2:220",
+       "2:260",
+       "6:122",
+       "37:102"
+      ],
+      "outside": 169,
+      "repeat": 75,
+      "zero": [
+       "51:1"
+      ]
+     },
+     "verses_with_words": 6236
+    }
+   },
+   "recommend": "off",
+   "sample": {
+    "surah 14": {
+     "agree_max_ms": 4.6,
+     "gross_check": {
+      "other_reciter": {
+       "n": 23,
+       "pass_rate": 0.696
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 23,
+       "pass_rate": 0.957
+      },
+      "same_verse1": {
+       "n": 8,
+       "pass_rate": 0.125
+      }
+     },
+     "located": 31,
+     "not_located": [],
+     "opens_on_sound": [
+      "112:2",
+      "112:3",
+      "112:4",
+      "114:2",
+      "67:2",
+      "67:3",
+      "1:3",
+      "36:2",
+      "36:3",
+      "36:5",
+      "18:3",
+      "18:110",
+      "3:8",
+      "4:2",
+      "19:4"
+     ],
+     "peak_median": 0.969,
+     "peak_min": 0.901,
+     "qul_misplaced": [],
+     "shift_by_threshold": {
+      "quietBelow window 0.2": {
+       "bias_ms": -80,
+       "max": 706,
+       "p90": 222
+      },
+      "quietBelow window 0.35": {
+       "bias_ms": -80,
+       "max": 716,
+       "p90": 283
+      },
+      "quietBelow window 0.5": {
+       "bias_ms": -90,
+       "max": 716,
+       "p90": 293
+      },
+      "speech - 20 dB": {
+       "bias_ms": -70,
+       "max": 696,
+       "p90": 232
+      },
+      "speech - 30 dB": {
+       "bias_ms": -60,
+       "max": 706,
+       "p90": 232
+      }
+     },
+     "span_check": {
+      "other_reciter": {
+       "n": 23,
+       "pass_rate": 0.391
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 23,
+       "pass_rate": 0.609
+      }
+     },
+     "surahs_other_recording": [],
+     "variants": {
+      "affine": {
+       "bias_ms": -40,
+       "max": 756,
+       "median": 66,
+       "n": 207,
+       "p90": 172,
+       "within_150": 0.865
+      },
+      "end": {
+       "bias_ms": 55,
+       "max": 1388,
+       "median": 53,
+       "n": 207,
+       "p90": 294,
+       "within_150": 0.729
+      },
+      "shift": {
+       "bias_ms": -80,
+       "max": 716,
+       "median": 41,
+       "n": 207,
+       "p90": 283,
+       "within_150": 0.865
+      },
+      "table": {
+       "bias_ms": -130,
+       "max": 1116,
+       "median": 94,
+       "n": 207,
+       "p90": 333,
+       "within_150": 0.855
+      }
+     },
+     "verdict": "match",
+     "verse1": {
+      "112:1": {
+       "shift": 4378,
+       "table": 4358
+      },
+      "114:1": {
+       "shift": 4616,
+       "table": 4566
+      },
+      "18:1": {
+       "shift": 5031,
+       "table": 4961
+      },
+      "19:1": {
+       "shift": 5770,
+       "table": 5690
+      },
+      "1:1": {
+       "shift": 452,
+       "table": -28
+      },
+      "36:1": {
+       "shift": 5206,
+       "table": 5196
+      },
+      "4:1": {
+       "shift": 5302,
+       "table": 5222
+      },
+      "67:1": {
+       "shift": 4684,
+       "table": 4674
+      }
+     },
+     "verses": 31
+    }
+   },
+   "source": "ayah https://everyayah.com/data/Fares_Abbad_64kbps",
+   "use": "surah 14",
+   "verdict": "match",
+   "why": "the shift mapping's p90 is 283 ms"
+  },
+  "abdulkareem": {
+   "kind": "ayah",
+   "name": "Muhammad AbdulKareem",
+   "qul": {
+    "surah 70": {
+     "mismatched": {
+      "37:130": "il_yasin"
+     },
+     "odd": {
+      "outside": [
+       "12:47",
+       "74:41",
+       "75:24"
+      ],
+      "repeat": 1344,
+      "zero": [
+       "74:41",
+       "75:24"
+      ]
+     },
+     "surahs_without": [
+      12
+     ],
+     "verses_with_words": 6235
+    }
+   },
+   "recommend": "on",
+   "runtime": {
+    "bias_ms": 0,
+    "method": "shift",
+    "surahs_off": [],
+    "verse1": {
+     "bias_ms": 35,
+     "off": [
+      1,
+      3,
+      5,
+      6,
+      7,
+      11,
+      15,
+      19,
+      58,
+      78
+     ],
+     "rule": "table"
+    }
+   },
+   "sample": {
+    "surah 70": {
+     "agree_max_ms": 7.3,
+     "gross_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.417
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 1.0
+      },
+      "same_verse1": {
+       "n": 7,
+       "pass_rate": 0.857
+      }
+     },
+     "located": 31,
+     "not_located": [],
+     "opens_on_sound": [
+      "112:2",
+      "112:4",
+      "36:3",
+      "36:5",
+      "2:254",
+      "3:7"
+     ],
+     "peak_median": 0.93,
+     "peak_min": 0.697,
+     "qul_misplaced": [],
+     "shift_by_threshold": {
+      "quietBelow window 0.2": {
+       "bias_ms": 10,
+       "max": 55,
+       "p90": 29
+      },
+      "quietBelow window 0.35": {
+       "bias_ms": 0,
+       "max": 65,
+       "p90": 29
+      },
+      "quietBelow window 0.5": {
+       "bias_ms": -10,
+       "max": 170,
+       "p90": 30
+      },
+      "speech - 20 dB": {
+       "bias_ms": 30,
+       "max": 70,
+       "p90": 21
+      },
+      "speech - 30 dB": {
+       "bias_ms": 50,
+       "max": 230,
+       "p90": 40
+      }
+     },
+     "span_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.208
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 0.875
+      }
+     },
+     "surahs_other_recording": [],
+     "variants": {
+      "affine": {
+       "bias_ms": 105,
+       "max": 1386,
+       "median": 75,
+       "n": 443,
+       "p90": 398,
+       "within_150": 0.747
+      },
+      "end": {
+       "bias_ms": 220,
+       "max": 1390,
+       "median": 142,
+       "n": 443,
+       "p90": 392,
+       "within_150": 0.533
+      },
+      "shift": {
+       "bias_ms": 0,
+       "max": 65,
+       "median": 9,
+       "n": 443,
+       "p90": 29,
+       "within_150": 1.0
+      },
+      "table": {
+       "bias_ms": 30,
+       "max": 480,
+       "median": 42,
+       "n": 443,
+       "p90": 480,
+       "within_150": 0.862
+      }
+     },
+     "verdict": "match",
+     "verse1": {
+      "112:1": {
+       "shift": 122,
+       "table": 2
+      },
+      "114:1": {
+       "shift": 142,
+       "table": 2
+      },
+      "18:1": {
+       "shift": 606,
+       "table": -34
+      },
+      "1:1": {
+       "shift": 3517,
+       "table": 3267
+      },
+      "36:1": {
+       "shift": 286,
+       "table": -34
+      },
+      "4:1": {
+       "shift": 236,
+       "table": -34
+      },
+      "67:1": {
+       "shift": 436,
+       "table": -34
+      }
+     },
+     "verses": 31
+    }
+   },
+   "source": "ayah https://everyayah.com/data/Muhammad_AbdulKareem_128kbps",
+   "survey": {
+    "errors": [],
+    "gross_check": {
+     "shift_after": {
+      "bias_ms": 0,
+      "stats": {
+       "max": 178,
+       "median": 14,
+       "n": 138,
+       "p90": 42,
+       "within_150": 0.993
+      }
+     },
+     "verse2_over_150_rejected": [],
+     "verse2_pass": {
+      "n": 114,
+      "pass_rate": 1.0
+     }
+    },
+    "no_words": [],
+    "other_recording": [],
+    "qul_misplaced": [],
+    "shift": {
+     "bias_ms": 0,
+     "max": 178,
+     "median": 14,
+     "n": 138,
+     "p90": 42,
+     "verses": 138,
+     "within_150": 0.993
+    },
+    "shift_over_150": [
+     29
+    ],
+    "surahs": 114,
+    "verse1": {
+     "shift": {
+      "bias_ms": -265,
+      "max": 3804,
+      "median": 119,
+      "n": 113,
+      "off": [
+       1,
+       2,
+       3,
+       5,
+       6,
+       7,
+       8,
+       9,
+       11,
+       12,
+       14,
+       15,
+       16,
+       17,
+       18,
+       19,
+       21,
+       23,
+       26,
+       28,
+       29,
+       30,
+       33,
+       37,
+       38,
+       43,
+       44,
+       45,
+       46,
+       47,
+       48,
+       52,
+       53,
+       54,
+       55,
+       57,
+       58,
+       61,
+       64,
+       67,
+       88,
+       95,
+       109
+      ],
+      "p90": 741,
+      "within_150": 0.619
+     },
+     "table": {
+      "bias_ms": 35,
+      "max": 3664,
+      "median": 1,
+      "n": 113,
+      "off": [
+       1,
+       3,
+       5,
+       6,
+       7,
+       11,
+       15,
+       19,
+       58
+      ],
+      "p90": 37,
+      "within_150": 0.92
+     }
+    },
+    "verse1_other_recording": [
+     78
+    ]
+   },
+   "use": "surah 70",
+   "verdict": "match"
+  },
+  "ajmi": {
+   "kind": "ayah",
+   "name": "Ahmed Al-Ajmi",
+   "qul": {
+    "surah 19": {
+     "mismatched": {},
+     "odd": {
+      "outside": [
+       "4:40",
+       "4:41",
+       "15:42",
+       "15:43",
+       "15:49"
+      ],
+      "repeat": 972,
+      "zero": [
+       "4:40",
+       "4:41",
+       "15:42",
+       "15:43",
+       "15:49"
+      ]
+     },
+     "surahs_without": [
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107,
+      108,
+      109,
+      110,
+      111,
+      112,
+      113,
+      114
+     ],
+     "verses_with_words": 2952
+    }
+   },
+   "recommend": "on",
+   "runtime": {
+    "bias_ms": 10,
+    "method": "shift",
+    "surahs_off": [
+     27,
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35,
+     36,
+     37,
+     38,
+     39,
+     40,
+     41,
+     42,
+     43,
+     44,
+     45,
+     46,
+     47,
+     48,
+     49,
+     50,
+     51,
+     52,
+     53,
+     54,
+     55,
+     56,
+     57,
+     58,
+     59,
+     60,
+     61,
+     62,
+     63,
+     64,
+     65,
+     66,
+     67,
+     68,
+     69,
+     70,
+     71,
+     72,
+     73,
+     74,
+     75,
+     76,
+     77,
+     78,
+     79,
+     80,
+     81,
+     82,
+     83,
+     84,
+     85,
+     86,
+     87,
+     88,
+     89,
+     90,
+     91,
+     92,
+     93,
+     94,
+     95,
+     96,
+     97,
+     98,
+     99,
+     100,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106,
+     107,
+     108,
+     109,
+     110,
+     111,
+     112,
+     113,
+     114
+    ],
+    "verse1": {
+     "rule": "none"
+    }
+   },
+   "sample": {
+    "surah 19": {
+     "agree_max_ms": 4.6,
+     "gross_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.583
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 1.0
+      },
+      "same_verse1": {
+       "n": 7,
+       "pass_rate": 0.0
+      }
+     },
+     "located": 31,
+     "not_located": [],
+     "opens_on_sound": [
+      "1:3",
+      "1:4",
+      "18:3",
+      "18:110",
+      "2:282",
+      "3:8",
+      "20:2",
+      "20:4",
+      "12:4",
+      "7:2"
+     ],
+     "peak_median": 0.997,
+     "peak_min": 0.939,
+     "qul_misplaced": [],
+     "shift_by_threshold": {
+      "quietBelow window 0.2": {
+       "bias_ms": 20,
+       "max": 96,
+       "p90": 27
+      },
+      "quietBelow window 0.35": {
+       "bias_ms": 10,
+       "max": 106,
+       "p90": 30
+      },
+      "quietBelow window 0.5": {
+       "bias_ms": -10,
+       "max": 193,
+       "p90": 22
+      },
+      "speech - 20 dB": {
+       "bias_ms": 50,
+       "max": 247,
+       "p90": 87
+      },
+      "speech - 30 dB": {
+       "bias_ms": 70,
+       "max": 365,
+       "p90": 91
+      }
+     },
+     "span_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.042
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 0.75
+      }
+     },
+     "surahs_other_recording": [],
+     "variants": {
+      "affine": {
+       "bias_ms": 55,
+       "max": 586,
+       "median": 39,
+       "n": 482,
+       "p90": 201,
+       "within_150": 0.865
+      },
+      "end": {
+       "bias_ms": 155,
+       "max": 555,
+       "median": 87,
+       "n": 482,
+       "p90": 365,
+       "within_150": 0.724
+      },
+      "shift": {
+       "bias_ms": 10,
+       "max": 106,
+       "median": 7,
+       "n": 482,
+       "p90": 30,
+       "within_150": 1.0
+      },
+      "table": {
+       "bias_ms": 30,
+       "max": 325,
+       "median": 72,
+       "n": 482,
+       "p90": 100,
+       "within_150": 0.959
+      }
+     },
+     "verdict": "match",
+     "verse1": {
+      "12:1": {
+       "shift": 2650,
+       "table": 2520
+      },
+      "18:1": {
+       "shift": 4219,
+       "table": 4139
+      },
+      "19:1": {
+       "shift": 4309,
+       "table": 4139
+      },
+      "1:1": {
+       "shift": 2807,
+       "table": 2807
+      },
+      "20:1": {
+       "shift": 3820,
+       "table": 3800
+      },
+      "4:1": {
+       "shift": 5956,
+       "table": 5916
+      },
+      "7:1": {
+       "shift": 2692,
+       "table": 2572
+      }
+     },
+     "verses": 31
+    }
+   },
+   "source": "ayah https://everyayah.com/data/ahmed_ibn_ali_al_ajamy_128kbps",
+   "survey": {
+    "errors": [],
+    "gross_check": {
+     "shift_after": {
+      "bias_ms": 10,
+      "stats": {
+       "max": 106,
+       "median": 13,
+       "n": 50,
+       "p90": 36,
+       "within_150": 1.0
+      }
+     },
+     "verse2_over_150_rejected": [],
+     "verse2_pass": {
+      "n": 26,
+      "pass_rate": 1.0
+     }
+    },
+    "no_words": [
+     27,
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35,
+     36,
+     37,
+     38,
+     39,
+     40,
+     41,
+     42,
+     43,
+     44,
+     45,
+     46,
+     47,
+     48,
+     49,
+     50,
+     51,
+     52,
+     53,
+     54,
+     55,
+     56,
+     57,
+     58,
+     59,
+     60,
+     61,
+     62,
+     63,
+     64,
+     65,
+     66,
+     67,
+     68,
+     69,
+     70,
+     71,
+     72,
+     73,
+     74,
+     75,
+     76,
+     77,
+     78,
+     79,
+     80,
+     81,
+     82,
+     83,
+     84,
+     85,
+     86,
+     87,
+     88,
+     89,
+     90,
+     91,
+     92,
+     93,
+     94,
+     95,
+     96,
+     97,
+     98,
+     99,
+     100,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106,
+     107,
+     108,
+     109,
+     110,
+     111,
+     112,
+     113,
+     114
+    ],
+    "other_recording": [],
+    "qul_misplaced": [],
+    "shift": {
+     "bias_ms": 10,
+     "max": 106,
+     "median": 13,
+     "n": 50,
+     "p90": 36,
+     "verses": 50,
+     "within_150": 1.0
+    },
+    "shift_over_150": [],
+    "surahs": 114,
+    "verse1": {
+     "shift": {
+      "bias_ms": -4165,
+      "max": 2467,
+      "median": 1219,
+      "n": 26,
+      "off": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10,
+       11,
+       12,
+       14,
+       15,
+       17,
+       20,
+       21,
+       22,
+       23,
+       24,
+       25,
+       26
+      ],
+      "p90": 1791,
+      "within_150": 0.154
+     },
+     "table": {
+      "bias_ms": -4060,
+      "max": 1882,
+      "median": 1174,
+      "n": 26,
+      "off": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10,
+       11,
+       12,
+       14,
+       15,
+       17,
+       20,
+       21,
+       22,
+       23,
+       24,
+       25,
+       26
+      ],
+      "p90": 1856,
+      "within_150": 0.154
+     }
+    },
+    "verse1_other_recording": []
+   },
+   "use": "surah 19",
+   "verdict": "match"
+  },
+  "alaqimy": {
+   "kind": "ayah",
+   "name": "Akram Al-Alaqimy",
+   "qul": {
+    "surah 127": {
+     "verses_with_words": 0
+    }
+   },
+   "recommend": "off",
+   "source": "ayah https://everyayah.com/data/Akram_AlAlaqimy_128kbps",
+   "verdict": "no_words"
+  },
+  "albanna": {
+   "files_differ": [],
+   "kind": "surah",
+   "name": "Mahmoud Ali Al-Banna",
+   "qul": {
+    "surah 129": {
+     "mismatched": {
+      "37:130": "il_yasin"
+     },
+     "odd": {
+      "repeat": 422
+     },
+     "verses_with_words": 6236
+    }
+   },
+   "recommend": "on",
+   "runtime": {
+    "method": "qul_times"
+   },
+   "sample": {
+    "surah 129": {
+     "agree_max_ms": 0.0,
+     "file_offset_ms": {
+      "1": [
+       0,
+       0
+      ],
+      "112": [
+       0,
+       0
+      ],
+      "114": [
+       0,
+       0
+      ],
+      "18": [
+       0,
+       0
+      ],
+      "2": [
+       0,
+       0
+      ],
+      "3": [
+       0,
+       0
+      ],
+      "36": [
+       0,
+       0
+      ],
+      "4": [
+       0,
+       0
+      ],
+      "67": [
+       0,
+       0
+      ]
+     },
+     "gross_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.583
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 1.0
+      },
+      "same_verse1": {
+       "n": 7,
+       "pass_rate": 0.0
+      }
+     },
+     "located": 31,
+     "not_located": [],
+     "opens_on_sound": [
+      "2:255"
+     ],
+     "peak_median": 1.0,
+     "peak_min": 0.996,
+     "qul_misplaced": [],
+     "shift_by_threshold": {
+      "quietBelow window 0.2": {
+       "bias_ms": 20,
+       "max": 42,
+       "p90": 25
+      },
+      "quietBelow window 0.35": {
+       "bias_ms": 20,
+       "max": 32,
+       "p90": 27
+      },
+      "quietBelow window 0.5": {
+       "bias_ms": 10,
+       "max": 42,
+       "p90": 27
+      },
+      "speech - 20 dB": {
+       "bias_ms": 20,
+       "max": 32,
+       "p90": 25
+      },
+      "speech - 30 dB": {
+       "bias_ms": 30,
+       "max": 350,
+       "p90": 37
+      }
+     },
+     "span_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.167
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 0.375
+      }
+     },
+     "surahs_other_recording": [],
+     "variants": {
+      "affine": {
+       "bias_ms": 220,
+       "max": 294,
+       "median": 117,
+       "n": 413,
+       "p90": 223,
+       "within_150": 0.63
+      },
+      "end": {
+       "bias_ms": 515,
+       "max": 163,
+       "median": 10,
+       "n": 413,
+       "p90": 35,
+       "within_150": 0.993
+      },
+      "shift": {
+       "bias_ms": 20,
+       "max": 32,
+       "median": 14,
+       "n": 413,
+       "p90": 27,
+       "within_150": 1.0
+      },
+      "table": {
+       "bias_ms": 300,
+       "max": 380,
+       "median": 204,
+       "n": 413,
+       "p90": 380,
+       "within_150": 0.305
+      }
+     },
+     "verdict": "match",
+     "verse1": {
+      "112:1": {
+       "shift": 5810,
+       "table": 4990
+      },
+      "114:1": {
+       "shift": 5980,
+       "table": 5320
+      },
+      "18:1": {
+       "shift": 4870,
+       "table": 4580
+      },
+      "1:1": {
+       "shift": 5410,
+       "table": 5350
+      },
+      "36:1": {
+       "shift": 4490,
+       "table": 4330
+      },
+      "4:1": {
+       "shift": 5190,
+       "table": 4370
+      },
+      "67:1": {
+       "shift": 5050,
+       "table": 4800
+      }
+     },
+     "verses": 31
+    }
+   },
+   "source": "surah https://download.quranicaudio.com/quran/mahmood_ali_albana SSS qul 129 opening 3600",
+   "use": "surah 129",
+   "verdict": "exact"
+  },
+  "alili": {
+   "kind": "ayah",
+   "name": "Aziz Alili",
+   "qul": {
+    "surah 44": {
+     "verses_with_words": 0
+    }
+   },
+   "recommend": "off",
+   "source": "ayah https://everyayah.com/data/aziz_alili_128kbps",
+   "verdict": "no_words"
+  },
+  "balilah": {
+   "kind": "surah",
+   "name": "Bandar Balilah",
+   "qul": {
+    "surah 160": {
+     "verses_with_words": 0
+    }
+   },
+   "recommend": "off",
+   "source": "surah https://server6.mp3quran.net/balilah SSS mp3quran 217",
+   "verdict": "no_words"
+  },
+  "basfar": {
+   "kind": "ayah",
+   "name": "Abdullah Basfar",
+   "qul": {
+    "surah 163": {
+     "verses_with_words": 0
+    }
+   },
+   "recommend": "off",
+   "source": "ayah https://everyayah.com/data/Abdullah_Basfar_192kbps",
+   "verdict": "no_words"
+  },
+  "budair": {
+   "kind": "ayah",
+   "name": "Salah Al-Budair",
+   "qul": {
+    "surah 43": {
+     "verses_with_words": 0
+    }
+   },
+   "recommend": "off",
+   "source": "ayah https://everyayah.com/data/Salah_Al_Budair_128kbps",
+   "verdict": "no_words"
+  },
+  "bukhatir": {
+   "kind": "ayah",
+   "name": "Salah Bukhatir",
+   "qul": {
+    "surah 18": {
+     "verses_with_words": 0
+    }
+   },
+   "recommend": "off",
+   "source": "ayah https://everyayah.com/data/Salaah_AbdulRahman_Bukhatir_128kbps",
+   "verdict": "no_words"
+  },
+  "dussary": {
+   "kind": "ayah",
+   "name": "Yasser Ad-Dussary",
+   "qul": {
+    "surah 174": {
+     "mismatched": {
+      "37:130": "il_yasin"
+     },
+     "odd": {
+      "order": 39,
+      "outside": [
+       "9:2",
+       "9:4",
+       "9:7",
+       "9:12",
+       "9:13",
+       "9:16",
+       "9:18",
+       "9:19",
+       "9:91",
+       "50:19",
+       "92:14"
+      ],
+      "repeat": 1205,
+      "zero": [
+       "9:60",
+       "9:91",
+       "9:118",
+       "50:19",
+       "92:14"
+      ]
+     },
+     "verses_with_words": 6236
+    },
+    "surah 97": {
+     "verses_with_words": 0
+    }
+   },
+   "recommend": "on",
+   "runtime": {
+    "bias_ms": -5,
+    "method": "shift",
+    "surahs_off": [
+     9,
+     29
+    ],
+    "verse1": {
+     "bias_ms": -95,
+     "off": [
+      20,
+      21,
+      28,
+      59,
+      62,
+      67,
+      72,
+      77
+     ],
+     "rule": "shift"
+    }
+   },
+   "sample": {
+    "surah 174": {
+     "agree_max_ms": 0.0,
+     "gross_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.5
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 0.958
+      },
+      "same_verse1": {
+       "n": 7,
+       "pass_rate": 1.0
+      }
+     },
+     "located": 31,
+     "not_located": [],
+     "opens_on_sound": [
+      "1:4",
+      "36:4",
+      "2:256",
+      "2:282",
+      "3:7",
+      "3:8"
+     ],
+     "peak_median": 0.97,
+     "peak_min": 0.879,
+     "qul_misplaced": [],
+     "shift_by_threshold": {
+      "quietBelow window 0.2": {
+       "bias_ms": 10,
+       "max": 106,
+       "p90": 61
+      },
+      "quietBelow window 0.35": {
+       "bias_ms": 10,
+       "max": 126,
+       "p90": 81
+      },
+      "quietBelow window 0.5": {
+       "bias_ms": 0,
+       "max": 156,
+       "p90": 91
+      },
+      "speech - 20 dB": {
+       "bias_ms": 10,
+       "max": 432,
+       "p90": 157
+      },
+      "speech - 30 dB": {
+       "bias_ms": 25,
+       "max": 476,
+       "p90": 172
+      }
+     },
+     "span_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.167
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 0.708
+      }
+     },
+     "surahs_other_recording": [],
+     "variants": {
+      "affine": {
+       "bias_ms": 25,
+       "max": 808,
+       "median": 24,
+       "n": 431,
+       "p90": 159,
+       "within_150": 0.896
+      },
+      "end": {
+       "bias_ms": 40,
+       "max": 1104,
+       "median": 59,
+       "n": 431,
+       "p90": 293,
+       "within_150": 0.759
+      },
+      "shift": {
+       "bias_ms": 10,
+       "max": 126,
+       "median": 15,
+       "n": 431,
+       "p90": 81,
+       "within_150": 1.0
+      },
+      "table": {
+       "bias_ms": -55,
+       "max": 486,
+       "median": 47,
+       "n": 431,
+       "p90": 162,
+       "within_150": 0.812
+      }
+     },
+     "verdict": "match",
+     "verse1": {
+      "112:1": {
+       "shift": 30,
+       "table": 0
+      },
+      "114:1": {
+       "shift": 20,
+       "table": 0
+      },
+      "18:1": {
+       "shift": 181,
+       "table": -29
+      },
+      "1:1": {
+       "shift": 188,
+       "table": -12
+      },
+      "36:1": {
+       "shift": 115,
+       "table": -195
+      },
+      "4:1": {
+       "shift": 92,
+       "table": 92
+      },
+      "67:1": {
+       "shift": 257,
+       "table": 27
+      }
+     },
+     "verses": 31
+    }
+   },
+   "source": "ayah https://everyayah.com/data/Yasser_Ad-Dussary_128kbps",
+   "survey": {
+    "errors": [
+     29
+    ],
+    "gross_check": {
+     "shift_after": {
+      "bias_ms": -5,
+      "stats": {
+       "max": 409,
+       "median": 27,
+       "n": 135,
+       "p90": 111,
+       "within_150": 0.963
+      }
+     },
+     "verse2_over_150_rejected": [],
+     "verse2_pass": {
+      "n": 112,
+      "pass_rate": 1.0
+     }
+    },
+    "no_words": [],
+    "other_recording": [
+     9
+    ],
+    "qul_misplaced": [
+     33
+    ],
+    "shift": {
+     "bias_ms": -5,
+     "max": 3562,
+     "median": 28,
+     "n": 136,
+     "p90": 113,
+     "verses": 136,
+     "within_150": 0.956
+    },
+    "shift_over_150": [
+     32,
+     33,
+     37,
+     73,
+     80,
+     90
+    ],
+    "surahs": 114,
+    "verse1": {
+     "shift": {
+      "bias_ms": -95,
+      "max": 327,
+      "median": 54,
+      "n": 111,
+      "off": [
+       21,
+       28,
+       59,
+       62,
+       67,
+       72,
+       77
+      ],
+      "p90": 122,
+      "within_150": 0.937
+     },
+     "table": {
+      "bias_ms": 0,
+      "max": 437,
+      "median": 25,
+      "n": 111,
+      "off": [
+       12,
+       13,
+       14,
+       24,
+       25,
+       26,
+       27,
+       33,
+       34,
+       35,
+       36,
+       37,
+       38,
+       45,
+       52,
+       66
+      ],
+      "p90": 189,
+      "within_150": 0.856
+     }
+    },
+    "verse1_other_recording": [
+     20
+    ]
+   },
+   "use": "surah 174",
+   "verdict": "mixed"
+  },
+  "ghamdi": {
+   "kind": "surah",
+   "name": "Saad Al-Ghamdi",
+   "qul": {
+    "surah 13": {
+     "mismatched": {
+      "37:130": "il_yasin"
+     },
+     "odd": {
+      "repeat": 785
+     },
+     "verses_with_words": 6236
+    }
+   },
+   "recommend": "on",
+   "runtime": {
+    "drift_ppm": -13.2,
+    "method": "offset",
+    "offset_ms": {
+     "1": -3831,
+     "10": -10314,
+     "100": -5555,
+     "101": -5498,
+     "102": -5717,
+     "103": -5428,
+     "104": -5670,
+     "105": -6035,
+     "106": -5431,
+     "107": -5996,
+     "108": -5636,
+     "109": -5396,
+     "11": -5824,
+     "110": -5511,
+     "111": -6134,
+     "112": -5830,
+     "113": -5546,
+     "114": -5645,
+     "12": -9694,
+     "13": -6322,
+     "14": -5596,
+     "15": -10131,
+     "16": -6396,
+     "17": -6148,
+     "18": -9903,
+     "19": -5550,
+     "2": -5505,
+     "20": -5445,
+     "21": -9906,
+     "22": -5370,
+     "23": -5524,
+     "24": -9142,
+     "25": -5277,
+     "26": -5809,
+     "27": -9250,
+     "28": -4651,
+     "29": -5758,
+     "3": -6896,
+     "30": -9589,
+     "31": -5488,
+     "32": -5332,
+     "33": -6460,
+     "34": -5570,
+     "35": -9554,
+     "36": -5446,
+     "37": -5683,
+     "38": -5701,
+     "39": -9502,
+     "4": -9226,
+     "40": -5437,
+     "41": -6193,
+     "42": -4575,
+     "43": -8516,
+     "44": -4838,
+     "45": -4722,
+     "46": -5460,
+     "47": -5818,
+     "48": -5342,
+     "49": -5946,
+     "5": -9254,
+     "50": -9207,
+     "51": -4153,
+     "52": -4092,
+     "53": -4338,
+     "54": -4058,
+     "55": -4107,
+     "56": -4031,
+     "57": -4064,
+     "58": -4045,
+     "59": -7598,
+     "6": -9545,
+     "60": -4159,
+     "61": -4074,
+     "62": -4981,
+     "63": -4212,
+     "64": -4160,
+     "65": -4117,
+     "66": -4241,
+     "67": -6006,
+     "68": -4900,
+     "69": -4656,
+     "7": -9701,
+     "70": -4812,
+     "71": -4844,
+     "72": -5460,
+     "73": -4636,
+     "74": -8620,
+     "75": -4830,
+     "76": -4976,
+     "77": -4832,
+     "78": -5332,
+     "79": -5385,
+     "8": -9562,
+     "80": -5563,
+     "81": -5481,
+     "82": -5645,
+     "83": -5669,
+     "84": -5433,
+     "85": -5313,
+     "86": -5539,
+     "87": -5529,
+     "88": -5710,
+     "89": -5501,
+     "9": -3902,
+     "90": -6070,
+     "91": -5932,
+     "92": -5447,
+     "93": -5690,
+     "94": -5591,
+     "95": -5496,
+     "96": -5575,
+     "97": -5748,
+     "98": -5648,
+     "99": -5731
+    },
+    "surahs_off": []
+   },
+   "sample": {
+    "surah 13": {
+     "agree_max_ms": 1.2,
+     "file_offset_ms": {
+      "1": [
+       -3831,
+       -3831
+      ],
+      "112": [
+       -5831,
+       -5831
+      ],
+      "114": [
+       -5645,
+       -5645
+      ],
+      "18": [
+       -9918,
+       -9903
+      ],
+      "2": [
+       -5591,
+       -5583
+      ],
+      "3": [
+       -6897,
+       -6897
+      ],
+      "36": [
+       -5446,
+       -5446
+      ],
+      "4": [
+       -9227,
+       -9226
+      ],
+      "67": [
+       -6006,
+       -6005
+      ]
+     },
+     "gross_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.5
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 0.958
+      },
+      "same_verse1": {
+       "n": 7,
+       "pass_rate": 0.857
+      }
+     },
+     "located": 31,
+     "not_located": [],
+     "opens_on_sound": [
+      "112:2",
+      "112:4",
+      "114:2",
+      "114:3",
+      "1:2",
+      "1:3",
+      "36:2",
+      "36:4"
+     ],
+     "peak_median": 0.968,
+     "peak_min": 0.887,
+     "qul_misplaced": [],
+     "shift_by_threshold": {
+      "quietBelow window 0.2": {
+       "bias_ms": 25,
+       "max": 1782,
+       "p90": 29
+      },
+      "quietBelow window 0.35": {
+       "bias_ms": 15,
+       "max": 1792,
+       "p90": 29
+      },
+      "quietBelow window 0.5": {
+       "bias_ms": -5,
+       "max": 1812,
+       "p90": 12
+      },
+      "speech - 20 dB": {
+       "bias_ms": 35,
+       "max": 1772,
+       "p90": 271
+      },
+      "speech - 30 dB": {
+       "bias_ms": 200,
+       "max": 1607,
+       "p90": 249
+      }
+     },
+     "span_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.125
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 0.5
+      }
+     },
+     "surahs_other_recording": [],
+     "variants": {
+      "affine": {
+       "bias_ms": 230,
+       "max": 1577,
+       "median": 145,
+       "n": 433,
+       "p90": 380,
+       "within_150": 0.52
+      },
+      "end": {
+       "bias_ms": 595,
+       "max": 1125,
+       "median": 141,
+       "n": 433,
+       "p90": 390,
+       "within_150": 0.642
+      },
+      "shift": {
+       "bias_ms": 15,
+       "max": 1792,
+       "median": 3,
+       "n": 433,
+       "p90": 29,
+       "within_150": 0.975
+      },
+      "table": {
+       "bias_ms": 215,
+       "max": 1582,
+       "median": 57,
+       "n": 433,
+       "p90": 232,
+       "within_150": 0.79
+      }
+     },
+     "verdict": "match",
+     "verse1": {
+      "112:1": {
+       "shift": 10,
+       "table": -90
+      },
+      "114:1": {
+       "shift": 39,
+       "table": -31
+      },
+      "18:1": {
+       "shift": -23,
+       "table": -53
+      },
+      "1:1": {
+       "shift": -11,
+       "table": -41
+      },
+      "36:1": {
+       "shift": 60,
+       "table": -30
+      },
+      "4:1": {
+       "shift": 41,
+       "table": -59
+      },
+      "67:1": {
+       "shift": 4,
+       "table": -56
+      }
+     },
+     "verses": 31
+    }
+   },
+   "source": "surah https://server7.mp3quran.net/s_gmd SSS mp3quran 30",
+   "survey": {
+    "errors": [],
+    "gross_check": {
+     "shift_after": {
+      "bias_ms": 15,
+      "stats": {
+       "max": 1792,
+       "median": 19,
+       "n": 130,
+       "p90": 148,
+       "within_150": 0.9
+      }
+     },
+     "verse2_over_150_rejected": [
+      7,
+      19,
+      36,
+      46,
+      79
+     ],
+     "verse2_pass": {
+      "n": 114,
+      "pass_rate": 0.93
+     }
+    },
+    "no_words": [],
+    "offset_v1_v2_max_ms": 4.5,
+    "other_recording": [],
+    "qul_misplaced": [],
+    "shift": {
+     "bias_ms": 15,
+     "max": 1995,
+     "median": 21,
+     "n": 138,
+     "p90": 194,
+     "verses": 138,
+     "within_150": 0.87
+    },
+    "shift_over_150": [
+     7,
+     19,
+     36,
+     40,
+     46,
+     79,
+     80,
+     100,
+     101,
+     102,
+     103,
+     104,
+     112,
+     114
+    ],
+    "surahs": 114,
+    "verse1": {
+     "shift": {
+      "bias_ms": -5,
+      "max": 3706,
+      "median": 17,
+      "n": 108,
+      "off": [
+       10,
+       68
+      ],
+      "p90": 62,
+      "within_150": 0.981
+     }
+    },
+    "verse1_other_recording": [
+     20,
+     89,
+     93,
+     98,
+     101,
+     103
+    ],
+    "verse2_opens_on_sound": [
+     1,
+     7,
+     19,
+     36,
+     43,
+     44,
+     45,
+     46,
+     79,
+     80,
+     81,
+     83,
+     86,
+     87,
+     89,
+     90,
+     92,
+     93,
+     94,
+     95,
+     96,
+     97,
+     101,
+     103,
+     104,
+     105,
+     107,
+     108,
+     110,
+     111,
+     112,
+     113,
+     114
+    ]
+   },
+   "use": "surah 13",
+   "verdict": "match"
+  },
+  "husary_mujawwad": {
+   "kind": "ayah",
+   "name": "Al-Husary · Mujawwad",
+   "qul": {
+    "surah 164": {
+     "mismatched": {
+      "37:130": "il_yasin"
+     },
+     "odd": {
+      "repeat": 577
+     },
+     "verses_with_words": 6236
+    }
+   },
+   "recommend": "on",
+   "runtime": {
+    "bias_ms": 20,
+    "method": "shift",
+    "surahs_off": [
+     17,
+     62
+    ],
+    "verse1": {
+     "bias_ms": -5,
+     "off": [
+      1,
+      9,
+      16,
+      25,
+      37,
+      46,
+      72,
+      77,
+      89,
+      109,
+      111
+     ],
+     "rule": "shift"
+    }
+   },
+   "sample": {
+    "surah 164": {
+     "agree_max_ms": 8.0,
+     "gross_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.0
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 1.0
+      },
+      "same_verse1": {
+       "n": 7,
+       "pass_rate": 0.857
+      }
+     },
+     "located": 31,
+     "not_located": [],
+     "opens_on_sound": [],
+     "peak_median": 0.964,
+     "peak_min": 0.778,
+     "qul_misplaced": [],
+     "shift_by_threshold": {
+      "quietBelow window 0.2": {
+       "bias_ms": 280,
+       "max": 3801,
+       "p90": 3801
+      },
+      "quietBelow window 0.35": {
+       "bias_ms": 30,
+       "max": 58,
+       "p90": 29
+      },
+      "quietBelow window 0.5": {
+       "bias_ms": -15,
+       "max": 55,
+       "p90": 31
+      },
+      "speech - 20 dB": {
+       "bias_ms": -20,
+       "max": 50,
+       "p90": 36
+      },
+      "speech - 30 dB": {
+       "bias_ms": 30,
+       "max": 39,
+       "p90": 30
+      }
+     },
+     "span_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.0
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 0.5
+      }
+     },
+     "surahs_other_recording": [],
+     "variants": {
+      "affine": {
+       "bias_ms": 200,
+       "max": 1366,
+       "median": 133,
+       "n": 409,
+       "p90": 371,
+       "within_150": 0.567
+      },
+      "end": {
+       "bias_ms": 510,
+       "max": 1709,
+       "median": 29,
+       "n": 409,
+       "p90": 1709,
+       "within_150": 0.807
+      },
+      "shift": {
+       "bias_ms": 30,
+       "max": 58,
+       "median": 10,
+       "n": 409,
+       "p90": 29,
+       "within_150": 1.0
+      },
+      "table": {
+       "bias_ms": 4180,
+       "max": 4926,
+       "median": 601,
+       "n": 409,
+       "p90": 3133,
+       "within_150": 0.425
+      }
+     },
+     "verdict": "match",
+     "verse1": {
+      "112:1": {
+       "shift": -39,
+       "table": -3009
+      },
+      "114:1": {
+       "shift": -35,
+       "table": -4375
+      },
+      "18:1": {
+       "shift": 1,
+       "table": -3679
+      },
+      "1:1": {
+       "shift": 7581,
+       "table": 3571
+      },
+      "36:1": {
+       "shift": -43,
+       "table": -2183
+      },
+      "4:1": {
+       "shift": 21,
+       "table": -7379
+      },
+      "67:1": {
+       "shift": 108,
+       "table": -4162
+      }
+     },
+     "verses": 31
+    }
+   },
+   "source": "ayah https://everyayah.com/data/Husary_128kbps_Mujawwad",
+   "survey": {
+    "errors": [],
+    "gross_check": {
+     "shift_after": {
+      "bias_ms": 20,
+      "stats": {
+       "max": 152,
+       "median": 12,
+       "n": 128,
+       "p90": 39,
+       "within_150": 0.992
+      }
+     },
+     "verse2_over_150_rejected": [
+      60,
+      61,
+      70,
+      80
+     ],
+     "verse2_pass": {
+      "n": 112,
+      "pass_rate": 0.929
+     }
+    },
+    "no_words": [],
+    "other_recording": [
+     17,
+     62
+    ],
+    "qul_misplaced": [],
+    "shift": {
+     "bias_ms": 20,
+     "max": 4479,
+     "median": 12,
+     "n": 136,
+     "p90": 46,
+     "verses": 136,
+     "within_150": 0.963
+    },
+    "shift_over_150": [
+     60,
+     61,
+     69,
+     70,
+     80
+    ],
+    "surahs": 114,
+    "verse1": {
+     "shift": {
+      "bias_ms": -5,
+      "max": 7576,
+      "median": 36,
+      "n": 110,
+      "off": [
+       1,
+       9,
+       16,
+       25,
+       46,
+       72,
+       77,
+       109,
+       111
+      ],
+      "p90": 130,
+      "within_150": 0.918
+     },
+     "table": {
+      "bias_ms": 3115,
+      "max": 6686,
+      "median": 948,
+      "n": 110,
+      "off": [
+       1,
+       2,
+       3,
+       4,
+       6,
+       7,
+       9,
+       10,
+       11,
+       12,
+       13,
+       14,
+       15,
+       16,
+       18,
+       19,
+       20,
+       23,
+       24,
+       25,
+       26,
+       27,
+       28,
+       29,
+       30,
+       31,
+       32,
+       33,
+       34,
+       35,
+       36,
+       38,
+       39,
+       40,
+       41,
+       42,
+       43,
+       46,
+       47,
+       48,
+       49,
+       50,
+       51,
+       52,
+       53,
+       54,
+       56,
+       57,
+       58,
+       59,
+       60,
+       63,
+       64,
+       65,
+       67,
+       68,
+       70,
+       71,
+       72,
+       74,
+       75,
+       76,
+       77,
+       78,
+       79,
+       80,
+       81,
+       82,
+       83,
+       84,
+       85,
+       86,
+       87,
+       90,
+       91,
+       92,
+       93,
+       95,
+       96,
+       97,
+       99,
+       100,
+       101,
+       102,
+       104,
+       105,
+       106,
+       107,
+       108,
+       109,
+       110,
+       114
+      ],
+      "p90": 2547,
+      "within_150": 0.164
+     }
+    },
+    "verse1_other_recording": [
+     37,
+     89
+    ]
+   },
+   "use": "surah 164",
+   "verdict": "mixed"
+  },
+  "jaber": {
+   "kind": "ayah",
+   "name": "Ali Jaber",
+   "qul": {
+    "surah 158": {
+     "verses_with_words": 0
+    }
+   },
+   "recommend": "off",
+   "source": "ayah https://everyayah.com/data/Ali_Jaber_64kbps",
+   "verdict": "no_words"
+  },
+  "jaleel": {
+   "kind": "surah",
+   "name": "Khalid Al-Jaleel",
+   "qul": {
+    "surah 170": {
+     "mismatched": {
+      "13:37": "bada",
+      "2:181": "bada",
+      "8:6": "bada"
+     },
+     "odd": {
+      "gap": [
+       "2:75",
+       "4:36",
+       "4:172",
+       "5:75",
+       "5:84",
+       "9:22",
+       "17:17",
+       "17:42",
+       "22:14",
+       "25:52",
+       "25:57",
+       "29:57",
+       "31:16",
+       "36:68",
+       "44:8",
+       "57:4",
+       "80:40"
+      ],
+      "repeat": 470,
+      "zero": [
+       "2:27",
+       "21:20",
+       "25:70",
+       "36:23",
+       "43:31",
+       "55:26",
+       "70:28",
+       "74:38",
+       "75:16",
+       "79:38",
+       "82:1",
+       "82:13",
+       "104:1"
+      ]
+     },
+     "verses_with_words": 6236
+    }
+   },
+   "recommend": "off",
+   "sample": {
+    "surah 170": {
+     "agree_max_ms": 0.0,
+     "file_offset_ms": {
+      "1": [
+       -3739,
+       -3739
+      ],
+      "112": [
+       -4914,
+       -4914
+      ],
+      "114": [
+       -4716,
+       -4716
+      ],
+      "2": [
+       -6405,
+       -6405
+      ],
+      "3": [
+       -3158,
+       -3158
+      ],
+      "36": [
+       -5065,
+       -5065
+      ],
+      "4": [
+       -5342,
+       -5342
+      ],
+      "67": [
+       -4770,
+       -4770
+      ]
+     },
+     "gross_check": {
+      "other_reciter": {
+       "n": 18,
+       "pass_rate": 0.444
+      },
+      "other_recording": {
+       "n": 7,
+       "pass_rate": 0.429
+      },
+      "same_recording": {
+       "n": 18,
+       "pass_rate": 0.833
+      },
+      "same_verse1": {
+       "n": 6,
+       "pass_rate": 1.0
+      }
+     },
+     "located": 24,
+     "not_located": [
+      "1:2",
+      "1:3",
+      "1:4",
+      "18:1",
+      "18:2",
+      "18:3",
+      "18:110"
+     ],
+     "opens_on_sound": [
+      "112:2",
+      "112:3",
+      "112:4",
+      "36:2",
+      "36:4",
+      "36:5",
+      "3:7",
+      "3:8"
+     ],
+     "peak_median": 0.987,
+     "peak_min": 0.85,
+     "qul_misplaced": [],
+     "shift_by_threshold": {
+      "quietBelow window 0.2": {
+       "bias_ms": -100,
+       "max": 33269,
+       "p90": 33269
+      },
+      "quietBelow window 0.35": {
+       "bias_ms": -110,
+       "max": 33259,
+       "p90": 33259
+      },
+      "quietBelow window 0.5": {
+       "bias_ms": -270,
+       "max": 33169,
+       "p90": 33169
+      },
+      "speech - 20 dB": {
+       "bias_ms": -30,
+       "max": 33339,
+       "p90": 33339
+      },
+      "speech - 30 dB": {
+       "bias_ms": 90,
+       "max": 33459,
+       "p90": 33459
+      }
+     },
+     "span_check": {
+      "other_reciter": {
+       "n": 18,
+       "pass_rate": 0.0
+      },
+      "other_recording": {
+       "n": 7,
+       "pass_rate": 0.286
+      },
+      "same_recording": {
+       "n": 18,
+       "pass_rate": 0.389
+      }
+     },
+     "surahs_other_recording": [
+      18
+     ],
+     "variants": {
+      "affine": {
+       "bias_ms": -345,
+       "max": 33651,
+       "median": 229,
+       "n": 367,
+       "p90": 31324,
+       "within_150": 0.332
+      },
+      "end": {
+       "bias_ms": -615,
+       "max": 33723,
+       "median": 566,
+       "n": 367,
+       "p90": 29512,
+       "within_150": 0.387
+      },
+      "shift": {
+       "bias_ms": -110,
+       "max": 33259,
+       "median": 49,
+       "n": 367,
+       "p90": 33259,
+       "within_150": 0.559
+      },
+      "table": {
+       "bias_ms": -10,
+       "max": 33359,
+       "median": 73,
+       "n": 367,
+       "p90": 33359,
+       "within_150": 0.613
+      }
+     },
+     "verdict": "mixed",
+     "verse1": {
+      "112:1": {
+       "shift": 99,
+       "table": -21
+      },
+      "114:1": {
+       "shift": 67,
+       "table": -213
+      },
+      "1:1": {
+       "shift": 12,
+       "table": -18
+      },
+      "36:1": {
+       "shift": -94,
+       "table": -214
+      },
+      "4:1": {
+       "shift": 102,
+       "table": -498
+      },
+      "67:1": {
+       "shift": 129,
+       "table": -21
+      }
+     },
+     "verses": 31
+    }
+   },
+   "source": "surah https://server10.mp3quran.net/jleel SSS mp3quran 20",
+   "use": "surah 170",
+   "verdict": "mixed",
+   "why": "the shift mapping's p90 is 33259 ms; QUL has another recording in surahs [18]"
+  },
+  "jibreel": {
+   "kind": "ayah",
+   "name": "Muhammad Jibreel",
+   "qul": {
+    "surah 169": {
+     "verses_with_words": 0
+    }
+   },
+   "recommend": "off",
+   "source": "ayah https://everyayah.com/data/Muhammad_Jibreel_128kbps",
+   "verdict": "no_words"
+  },
+  "juhani": {
+   "kind": "ayah",
+   "name": "Abdullah Al-Juhani",
+   "qul": {
+    "surah 162": {
+     "verses_with_words": 0
+    }
+   },
+   "recommend": "off",
+   "source": "ayah https://everyayah.com/data/Abdullaah_3awwaad_Al-Juhaynee_128kbps",
+   "verdict": "no_words"
+  },
+  "matrood": {
+   "kind": "ayah",
+   "name": "Abdullah Al-Matrood",
+   "qul": {
+    "surah 124": {
+     "verses_with_words": 0
+    }
+   },
+   "recommend": "off",
+   "source": "ayah https://everyayah.com/data/Abdullah_Matroud_128kbps",
+   "verdict": "no_words"
+  },
+  "muaiqly": {
+   "kind": "ayah",
+   "name": "Maher Al-Muaiqly",
+   "qul": {
+    "surah 159": {
+     "mismatched": {
+      "13:37": "bada",
+      "2:181": "bada",
+      "8:6": "bada"
+     },
+     "odd": {
+      "gap": [
+       "17:111",
+       "49:11"
+      ],
+      "outside": 39,
+      "repeat": 304
+     },
+     "verses_with_words": 6236
+    },
+    "surah 65": {
+     "mismatched": {
+      "37:130": "il_yasin"
+     },
+     "odd": {
+      "outside": [
+       "15:92",
+       "56:13",
+       "56:49",
+       "56:93"
+      ],
+      "repeat": 1673,
+      "zero": [
+       "15:92",
+       "56:13",
+       "56:49",
+       "56:93"
+      ]
+     },
+     "verses_with_words": 6236
+    }
+   },
+   "recommend": "off",
+   "sample": {
+    "surah 159": {
+     "located": 0,
+     "not_located": [
+      "112:1",
+      "112:2",
+      "112:3",
+      "112:4",
+      "114:1",
+      "114:2",
+      "114:3",
+      "67:1",
+      "67:2",
+      "67:3"
+     ],
+     "peak_max": 0.211,
+     "verdict": "different",
+     "verses": 10
+    },
+    "surah 65": {
+     "located": 0,
+     "not_located": [
+      "112:1",
+      "112:2",
+      "112:3",
+      "112:4",
+      "114:1",
+      "114:2",
+      "114:3",
+      "67:1",
+      "67:2",
+      "67:3",
+      "1:1",
+      "1:2",
+      "1:3",
+      "1:4",
+      "36:1",
+      "36:2",
+      "36:3",
+      "36:4",
+      "36:5",
+      "18:1",
+      "18:2",
+      "18:3",
+      "18:110",
+      "2:254",
+      "2:255",
+      "2:256",
+      "2:282",
+      "3:7",
+      "3:8",
+      "4:1",
+      "4:2"
+     ],
+     "peak_max": 0.624,
+     "verdict": "different",
+     "verses": 31
+    }
+   },
+   "source": "ayah https://everyayah.com/data/MaherAlMuaiqly128kbps",
+   "verdict": "different"
+  },
+  "mustafa_ismail": {
+   "kind": "ayah",
+   "name": "Mustafa Ismail",
+   "qul": {
+    "surah 88": {
+     "verses_with_words": 0
+    }
+   },
+   "recommend": "off",
+   "source": "ayah https://quran.ksu.edu.sa/ayat/mp3/Mostafa_Ismail_128kbps",
+   "verdict": "no_words"
+  },
+  "neana": {
+   "kind": "ayah",
+   "name": "Ahmed Neana",
+   "qul": {
+    "surah 126": {
+     "verses_with_words": 0
+    }
+   },
+   "recommend": "off",
+   "source": "ayah https://everyayah.com/data/Ahmed_Neana_128kbps",
+   "verdict": "no_words"
+  },
+  "nufais": {
+   "kind": "ayah",
+   "name": "Ahmad Al-Nufais",
+   "qul": {
+    "ayah 42": {
+     "mismatched": {
+      "13:37": "bada"
+     },
+     "not_ours": [],
+     "odd": {
+      "gap": [
+       "2:83",
+       "5:95",
+       "6:119",
+       "6:162",
+       "7:140",
+       "8:60",
+       "10:57",
+       "11:48",
+       "14:46",
+       "16:78",
+       "17:14",
+       "23:24",
+       "23:99",
+       "32:17",
+       "37:99",
+       "45:25",
+       "69:18",
+       "78:30"
+      ],
+      "repeat": 634,
+      "zero": [
+       "21:67",
+       "21:103",
+       "24:20"
+      ]
+     },
+     "sizes_checked": 61,
+     "sizes_differ": [],
+     "verses_with_words": 6236
+    },
+    "surah 175": {
+     "mismatched": {
+      "37:130": "il_yasin"
+     },
+     "odd": {
+      "gap": [
+       "11:58",
+       "31:16",
+       "49:13",
+       "60:12"
+      ],
+      "order": 146,
+      "outside": 53,
+      "repeat": 1088,
+      "zero": [
+       "3:187",
+       "6:132",
+       "8:30",
+       "9:51",
+       "11:57",
+       "23:99",
+       "39:10",
+       "39:53",
+       "40:30",
+       "42:15",
+       "42:19",
+       "44:47"
+      ]
+     },
+     "verses_with_words": 6236
+    }
+   },
+   "recommend": "on",
+   "runtime": {
+    "endpoint": "https://qul.tarteel.ai/api/v1/audio/ayah_segments/42?surah={s}&per_page={verses}",
+    "method": "ayah_spans"
+   },
+   "sample": {
+    "surah 175": {
+     "agree_max_ms": 0.1,
+     "gross_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.542
+      },
+      "other_recording": {
+       "n": 1,
+       "pass_rate": 0.0
+      },
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 1.0
+      },
+      "same_verse1": {
+       "n": 6,
+       "pass_rate": 1.0
+      }
+     },
+     "located": 30,
+     "not_located": [
+      "1:1"
+     ],
+     "opens_on_sound": [
+      "112:4",
+      "114:3",
+      "1:4"
+     ],
+     "peak_median": 0.984,
+     "peak_min": 0.904,
+     "qul_misplaced": [],
+     "shift_by_threshold": {
+      "quietBelow window 0.2": {
+       "bias_ms": 155,
+       "max": 900,
+       "p90": 849
+      },
+      "quietBelow window 0.35": {
+       "bias_ms": 155,
+       "max": 920,
+       "p90": 859
+      },
+      "quietBelow window 0.5": {
+       "bias_ms": 145,
+       "max": 930,
+       "p90": 869
+      },
+      "speech - 20 dB": {
+       "bias_ms": 195,
+       "max": 1024,
+       "p90": 729
+      },
+      "speech - 30 dB": {
+       "bias_ms": 375,
+       "max": 844,
+       "p90": 729
+      }
+     },
+     "span_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.167
+      },
+      "other_recording": {
+       "n": 1,
+       "pass_rate": 0.0
+      },
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 0.417
+      }
+     },
+     "surahs_other_recording": [],
+     "variants": {
+      "affine": {
+       "bias_ms": 105,
+       "max": 2196,
+       "median": 220,
+       "n": 417,
+       "p90": 694,
+       "within_150": 0.353
+      },
+      "end": {
+       "bias_ms": 45,
+       "max": 2433,
+       "median": 80,
+       "n": 417,
+       "p90": 655,
+       "within_150": 0.583
+      },
+      "shift": {
+       "bias_ms": 155,
+       "max": 920,
+       "median": 344,
+       "n": 417,
+       "p90": 859,
+       "within_150": 0.458
+      },
+      "table": {
+       "bias_ms": -220,
+       "max": 602,
+       "median": 134,
+       "n": 417,
+       "p90": 596,
+       "within_150": 0.645
+      }
+     },
+     "verdict": "match",
+     "verse1": {
+      "112:1": {
+       "shift": 15,
+       "table": -5
+      },
+      "114:1": {
+       "shift": -24,
+       "table": -24
+      },
+      "18:1": {
+       "shift": 188,
+       "table": 118
+      },
+      "36:1": {
+       "shift": 231,
+       "table": 111
+      },
+      "4:1": {
+       "shift": 118,
+       "table": -12
+      },
+      "67:1": {
+       "shift": 33,
+       "table": -67
+      }
+     },
+     "verses": 31
+    }
+   },
+   "source": "ayah https://audio-cdn.tarteel.ai/quran/alnufais",
+   "use": "ayah 42",
+   "verdict": "exact"
+  },
+  "qatami": {
+   "kind": "ayah",
+   "name": "Nasser Al-Qatami",
+   "qul": {
+    "surah 104": {
+     "verses_with_words": 0
+    }
+   },
+   "recommend": "off",
+   "source": "ayah https://everyayah.com/data/Nasser_Alqatami_128kbps",
+   "verdict": "no_words"
+  },
+  "sahl_yassin": {
+   "kind": "ayah",
+   "name": "Sahl Yassin",
+   "qul": {
+    "surah 17": {
+     "verses_with_words": 0
+    }
+   },
+   "recommend": "off",
+   "source": "ayah https://everyayah.com/data/Sahl_Yassin_128kbps",
+   "verdict": "no_words"
+  },
+  "salimi": {
+   "kind": "surah",
+   "name": "Mansour Al-Salimi",
+   "qul": {
+    "surah 179": {
+     "mismatched": {
+      "22:5": "unfit",
+      "37:130": "il_yasin"
+     },
+     "odd": {
+      "order": [
+       "29:58"
+      ],
+      "outside": [
+       "111:3"
+      ],
+      "repeat": 517,
+      "zero": [
+       "111:3"
+      ]
+     },
+     "verses_with_words": 6236
+    }
+   },
+   "recommend": "on",
+   "runtime": {
+    "drift_ppm": 0.0,
+    "method": "offset",
+    "offset_ms": {
+     "1": 8,
+     "10": -4774,
+     "100": -4875,
+     "101": -4923,
+     "102": -4873,
+     "103": -4975,
+     "104": -5170,
+     "105": -4880,
+     "106": -4937,
+     "107": -4810,
+     "108": -4908,
+     "109": -4942,
+     "11": -4938,
+     "110": -4903,
+     "111": -4942,
+     "112": -5132,
+     "113": -4922,
+     "114": -12504,
+     "12": -4925,
+     "13": -5032,
+     "14": -4893,
+     "15": -4755,
+     "16": -5122,
+     "17": -5022,
+     "18": -4878,
+     "19": -5013,
+     "2": -4902,
+     "20": -5058,
+     "21": -5080,
+     "22": -5230,
+     "23": -5017,
+     "24": -5020,
+     "25": -4905,
+     "26": -4940,
+     "27": -5038,
+     "28": -4902,
+     "29": -4828,
+     "3": -4870,
+     "30": -4947,
+     "31": -4611,
+     "32": -4915,
+     "33": -4897,
+     "34": -4853,
+     "35": -4924,
+     "36": -4980,
+     "37": -4928,
+     "38": -5002,
+     "39": -5011,
+     "4": -4854,
+     "40": -4964,
+     "41": -4917,
+     "42": -4704,
+     "43": -4944,
+     "44": -4956,
+     "45": -5017,
+     "46": -5029,
+     "47": -5009,
+     "48": -4901,
+     "49": -4952,
+     "5": -5373,
+     "50": -4992,
+     "51": -4965,
+     "52": -4892,
+     "53": -4761,
+     "54": -4957,
+     "55": -4855,
+     "56": -4854,
+     "57": -4972,
+     "58": -5010,
+     "59": -4920,
+     "6": -4804,
+     "60": -5035,
+     "61": -4994,
+     "62": -4909,
+     "63": -4910,
+     "64": -4951,
+     "65": -5036,
+     "66": -4932,
+     "67": -4960,
+     "68": -4636,
+     "69": -4945,
+     "7": -4937,
+     "70": -4932,
+     "71": -4949,
+     "72": -4916,
+     "73": -5089,
+     "74": -4735,
+     "75": -4956,
+     "76": -4912,
+     "77": -4994,
+     "78": -5024,
+     "79": -4705,
+     "8": -4989,
+     "80": -4838,
+     "81": -5004,
+     "82": -4887,
+     "83": -4937,
+     "84": -4986,
+     "85": -5090,
+     "86": -4944,
+     "87": -4838,
+     "88": -4828,
+     "89": -4958,
+     "9": -6881,
+     "90": -4851,
+     "91": -4833,
+     "92": -5110,
+     "93": -4948,
+     "94": -4730,
+     "95": -4866,
+     "96": -4865,
+     "97": -4912,
+     "98": -4966,
+     "99": -5007
+    },
+    "surahs_off": []
+   },
+   "sample": {
+    "surah 179": {
+     "agree_max_ms": 0.0,
+     "file_offset_ms": {
+      "1": [
+       8,
+       8
+      ],
+      "112": [
+       -5132,
+       -5132
+      ],
+      "114": [
+       -12504,
+       -12504
+      ],
+      "18": [
+       -4878,
+       -4878
+      ],
+      "2": [
+       -4902,
+       -4902
+      ],
+      "3": [
+       -4870,
+       -4870
+      ],
+      "36": [
+       -4980,
+       -4980
+      ],
+      "4": [
+       -4854,
+       -4854
+      ],
+      "67": [
+       -4960,
+       -4960
+      ]
+     },
+     "gross_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.542
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 1.0
+      },
+      "same_verse1": {
+       "n": 7,
+       "pass_rate": 0.857
+      }
+     },
+     "located": 31,
+     "not_located": [],
+     "opens_on_sound": [
+      "112:2",
+      "112:3",
+      "112:4",
+      "114:2",
+      "114:3"
+     ],
+     "peak_median": 0.988,
+     "peak_min": 0.965,
+     "qul_misplaced": [],
+     "shift_by_threshold": {
+      "quietBelow window 0.2": {
+       "bias_ms": 100,
+       "max": 104,
+       "p90": 76
+      },
+      "quietBelow window 0.35": {
+       "bias_ms": 90,
+       "max": 94,
+       "p90": 71
+      },
+      "quietBelow window 0.5": {
+       "bias_ms": 80,
+       "max": 96,
+       "p90": 66
+      },
+      "speech - 20 dB": {
+       "bias_ms": 110,
+       "max": 81,
+       "p90": 74
+      },
+      "speech - 30 dB": {
+       "bias_ms": 180,
+       "max": 283,
+       "p90": 283
+      }
+     },
+     "span_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.292
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 0.708
+      }
+     },
+     "surahs_other_recording": [],
+     "variants": {
+      "affine": {
+       "bias_ms": 105,
+       "max": 1291,
+       "median": 21,
+       "n": 411,
+       "p90": 121,
+       "within_150": 0.932
+      },
+      "end": {
+       "bias_ms": 185,
+       "max": 1279,
+       "median": 78,
+       "n": 411,
+       "p90": 129,
+       "within_150": 0.905
+      },
+      "shift": {
+       "bias_ms": 90,
+       "max": 94,
+       "median": 17,
+       "n": 411,
+       "p90": 71,
+       "within_150": 1.0
+      },
+      "table": {
+       "bias_ms": -20,
+       "max": 283,
+       "median": 61,
+       "n": 411,
+       "p90": 283,
+       "within_150": 0.766
+      }
+     },
+     "verdict": "match",
+     "verse1": {
+      "112:1": {
+       "shift": -3,
+       "table": -73
+      },
+      "114:1": {
+       "shift": -10,
+       "table": -50
+      },
+      "18:1": {
+       "shift": 1,
+       "table": -79
+      },
+      "1:1": {
+       "shift": 1418,
+       "table": 1268
+      },
+      "36:1": {
+       "shift": -16,
+       "table": -136
+      },
+      "4:1": {
+       "shift": -12,
+       "table": -62
+      },
+      "67:1": {
+       "shift": 21,
+       "table": -189
+      }
+     },
+     "verses": 31
+    }
+   },
+   "source": "surah https://server14.mp3quran.net/mansor SSS mp3quran 245",
+   "survey": {
+    "errors": [],
+    "gross_check": {
+     "shift_after": {
+      "bias_ms": 65,
+      "stats": {
+       "max": 553,
+       "median": 24,
+       "n": 132,
+       "p90": 80,
+       "within_150": 0.947
+      }
+     },
+     "verse2_over_150_rejected": [
+      7,
+      19,
+      28,
+      29,
+      45,
+      108
+     ],
+     "verse2_pass": {
+      "n": 114,
+      "pass_rate": 0.947
+     }
+    },
+    "no_words": [],
+    "offset_v1_v2_max_ms": 5.6,
+    "other_recording": [],
+    "qul_misplaced": [],
+    "shift": {
+     "bias_ms": 70,
+     "max": 1938,
+     "median": 25,
+     "n": 138,
+     "p90": 106,
+     "verses": 138,
+     "within_150": 0.906
+    },
+    "shift_over_150": [
+     7,
+     19,
+     20,
+     28,
+     29,
+     45,
+     53,
+     77,
+     105,
+     106,
+     108,
+     110,
+     111
+    ],
+    "surahs": 114,
+    "verse1": {
+     "shift": {
+      "bias_ms": 0,
+      "max": 4376,
+      "median": 16,
+      "n": 109,
+      "off": [
+       1,
+       68
+      ],
+      "p90": 74,
+      "within_150": 0.982
+     }
+    },
+    "verse1_other_recording": [
+     20,
+     89,
+     93,
+     101,
+     103
+    ],
+    "verse2_opens_on_sound": [
+     5,
+     7,
+     19,
+     20,
+     28,
+     29,
+     45,
+     58,
+     60,
+     61,
+     68,
+     69,
+     74,
+     77,
+     83,
+     93,
+     99,
+     100,
+     106,
+     112,
+     113,
+     114
+    ]
+   },
+   "use": "surah 179",
+   "verdict": "match"
+  },
+  "suesy": {
+   "kind": "ayah",
+   "name": "Ali Hajjaj Al-Suesy",
+   "qul": {
+    "surah 128": {
+     "verses_with_words": 0
+    }
+   },
+   "recommend": "off",
+   "source": "ayah https://everyayah.com/data/Ali_Hajjaj_AlSuesy_128kbps",
+   "verdict": "no_words"
+  },
+  "toure": {
+   "files_differ": [],
+   "kind": "surah",
+   "name": "Hady Toure",
+   "qul": {
+    "surah 172": {
+     "mismatched": {
+      "13:37": "bada",
+      "2:181": "bada",
+      "8:6": "bada"
+     },
+     "odd": {
+      "gap": [
+       "2:222",
+       "2:281",
+       "5:70",
+       "7:116",
+       "12:8",
+       "17:102",
+       "19:7",
+       "21:13",
+       "21:36",
+       "21:97",
+       "22:28",
+       "25:71",
+       "26:51",
+       "33:20",
+       "33:63",
+       "34:16",
+       "34:33",
+       "35:44",
+       "44:37",
+       "59:10",
+       "71:25",
+       "72:24"
+      ],
+      "repeat": 656,
+      "zero": [
+       "12:8",
+       "18:104",
+       "18:106",
+       "25:71",
+       "26:201",
+       "26:207",
+       "39:64",
+       "44:8",
+       "50:1",
+       "75:1"
+      ]
+     },
+     "verses_with_words": 6236
+    }
+   },
+   "recommend": "on",
+   "runtime": {
+    "method": "qul_times"
+   },
+   "sample": {
+    "surah 172": {
+     "agree_max_ms": 0.0,
+     "file_offset_ms": {
+      "1": [
+       0,
+       0
+      ],
+      "112": [
+       0,
+       0
+      ],
+      "114": [
+       0,
+       0
+      ],
+      "18": [
+       0,
+       0
+      ],
+      "2": [
+       0,
+       0
+      ],
+      "3": [
+       0,
+       0
+      ],
+      "36": [
+       0,
+       0
+      ],
+      "4": [
+       0,
+       0
+      ],
+      "67": [
+       0,
+       0
+      ]
+     },
+     "gross_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.292
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 0.917
+      },
+      "same_verse1": {
+       "n": 7,
+       "pass_rate": 1.0
+      }
+     },
+     "located": 31,
+     "not_located": [],
+     "opens_on_sound": [
+      "114:3",
+      "67:3",
+      "36:3",
+      "36:4",
+      "2:254",
+      "2:255",
+      "3:7",
+      "3:8"
+     ],
+     "peak_median": 1.0,
+     "peak_min": 0.992,
+     "qul_misplaced": [],
+     "shift_by_threshold": {
+      "quietBelow window 0.2": {
+       "bias_ms": 10,
+       "max": 255,
+       "p90": 81
+      },
+      "quietBelow window 0.35": {
+       "bias_ms": 10,
+       "max": 255,
+       "p90": 91
+      },
+      "quietBelow window 0.5": {
+       "bias_ms": 0,
+       "max": 265,
+       "p90": 91
+      },
+      "speech - 20 dB": {
+       "bias_ms": 10,
+       "max": 345,
+       "p90": 81
+      },
+      "speech - 30 dB": {
+       "bias_ms": 85,
+       "max": 581,
+       "p90": 162
+      }
+     },
+     "span_check": {
+      "other_reciter": {
+       "n": 24,
+       "pass_rate": 0.042
+      },
+      "other_recording": null,
+      "same_recording": {
+       "n": 24,
+       "pass_rate": 0.583
+      }
+     },
+     "surahs_other_recording": [],
+     "variants": {
+      "affine": {
+       "bias_ms": -160,
+       "max": 11040,
+       "median": 132,
+       "n": 440,
+       "p90": 7453,
+       "within_150": 0.52
+      },
+      "end": {
+       "bias_ms": -305,
+       "max": 11006,
+       "median": 197,
+       "n": 440,
+       "p90": 11006,
+       "within_150": 0.234
+      },
+      "shift": {
+       "bias_ms": 10,
+       "max": 255,
+       "median": 46,
+       "n": 440,
+       "p90": 91,
+       "within_150": 0.995
+      },
+      "table": {
+       "bias_ms": -75,
+       "max": 541,
+       "median": 118,
+       "n": 440,
+       "p90": 236,
+       "within_150": 0.625
+      }
+     },
+     "verdict": "match",
+     "verse1": {
+      "112:1": {
+       "shift": 67,
+       "table": -203
+      },
+      "114:1": {
+       "shift": 87,
+       "table": 67
+      },
+      "18:1": {
+       "shift": 97,
+       "table": 87
+      },
+      "1:1": {
+       "shift": 306,
+       "table": -24
+      },
+      "36:1": {
+       "shift": -114,
+       "table": -354
+      },
+      "4:1": {
+       "shift": -73,
+       "table": -143
+      },
+      "67:1": {
+       "shift": 77,
+       "table": -203
+      }
+     },
+     "verses": 31
+    }
+   },
+   "source": "surah https://download.quranicaudio.com/qdc/hadi_toure/mp3 S qul 172",
+   "use": "surah 172",
+   "verdict": "exact"
+  },
+  "tunaiji": {
+   "kind": "ayah",
+   "name": "Khalifa Al-Tunaiji",
+   "qul": {
+    "surah 161": {
+     "mismatched": {
+      "37:130": "il_yasin"
+     },
+     "odd": {
+      "repeat": 314
+     },
+     "verses_with_words": 6236
+    }
+   },
+   "recommend": "on",
+   "runtime": {
+    "bias_ms": 0,
+    "method": "shift",
+    "surahs_off": [
+     1,
+     10,
+     13,
+     14,
+     72
+    ],
+    "verse1": {
+     "bias_ms": 25,
+     "off": [],
+     "rule": "table"
+    }
+   },
+   "sample": {
+    "surah 161": {
+     "agree_max_ms": 0.0,
+     "gross_check": {
+      "other_reciter": {
+       "n": 21,
+       "pass_rate": 0.619
+      },
+      "other_recording": {
+       "n": 4,
+       "pass_rate": 0.75
+      },
+      "same_recording": {
+       "n": 21,
+       "pass_rate": 1.0
+      },
+      "same_verse1": {
+       "n": 6,
+       "pass_rate": 1.0
+      }
+     },
+     "located": 27,
+     "not_located": [
+      "1:1",
+      "1:2",
+      "1:3",
+      "1:4"
+     ],
+     "opens_on_sound": [],
+     "peak_median": 0.994,
+     "peak_min": 0.941,
+     "qul_misplaced": [],
+     "shift_by_threshold": {
+      "quietBelow window 0.2": {
+       "bias_ms": 5,
+       "max": 54,
+       "p90": 30
+      },
+      "quietBelow window 0.35": {
+       "bias_ms": -10,
+       "max": 49,
+       "p90": 45
+      },
+      "quietBelow window 0.5": {
+       "bias_ms": -40,
+       "max": 69,
+       "p90": 45
+      },
+      "speech - 20 dB": {
+       "bias_ms": 155,
+       "max": 173,
+       "p90": 138
+      },
+      "speech - 30 dB": {
+       "bias_ms": 300,
+       "max": 187,
+       "p90": 161
+      }
+     },
+     "span_check": {
+      "other_reciter": {
+       "n": 21,
+       "pass_rate": 0.333
+      },
+      "other_recording": {
+       "n": 4,
+       "pass_rate": 0.25
+      },
+      "same_recording": {
+       "n": 21,
+       "pass_rate": 0.381
+      }
+     },
+     "surahs_other_recording": [
+      1
+     ],
+     "variants": {
+      "affine": {
+       "bias_ms": 175,
+       "max": 780,
+       "median": 98,
+       "n": 399,
+       "p90": 210,
+       "within_150": 0.712
+      },
+      "end": {
+       "bias_ms": 425,
+       "max": 595,
+       "median": 47,
+       "n": 399,
+       "p90": 194,
+       "within_150": 0.895
+      },
+      "shift": {
+       "bias_ms": -10,
+       "max": 49,
+       "median": 9,
+       "n": 399,
+       "p90": 45,
+       "within_150": 1.0
+      },
+      "table": {
+       "bias_ms": 160,
+       "max": 141,
+       "median": 40,
+       "n": 399,
+       "p90": 141,
+       "within_150": 1.0
+      }
+     },
+     "verdict": "mixed",
+     "verse1": {
+      "112:1": {
+       "shift": 296,
+       "table": -24
+      },
+      "114:1": {
+       "shift": 226,
+       "table": -24
+      },
+      "18:1": {
+       "shift": 166,
+       "table": -24
+      },
+      "36:1": {
+       "shift": 256,
+       "table": -24
+      },
+      "4:1": {
+       "shift": 378,
+       "table": -12
+      },
+      "67:1": {
+       "shift": 266,
+       "table": -24
+      }
+     },
+     "verses": 31
+    }
+   },
+   "source": "ayah https://everyayah.com/data/khalefa_al_tunaiji_64kbps",
+   "survey": {
+    "errors": [],
+    "gross_check": {
+     "shift_after": {
+      "bias_ms": 0,
+      "stats": {
+       "max": 92,
+       "median": 13,
+       "n": 130,
+       "p90": 41,
+       "within_150": 1.0
+      }
+     },
+     "verse2_over_150_rejected": [],
+     "verse2_pass": {
+      "n": 109,
+      "pass_rate": 1.0
+     }
+    },
+    "no_words": [],
+    "other_recording": [
+     1,
+     10,
+     13,
+     14,
+     72
+    ],
+    "qul_misplaced": [],
+    "shift": {
+     "bias_ms": 0,
+     "max": 92,
+     "median": 13,
+     "n": 130,
+     "p90": 41,
+     "verses": 130,
+     "within_150": 1.0
+    },
+    "shift_over_150": [],
+    "surahs": 114,
+    "verse1": {
+     "shift": {
+      "bias_ms": -335,
+      "max": 411,
+      "median": 61,
+      "n": 109,
+      "off": [
+       2,
+       18,
+       25,
+       38,
+       57,
+       76
+      ],
+      "p90": 123,
+      "within_150": 0.945
+     },
+     "table": {
+      "bias_ms": 25,
+      "max": 13,
+      "median": 1,
+      "n": 109,
+      "off": [],
+      "p90": 1,
+      "within_150": 1.0
+     }
+    },
+    "verse1_other_recording": []
+   },
+   "use": "surah 161",
+   "verdict": "mixed"
+  }
+ }
+}
