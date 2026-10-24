@@ -188,6 +188,11 @@ class _StyleScreenState extends State<StyleScreen> {
     creationState.setOverlayAlign(creationState.overlayAlign + by);
   }
 
+  /// Where the verse stands, in percent of the way down, [by] points
+  /// on: what a screen reader says now and after a swipe.
+  int _versePct(int by) =>
+      ((creationState.overlayAlign * 100).round() + by).clamp(0, 100);
+
   /// Puts this panel's decisions back to the app's own defaults, and
   /// only this panel's: a reset button that quietly took the grade off
   /// with the typeface would be a button nobody dares press.
@@ -306,9 +311,11 @@ class _StyleScreenState extends State<StyleScreen> {
                               child: Semantics(
                                 container: true,
                                 label: l.a11yStyleStage,
-                                value: l.a11yVersePosition(
-                                    (creationState.overlayAlign * 100)
-                                        .round()),
+                                value: l.a11yVersePosition(_versePct(0)),
+                                increasedValue:
+                                    l.a11yVersePosition(_versePct(10)),
+                                decreasedValue:
+                                    l.a11yVersePosition(_versePct(-10)),
                                 hint: l.a11yVersePositionHint,
                                 onIncrease: () => _moveVerse(0.1),
                                 onDecrease: () => _moveVerse(-0.1),

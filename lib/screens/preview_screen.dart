@@ -2700,6 +2700,20 @@ class _PreviewScreenState extends State<PreviewScreen>
                             ? l.a11yVersePosition(
                                 (_overlayAlign * 100).round())
                             : null,
+                        // An adjustable value says what a swipe makes
+                        // it, or the semantics tree refuses the node.
+                        increasedValue: ready
+                            ? l.a11yVersePosition(
+                                ((_overlayAlign + 0.1) * 100)
+                                    .round()
+                                    .clamp(0, 100))
+                            : null,
+                        decreasedValue: ready
+                            ? l.a11yVersePosition(
+                                ((_overlayAlign - 0.1) * 100)
+                                    .round()
+                                    .clamp(0, 100))
+                            : null,
                         hint: ready ? l.a11yVersePositionHint : null,
                         onIncrease: ready ? () => _nudgeOverlay(0.1) : null,
                         onDecrease: ready ? () => _nudgeOverlay(-0.1) : null,
