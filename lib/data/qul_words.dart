@@ -93,10 +93,17 @@ class QulSource {
   /// the audio the app plays. Null for a recitation of QUL's.
   final String? own;
 
+  /// What the published files of [own] say (the index's `rev`): part of
+  /// the name a surah's file is kept under, so a file kept from before
+  /// the timing was published again is fetched once more instead of
+  /// standing for good. Null for an index that has none.
+  final String? ownRev;
+
   const QulSource(
     this.recitation,
     this.fit, {
     this.own,
+    this.ownRev,
     this.biasMs = 0,
     this.verseOne = QulVerseOne.shift,
     this.verseOneBiasMs = 0,
@@ -532,7 +539,7 @@ abstract final class QulWords {
   /// be read; callers then have no words for the surah.
   static Future<Map<int, QulVerse>?> versesOf(QulSource src, int surah) async {
     final key = src.own != null
-        ? 'o${src.own}_$surah'
+        ? 'o${src.own}${src.ownRev == null ? '' : '.${src.ownRev}'}_$surah'
         : '${src.fit == QulFit.ayahFiles ? 'a' : 's'}${src.recitation}_$surah';
     final hit = _memory.remove(key);
     if (hit != null) return _memory[key] = hit;
@@ -555,6 +562,7 @@ abstract final class QulWords {
                 ? parseAyahSpans(json, surah)
                 : parse(json, surah);
         await writeWhole(f, jsonEncode(encodeCompact(verses)));
+        if (src.own != null) _dropStale(f, src.own!, surah);
       }
     } catch (e) {
       rlog('qul: no words for ${src.recitation} surah $surah ($e)');
@@ -732,6 +740,22 @@ abstract final class QulWords {
       ]);
     }
     return out;
+  }
+
+  /// The copies of [own]'s file for [surah] kept under an older
+  /// revision, now that [kept] holds the current one: let go, so a voice
+  /// published again does not leave the phone holding it twice.
+  static void _dropStale(File kept, String own, int surah) {
+    try {
+      final stale = RegExp(
+          '^o${RegExp.escape(own)}(\\.[0-9a-f]+)?_$surah\\.json\$');
+      for (final e in kept.parent.listSync()) {
+        if (e is! File || e.path == kept.path) continue;
+        if (stale.hasMatch(e.uri.pathSegments.last)) e.deleteSync();
+      }
+    } catch (_) {
+      // Only room on the phone: a copy left behind is never read.
+    }
   }
 
   static Future<File> _file(String key) async {

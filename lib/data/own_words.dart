@@ -125,10 +125,12 @@ abstract final class OwnWords {
           if (s is int && s >= 1 && s <= 114) s,
       };
       if (have.isEmpty) continue;
+      final rev = v['rev'];
       out[id] = QulSource(
         0,
         fit,
         own: id,
+        ownRev: rev is String && _rev.hasMatch(rev) ? rev : null,
         skip: {
           for (var s = 1; s <= 114; s++)
             if (!have.contains(s)) s,
@@ -137,6 +139,9 @@ abstract final class OwnWords {
     }
     return out;
   }
+
+  /// What a revision may look like: it becomes part of a file name.
+  static final _rev = RegExp(r'^[0-9a-f]{1,40}$');
 
   static Future<File> _file() async {
     final dir = debugDir ?? await getApplicationSupportDirectory();

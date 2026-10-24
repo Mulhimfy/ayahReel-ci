@@ -142,4 +142,46 @@ void main() {
         'قُلْ هُوَ ٱللَّهُ أَحَدٌ', placed[1]!);
     expect(spans, hasLength(4));
   });
+
+  test('a file kept from before the voice was published again is not '
+      'read: the index\'s revision names the one that is', () async {
+    final s = OwnWords.parseIndex({
+      'v': 1,
+      'voices': {
+        untimed.id: {...entry(surahs: [112]), 'rev': '3f9a0c1b2d'},
+      },
+    });
+    expect(s[untimed.id]!.ownRev, '3f9a0c1b2d');
+    // Nothing that could not be part of a file name.
+    expect(
+        OwnWords.parseIndex({
+          'v': 1,
+          'voices': {
+            untimed.id: {...entry(), 'rev': '../x'},
+          },
+        })[untimed.id]!
+            .ownRev,
+        isNull);
+    OwnWords.debugSet(s);
+    String verse(int startMs) => jsonEncode(QulWords.encodeCompact({
+          1: QulVerse(startMs, startMs + 1900, [
+            (1, startMs, startMs + 400),
+            (2, startMs + 400, startMs + 900),
+            (3, startMs + 900, startMs + 1400),
+            (4, startMs + 1400, startMs + 1900),
+          ]),
+        }));
+    // The copy from before, and the one the index names.
+    File('${dir.path}/o${untimed.id}_112.json').writeAsStringSync(verse(900));
+    File('${dir.path}/o${untimed.id}.3f9a0c1b2d_112.json')
+        .writeAsStringSync(verse(300));
+    const rec = Recitation(
+      reciterId: 'x',
+      surah: 112,
+      audioPath: 'unused.mp3',
+      timings: [AyahTiming(1, 0, 2600)],
+    );
+    final placed = await QulWords.forRecitation(untimed, rec);
+    expect(placed![1]!.words.first, (1, 300, 700));
+  });
 }
