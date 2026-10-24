@@ -15,6 +15,8 @@ import '../data/card_style.dart';
 import '../data/debug_log.dart';
 import '../data/gallery_saver.dart';
 import '../data/instagram_share.dart';
+import '../data/platform_share.dart';
+import '../data/quran_repository.dart';
 import '../data/rewards_service.dart';
 import '../data/settings_service.dart';
 import '../data/share_origin.dart';
@@ -28,9 +30,9 @@ import '../widgets/card_dock.dart';
 import '../widgets/card_scene_sheet.dart';
 import '../widgets/telegram_invite.dart';
 import '../widgets/dedicate_sheet.dart';
-import '../widgets/direct_share_button.dart' show instagramMesh;
 import '../widgets/gallery_blocked_dialog.dart';
 import '../widgets/scripture_finder.dart';
+import '../widgets/share_to.dart';
 
 /// The composer.
 ///
@@ -666,35 +668,98 @@ class _CardStudioScreenState extends State<CardStudioScreen> {
 
   // ---- export ------------------------------------------------------
 
-  /// Straight to Instagram's story composer, re-cut on the way.
+  /// The apps Share to offers for a card. YouTube takes videos only, so
+  /// it is not among them; Instagram's two doors follow the reel's
+  /// setting for them, and WhatsApp's hand-off is Android's alone.
+  List<ShareTarget> get _shareTargets {
+    final s = SettingsService.state.value;
+    final ig = InstagramShare.supported && s.instagramDirectShare;
+    return [
+      if (ig) ...[ShareTarget.instagramPost, ShareTarget.instagramStory],
+      ShareTarget.tiktok,
+      ShareTarget.facebook,
+      if (defaultTargetPlatform == TargetPlatform.android &&
+          s.whatsappDirectShare)
+        ShareTarget.whatsapp,
+    ];
+  }
+
+  /// The surah a verse card quotes, for its caption's tag.
+  String? get _surahName {
+    final src = _deck.source;
+    if (!src.isVerse || src.surah < 1 || src.surah > 114) return null;
+    return QuranRepository.surahInfo(src.surah).nameEnglish;
+  }
+
+  /// Straight into one app, from Share to: the card handed over, and the
+  /// caption with that app's hashtags on the clipboard, the mark among
+  /// them.
   ///
-  /// A card is 4:5 and a story is 9:16 — handed over as it is, it is
-  /// boxed or cropped by Instagram. [CardExporter.prepare] re-cuts it,
-  /// which costs nothing because every position on a card is a
-  /// fraction, and the mark climbs into the strip that opens up so
-  /// Instagram's own bottom bar cannot sit on top of it.
-  ///
-  /// A story is one picture, so only the first card travels. When
-  /// Instagram is not there, the same picture goes to the share sheet
-  /// rather than the tap ending in nothing.
-  Future<void> _shareToStory(Rect origin) async {
+  /// Instagram's story is the story door it always was: one picture,
+  /// re-cut to 9:16 by [CardExporter.prepare] — every position on a
+  /// card is a fraction, so it costs nothing — with the mark climbing
+  /// into the strip that opens up, clear of Instagram's own bottom bar.
+  /// Every other app gets the card, the whole carousel where there is
+  /// one, in its own composer on Android; on iOS the cards go to the
+  /// gallery and the app opens with them first in its picker. Anything
+  /// that stops the hand-off ends in the share sheet rather than in
+  /// nothing.
+  Future<void> _shareTo(ShareTarget target, Rect origin) async {
     if (_exporting) return;
     final l = L10n.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final ios = defaultTargetPlatform == TargetPlatform.iOS;
     setState(() => _exporting = true);
     try {
-      final files = await CardExporter.render(_deck, asStory: true);
+      final story = target == ShareTarget.instagramStory;
+      final files = await CardExporter.render(_deck, asStory: story);
       if (!mounted || files.isEmpty) return;
-      final handed = await InstagramShare.shareStory(files.first);
+      final text = PlatformShare.caption(target,
+          line: l.cardShareLine, surahName: _surahName);
+      await PlatformShare.copy(text);
+      final app = target.app(l);
+      var handed = false;
+      if (story) {
+        handed = await InstagramShare.shareStory(files.first);
+      } else if (ios) {
+        var saved = 0;
+        for (var i = 0; i < files.length; i++) {
+          final r = await GallerySaver.saveImage(files[i],
+              name: CardExporter.name(_deck, i));
+          if (r.ok) saved++;
+        }
+        handed = saved > 0 && await PlatformShare.sendImages(target, files);
+        if (handed && mounted) {
+          messenger
+            ..clearSnackBars()
+            ..showSnackBar(toast(l.shareCardOpenHint(app),
+                tone: ToastTone.done, duration: const Duration(seconds: 9)));
+        }
+      } else {
+        handed = await PlatformShare.sendImages(target, files, text: text);
+      }
       if (!handed) {
-        if (mounted) _say(l.instagramUnavailable);
+        if (mounted) {
+          _say(story ? l.instagramUnavailable : l.shareAppMissing(app));
+        }
         await SharePlus.instance.share(ShareParams(
-          files: [XFile(files.first.path, mimeType: 'image/png')],
+          files: [
+            for (final f in story ? [files.first] : files)
+              XFile(f.path, mimeType: 'image/png'),
+          ],
+          text: story ? null : text,
           sharePositionOrigin: origin,
         ));
+      } else if (mounted && !ios) {
+        // iOS said where the card went; Instagram's story on iOS takes
+        // the clipboard for the picture, so there is nothing to paste.
+        messenger
+          ..clearSnackBars()
+          ..showSnackBar(toast(l.shareCaptionCopied, tone: ToastTone.done));
       }
       unawaited(_kept());
     } catch (e, s) {
-      rlogError('card story', e, s);
+      rlogError('card share to', e, s);
       if (mounted) _say(l.cardExportFailed);
     } finally {
       if (mounted) setState(() => _exporting = false);
@@ -1037,11 +1102,12 @@ class _CardStudioScreenState extends State<CardStudioScreen> {
           // The two share buttons are bounded together, because
           // together is where the row runs out of room: four glyphs and
           // the bar's padding take about 178dp before either is drawn,
-          // leaving 182 on a 360dp screen for a pill that wants 88 and
-          // a gold button whose label is a translated word. "Bagikan"
-          // and "Teilen" overrun that on their own, and the spinner
-          // that appears while exporting takes 28 more. Inside the
-          // bound both ellipsise instead of painting past the edge —
+          // leaving 182 on a 360dp screen for a Share to pill that
+          // wants about 90 and a gold button whose label is a
+          // translated word. "Bagikan" and "Teilen" overrun that on
+          // their own, and the spinner that appears while exporting
+          // takes 28 more. Inside the bound both ellipsise instead of
+          // painting past the edge —
           // which in release is a clipped Share button, not the debug
           // stripes. On a wide screen the bound exceeds what they ask
           // for and nothing changes.
@@ -1050,17 +1116,18 @@ class _CardStudioScreenState extends State<CardStudioScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (InstagramShare.supported)
-                  Flexible(
-                    child: Builder(
-                      builder: (button) => _StoryPill(
-                        label: l.shareToStory,
-                        onTap: _exporting
-                            ? null
-                            : () => _shareToStory(shareOriginOf(button)),
-                      ),
+                Flexible(
+                  child: Builder(
+                    builder: (button) => ShareToButton(
+                      compact: true,
+                      targets: _shareTargets,
+                      note: l.shareToCardNote,
+                      onPick: _exporting
+                          ? null
+                          : (t) => _shareTo(t, shareOriginOf(button)),
                     ),
                   ),
+                ),
                 const SizedBox(width: 4),
                 Flexible(
                   child: Builder(
@@ -1305,82 +1372,6 @@ class _Ghost extends StatelessWidget {
         color: on ? AppColors.textPrimary : AppColors.stroke,
         onPressed: onTap,
         visualDensity: VisualDensity.compact,
-      ),
-    );
-  }
-}
-
-/// The door to Instagram's story camera, in Instagram's own colours.
-///
-/// It was an unlabelled glyph beside the gold Share, which made it the
-/// one button in the bar nobody could name — and the app already has
-/// a named, painted version of exactly this door in the invite sheet.
-/// Same mesh, same argument: a button that hands something to another
-/// app should look like that app and say where it goes, not read as
-/// one more Share. See [instagramMesh].
-class _StoryPill extends StatelessWidget {
-  final String label;
-  final VoidCallback? onTap;
-
-  const _StoryPill({required this.label, this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final on = onTap != null;
-    return A11yTap(
-      label: label,
-      enabled: on,
-      onTap: onTap,
-      child: Opacity(
-        opacity: on ? 1 : 0.45,
-        // A ceiling on how wide the pill grows when there is room. It
-        // is not what keeps the row on screen — the bar bounds this
-        // pill and the gold Share together and both ellipsise under
-        // that — only what stops a short label in a wide language from
-        // making the pill louder than the button beside it.
-        child: Container(
-          height: 30,
-          constraints: const BoxConstraints(maxWidth: 88),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: instagramMesh,
-            ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: onTap,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 9),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.motion_photos_on_rounded,
-                        size: 13, color: Colors.white),
-                    const SizedBox(width: 5),
-                    Flexible(
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

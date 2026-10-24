@@ -155,16 +155,29 @@ class MainActivity : FlutterActivity() {
         // of the packages Dart lists, in turn, as a share sheet's row for
         // that app would send it; false when none of them takes it, and
         // Dart opens the share sheet instead.
+        //
+        // shareFiles is the same for a card, or a carousel of them: the
+        // pictures to Instagram, TikTok, Facebook or WhatsApp, as one
+        // ACTION_SEND or, for several, one ACTION_SEND_MULTIPLE.
         MethodChannel(messenger, "ayahreel/apps")
             .setMethodCallHandler { call, result ->
-                if (call.method != "shareVideo") {
-                    result.notImplemented(); return@setMethodCallHandler
-                }
                 val packages = call.argument<List<String>>("packages") ?: emptyList()
                 val text = call.argument<String>("text") ?: ""
-                val title = call.argument<String>("title") ?: ""
-                withSharedUri(call.argument<String>("path"), result) { uri ->
-                    packages.any { pkg -> sendTo(pkg, uri, text, title) }
+                when (call.method) {
+                    "shareVideo" -> {
+                        val title = call.argument<String>("title") ?: ""
+                        withSharedUri(call.argument<String>("path"), result) { uri ->
+                            packages.any { pkg -> sendTo(pkg, uri, text, title) }
+                        }
+                    }
+                    "shareFiles" -> {
+                        val mime = call.argument<String>("mime") ?: PNG
+                        val paths = call.argument<List<String>>("paths") ?: emptyList()
+                        withSharedUris(paths, result) { uris ->
+                            packages.any { pkg -> sendFilesTo(pkg, uris, mime, text) }
+                        }
+                    }
+                    else -> result.notImplemented()
                 }
             }
 
@@ -442,6 +455,38 @@ class MainActivity : FlutterActivity() {
         return launch(intent)
     }
 
+    /**
+     * The files at [uris], all of type [mime], to [pkg] with [text]: one
+     * as an ACTION_SEND, several as an ACTION_SEND_MULTIPLE. False when
+     * [pkg] isn't there to take them.
+     */
+    private fun sendFilesTo(pkg: String, uris: List<Uri>, mime: String, text: String): Boolean {
+        if (uris.isEmpty()) return false
+        val one = uris.size == 1
+        val intent = Intent(if (one) Intent.ACTION_SEND else Intent.ACTION_SEND_MULTIPLE)
+        if (one) {
+            intent.putExtra(Intent.EXTRA_STREAM, uris[0])
+        } else {
+            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList<Uri>(uris))
+        }
+        intent.type = mime
+        intent.setPackage(pkg)
+        val clip = ClipData.newRawUri("files", uris[0])
+        for (i in 1 until uris.size) clip.addItem(ClipData.Item(uris[i]))
+        intent.clipData = clip
+        if (text.isNotEmpty()) intent.putExtra(Intent.EXTRA_TEXT, text)
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        if (packageManager.resolveActivity(intent, 0) == null) return false
+        for (uri in uris) {
+            try {
+                grantUriPermission(pkg, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            } catch (_: Exception) {
+                // The flag on the intent still carries the grant.
+            }
+        }
+        return launch(intent)
+    }
+
     /** ACTION_SEND of [uri] as [mime], pinned to Instagram. */
     private fun sendIntent(uri: Uri, mime: String = MP4) = Intent(Intent.ACTION_SEND).apply {
         type = mime
@@ -500,6 +545,34 @@ class MainActivity : FlutterActivity() {
                 this, "$packageName.ayahreel.fileprovider", file
             )
             result.success(hand(uri))
+        } catch (e: Exception) {
+            result.error("share_failed", e.message, null)
+        }
+    }
+
+    /**
+     * [withSharedUri] for several files: every one must be there, and
+     * [hand] gets them in the order Dart gave them.
+     */
+    private fun withSharedUris(
+        paths: List<String>,
+        result: MethodChannel.Result,
+        hand: (List<Uri>) -> Boolean,
+    ) {
+        if (paths.isEmpty()) {
+            result.error("bad_args", "paths are required", null)
+            return
+        }
+        try {
+            val uris = paths.map { path ->
+                val file = File(path)
+                if (!file.exists()) {
+                    result.error("not_found", "no file at $path", null)
+                    return
+                }
+                FileProvider.getUriForFile(this, "$packageName.ayahreel.fileprovider", file)
+            }
+            result.success(hand(uris))
         } catch (e: Exception) {
             result.error("share_failed", e.message, null)
         }

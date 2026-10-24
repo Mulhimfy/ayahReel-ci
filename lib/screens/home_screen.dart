@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import '../data/arena_service.dart';
-import '../data/quran_repository.dart';
 import '../data/reel_library.dart';
 import '../data/rewards_service.dart';
-import '../data/series_library.dart';
 import '../data/settings_service.dart';
 import '../l10n/l10n.dart';
 import '../state/creation_state.dart';
@@ -13,6 +11,7 @@ import '../theme/app_theme.dart';
 import '../widgets/a11y.dart';
 import '../widgets/ambient_motion.dart';
 import '../widgets/arena_history.dart';
+import '../widgets/arena_portal.dart';
 import '../widgets/badges_sheet.dart';
 import '../widgets/cinematic_hero.dart';
 import '../widgets/create_chooser.dart';
@@ -21,15 +20,12 @@ import '../widgets/glass_tile.dart';
 import '../widgets/gilded_writing.dart';
 import '../widgets/illumination.dart';
 import '../widgets/reel_thumb.dart';
-import '../widgets/series_strip.dart';
 import '../widgets/shimmer_text.dart';
 import '../widgets/tanafus_button.dart' show TanafusButton;
 import '../widgets/widget_nudge.dart';
 import 'arena_screen.dart' show openArena;
 import 'reciter_screen.dart';
 import 'reel_player_screen.dart';
-import 'series_intro_screen.dart';
-import 'series_screen.dart';
 
 /// The landing tab.
 ///
@@ -65,17 +61,11 @@ class _HomeScreenState extends State<HomeScreen> {
   final _page = ScrollController();
   List<SavedReel> _recent = const [];
 
-  /// The series in progress, if there is one: its days ride above the
-  /// recent reels so the next one to make is a glance away.
-  ReelSeries? _series;
-
   @override
   void initState() {
     super.initState();
     _loadRecent();
-    _loadSeries();
     ReelLibrary.revision.addListener(_loadRecent);
-    SeriesLibrary.revision.addListener(_loadSeries);
     RewardsService.state.addListener(_rewardsChanged);
     SettingsService.state.addListener(_rewardsChanged);
     ArenaService.state.addListener(_rewardsChanged);
@@ -84,7 +74,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     ReelLibrary.revision.removeListener(_loadRecent);
-    SeriesLibrary.revision.removeListener(_loadSeries);
     RewardsService.state.removeListener(_rewardsChanged);
     SettingsService.state.removeListener(_rewardsChanged);
     ArenaService.state.removeListener(_rewardsChanged);
@@ -99,13 +88,6 @@ class _HomeScreenState extends State<HomeScreen> {
   /// How far the page under the picture rides up over its foot: the
   /// verse card overlaps the picture by this much.
   static const _hemLift = 58.0;
-
-  /// Reels a user has to have made before the page offers them a
-  /// series of reels. Two: the first is finding out what a reel is,
-  /// the second is coming back for another — which is the habit a
-  /// series is for. Until then the offer is a plan for something the
-  /// user has not yet done once.
-  static const _reelsBeforeSeries = 2;
 
   Future<void> _loadRecent() async {
     final reels = await ReelLibrary.load();
@@ -162,25 +144,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> _loadSeries() async {
-    final s = await SeriesLibrary.active();
-    if (mounted) setState(() => _series = s);
-  }
-
-  void _planSeries() {
-    HapticFeedback.selectionClick();
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const SeriesIntroScreen()),
-    );
-  }
-
-  void _openSeries(ReelSeries s, [int? day]) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-          builder: (_) => SeriesScreen(seriesId: s.id, initialDay: day)),
-    );
-  }
-
   void _startCreate() {
     HapticFeedback.selectionClick();
     creationState.startNewReel();
@@ -207,11 +170,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
-    // Read once: the series row's callbacks close over the value this
-    // frame was built from, not over a field a library refresh can
-    // null out between the frame and the tap.
-    final series = _series;
-    final settings = SettingsService.state.value;
     // No sky of its own: the shell paints one behind all three tabs.
     // Falling back to none keeps this screen usable on its own in a
     // test or a preview harness.
@@ -340,41 +298,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 const _Margin(
                   child: _Reveal(delayMs: 80, child: WidgetNudge()),
                 ),
-                // A surah over several days. Here once a series exists,
-                // or once the user has made a couple of reels — see
-                // [_reelsBeforeSeries] — and it holds the streak once a
-                // series exists. Kept to a rule and one line under it
-                // until then: the home page is for the verse and the
-                // reels, and a plan that does not exist yet should take
-                // no more room than a sentence.
-                if (settings.showSeries &&
-                    (series != null ||
-                        RewardsService.state.value.reelsMade >=
-                            _reelsBeforeSeries)) ...[
-                  const SizedBox(height: 18),
-                  _Margin(
-                    child: _Reveal(
-                      delayMs: 135,
-                      // No button on the rule: before a series, the line
-                      // under it is the way in; after, a new one is in
-                      // the series' own menu.
-                      child: SectionRule(title: l.seriesTitle),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  _Reveal(
-                    delayMs: 135,
-                    child: series == null
-                        ? _Margin(child: _SeriesInvite(onTap: _planSeries))
-                        : _SeriesRow(
-                            series: series,
-                            onTapDay: (d) => _openSeries(series, d),
-                            onLongPressDay: (d) =>
-                                SeriesLibrary.toggleDay(series.id, d),
-                            onOpen: () => _openSeries(series),
-                          ),
-                  ),
-                ],
+                // Tanafus, the quiz: a pane of the arena's own weather,
+                // the most alive thing under the verse, because it is the
+                // other thing the app is for. It opens the lobby, where a
+                // round is chosen and begun.
+                const SizedBox(height: 18),
+                const _Margin(
+                  child: _Reveal(delayMs: 135, child: ArenaPortal()),
+                ),
                 // The shelf at the foot: the latest reels, or — once a
                 // round of the quiz has been played — the rounds, by a
                 // tap on the heading.
@@ -412,10 +343,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           : _ReelsRail(
                               key: const ValueKey('reels'),
                               reels: _recent,
-                              // The streak above takes some of this row's
-                              // room: the cards stand a little shorter
-                              // under it.
-                              compact: series != null,
                               onOpen: (r) => Navigator.of(context).push(
                                 MaterialPageRoute(
                                     builder: (_) => ReelPlayerScreen(reel: r)),
@@ -649,23 +576,22 @@ class _HeroContent extends StatelessWidget {
   }
 }
 
-/// Moves [child] out past the frame's margin, toward the screen's start
-/// edge — the right edge in Arabic and Urdu — to stand [inset] from it.
+/// Moves [child] out past the frame's margin to the screen's start edge
+/// — the right edge in Arabic and Urdu — with nothing left between them.
 ///
 /// The greeting and the cartouche both hang from this one widget so
 /// they stand on the same line; when the cartouche hung alone and the
 /// greeting kept the margin, the two looked set by different hands.
-/// Not on the edge itself: the salutation pressed against the glass
-/// read as pushed off the page.
+/// The cartouche's own padding is all the room they keep from the
+/// glass: a sliver of inset on top of it came back once (2026-10-23)
+/// and was taken out again at the owner's word.
 class _HungToEdge extends StatelessWidget {
   final Widget child;
   const _HungToEdge({required this.child});
 
-  static const inset = 16.0;
-
   @override
   Widget build(BuildContext context) {
-    const m = _HeroContent.margin - inset;
+    const m = _HeroContent.margin;
     return Transform.translate(
       offset: Offset(Directionality.of(context) == TextDirection.rtl ? m : -m, 0),
       child: child,
@@ -932,22 +858,18 @@ class _ReelsRail extends StatelessWidget {
   final List<SavedReel> reels;
   final void Function(SavedReel) onOpen;
 
-  /// Shorter cards, for when the series streak is on the page above.
-  final bool compact;
-
   const _ReelsRail({
     super.key,
     required this.reels,
     required this.onOpen,
-    this.compact = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final rtl = Directionality.of(context) == TextDirection.rtl;
-    final width = compact ? 88.0 : 108.0;
+    const width = 108.0;
     return _Rail(
-      height: compact ? 156 : 190,
+      height: 190,
       itemWidth: width,
       gap: 13,
       padding: const EdgeInsets.symmetric(horizontal: 22),
@@ -1068,108 +990,6 @@ class _ShelfName extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// The active series on the home page: its days in a row, and the
-/// surah's name above them as the way into the whole plan.
-class _SeriesRow extends StatelessWidget {
-  final ReelSeries series;
-  final ValueChanged<int> onTapDay;
-  final ValueChanged<int> onLongPressDay;
-  final VoidCallback onOpen;
-
-  const _SeriesRow({
-    required this.series,
-    required this.onTapDay,
-    required this.onLongPressDay,
-    required this.onOpen,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L10n.of(context);
-    final t = Theme.of(context).textTheme;
-    final surah = QuranRepository.surahInfo(series.surah);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _Margin(
-          child: A11yTap(
-            hint: l.a11yOpensSeries,
-            child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: onOpen,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    '${l.seriesHeading(surah.nameEnglish, series.days)} · '
-                    '${l.seriesProgress(series.daysDone, series.days)}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: t.bodySmall?.copyWith(
-                      fontSize: 12.5,
-                      color: AppColors.gold.withValues(alpha: 0.9),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                const Icon(Icons.chevron_right_rounded,
-                    size: 18, color: AppColors.textSecondary),
-              ],
-            ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        SeriesStrip(
-          series: series,
-          compact: true,
-          onTapDay: onTapDay,
-          onLongPressDay: onLongPressDay,
-        ),
-      ],
-    );
-  }
-}
-
-/// Before any series exists: one quiet line saying what the section is
-/// for, and nothing else — no card, no seals, no border. The line is
-/// the door.
-class _SeriesInvite extends StatelessWidget {
-  final VoidCallback onTap;
-  const _SeriesInvite({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final l = L10n.of(context);
-    final t = Theme.of(context).textTheme;
-    return A11yTap(
-      hint: l.a11yPlansSeries,
-      child: GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                l.seriesSubtitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: t.bodyMedium?.copyWith(fontSize: 12.5),
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Icon(Icons.chevron_right_rounded,
-                size: 18, color: AppColors.textSecondary),
-          ],
-        ),
-      ),
       ),
     );
   }

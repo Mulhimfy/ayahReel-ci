@@ -67,8 +67,8 @@ class SurahQuery {
 /// under the surahs: Arabic words against the bundled text, and words
 /// in any other script against the translation the reader has chosen
 /// — see [QuranSearch.search] and [QuranSearch.searchTranslation].
-/// Shared by the verse picker and the series planner, which is why it
-/// is not private to either.
+/// Shared by the verse picker, the quiz lobby, the card finder and the
+/// offline sheet, which is why it is not private to any of them.
 class SurahPickerSheet extends StatefulWidget {
   /// Surahs listed but not offered; see [showSurahPicker].
   final Set<int> unavailable;

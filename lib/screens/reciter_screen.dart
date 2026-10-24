@@ -33,17 +33,16 @@ import 'verses_screen.dart';
 /// shape of rather than assemble. See [UserAudioService].
 class ReciterScreen extends StatefulWidget {
   /// Where Continue goes. By default it pushes the verse picker; the
-  /// series planner and the verse of the day hand in their own next
-  /// step instead, because their verses are already chosen.
+  /// verse of the day hands in its own next step instead, because its
+  /// verses are already chosen.
   final void Function(BuildContext context, Reciter reciter)? onContinue;
 
-  /// A voice to open with already selected — the one a series was
-  /// planned in, so making its next reel is Continue, not a choice.
+  /// A voice to open with already selected, so making the reel is
+  /// Continue, not a choice.
   final String? initialReciterId;
 
   /// The surah already chosen, when there is one — the verse of the
-  /// day, a series. A voice that never recorded it is shown but can't
-  /// be picked.
+  /// day. A voice that never recorded it is shown but can't be picked.
   final int? surah;
 
   const ReciterScreen(

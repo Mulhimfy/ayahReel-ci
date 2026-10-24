@@ -20,6 +20,7 @@ import 'package:ayah_reels/screens/card_studio_screen.dart';
 import 'package:ayah_reels/theme/app_theme.dart' show AppColors;
 import 'package:ayah_reels/widgets/card_canvas.dart';
 import 'package:ayah_reels/widgets/card_dock.dart';
+import 'package:ayah_reels/widgets/share_to.dart';
 
 class _FakePathProvider extends PathProviderPlatform
     with MockPlatformInterfaceMixin {
@@ -407,15 +408,15 @@ void main() {
   testWidgets('the top bar holds together on a small screen, in every '
       'language', (t) async {
     // Four glyphs and the bar's padding take about 178dp before the
-    // story pill or the gold Share is drawn, which leaves 182 on a
-    // 360dp screen for a pill that wants 88 and a button whose label
-    // is a translated word. "Bagikan" and "Teilen" overrun that on
-    // their own, and in release an overflowing Row clips the Share
+    // Share to pill or the gold Share is drawn, which leaves 182 on a
+    // 360dp screen for a pill that wants about 90 and a button whose
+    // label is a translated word. "Bagikan" and "Teilen" overrun that
+    // on their own, and in release an overflowing Row clips the Share
     // button rather than painting the debug stripes — so nothing on
     // screen says the button has gone.
-    // The story pill is a phone-only control and `dart:io` is not
-    // something a widget test can move, so without this the bar under
-    // test is not the bar that ships.
+    // Instagram's doors are phone-only and `dart:io` is not something
+    // a widget test can move, so without this the panel under test is
+    // not the one that ships.
     InstagramShare.debugSupported = true;
     addTearDown(() => InstagramShare.debugSupported = null);
     for (final code in ['en', 'ar', 'ur', 'id', 'de']) {
@@ -427,10 +428,8 @@ void main() {
       // Both buttons are still buttons, not slivers.
       expect(t.getSize(find.byType(FilledButton)).width, greaterThan(40),
           reason: '$code squeezed the Share button to nothing');
-      expect(
-          t.getSize(find.text(L10n(AppLang.fromCode(code)).shareToStory)).width,
-          greaterThan(10),
-          reason: '$code squeezed the story pill to nothing');
+      expect(t.getSize(find.byType(ShareToButton)).width, greaterThan(40),
+          reason: '$code squeezed the Share to pill to nothing');
     }
 
     // And 40dp narrower than the narrowest phone, which stands in for

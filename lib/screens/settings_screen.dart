@@ -311,15 +311,6 @@ class _SettingsScreenState extends State<SettingsScreen>
                     },
                   ),
               ],
-              _SwitchRow(
-                icon: Icons.calendar_month_outlined,
-                title: l.homeShowsSeries,
-                value: s.showSeries,
-                onChanged: (on) {
-                  HapticFeedback.selectionClick();
-                  SettingsService.update(s.copyWith(showSeries: on));
-                },
-              ),
               // Last in the card of switches: set-it-once choices about
               // the reels themselves, on a page of their own with a reel
               // playing them (see CustomizeScreen). The line after the

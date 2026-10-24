@@ -29,7 +29,6 @@ import '../data/reel_effects.dart';
 import '../data/reel_library.dart';
 import '../data/reel_limits.dart';
 import '../data/reel_recipe.dart';
-import '../data/series_library.dart';
 import '../data/reminder_service.dart';
 import '../data/review_prompt.dart';
 import '../data/rewards_service.dart';
@@ -78,7 +77,14 @@ import 'home_shell.dart';
 
 /// An app Share can hand the finished reel to directly, skipping the
 /// OS share sheet. Null anywhere below means the sheet itself.
-enum _DirectShare { whatsapp, instagramReel, instagramStory, tiktok, youtube }
+enum _DirectShare {
+  whatsapp,
+  instagramReel,
+  instagramStory,
+  tiktok,
+  youtube,
+  facebook,
+}
 
 /// Screen 4 of 4. The reel plays immediately: this is the aha moment.
 /// Verse text is driven live off the same timing table the exporter
@@ -530,11 +536,6 @@ class _PreviewScreenState extends State<PreviewScreen>
   /// The library entry for [_libraryPath], which also carries whether
   /// this reel has already been written to the device gallery.
   SavedReel? _saved;
-
-  /// The day a series reel was just ticked off on, for the line that
-  /// says so; null when this reel is not part of a series, or once
-  /// the line has been shown.
-  int? _seriesDayDone;
 
   /// A tenth reel just made (the twentieth, the thirtieth…): its card is
   /// offered once the save is over, in place of the usual asks.
@@ -1985,7 +1986,9 @@ class _PreviewScreenState extends State<PreviewScreen>
         var handed = false;
         switch (direct) {
           case _DirectShare.whatsapp:
-            handed = await WhatsAppShare.shareVideo(file, text: caption);
+            handed = await WhatsAppShare.shareVideo(file,
+                text: PlatformShare.caption(ShareTarget.whatsapp,
+                    line: caption, surahName: _surahName));
             if (!handed && mounted) {
               messenger.showSnackBar(
                 toast(
@@ -2018,12 +2021,13 @@ class _PreviewScreenState extends State<PreviewScreen>
             }
           case _DirectShare.tiktok:
           case _DirectShare.youtube:
-            final target = direct == _DirectShare.tiktok
-                ? ShareTarget.tiktok
-                : ShareTarget.youtube;
-            final app = target == ShareTarget.tiktok
-                ? 'TikTok'
-                : L10n.current.shareToYouTube;
+          case _DirectShare.facebook:
+            final target = switch (direct) {
+              _DirectShare.tiktok => ShareTarget.tiktok,
+              _DirectShare.facebook => ShareTarget.facebook,
+              _ => ShareTarget.youtube,
+            };
+            final app = target.app(L10n.current);
             final text = PlatformShare.caption(target,
                 line: caption, surahName: _surahName);
             await PlatformShare.copy(text);
@@ -2042,8 +2046,13 @@ class _PreviewScreenState extends State<PreviewScreen>
                 ));
               }
             } else {
+              // YouTube reads the title off the hand-off: the caption
+              // itself, which is cut to fit a Short's title.
               handed = await PlatformShare.send(target, file,
-                  text: text, title: '$_surahName · ${_reciter.name}');
+                  text: text,
+                  title: target == ShareTarget.youtube
+                      ? text
+                      : '$_surahName · ${_reciter.name}');
               if (handed && mounted) {
                 messenger.showSnackBar(toast(
                   L10n.current.shareCaptionCopied,
@@ -2085,18 +2094,6 @@ class _PreviewScreenState extends State<PreviewScreen>
         );
       } else if (!await _writeToGallery(file, saved)) {
         return; // the failure has already been reported
-      }
-      // A series reel: say which day it lit, before the asks below,
-      // because it is the one line here about what the user set out
-      // to do rather than about the app.
-      final day = _seriesDayDone;
-      if (day != null && mounted) {
-        _seriesDayDone = null;
-        messenger.showSnackBar(toast(
-          L10n.current.seriesReelDone(day),
-          tone: ToastTone.done,
-          duration: const Duration(seconds: 3),
-        ));
       }
       // The tags first: they belong to the post the user is about to
       // write, and everything below belongs to the app.
@@ -2349,20 +2346,6 @@ class _PreviewScreenState extends State<PreviewScreen>
             tone: ToastTone.done,
           ));
         });
-      }
-      // A reel made for a series lights its day. Once per reel: a
-      // second export of the same render is the same reel.
-      final target = creationState.seriesTarget;
-      if (target != null && isNew) {
-        final series = await SeriesLibrary.markReelDone(
-          target.seriesId,
-          target.reelIndex,
-          savedReelId: reel.id,
-        );
-        if (series != null && target.reelIndex < series.reels.length) {
-          _seriesDayDone = series.reels[target.reelIndex].day;
-          rlog('series: reel ${target.reelIndex} done, day $_seriesDayDone');
-        }
       }
       return reel;
     } catch (e, s) {
@@ -3100,6 +3083,7 @@ class _PreviewScreenState extends State<PreviewScreen>
                             ],
                             ShareTarget.tiktok,
                             ShareTarget.youtube,
+                            ShareTarget.facebook,
                             if (waOn) ShareTarget.whatsapp,
                           ],
                           onPick: !ready || _busy || blocked
@@ -3107,13 +3091,16 @@ class _PreviewScreenState extends State<PreviewScreen>
                               : (t) => _export(
                                     shareAfter: true,
                                     direct: switch (t) {
-                                      ShareTarget.instagramReel =>
+                                      ShareTarget.instagramReel ||
+                                      ShareTarget.instagramPost =>
                                         _DirectShare.instagramReel,
                                       ShareTarget.instagramStory =>
                                         _DirectShare.instagramStory,
                                       ShareTarget.tiktok => _DirectShare.tiktok,
                                       ShareTarget.youtube =>
                                         _DirectShare.youtube,
+                                      ShareTarget.facebook =>
+                                        _DirectShare.facebook,
                                       ShareTarget.whatsapp =>
                                         _DirectShare.whatsapp,
                                     },

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ayah_reels/data/hashtag_sets.dart';
+import 'package:ayah_reels/data/platform_share.dart';
 import 'package:ayah_reels/l10n/l10n.dart';
 import 'package:ayah_reels/theme/app_theme.dart';
 import 'package:ayah_reels/widgets/hashtags_sheet.dart';
@@ -40,11 +41,23 @@ void main() {
     }
   });
 
-  test('the mark does not sit at the same offset in every block', () {
-    final offsets = {
-      for (final s in everySet()) s.resolved.indexOf(HashtagSet.mark),
-    };
-    expect(offsets.length, greaterThan(1));
+  test('the mark sits in the middle of every block, inside the first five',
+      () {
+    // Instagram and TikTok keep five hashtags and drop the rest: a mark
+    // past the fifth is a mark nobody sees.
+    for (final s in everySet()) {
+      expect(s.resolved.indexOf(HashtagSet.mark), s.resolved.length ~/ 2,
+          reason: '${s.key} has the mark off its middle');
+      expect(s.resolved.indexOf(HashtagSet.mark),
+          lessThan(HashtagSet.perBlock));
+    }
+  });
+
+  test('a YouTube block leaves room in a Short\'s title', () {
+    for (final s in hashtagSets(TagPlatform.youtube)) {
+      expect(s.text.length, lessThanOrEqualTo(60),
+          reason: '${s.key} takes too much of a 100-character title');
+    }
   });
 
   test('nothing reaches outside the niche', () {
@@ -78,17 +91,67 @@ void main() {
     }
   });
 
-  test('no block repeats a tag, and none is too thin to be worth a tap', () {
+  test('no block repeats a tag, and every block is five, the mark counted',
+      () {
     for (final s in everySet()) {
       final tags = s.resolved.map((t) => t.toLowerCase()).toList();
       expect(tags.toSet().length, tags.length,
           reason: '${s.key} repeats a tag');
-      expect(tags.length, greaterThanOrEqualTo(7),
-          reason: '${s.key} is too short to be worth copying');
-      // Instagram takes thirty; every platform here takes fewer than
-      // that badly, so no block goes near the ceiling.
-      expect(tags.length, lessThanOrEqualTo(20));
+      // Instagram and TikTok take five; a sixth is cut, and pasting a
+      // block whole must never lose anything.
+      expect(tags.length, HashtagSet.perBlock,
+          reason: '${s.key} is not five tags');
     }
+  });
+
+  group('the caption Share to copies', () {
+    List<String> hashtags(String caption) => [
+          for (final w in caption.split(RegExp(r'\s+')))
+            if (w.startsWith('#')) w.substring(1),
+        ];
+
+    const line = '🎧 Surah Al-Kahf · Mishary Rashid Alafasy\n'
+        '✨ Made with AyahReel — a Quran reel in a minute, no editing';
+
+    test('five tags at most for Instagram, TikTok and Facebook, the mark '
+        'in the middle and the surah among them', () {
+      for (final t in [
+        ShareTarget.instagramReel,
+        ShareTarget.instagramPost,
+        ShareTarget.instagramStory,
+        ShareTarget.tiktok,
+        ShareTarget.facebook,
+      ]) {
+        final c = PlatformShare.caption(t, line: line, surahName: 'Al-Kahf');
+        final tags = hashtags(c);
+        expect(tags.length, lessThanOrEqualTo(5), reason: '$t');
+        expect(tags.indexOf(HashtagSet.mark), tags.length ~/ 2,
+            reason: '$t has the mark off its middle');
+        expect(tags, contains('SurahAlKahf'), reason: '$t');
+        expect(c, startsWith(line), reason: '$t keeps its line');
+      }
+    });
+
+    test('YouTube fits a Short\'s title and still carries the mark', () {
+      const longest = '🎧 Surah Al-Ankabut · Abdul Rahman Al-Sudais and a '
+          'name long enough to run past any title YouTube takes';
+      for (final l in [line, longest]) {
+        for (final surah in [null, 'Al-Ankabut']) {
+          final c = PlatformShare.caption(ShareTarget.youtube,
+              line: l, surahName: surah);
+          expect(c.length, lessThanOrEqualTo(HashtagSet.youtubeTitleMax),
+              reason: c);
+          expect(hashtags(c), contains(HashtagSet.mark), reason: c);
+          expect(c, isNot(contains('\n')), reason: 'a title is one line');
+        }
+      }
+    });
+
+    test('WhatsApp carries the mark, and only the mark', () {
+      final c = PlatformShare.caption(ShareTarget.whatsapp,
+          line: line, surahName: 'Al-Kahf');
+      expect(hashtags(c), [HashtagSet.mark]);
+    });
   });
 
   test('the curated tab leads with this reel, or drops the block', () {

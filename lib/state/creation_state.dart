@@ -170,34 +170,12 @@ bool isLightGround({
     backdrop != LetterboxBackdrop.blur &&
     isLightSurface(backdropArgb);
 
-/// Which reel of which series the wizard is making, when it is making
-/// one. Set by the series screen on the way into the wizard and read
-/// by the preview when the export lands, so the series can tick the
-/// reel off. Cleared by [CreationState.startNewReel], which every
-/// other way into the wizard calls.
-@immutable
-class SeriesTarget {
-  final String seriesId;
-  final int reelIndex;
-  const SeriesTarget(this.seriesId, this.reelIndex);
-}
-
 /// Single source of truth for the reel being created.
 /// Kept deliberately tiny: reciter + background is the entire decision
 /// space of the MVP.
 class CreationState extends ChangeNotifier {
   Reciter? _reciter;
   ReelBackground? _background;
-
-  SeriesTarget? _seriesTarget;
-
-  /// The series reel this wizard run belongs to, if any.
-  SeriesTarget? get seriesTarget => _seriesTarget;
-
-  void setSeriesTarget(SeriesTarget? t) {
-    _seriesTarget = t;
-    notifyListeners();
-  }
 
   /// Whether [_background] is something somebody actually picked, as
   /// opposed to the stand-in the scenery screen seeds so the renderer
@@ -212,7 +190,13 @@ class CreationState extends ChangeNotifier {
   /// [sceneWeights].
   final List<int> _sceneWeights = [];
   bool _multiScene = false;
-  ScenePacing _pacing = ScenePacing.perAyah;
+  /// A process's first reel starts where [startNewReel] starts every
+  /// other: following the lines when Settings has them and asks for it.
+  ScenePacing _pacing = SettingsService.state.value.verseLines >
+              VerseLines.whole &&
+          SettingsService.state.value.scenesFollowLines
+      ? ScenePacing.perLine
+      : ScenePacing.perAyah;
   SceneTransition _transition = SceneTransition.fade;
   int _surah = 1;
   int _startAyah = 1;
@@ -872,7 +856,6 @@ class CreationState extends ChangeNotifier {
   /// one reel in Cormorant over a golden-hour grade did not mean it for
   /// that reel alone.
   void startNewReel() {
-    _seriesTarget = null;
     // Where the scenery screen was left belongs to the reel it was left
     // in; a new one opens the screen fresh.
     sceneryTab = null;

@@ -269,7 +269,7 @@ void main() {
   });
 
   testWidgets('the motion panel offers the five looks, all in view, and '
-      'no switches that repeat them', (t) async {
+      'one switch: the recited word lighting up', (t) async {
     await open(t);
     await openTab(t, l.styleTabMotion);
     for (final p in MotionPreset.values) {
@@ -278,10 +278,37 @@ void main() {
     }
     expect(find.text('Breathe'), findsNothing);
     expect(find.text('Rise'), findsNothing);
-    expect(find.byType(Switch), findsNothing);
+    expect(find.byType(Switch), findsOneWidget);
+    final was = creationState.wordHighlight;
+    await t.tap(find.text(l.wordLightShort));
+    await settle(t);
+    expect(creationState.wordHighlight, !was);
+    await t.tap(find.byType(Switch));
+    await settle(t);
+    expect(creationState.wordHighlight, was);
     await t.tap(find.text(l.motionPresetName(MotionPreset.thread.name)));
     await settle(t);
     expect(creationState.motion, MotionPreset.thread.motion);
+  });
+
+  testWidgets('the verse moves up and down from beside the frame, and '
+      'stops at the ends', (t) async {
+    creationState.setOverlayAlign(0.5);
+    addTearDown(() => creationState.setOverlayAlign(0.5));
+    await open(t);
+    await t.tap(find.byIcon(Icons.expand_more_rounded));
+    await settle(t);
+    expect(creationState.overlayAlign, closeTo(0.55, 1e-9));
+    await t.tap(find.byIcon(Icons.expand_less_rounded));
+    await settle(t);
+    await t.tap(find.byIcon(Icons.expand_less_rounded));
+    await settle(t);
+    expect(creationState.overlayAlign, closeTo(0.45, 1e-9));
+    creationState.setOverlayAlign(0);
+    await settle(t);
+    await t.tap(find.byIcon(Icons.expand_less_rounded));
+    await settle(t);
+    expect(creationState.overlayAlign, 0);
   });
 
   testWidgets('a luminous ink draws the verse, and a flat colour takes it off',

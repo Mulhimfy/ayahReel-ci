@@ -34,7 +34,7 @@ import 'make_sheet.dart';
 /// The card's own tap now asks which of the two things to make first —
 /// see [makeFromVerse] — and this is what it calls when the answer is
 /// a reel. Still public and still called directly by everything that
-/// knows it wants a reel: the moments rail, the series, the widget.
+/// knows it wants a reel: the Friday card's own button, the widget.
 void startVerseReel(BuildContext context, QuranVerse v) {
   HapticFeedback.selectionClick();
   creationState
@@ -107,10 +107,9 @@ class _DayVerseCardState extends State<DayVerseCard>
   Timer? _turn;
 
   /// The card's slow clock: the light drifting in its ground, the motes
-  /// rising through it, the medallion turning, and the two points of
-  /// light running round its rim. One turn every fourteen seconds;
-  /// everything on it goes round a whole number of times per turn, so
-  /// nothing jumps when it wraps.
+  /// rising through it and the medallion turning. One turn every
+  /// fourteen seconds; everything on it goes round a whole number of
+  /// times per turn, so nothing jumps when it wraps.
   late final AnimationController _clock = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 14),
@@ -313,21 +312,6 @@ class _DayVerseCardState extends State<DayVerseCard>
                   radius: DayVerseCard.radius,
                   sealSize: 0,
                   color: jumuah ? AppColors.goldBright : AppColors.gold,
-                ),
-              ),
-              // Two points of light running round the rim, opposite
-              // each other, once a turn.
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: RepaintBoundary(
-                    child: CustomPaint(
-                      painter: _RimLightPainter(
-                        _clock,
-                        radius: DayVerseCard.radius,
-                        colour: AppColors.goldBright,
-                      ),
-                    ),
-                  ),
                 ),
               ),
             ],
@@ -1090,77 +1074,6 @@ class _GroundPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _GroundPainter old) =>
       old.clock != clock || old.friday != friday;
-}
-
-/// Two points of light running round the card's rim, opposite each
-/// other, each trailing a fading tail: the frame lit as if a lamp were
-/// carried round it.
-class _RimLightPainter extends CustomPainter {
-  final Animation<double> clock;
-  final BorderRadius radius;
-  final Color colour;
-
-  _RimLightPainter(this.clock, {required this.radius, required this.colour})
-      : super(repaint: clock);
-
-  Size? _for;
-  ui.PathMetric? _rim;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (size.isEmpty) return;
-    if (_for != size) {
-      _for = size;
-      final metrics = (Path()
-            ..addRRect(radius.toRRect((Offset.zero & size).deflate(0.9))))
-          .computeMetrics()
-          .toList();
-      _rim = metrics.isEmpty ? null : metrics.first;
-    }
-    final rim = _rim;
-    if (rim == null) return;
-    final length = rim.length;
-    final tail = length * 0.14;
-    const steps = 7;
-    for (final start in const [0.0, 0.5]) {
-      final head = ((clock.value + start) % 1) * length;
-      for (var j = 0; j < steps; j++) {
-        final from = head - tail + tail * j / steps;
-        final to = head - tail + tail * (j + 1) / steps;
-        final paint = Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.6
-          ..strokeCap = StrokeCap.round
-          ..color = colour.withValues(alpha: 0.75 * (j + 1) / steps);
-        _stroke(canvas, rim, from, to, length, paint);
-      }
-      final tip = rim.getTangentForOffset(head);
-      if (tip != null) {
-        canvas.drawCircle(tip.position, 5,
-            Paint()..color = colour.withValues(alpha: 0.22));
-        canvas.drawCircle(tip.position, 1.9,
-            Paint()..color = Color.lerp(colour, Colors.white, 0.5)!);
-      }
-    }
-  }
-
-  /// A stretch of the rim from [from] to [to], either of which may have
-  /// gone round past the start.
-  static void _stroke(Canvas canvas, ui.PathMetric rim, double from, double to,
-      double length, Paint paint) {
-    if (from < 0 && to <= 0) {
-      canvas.drawPath(rim.extractPath(from + length, to + length), paint);
-    } else if (from < 0) {
-      canvas.drawPath(rim.extractPath(from + length, length), paint);
-      canvas.drawPath(rim.extractPath(0, to), paint);
-    } else {
-      canvas.drawPath(rim.extractPath(from, to), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _RimLightPainter old) =>
-      old.clock != clock || old.radius != radius || old.colour != colour;
 }
 
 /// The card leaning toward the finger that rests on it, a few degrees,

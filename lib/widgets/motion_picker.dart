@@ -262,6 +262,10 @@ class MotionColourRow extends StatelessWidget {
   /// Back to the house gold, free to follow the ground again.
   final VoidCallback onGold;
 
+  /// Stands at the end of the heading's line: the style step's switch
+  /// for the recited word, which costs the panel no line of its own.
+  final Widget? trailing;
+
   const MotionColourRow({
     super.key,
     required this.accentArgb,
@@ -269,6 +273,7 @@ class MotionColourRow extends StatelessWidget {
     required this.onLight,
     required this.onInk,
     required this.onGold,
+    this.trailing,
   });
 
   @override
@@ -281,24 +286,37 @@ class MotionColourRow extends StatelessWidget {
         ? named
         : named[0].toUpperCase() + named.substring(1);
     final section = l.motionColour;
+    final heading = ExcludeSemantics(
+      child: Text(
+        '${section.toUpperCase()} · $name',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.5,
+          color: AppColors.textSecondary,
+        ),
+      ),
+    );
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ExcludeSemantics(
-            child: Text(
-              '${section.toUpperCase()} · $name',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
-                color: AppColors.textSecondary,
+          if (trailing == null)
+            heading
+          else
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Expanded(child: heading),
+                  const SizedBox(width: 8),
+                  trailing!,
+                ],
               ),
             ),
-          ),
           const SizedBox(height: 4),
           InkStrip(
             inks: VerseInk.ordered(onLight: onLight),

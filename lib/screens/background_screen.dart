@@ -134,8 +134,10 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
   }
 
   /// What a scene each would be: the verses, or — with long verses shown
-  /// line by line and the scenery following the lines — every line of
-  /// them, counted from the text as it will be typeset.
+  /// line by line — every line of them, counted from the text as it will
+  /// be typeset. A verse of three lines has room for three sceneries
+  /// whichever way the run is dealt, so the count of lines is what
+  /// bounds the picker even when the scenery is set to change by verse.
   int get _slotCount {
     final s = creationState;
     final ayahs = QuranRepository.ayahsIfCached(s.surah);
@@ -143,14 +145,35 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
         s.endAyah - s.startAyah + 1;
   }
 
+  /// Whether the run follows the lines rather than the verses: the
+  /// reel's pacing says so, or it is on the per-verse pacing a reel
+  /// starts on and Settings has the scenery change with every line
+  /// (the default).
+  bool get _followsLines {
+    final s = creationState;
+    if (s.verseLines == VerseLines.whole) return false;
+    return s.pacing == ScenePacing.perLine ||
+        (s.pacing == ScenePacing.perAyah &&
+            SettingsService.state.value.scenesFollowLines);
+  }
+
+  /// A run longer than the verses, its verses going line by line and
+  /// the scenery set to follow them: dealt out a line at a time, so the
+  /// sceneries change as the lines do instead of splitting a verse's
+  /// seconds evenly.
+  void _paceRunByLines() {
+    final s = creationState;
+    if (s.pacing != ScenePacing.perAyah || !_followsLines) return;
+    if (s.scenes.length > s.endAyah - s.startAyah + 1) {
+      s.setPacing(ScenePacing.perLine);
+    }
+  }
+
   /// The text of each line of the selection when its long verses go
-  /// line by line and the scenery follows them; null when it is a
-  /// scene per verse.
+  /// line by line; null when every verse is shown whole.
   List<String>? _lineTexts(List<Ayah> ayahs) {
     final s = creationState;
-    if (s.verseLines == VerseLines.whole || s.pacing != ScenePacing.perLine) {
-      return null;
-    }
+    if (s.verseLines == VerseLines.whole) return null;
     final settings = SettingsService.state.value;
     return VersePlanner.estimateLines(
       ayahs,
@@ -172,7 +195,9 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
 
   /// A scene per verse — or per line — : what the blurb suggests, and
   /// what the reel is built around.
-  int get _sceneIdeal => ScenePlan.recommended(_slotCount);
+  int get _sceneIdeal => _followsLines
+      ? ScenePlan.recommended(_slotCount)
+      : creationState.endAyah - creationState.startAyah + 1;
 
   /// This scenery's place in the run, 1-based; 0 when it is not in it.
   int _orderOf(String id) {
@@ -397,7 +422,7 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
       final limit = _sceneLimit;
       // With long verses going line by line and the scenery following
       // them, every line chooses its own scenery from its own words.
-      final lines = _lineTexts(ayahs);
+      final lines = _followsLines ? _lineTexts(ayahs) : null;
       final source = lines == null
           ? ayahs
           : [
@@ -460,6 +485,9 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
         for (final b in resolved) {
           creationState.toggleScene(b, limit: resolved.length);
         }
+        // Picked a line at a time, so dealt out a line at a time: the
+        // scenery changes as each line comes on.
+        if (lines != null) creationState.setPacing(ScenePacing.perLine);
       } else {
         creationState.selectBackground(resolved.first);
       }
@@ -879,6 +907,7 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
         return;
       }
     }
+    _paceRunByLines();
     setState(() => _suspended = true);
     await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const StyleScreen()),

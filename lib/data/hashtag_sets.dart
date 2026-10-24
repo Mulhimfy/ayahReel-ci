@@ -16,12 +16,18 @@
 enum TagPlatform { instagram, tiktok, youtube, more }
 
 /// One block of hashtags, copied whole.
+///
+/// Five tags a block, the mark among them: Instagram and TikTok take
+/// five hashtags on a post and drop the rest, so a longer block pasted
+/// whole lost whatever came after the fifth — the mark too, when it sat
+/// in the middle of ten. Five is also what keeps a YouTube block short
+/// enough to ride in a Short's title (see [youtubeTitleMax]).
 class HashtagSet {
-  /// Names the block: looks its label up in `L10n`, and decides where
-  /// the mark falls, so the two can never drift apart.
+  /// Names the block: looks its label up in `L10n`.
   final String key;
 
-  /// The tags themselves, each without its '#'.
+  /// The tags themselves, each without its '#': [perBlock] less one,
+  /// since the mark takes the fifth place.
   ///
   /// The app's own mark is deliberately NOT in here. [text] puts it in,
   /// which is what stops a set added later from ever shipping without
@@ -37,17 +43,22 @@ class HashtagSet {
   /// The app's signature, carried by every block that leaves here.
   static const mark = 'AyahReel';
 
-  /// Where the mark lands. Mid-block, nudged by the set's own name so
-  /// it does not sit at the same offset every time, and kept off both
-  /// ends — first and last are the two positions an eye skimming a
-  /// wall of tags actually stops on.
-  int get _markIndex {
-    final mid = tags.length ~/ 2;
-    return (mid + key.length % 3 - 1).clamp(1, tags.length - 1);
-  }
+  /// The most hashtags a post on Instagram or TikTok keeps. Every block
+  /// holds exactly this many, the mark counted.
+  static const perBlock = 5;
+
+  /// A YouTube Short's title holds this many characters, and a caption
+  /// copied for one goes in that box.
+  static const youtubeTitleMax = 100;
+
+  /// [tags] with the mark in their middle: never first or last, the two
+  /// places an eye skimming tags stops on, and inside the first five
+  /// wherever a platform cuts.
+  static List<String> withMark(List<String> tags) =>
+      [...tags]..insert(tags.length ~/ 2, mark);
 
   /// The tags with the mark in place, in copy order.
-  List<String> get resolved => [...tags]..insert(_markIndex, mark);
+  List<String> get resolved => withMark(tags);
 
   /// What a tap on Copy puts on the clipboard.
   String get text => resolved.map((t) => '#$t').join(' ');
@@ -58,195 +69,60 @@ class HashtagSet {
 }
 
 // ---- Arabic ------------------------------------------------------
-// One set of tags does the work on every platform here: Arabic Quran
+// The same few Arabic tags lead on every platform: Arabic Quran
 // searches are not split app by app the way the English ones are.
 
-const _arabicCore = [
-  'قران',
-  'قرآن',
-  'تلاوة',
-  'القران_الكريم',
-  'تلاوة_خاشعة',
-  'ايات_قرانية',
-  'ترتيل',
-  'تدبر',
-  'خشوع',
-  'اسلاميات',
-];
-
 const _arabicInstagram =
-    HashtagSet('arabic', [..._arabicCore, 'ذكر_الله'], rtl: true);
+    HashtagSet('arabic', ['قرآن', 'تلاوة', 'القران_الكريم', 'ذكر_الله'],
+        rtl: true);
 const _arabicTikTok =
-    HashtagSet('arabic', [..._arabicCore, 'قران_كريم'], rtl: true);
-const _arabicYouTube = HashtagSet('arabic', _arabicCore, rtl: true);
+    HashtagSet('arabic', ['قرآن', 'تلاوة', 'القران_الكريم', 'قران_كريم'],
+        rtl: true);
+const _arabicYouTube =
+    HashtagSet('arabic', ['قرآن', 'تلاوة', 'ترتيل', 'تلاوة_خاشعة'],
+        rtl: true);
 
 // ---- Instagram ---------------------------------------------------
 
 const _instagram = [
-  HashtagSet('recitation', [
-    'quran',
-    'quranrecitation',
-    'tilawah',
-    'beautifulrecitation',
-    'quranreels',
-    'holyquran',
-    'recitequran',
-    'quranvideo',
-    'tajweed',
-    'quranlover',
-    'islamicreels',
-  ]),
+  HashtagSet('recitation',
+      ['quran', 'quranrecitation', 'quranreels', 'tilawah']),
   _arabicInstagram,
-  HashtagSet('reminders', [
-    'islamicreminder',
-    'quranquotes',
-    'quranicverses',
-    'islamicquotes',
-    'dawah',
-    'deenoverdunya',
-    'verseoftheday',
-    'muslimreminder',
-    'reflectonquran',
-    'imaan',
-  ]),
-  HashtagSet('night', [
-    'tahajjud',
-    'qiyamullayl',
-    'quranatnight',
-    'soothingrecitation',
-    'peacefulquran',
-    'nightprayer',
-    'sujood',
-    'khushu',
-    'duaa',
-  ]),
+  HashtagSet('reminders',
+      ['islamicreminder', 'quranquotes', 'dawah', 'verseoftheday']),
+  HashtagSet('night',
+      ['tahajjud', 'quranatnight', 'peacefulquran', 'qiyamullayl']),
 ];
 
 // ---- TikTok ------------------------------------------------------
 
 const _tiktok = [
-  HashtagSet('recitation', [
-    'quran',
-    'quranrecitation',
-    'tilawah',
-    'qurantok',
-    'quranedit',
-    'recitequran',
-    'beautifulrecitation',
-    'muslimtiktok',
-    'islamictiktok',
-    'holyquran',
-  ]),
+  HashtagSet('recitation',
+      ['quran', 'qurantok', 'quranrecitation', 'islamictiktok']),
   _arabicTikTok,
-  HashtagSet('reminders', [
-    'islamicreminder',
-    'deentok',
-    'quranquotes',
-    'islamicquotes',
-    'dawah',
-    'verseoftheday',
-    'deenoverdunya',
-    'muslimtiktok',
-    'imaan',
-  ]),
-  HashtagSet('night', [
-    'tahajjud',
-    'quranatnight',
-    'qiyamullayl',
-    'soothingrecitation',
-    'peacefulquran',
-    'sujood',
-    'khushu',
-    'deentok',
-    'duaa',
-  ]),
+  HashtagSet('reminders',
+      ['islamicreminder', 'deentok', 'quranquotes', 'muslimtiktok']),
+  HashtagSet('night',
+      ['tahajjud', 'quranatnight', 'deentok', 'peacefulquran']),
 ];
 
 // ---- YouTube -----------------------------------------------------
+// Short tags: a block has to leave room for the title it follows.
 
 const _youtube = [
-  HashtagSet('recitation', [
-    'quran',
-    'quranrecitation',
-    'quranshorts',
-    'tilawah',
-    'beautifulrecitation',
-    'holyquran',
-    'recitequran',
-    'islamicshorts',
-    'quranvideo',
-    'tajweed',
-  ]),
+  HashtagSet('recitation', ['quran', 'quranshorts', 'tilawah', 'tajweed']),
   _arabicYouTube,
-  HashtagSet('reminders', [
-    'islamicreminder',
-    'quranquotes',
-    'quranicverses',
-    'islamicshorts',
-    'dawah',
-    'verseoftheday',
-    'islamicquotes',
-    'imaan',
-  ]),
-  HashtagSet('night', [
-    'tahajjud',
-    'quranatnight',
-    'qiyamullayl',
-    'soothingrecitation',
-    'peacefulquran',
-    'islamicshorts',
-    'nightprayer',
-    'khushu',
-  ]),
+  HashtagSet('reminders', ['islamicshorts', 'quranquotes', 'dawah', 'imaan']),
+  HashtagSet('night', ['tahajjud', 'quranatnight', 'islamicshorts', 'khushu']),
 ];
 
 // ---- the curated rest --------------------------------------------
 
 const _more = [
-  HashtagSet('hifz', [
-    'hifz',
-    'quranmemorization',
-    'memorizequran',
-    'hafiz',
-    'learnquran',
-    'quranstudy',
-    'hifzjourney',
-    'tajweed',
-    'quranclass',
-  ]),
-  HashtagSet('ramadan', [
-    'ramadan',
-    'ramadankareem',
-    'taraweeh',
-    'laylatulqadr',
-    'quraninramadan',
-    'ramadanreminder',
-    'ramadanquran',
-    'ibadah',
-    'fasting',
-  ]),
-  HashtagSet('dhikr', [
-    'dhikr',
-    'azkar',
-    'istighfar',
-    'subhanallah',
-    'alhamdulillah',
-    'allahuakbar',
-    'tasbeeh',
-    'remembrance',
-    'dua',
-  ]),
-  HashtagSet('dawah', [
-    'dawah',
-    'islamicdawah',
-    'quranexplained',
-    'islamicknowledge',
-    'learnislam',
-    'islamicteaching',
-    'newmuslim',
-    'calltoislam',
-    'deen',
-  ]),
+  HashtagSet('hifz', ['hifz', 'quranmemorization', 'hafiz', 'learnquran']),
+  HashtagSet('ramadan', ['ramadan', 'ramadankareem', 'taraweeh', 'laylatulqadr']),
+  HashtagSet('dhikr', ['dhikr', 'azkar', 'istighfar', 'subhanallah']),
+  HashtagSet('dawah', ['dawah', 'islamicdawah', 'learnislam', 'deen']),
 ];
 
 /// "Ali 'Imran" becomes 'AliImran'. A hashtag carries letters and
@@ -276,16 +152,7 @@ List<HashtagSet> hashtagSets(TagPlatform p, {String? surahName}) {
       final s = surahTag(surahName);
       if (s == null) return _more;
       return [
-        HashtagSet('surah', [
-          'Surah$s',
-          s,
-          'quran',
-          'quranrecitation',
-          'surahrecitation',
-          'tilawah',
-          'quranicverses',
-          'recitequran',
-        ]),
+        HashtagSet('surah', ['Surah$s', 'quran', 'quranrecitation', 'tilawah']),
         ..._more,
       ];
   }

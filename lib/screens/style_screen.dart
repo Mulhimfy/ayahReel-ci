@@ -181,6 +181,13 @@ class _StyleScreenState extends State<StyleScreen> {
     setState(() => _panel = p);
   }
 
+  /// The verse [by] of the room it has to move in, down for more: the
+  /// same place the reel screen's drag sets, and the reel keeps it.
+  void _moveVerse(double by) {
+    HapticFeedback.selectionClick();
+    creationState.setOverlayAlign(creationState.overlayAlign + by);
+  }
+
   /// Puts this panel's decisions back to the app's own defaults, and
   /// only this panel's: a reset button that quietly took the grade off
   /// with the typeface would be a button nobody dares press.
@@ -207,7 +214,8 @@ class _StyleScreenState extends State<StyleScreen> {
       case _Panel.motion:
         s
           ..setMotion(VerseMotion.standard)
-          ..resetAccent();
+          ..resetAccent()
+          ..setWordHighlight(true);
       case _Panel.title:
         s.setSurahTitleLook(SurahTitleLook.classic);
     }
@@ -284,28 +292,59 @@ class _StyleScreenState extends State<StyleScreen> {
                   ),
                   const SizedBox(height: 10),
                   Expanded(
-                    child: Center(
-                      child: AspectRatio(
-                        aspectRatio: 9 / 16,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Semantics(
-                            container: true,
-                            label: l.a11yStyleStage,
-                            child: _Stage(
-                              ayah: _ayah,
-                              aspect: _aspect,
-                              // The motion plays on the frame while its
-                              // panel is open; the other panels judge
-                              // type and colour on a still.
-                              motion: _panel == _Panel.motion
-                                  ? creationState.motion
-                                  : null,
-                              hasWords: _hasWords,
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: AspectRatio(
+                            aspectRatio: 9 / 16,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              // A drag on the frame moves the verse up or
+                              // down, as it does on the reel screen; to a
+                              // screen reader the frame is the adjustable
+                              // value, a tenth of the frame a swipe.
+                              child: Semantics(
+                                container: true,
+                                label: l.a11yStyleStage,
+                                value: l.a11yVersePosition(
+                                    (creationState.overlayAlign * 100)
+                                        .round()),
+                                hint: l.a11yVersePositionHint,
+                                onIncrease: () => _moveVerse(0.1),
+                                onDecrease: () => _moveVerse(-0.1),
+                                child: _Stage(
+                                  ayah: _ayah,
+                                  aspect: _aspect,
+                                  // The motion plays on the frame while
+                                  // its panel is open; the other panels
+                                  // judge type and colour on a still.
+                                  motion: _panel == _Panel.motion
+                                      ? creationState.motion
+                                      : null,
+                                  hasWords: _hasWords,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                        // Up and down beside the frame, for a thumb that
+                        // would rather tap than drag.
+                        PositionedDirectional(
+                          end: 12,
+                          top: 0,
+                          bottom: 0,
+                          child: Center(
+                            child: _VerseMover(
+                              onUp: creationState.overlayAlign <= 0
+                                  ? null
+                                  : () => _moveVerse(-0.05),
+                              onDown: creationState.overlayAlign >= 1
+                                  ? null
+                                  : () => _moveVerse(0.05),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -374,6 +413,17 @@ class _StyleScreenState extends State<StyleScreen> {
                 onLight: creationState.onLightGround,
                 onInk: creationState.setAccentInk,
                 onGold: creationState.resetAccent,
+                // The word lighting as it is recited: on or off for this
+                // reel and the ones after it, as in Customize. On the
+                // colour's own line, since the lit word is what that
+                // colour paints.
+                trailing: _WordLightToggle(
+                  on: creationState.wordHighlight,
+                  onChanged: (on) {
+                    HapticFeedback.selectionClick();
+                    creationState.setWordHighlight(on);
+                  },
+                ),
               ),
             ),
           ),
@@ -409,6 +459,34 @@ class _Stage extends StatefulWidget {
 }
 
 class _StageState extends State<_Stage> {
+  /// Where the verse is while a finger is moving it: held here and
+  /// written back when the finger lifts, so the whole screen does not
+  /// rebuild a frame at a time under the drag.
+  double? _dragAlign;
+
+  /// How far the verse can travel on this frame, in its own pixels: the
+  /// frame's height, or the band's on a wide card, less the verse's own.
+  double _free(BoxConstraints box, LetterboxGeometry? geo) {
+    final scale = box.maxWidth / LetterboxGeometry.frameW;
+    final travel =
+        geo == null ? box.maxHeight : geo.bandHeight * scale;
+    final card = _cardHeight ?? box.maxHeight * 0.35;
+    return math.max(1.0, travel - card);
+  }
+
+  void _dragBy(double dy, BoxConstraints box, LetterboxGeometry? geo) {
+    final from = _dragAlign ?? creationState.overlayAlign;
+    setState(() =>
+        _dragAlign = (from + dy / _free(box, geo)).clamp(0.0, 1.0));
+  }
+
+  void _dragEnd() {
+    final at = _dragAlign;
+    if (at == null) return;
+    creationState.setOverlayAlign(at);
+    setState(() => _dragAlign = null);
+  }
+
   /// Only ever created for a clip the user brought in themselves.
   /// Everything from the app's own library has a poster bundled, which
   /// is this exact still at no cost at all — see [_picture].
@@ -566,7 +644,8 @@ class _StageState extends State<_Stage> {
             // never lights one leaves half of that claim unshown —
             // which is also what hid the case where the accent is so
             // near the verse's own colour that it gives way.
-            highlightTokens: widget.ayah.arabic.trim().isEmpty
+            highlightTokens: widget.ayah.arabic.trim().isEmpty ||
+                    !s.wordHighlight
                 ? null
                 : (start: 0, end: 1),
           ),
@@ -577,13 +656,14 @@ class _StageState extends State<_Stage> {
         // letterbox, where the mark answers to the card and not to the
         // verse, and null until the card has laid out once.
         final cardH = _cardHeight;
+        final align = _dragAlign ?? s.overlayAlign;
         final verseBottom = geo != null || cardH == null
             ? null
             : (LetterboxGeometry.frameH -
                         cardH * LetterboxGeometry.frameW / box.maxWidth) *
-                    s.overlayAlign +
+                    align +
                 cardH * LetterboxGeometry.frameW / box.maxWidth;
-        return Stack(
+        final frame = Stack(
           fit: StackFit.expand,
           children: [
             if (geo == null) ...[
@@ -629,7 +709,7 @@ class _StageState extends State<_Stage> {
             if (geo == null)
               Positioned.fill(
                 child: OverflowBox(
-                  alignment: Alignment(0, s.overlayAlign * 2 - 1),
+                  alignment: Alignment(0, align * 2 - 1),
                   minHeight: 0,
                   maxHeight: double.infinity,
                   child: verse,
@@ -642,7 +722,7 @@ class _StageState extends State<_Stage> {
                 top: geo.bandTop * scale,
                 height: geo.bandHeight * scale,
                 child: OverflowBox(
-                  alignment: Alignment(0, s.overlayAlign * 2 - 1),
+                  alignment: Alignment(0, align * 2 - 1),
                   minHeight: 0,
                   maxHeight: double.infinity,
                   child: verse,
@@ -672,7 +752,148 @@ class _StageState extends State<_Stage> {
             if (grain != null) Positioned.fill(child: grain),
           ],
         );
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          // The frame's own adjust actions stand in for the drag; its
+          // own would only add a nameless scrollable under them.
+          excludeFromSemantics: true,
+          onVerticalDragUpdate: (d) => _dragBy(d.delta.dy, box, geo),
+          onVerticalDragEnd: (_) => _dragEnd(),
+          onVerticalDragCancel: _dragEnd,
+          child: frame,
+        );
       },
+    );
+  }
+}
+
+/// Up and down beside the frame: the verse a step at a time, for a thumb
+/// that would rather tap than drag. A button is dimmed at its end of the
+/// room.
+class _VerseMover extends StatelessWidget {
+  final VoidCallback? onUp;
+  final VoidCallback? onDown;
+
+  const _VerseMover({required this.onUp, required this.onDown});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _MoverButton(
+            icon: Icons.expand_less_rounded, label: l.verseUp, onTap: onUp),
+        const SizedBox(height: 10),
+        _MoverButton(
+            icon: Icons.expand_more_rounded,
+            label: l.verseDown,
+            onTap: onDown),
+      ],
+    );
+  }
+}
+
+class _MoverButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+
+  const _MoverButton(
+      {required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final on = onTap != null;
+    return A11yTap(
+      label: label,
+      enabled: on,
+      onTap: onTap,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 160),
+          opacity: on ? 1 : 0.35,
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.surfaceRaised.withValues(alpha: 0.92),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Icon(icon, size: 22, color: AppColors.textPrimary),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The motion panel's switch for the recited word lighting up: a short
+/// name and a small switch, on the line over the motion's colours.
+class _WordLightToggle extends StatelessWidget {
+  final bool on;
+  final ValueChanged<bool> onChanged;
+
+  const _WordLightToggle({required this.on, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    return Semantics(
+      container: true,
+      toggled: on,
+      label: l.highlightRecitedWord,
+      hint: l.wordHighlightNote,
+      onTap: () => onChanged(!on),
+      child: ExcludeSemantics(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => onChanged(!on),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.auto_awesome_rounded,
+                  size: 13,
+                  color: on
+                      ? AppColors.goldBright
+                      : AppColors.gold.withValues(alpha: 0.6)),
+              const SizedBox(width: 4),
+              Text(
+                l.wordLightShort,
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
+                  color: on ? AppColors.textPrimary : AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(width: 4),
+              SizedBox(
+                width: 38,
+                height: 24,
+                child: FittedBox(
+                  child: Switch(
+                    value: on,
+                    onChanged: onChanged,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

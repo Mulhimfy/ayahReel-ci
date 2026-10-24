@@ -17,8 +17,6 @@ import 'package:ayah_reels/data/arena_engine.dart';
 import 'package:ayah_reels/data/arena_service.dart';
 import 'package:ayah_reels/data/quran_search.dart';
 import 'package:ayah_reels/data/reel_library.dart';
-import 'package:ayah_reels/data/series_library.dart';
-import 'package:ayah_reels/data/series_planner.dart';
 import 'package:ayah_reels/data/settings_service.dart';
 import 'package:ayah_reels/l10n/l10n.dart';
 import 'package:ayah_reels/render/arena_story.dart';
@@ -219,8 +217,8 @@ void main() {
       await ArenaService.remember({'intro': '1'});
     });
 
-    // A couple of reels in the library and a series under way, so the
-    // home page has its shelf switch and its day lamps to show.
+    // A couple of reels in the library, so the home page has its shelf
+    // switch to show, and Tanafus' pane over it.
     final docs = Directory('$out/reels')..createSync(recursive: true);
     final kept = [
       for (final (i, surah) in [(1, 'Al-Mulk'), (2, 'Ya-Sin')])
@@ -240,28 +238,11 @@ void main() {
     }
     File('${docs.path}/library.json')
         .writeAsStringSync(jsonEncode([for (final r in kept) r.toJson()]));
-    await t.runAsync(() async {
-      final s = ReelSeries.plan(
-        surah: 36,
-        reciterId: 'alafasy',
-        perDay: 1,
-        days: 7,
-        cuts: [
-          for (var i = 0; i < 9; i++)
-            SeriesCut(startAyah: i * 9 + 1, endAyah: i * 9 + 9, estimateMs: 40000),
-        ],
-        now: DateTime.now().subtract(const Duration(days: 2)),
-      );
-      await SeriesLibrary.add(s);
-      await SeriesLibrary.markReelDone(s.id, 0, savedReelId: 'r1');
-      await SeriesLibrary.markReelDone(s.id, 2, savedReelId: 'r2');
-    });
-
     // 1 · The shell, with both doors.
     await scene(const HomeShell());
     await settle(1600);
     await shoot('01_shell_home');
-    // Lower down: the series' lamps and the shelf, with its switch. A
+    // Lower down: Tanafus' pane and the shelf, with its switch. A
     // step that can't be taken here is passed over, not the end of the
     // run.
     try {

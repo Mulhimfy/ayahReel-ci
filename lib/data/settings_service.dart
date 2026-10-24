@@ -164,9 +164,6 @@ class AppSettings {
   final int lastSurah;
   final int lastAyah;
 
-  /// Whether Home shows its Reel series section. On unless turned off
-  /// in Settings.
-  final bool showSeries;
   /// Whether a reel's verse card carries the verse's number, and how —
   /// see [VerseNumbering]. Off until the user turns it on.
   final VerseNumbering verseNumbering;
@@ -236,7 +233,6 @@ class AppSettings {
     this.versesCardName = false,
     this.versesCardNumbers = false,
     this.homeRounds = false,
-    this.showSeries = true,
     this.verseNumbering = VerseNumbering.mark,
     this.verseTranslationOff = false,
     this.highQualityVideo = false,
@@ -292,7 +288,6 @@ class AppSettings {
     bool? versesCardName,
     bool? versesCardNumbers,
     bool? homeRounds,
-    bool? showSeries,
     VerseNumbering? verseNumbering,
     bool? verseTranslationOff,
     bool? highQualityVideo,
@@ -334,7 +329,6 @@ class AppSettings {
       versesCardName: versesCardName ?? this.versesCardName,
       versesCardNumbers: versesCardNumbers ?? this.versesCardNumbers,
       homeRounds: homeRounds ?? this.homeRounds,
-      showSeries: showSeries ?? this.showSeries,
       verseNumbering: verseNumbering ?? this.verseNumbering,
       verseTranslationOff: verseTranslationOff ?? this.verseTranslationOff,
       highQualityVideo: highQualityVideo ?? this.highQualityVideo,
@@ -376,7 +370,6 @@ class AppSettings {
         'versesCardName': versesCardName,
         'versesCardNumbers': versesCardNumbers,
         'homeRounds': homeRounds,
-        'showSeries': showSeries,
         // Not 'verseNumbering': that key was written on every save with
         // the old default, off, so it cannot tell a choice from the
         // default. See [fromJson].
@@ -447,7 +440,6 @@ class AppSettings {
         versesCardName: j['versesCardName'] as bool? ?? false,
         versesCardNumbers: j['versesCardNumbers'] as bool? ?? false,
         homeRounds: j['homeRounds'] as bool? ?? false,
-        showSeries: j['showSeries'] as bool? ?? true,
         // The verse-end mark by default since 2026-10-23. An install that
         // predates the new key wrote 'verseNumbering' with the old
         // default on every save, so its "off" is the default, not a

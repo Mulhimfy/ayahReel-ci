@@ -14,7 +14,9 @@ import 'popover.dart';
 /// Each target's own colours, as its app wears them.
 extension ShareTargetLook on ShareTarget {
   List<Color> get colours => switch (this) {
-        ShareTarget.instagramReel || ShareTarget.instagramStory =>
+        ShareTarget.instagramReel ||
+        ShareTarget.instagramPost ||
+        ShareTarget.instagramStory =>
           instagramMesh,
         ShareTarget.tiktok => const [
             Color(0xFF25F4EE),
@@ -23,34 +25,59 @@ extension ShareTargetLook on ShareTarget {
             Color(0xFFFE2C55),
           ],
         ShareTarget.youtube => const [Color(0xFFFF2D2D), Color(0xFFCC0000)],
+        ShareTarget.facebook => const [Color(0xFF2D88FF), Color(0xFF1360D6)],
         ShareTarget.whatsapp => whatsappMesh,
       };
 
   String label(L10n l) => switch (this) {
         ShareTarget.instagramReel => l.shareToInstagramReel,
+        ShareTarget.instagramPost => l.shareToInstagramPost,
         ShareTarget.instagramStory => l.shareToInstagramStory,
         ShareTarget.tiktok => 'TikTok',
         ShareTarget.youtube => l.shareToYouTube,
+        ShareTarget.facebook => 'Facebook',
+        ShareTarget.whatsapp => 'WhatsApp',
+      };
+
+  /// The app's name alone, for a line that names where something went.
+  String app(L10n l) => switch (this) {
+        ShareTarget.instagramReel ||
+        ShareTarget.instagramPost ||
+        ShareTarget.instagramStory =>
+          'Instagram',
+        ShareTarget.tiktok => 'TikTok',
+        ShareTarget.youtube => l.shareToYouTube,
+        ShareTarget.facebook => 'Facebook',
         ShareTarget.whatsapp => 'WhatsApp',
       };
 }
 
-/// Opens the platforms a reel can go straight to, rising out of [anchor]
-/// (the Share to button): one button per app, in the app's own colours,
-/// arriving one after another. Answers with the one tapped, or null.
+/// Opens the platforms a reel or a card can go straight to, rising out
+/// of [anchor] (the Share to button): one button per app, in the app's
+/// own colours, arriving one after another. [note] is the line over
+/// them; the reel's by default. Answers with the one tapped, or null.
 Future<ShareTarget?> showShareTo(BuildContext anchor,
-    {required List<ShareTarget> targets}) {
+    {required List<ShareTarget> targets,
+    String? note,
+    bool preferAbove = true}) {
   return showPopover<ShareTarget>(
     anchor,
-    preferAbove: true,
+    preferAbove: preferAbove,
     dim: true,
-    builder: (context) => _ShareToPanel(targets: targets),
+    builder: (context) =>
+        _ShareToPanel(targets: targets, note: note, fromTop: !preferAbove),
   );
 }
 
 class _ShareToPanel extends StatefulWidget {
   final List<ShareTarget> targets;
-  const _ShareToPanel({required this.targets});
+  final String? note;
+
+  /// The panel hangs under its button: the rows arrive from the top.
+  final bool fromTop;
+
+  const _ShareToPanel(
+      {required this.targets, this.note, this.fromTop = false});
 
   @override
   State<_ShareToPanel> createState() => _ShareToPanelState();
@@ -90,14 +117,17 @@ class _ShareToPanelState extends State<_ShareToPanel>
             ),
           ],
         ),
-        child: Column(
+        // Every app at once is taller than a short phone has room for
+        // over the button: the list scrolls rather than run off it.
+        child: SingleChildScrollView(
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 2, 8, 8),
               child: Text(
-                l.shareToCaptionNote,
+                widget.note ?? l.shareToCaptionNote,
                 style: const TextStyle(
                   fontSize: 11,
                   height: 1.3,
@@ -110,9 +140,10 @@ class _ShareToPanelState extends State<_ShareToPanel>
               AnimatedBuilder(
                 animation: _in,
                 builder: (context, child) {
-                  // Each a beat after the one above it: the nearest the
+                  // Each a beat after the one before it: the nearest the
                   // button first, as if they rise out of it.
-                  final from = (n - 1 - i) * 70 / _in.duration!.inMilliseconds;
+                  final rank = widget.fromTop ? i : n - 1 - i;
+                  final from = rank * 70 / _in.duration!.inMilliseconds;
                   final v = Curves.easeOutBack.transform(
                       ((_in.value - from) / (1 - from).clamp(0.01, 1.0))
                           .clamp(0.0, 1.0));
@@ -136,6 +167,7 @@ class _ShareToPanelState extends State<_ShareToPanel>
               ),
             ],
           ],
+          ),
         ),
       ),
     );
@@ -207,10 +239,12 @@ class _TargetButton extends StatelessWidget {
 
   static Widget _mark(ShareTarget t) => switch (t) {
         ShareTarget.instagramReel ||
+        ShareTarget.instagramPost ||
         ShareTarget.instagramStory =>
           const InstagramGlyph(),
         ShareTarget.tiktok => const CustomPaint(painter: _TikTokPainter()),
         ShareTarget.youtube => const CustomPaint(painter: _YouTubePainter()),
+        ShareTarget.facebook => const CustomPaint(painter: _FacebookPainter()),
         ShareTarget.whatsapp =>
           const Icon(Icons.send_rounded, size: 19, color: Colors.white),
       };
@@ -283,33 +317,89 @@ class _YouTubePainter extends CustomPainter {
   bool shouldRepaint(covariant _YouTubePainter old) => false;
 }
 
-/// The reel screen's "Share to": beside the share sheet's button, a pill
-/// carrying a dot of each app's colour, which opens [showShareTo].
+/// Facebook's mark: a white disc with the "f" cut out of it in the
+/// app's blue.
+class _FacebookPainter extends CustomPainter {
+  const _FacebookPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final s = size.shortestSide;
+    final c = size.center(Offset.zero);
+    canvas.drawCircle(c, s / 2, Paint()..color = Colors.white);
+    final f = TextPainter(
+      text: TextSpan(
+        text: 'f',
+        style: TextStyle(
+          color: const Color(0xFF1877F2),
+          fontSize: s * 0.95,
+          height: 1.0,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    f.paint(canvas, Offset(c.dx - f.width / 2 + s * 0.04, c.dy - f.height / 2 + s * 0.08));
+    f.dispose();
+  }
+
+  @override
+  bool shouldRepaint(covariant _FacebookPainter old) => false;
+}
+
+/// "Share to": beside the share sheet's button, a pill carrying a dot of
+/// each app's colour, which opens [showShareTo].
+///
+/// [compact] is the card studio's top bar: a smaller pill, a word and at
+/// most two dots, sized to what it holds, that gives way as the gold
+/// Share beside it does.
 class ShareToButton extends StatelessWidget {
   final List<ShareTarget> targets;
   final ValueChanged<ShareTarget>? onPick;
   final double height;
+  final bool compact;
+
+  /// The line over the apps; the reel's when null.
+  final String? note;
 
   const ShareToButton({
     super.key,
     required this.targets,
     required this.onPick,
     this.height = 46,
+    this.compact = false,
+    this.note,
   });
 
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
     final enabled = onPick != null && targets.isNotEmpty;
-    // One dot per app, not per way into it: Instagram's two are one dot.
+    // One dot per app, not per way into it: Instagram's ways are one dot.
     final dots = <List<Color>>[];
+    var instagram = false;
     for (final t in targets) {
-      if (t == ShareTarget.instagramStory &&
-          targets.contains(ShareTarget.instagramReel)) {
-        continue;
-      }
+      final ig = t == ShareTarget.instagramReel ||
+          t == ShareTarget.instagramPost ||
+          t == ShareTarget.instagramStory;
+      if (ig && instagram) continue;
+      instagram = instagram || ig;
       dots.add(t.colours);
     }
+    if (compact && dots.length > 2) dots.removeRange(2, dots.length);
+    final h = compact ? 30.0 : height;
+    final dot = compact ? 9.0 : 12.0;
+    final step = compact ? 6.0 : 9.0;
+    final label = Text(
+      l.shareTo,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        fontSize: compact ? 11.5 : 14.5,
+        fontWeight: FontWeight.w700,
+        color: AppColors.textPrimary,
+      ),
+    );
     return A11yTap(
       label: l.shareTo,
       enabled: enabled,
@@ -322,41 +412,31 @@ class ShareToButton extends StatelessWidget {
             duration: const Duration(milliseconds: 180),
             opacity: enabled ? 1 : 0.45,
             child: Container(
-              height: height,
-              padding: const EdgeInsets.symmetric(horizontal: 14),
+              height: h,
+              padding: EdgeInsets.symmetric(horizontal: compact ? 9 : 14),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(height / 2),
+                borderRadius: BorderRadius.circular(compact ? 12 : h / 2),
                 color: AppColors.surfaceRaised,
                 border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
               ),
               child: Row(
+                mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Flexible(
-                    child: Text(
-                      l.shareTo,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
+                  Flexible(child: label),
+                  SizedBox(width: compact ? 6 : 8),
                   SizedBox(
-                    width: 12.0 + 9 * math.max(0, dots.length - 1),
-                    height: 14,
+                    width: dot + step * math.max(0, dots.length - 1),
+                    height: dot + 2,
                     child: Stack(
                       children: [
                         for (var i = 0; i < dots.length; i++)
                           Positioned(
-                            left: 9.0 * i,
+                            left: step * i,
                             top: 1,
                             child: Container(
-                              width: 12,
-                              height: 12,
+                              width: dot,
+                              height: dot,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 gradient: LinearGradient(colors: dots[i]),
@@ -368,9 +448,11 @@ class ShareToButton extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.expand_less_rounded,
-                      size: 18, color: AppColors.textSecondary),
+                  if (!compact) ...[
+                    const SizedBox(width: 4),
+                    const Icon(Icons.expand_less_rounded,
+                        size: 18, color: AppColors.textSecondary),
+                  ],
                 ],
               ),
             ),
@@ -381,7 +463,8 @@ class ShareToButton extends StatelessWidget {
   }
 
   Future<void> _open(BuildContext anchor) async {
-    final picked = await showShareTo(anchor, targets: targets);
+    final picked = await showShareTo(anchor,
+        targets: targets, note: note, preferAbove: !compact);
     if (picked != null) onPick?.call(picked);
   }
 }

@@ -23,8 +23,6 @@ void main() {
     expect(ar.sceneLimit(12), contains('12 مشهدًا'));
     expect(ar.scenesTooShort(2), contains('لقطتان'));
     expect(ar.scenesTooShort(11), contains('11 لقطةً'));
-    expect(ar.seriesProgress(1, 2), contains('يومين'));
-    expect(ar.seriesProgress(3, 14), contains('14 يومًا'));
     expect(ar.cardSavedToGallery(2), contains('بطاقتان'));
     expect(ar.cardSavedToGallery(4), contains('4'));
   });

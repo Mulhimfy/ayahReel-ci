@@ -16,7 +16,6 @@ import 'package:ayah_reels/screens/background_screen.dart';
 import 'package:ayah_reels/screens/home_shell.dart';
 import 'package:ayah_reels/screens/onboarding_screen.dart';
 import 'package:ayah_reels/screens/reel_player_screen.dart';
-import 'package:ayah_reels/screens/series_setup_screen.dart';
 import 'package:ayah_reels/screens/settings_screen.dart';
 import 'package:ayah_reels/screens/verses_screen.dart';
 import 'package:ayah_reels/state/creation_state.dart';
@@ -401,20 +400,6 @@ void main() {
   });
 
   group('sheets', () {
-    testWidgets('the series planner: headings, chips with a state, pickers '
-        'with a hint', (t) async {
-      final h = t.ensureSemantics();
-      phone(t);
-      await t.pumpWidget(host(const SeriesSetupScreen(), scaffold: false));
-      await t.pump(const Duration(milliseconds: 300));
-      expect(isHeader(node(t, l.howManyDays)), isTrue);
-      expect(isSelected(node(t, l.daysCount(7))), isTrue);
-      expect(isSelected(node(t, l.daysCount(3))), isFalse);
-      expect(node(t, l.chooseASurah).hint, l.a11yOpensSurahPicker);
-      expect(node(t, l.chooseAVoice).hint, l.a11yOpensVoicePicker);
-      h.dispose();
-    });
-
     testWidgets('the widget sheet: numbered steps read as one line each, '
         'and the picture is described', (t) async {
       final h = t.ensureSemantics();
@@ -463,10 +448,6 @@ void main() {
       expect(s.a11yVerseCard('r', 'a', 't'), contains('r'));
       expect(s.a11yNthOf('Sky', 3, 40), contains('3'));
       expect(s.a11ySceneSegment(2, 3, true), contains('3'));
-      expect(s.a11yDayLamp(4, done: false, today: true, reelsDone: 1, reels: 2),
-          contains(s.today));
-      expect(s.a11yDayLamp(4, done: true, today: false, reelsDone: 2, reels: 2),
-          contains(s.doneLabel));
       expect(s.colourName(0xFFEEC96B), isNot('colour'));
       expect(s.a11yColourSwatch(0xFF000000), isNotEmpty);
       expect(s.sceneName('sky_pexels_03', 'Sky'), isNotEmpty);

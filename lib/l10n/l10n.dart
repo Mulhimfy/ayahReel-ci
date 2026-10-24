@@ -1269,6 +1269,9 @@ class L10n {
       'تلاوت شدہ لفظ نمایاں کریں',
       'Sorot kata yang dibaca',
       'Rezitiertes Wort hervorheben');
+  /// The same, where a line has room for two words.
+  String get wordLightShort => _t('Highlight word', 'إبراز الكلمة',
+      'لفظ نمایاں', 'Sorot kata', 'Wort hervorheben');
   String get dragToMoveVerse => _t('Drag to move the verse',
       'اسحب لتحريك الآية', 'آیت کھسکانے کے لیے کھینچیں',
       'Seret untuk memindahkan ayat', 'Zum Verschieben des Verses ziehen');
@@ -1579,9 +1582,6 @@ class L10n {
   String get platformInstagram => 'Instagram';
   String get platformTikTok => 'TikTok';
   String get platformYouTube => 'YouTube';
-  String get homeShowsSeries => _t('Reel series on Home',
-      'سلسلة مقاطع في الرئيسية', 'ہوم پر ریل سلسلہ', 'Seri reel di Beranda',
-      'Reel-Serie auf der Startseite');
   String get moreLanguages => _t('More languages', 'لغات أخرى',
       'مزید زبانیں', 'Bahasa lain', 'Weitere Sprachen');
   String get platformMore =>
@@ -2915,78 +2915,7 @@ class L10n {
     return '$name · $range';
   }
 
-  // ---- reel series --------------------------------------------------
-  String get seriesTitle => _t('Reel series', 'سلسلة مقاطع', 'ریل سلسلہ',
-      'Seri reel', 'Reel-Serie');
-  String get seriesSubtitle => _t(
-      'A whole surah over several days, one reel to share a day',
-      'سورة كاملة على أيام، ومقطع تشاركه كل يوم',
-      'پوری سورت کئی دنوں میں، ہر دن شیئر کرنے کو ایک ریل',
-      'Satu surah utuh selama beberapa hari, satu reel untuk dibagikan tiap hari',
-      'Eine ganze Sure über mehrere Tage, ein Reel zum Teilen pro Tag');
-
-  /// The button beside "See all", and on the series section.
-  String get planDays => _t('Plan days', 'خطّط أيامًا', 'دن ترتیب دیں',
-      'Rencanakan hari', 'Tage planen');
-  String get newSeries => _t('New series', 'سلسلة جديدة', 'نیا سلسلہ',
-      'Seri baru', 'Neue Serie');
-
-  String get seriesIntroLabel => _t('A REEL SERIES', 'سلسلة مقاطع',
-      'ایک ریل سلسلہ', 'SEBUAH SERI REEL', 'EINE REEL-SERIE');
-  String get seriesIntroHeadline => _t(
-      'Create reels for several days,\nand keep sharing daily',
-      'اصنع مقاطع لعدة أيام،\nوواصل المشاركة يوميًا',
-      'کئی دنوں کی ریلز بنائیں،\nاور روز شیئر کرتے رہیں',
-      'Buat reel untuk beberapa hari,\ndan terus bagikan setiap hari',
-      'Erstell Reels für mehrere Tage\nund teile weiter täglich');
-  String get seriesIntroBody => _t(
-      'Pick a surah and it is divided over your days at its own '
-          'natural pauses — every reel a complete thought, never a verse '
-          'cut from the middle of a story. Make today’s, share it, and '
-          'come back tomorrow for the next.',
-      'اختر سورة، ونقسّمها لك على الأيام عند مواضع الوقف الطبيعية — '
-          'كل مقطع فكرة كاملة، لا آية مقطوعة من وسط قصة. '
-          'ثم اصنع مقطع اليوم، وشاركه، وعُد غدًا للتالي.',
-      'کوئی سورت چنیں، اور وہ آپ کے دنوں پر اس کے اپنے فطری وقفوں پر '
-          'تقسیم ہو جائے گی — ہر ریل ایک مکمل بات، کبھی کسی قصے کے بیچ '
-          'سے کٹی ہوئی آیت نہیں۔ آج کی بنائیں، شیئر کریں، اور کل اگلی کے لیے آئیں۔',
-      'Pilih satu surah, lalu ia dibagi ke hari-hari Anda pada jeda '
-          'alaminya sendiri — tiap reel satu gagasan utuh, bukan ayat yang '
-          'terpotong di tengah kisah. Buat yang hari ini, bagikan, dan '
-          'kembali besok untuk berikutnya.',
-      'Wähl eine Sure, und sie wird an ihren eigenen natürlichen Pausen '
-          'über deine Tage verteilt — jedes Reel ein vollständiger Gedanke, '
-          'nie ein Vers aus der Mitte einer Geschichte geschnitten. Mach '
-          'das von heute, teil es, und komm morgen für das nächste wieder.');
-  String get seriesIntroBegin => _t('Plan my days', 'ابدأ التخطيط',
-      'میرے دن ترتیب دیں', 'Rencanakan hari saya', 'Meine Tage planen');
-
-  String get howManyDays => _t('How many days?', 'كم يومًا؟', 'کتنے دن؟',
-      'Berapa hari?', 'Wie viele Tage?');
-  String get reelsADay => _t('Reels a day', 'مقاطع في اليوم',
-      'روزانہ ریلز', 'Reel per hari', 'Reels pro Tag');
-  String get autoDays => _t('Let the surah decide', 'حسب السورة',
-      'سورت کو طے کرنے دیں', 'Biar surahnya yang menentukan',
-      'Die Sure entscheiden lassen');
-  String get autoDaysBody => _t(
-      'About a minute a reel, and as many days as the surah needs.',
-      'نحو دقيقة لكل مقطع، والأيام بقدر ما تحتاج السورة.',
-      'ہر ریل تقریباً ایک منٹ، اور جتنے دن سورت کو درکار ہوں۔',
-      'Sekitar semenit per reel, dan sebanyak hari yang surahnya butuhkan.',
-      'Etwa eine Minute pro Reel, und so viele Tage, wie die Sure braucht.');
-  String daysCount(int n) => switch (lang) {
-        AppLang.en => n == 1 ? '1 day' : '$n days',
-        AppLang.ar => n == 1
-            ? 'يوم واحد'
-            : n == 2
-                ? 'يومان'
-                : n <= 10
-                    ? '$n أيام'
-                    : '$n يومًا',
-        AppLang.ur => n == 1 ? 'ایک دن' : '$n دن',
-        AppLang.id => '$n hari',
-        AppLang.de => n == 1 ? '1 Tag' : '$n Tage',
-      };
+  // ---- counted ------------------------------------------------------
 
   String reelsCount(int n) => switch (lang) {
         AppLang.en => n == 1 ? '1 reel' : '$n reels',
@@ -3038,99 +2967,9 @@ class L10n {
 
   String get whichSurah => _t('Which surah?', 'أي سورة؟', 'کون سی سورت؟',
       'Surah yang mana?', 'Welche Sure?');
-  String get chooseASurah => _t('Choose a surah', 'اختر سورة',
-      'سورت منتخب کریں', 'Pilih surah', 'Sure wählen');
-  String get whoseVoice => _t('Whose voice?', 'بصوت من؟', 'کس کی آواز؟',
-      'Suara siapa?', 'Wessen Stimme?');
-  String get chooseAVoice => _t('Choose a voice', 'اختر قارئًا',
-      'آواز منتخب کریں', 'Pilih suara', 'Stimme wählen');
 
-  /// '12 reels · 4 days · about 55s each'
-  String seriesSummary(int reels, int days, int eachMs) => _t(
-      '${reelsCount(reels)} · ${daysCount(days)} · about ${clock(eachMs)} each',
-      '${reelsCount(reels)} · ${daysCount(days)} · نحو ${clock(eachMs)} لكل مقطع',
-      '${reelsCount(reels)} · ${daysCount(days)} · ہر ایک تقریباً ${clock(eachMs)}',
-      '${reelsCount(reels)} · ${daysCount(days)} · masing-masing sekitar ${clock(eachMs)}',
-      '${reelsCount(reels)} · ${daysCount(days)} · je etwa ${clock(eachMs)}');
-
-  /// The days asked for would have made reels past the minute a feed
-  /// is built around, so the plan kept the minute and put more reels
-  /// on each day — up to [perDay].
-  /// Under the series planner when the minute cap gives a day more
-  /// reels than were asked for: they are there to choose from, and the
-  /// reels asked for are what finish the day.
-  String seriesUnderAMinute(int perDay) => _t(
-      'Each reel stays under a minute, so every day has up to '
-          '${reelsCount(perDay)} to choose from.',
-      'كل مقطع دون الدقيقة، فلكل يوم حتى ${reelsCount(perDay)} تختار منها.',
-      'ہر ریل ایک منٹ سے کم رہتی ہے، اس لیے ہر دن ${reelsCount(perDay)} تک ہوں گی، جو چاہیں چن لیں۔',
-      'Tiap reel tetap di bawah semenit, jadi setiap hari ada sampai '
-          '${reelsCount(perDay)} untuk dipilih.',
-      'Jedes Reel bleibt unter einer Minute, also hat jeder Tag bis zu '
-          '${reelsCount(perDay)} zur Auswahl.');
-
-  /// The surah has fewer verses than the days asked for.
-  String seriesShortSurah(int verses) => _t(
-      'This surah has only ${versesCount(verses)}, so the days shrink to match.',
-      'هذه السورة ${versesCount(verses)} فقط، فستكون الأيام بقدرها.',
-      'اس سورت میں صرف ${versesCount(verses)} ہیں، اس لیے دن بھی اسی کے مطابق کم ہو جائیں گے۔',
-      'Surah ini hanya ${versesCount(verses)}, jadi jumlah harinya menyesuaikan.',
-      'Diese Sure hat nur ${versesCount(verses)}, also schrumpfen die Tage entsprechend.');
-  String get seriesLoadingSurah => _t('Reading the surah…', 'نقرأ السورة…',
-      'سورت پڑھی جا رہی ہے…', 'Membaca surahnya…', 'Die Sure wird gelesen …');
-  String get planTheSeries => _t('Plan the series', 'خطّط السلسلة',
-      'سلسلہ ترتیب دیں', 'Rencanakan serinya', 'Serie planen');
-
-  /// 'Day 3'
-  String dayN(int n) =>
-      _t('Day $n', 'اليوم $n', '$n واں دن', 'Hari $n', 'Tag $n');
-  String get today => _t('Today', 'اليوم', 'آج', 'Hari ini', 'Heute');
   String get doneLabel =>
       _t('Done', 'تم', 'ہو گیا', 'Selesai', 'Fertig');
-  String reelN(int n) =>
-      _t('Reel $n', 'مقطع $n', 'ریل $n', 'Reel $n', 'Reel $n');
-  String get makeThisReel => _t('Make this reel', 'اصنع هذا المقطع',
-      'یہ ریل بنائیں', 'Buat reel ini', 'Dieses Reel machen');
-  String get makeItAgain => _t('Make it again', 'اصنعه مجددًا',
-      'دوبارہ بنائیں', 'Buat lagi', 'Nochmal machen');
-  String get holdADayToMark => _t(
-      'Hold a day to mark it done',
-      'اضغط مطولًا على يوم لتعليمه منجزًا',
-      'کسی دن کو دبا کر رکھیں تاکہ وہ مکمل نشان زد ہو',
-      'Tahan satu hari untuk menandainya selesai',
-      'Halte einen Tag gedrückt, um ihn als erledigt zu markieren');
-  String get seriesFinished => _t('Series complete ✦', 'اكتملت السلسلة ✦',
-      'سلسلہ مکمل ✦', 'Seri selesai ✦', 'Serie abgeschlossen ✦');
-  String seriesReelDone(int day) => _t(
-      'Day $day · reel done ✦',
-      'اليوم $day · تم المقطع ✦',
-      '$day واں دن · ریل ہو گئی ✦',
-      'Hari $day · reel selesai ✦',
-      'Tag $day · Reel fertig ✦');
-  String get nextUp =>
-      _t('Next up', 'التالي', 'اگلا', 'Berikutnya', 'Als Nächstes');
-  String get deleteSeriesTitle => _t('Delete this series?',
-      'حذف هذه السلسلة؟', 'یہ سلسلہ حذف کریں؟', 'Hapus seri ini?',
-      'Diese Serie löschen?');
-  String get deleteSeriesBody => _t(
-      'Only the plan goes. Reels you already made stay in $navWorks.',
-      'تُحذف الخطة فقط. المقاطع التي صنعتها تبقى في «$navWorks».',
-      'صرف منصوبہ جاتا ہے۔ جو ریلز آپ بنا چکے ہیں وہ «$navWorks» میں رہیں گی۔',
-      'Hanya rencananya yang hilang. Reel yang sudah Anda buat tetap di $navWorks.',
-      'Nur der Plan geht. Reels, die du schon gemacht hast, bleiben in $navWorks.');
-
-  /// Title of the series screen: 'Ya-Sin · 7 days'.
-  String seriesHeading(String surahName, int days) =>
-      '${localizedSurahName(surahName)} · ${daysCount(days)}';
-
-  /// The progress line under it: '2 of 7 days done'.
-  String seriesProgress(int done, int days) => _t(
-      '$done of $days days done',
-      // After من the dual is يومين, and eleven and up take the singular.
-      'أُنجز $done من ${days == 1 ? 'يوم واحد' : days == 2 ? 'يومين' : days <= 10 ? '$days أيام' : '$days يومًا'}',
-      '$days میں سے $done دن مکمل',
-      '$done dari $days hari selesai',
-      '$done von $days Tagen erledigt');
 
   // ---- scenery: matched to the verses ------------------------------
   /// The pill at the head of the scenery rail. Short: it shares a row
@@ -3284,11 +3123,6 @@ class L10n {
       'ریل چلاتا ہے', 'Memutar reel', 'Spielt das Reel ab');
   String get a11yReelOptions => _t('Reel options', 'خيارات المقطع',
       'ریل کے اختیارات', 'Opsi reel', 'Reel-Optionen');
-  String get a11yOpensSeries => _t('Opens the series', 'يفتح السلسلة',
-      'سلسلہ کھولتا ہے', 'Membuka seri', 'Öffnet die Serie');
-  String get a11yPlansSeries => _t('Plans a reel series', 'يخطّط سلسلة مقاطع',
-      'ریل سلسلہ ترتیب دیتا ہے', 'Merencanakan seri reel',
-      'Plant eine Reel-Serie');
 
   /// The verse card: what it is, then the verse, then its meaning. The
   /// translation is only spoken where it is shown — in Arabic the card
@@ -3527,6 +3361,11 @@ class L10n {
       'آیت فریم میں اوپر سے $pct% پر',
       'Ayat $pct% dari atas bingkai',
       'Vers $pct % von oben im Rahmen');
+  /// Make it yours: the two buttons beside the frame that move the verse.
+  String get verseUp => _t('Move the verse up', 'حرّك الآية لأعلى',
+      'آیت اوپر کریں', 'Geser ayat ke atas', 'Vers nach oben');
+  String get verseDown => _t('Move the verse down', 'حرّك الآية لأسفل',
+      'آیت نیچے کریں', 'Geser ayat ke bawah', 'Vers nach unten');
   String get a11yVersePositionHint => _t(
       'Adjust to move the verse up or down',
       'اضبط لتحريك الآية لأعلى أو لأسفل',
@@ -3588,43 +3427,6 @@ class L10n {
       'پلے بیک کی جگہ', 'Posisi pemutaran', 'Abspielposition');
   String get a11yLoadingReel => _t('Loading the reel', 'جارٍ تحميل المقطع',
       'ریل لوڈ ہو رہی ہے', 'Memuat reel', 'Reel wird geladen');
-
-  // Series.
-  String get a11ySeriesOptions => _t('Series options', 'خيارات السلسلة',
-      'سلسلے کے اختیارات', 'Opsi seri', 'Serien-Optionen');
-  String a11yDayLamp(int day,
-      {required bool done,
-      required bool today,
-      required int reelsDone,
-      required int reels}) {
-    final parts = <String>[
-      dayN(day),
-      if (today) this.today,
-      if (done)
-        doneLabel
-      else if (reelsDone > 0)
-        _t(
-            '$reelsDone of ${reelsCount(reels)} done',
-            'أُنجز $reelsDone من ${reelsCount(reels)}',
-            '${reelsCount(reels)} میں سے $reelsDone مکمل',
-            '$reelsDone dari ${reelsCount(reels)} selesai',
-            '$reelsDone von ${reelsCount(reels)} erledigt'),
-    ];
-    return parts.join('$comma ');
-  }
-
-  String get a11yHoldToMarkDone => _t(
-      'Double tap and hold to mark it done',
-      'انقر مرتين مع الاستمرار لتعليمه منجزًا',
-      'مکمل نشان زد کرنے کے لیے دو بار ٹیپ کر کے دبائے رکھیں',
-      'Ketuk dua kali dan tahan untuk menandainya selesai',
-      'Zweimal tippen und halten, um es als erledigt zu markieren');
-  String get a11ySeriesPreview => _t(
-      'Seven days lighting up one after another',
-      'سبعة أيام تضيء واحدًا تلو الآخر',
-      'سات دن یکے بعد دیگرے روشن ہوتے ہوئے',
-      'Tujuh hari menyala satu demi satu',
-      'Sieben Tage, die nacheinander aufleuchten');
 
   // Sheets.
   String get a11yWidgetPreview => _t(
@@ -5886,24 +5688,6 @@ class L10n {
                 'Ketuk percikan di awal tab pemandangan: ia membaca ayat dan memilih gambar untuk masing-masing.',
                 'Tippe auf den Funken am Anfang der Kulissen-Tabs: Er liest die Verse und wählt zu jedem ein Bild.'),
           ),
-        'hold-day-done' => (
-            _t('Hold a day to close it', 'اضغط مطوّلًا على اليوم لإتمامه',
-                'دن کو دبا کر مکمل کریں',
-                'Tahan satu hari untuk menutupnya',
-                'Halte einen Tag, um ihn abzuschließen'),
-            _t(
-                'In a series, press and hold the day and its circle fills — '
-                    'for the day you finished away from the app.',
-                'في السلسلة، اضغط مطوّلًا على اليوم فتمتلئ دائرته — لليوم '
-                    'الذي أتممته خارج التطبيق.',
-                'سلسلے میں دن کو دبا کر رکھیں تو اس کا دائرہ بھر جاتا ہے — '
-                    'اس دن کے لیے جو آپ نے ایپ سے باہر مکمل کیا۔',
-                'Di sebuah seri, tekan lama harinya dan lingkarannya terisi '
-                    '— untuk hari yang kamu selesaikan di luar aplikasi.',
-                'Halte in einer Serie den Tag gedrückt, und sein Kreis füllt '
-                    'sich — für den Tag, den du außerhalb der App geschafft '
-                    'hast.'),
-          ),
         'reel-edit' => (
             _t('Change a finished reel',
                 'عدّل مقطعًا جاهزًا',
@@ -6302,6 +6086,38 @@ class L10n {
       'قصة إنستغرام', 'انسٹاگرام اسٹوری', 'Story Instagram', 'Instagram-Story');
   String get shareToYouTube => _t('YouTube Shorts', 'يوتيوب شورتس',
       'یوٹیوب شارٹس', 'YouTube Shorts', 'YouTube Shorts');
+
+  /// A card into Instagram's feed.
+  String get shareToInstagramPost => _t('Instagram Post', 'منشور إنستغرام',
+      'انسٹاگرام پوسٹ', 'Postingan Instagram', 'Instagram-Beitrag');
+
+  /// Over the apps a card can go straight to.
+  String get shareToCardNote => _t(
+      'The card goes straight in, its caption and hashtags copied',
+      'تُرسل البطاقة مباشرة، مع نسخ الوصف والوسوم',
+      'کارڈ سیدھا جاتا ہے، کیپشن اور ہیش ٹیگز کاپی ہو جاتے ہیں',
+      'Kartu langsung masuk, keterangan dan tagarnya tersalin',
+      'Die Karte geht direkt hinein, Text und Hashtags kopiert');
+
+  /// The line a card's caption opens with, before its hashtags.
+  String get cardShareLine => _t(
+      '✨ Made with AyahReel — Islamic cards and Quran reels',
+      '✨ صُنعت بتطبيق AyahReel — بطاقات إسلامية ومقاطع قرآنية',
+      '✨ AyahReel سے بنایا گیا — اسلامی کارڈز اور قرآنی ریلز',
+      '✨ Dibuat dengan AyahReel — kartu Islami dan reel Al-Qur’an',
+      '✨ Gemacht mit AyahReel – islamische Karten und Quran-Reels');
+
+  /// After a card was saved and its app opened (iOS): where it is.
+  String shareCardOpenHint(String app) => _t(
+      'Saved to your gallery. In $app, tap + and pick the newest picture; '
+          'the caption and hashtags are copied.',
+      'حُفظت في معرضك. في $app اضغط + واختر أحدث صورة؛ الوصف والوسوم منسوخة.',
+      'گیلری میں محفوظ ہو گیا۔ $app میں + دبائیں اور تازہ ترین تصویر چنیں؛ '
+          'کیپشن اور ہیش ٹیگز کاپی ہیں۔',
+      'Tersimpan di galeri. Di $app, ketuk + lalu pilih gambar terbaru; '
+          'keterangan dan tagar sudah tersalin.',
+      'In der Galerie gespeichert. Tippe in $app auf + und wähle das neueste '
+          'Bild; Text und Hashtags sind kopiert.');
   String get shareToCaptionNote => _t(
       'The reel goes straight in, its caption and hashtags copied',
       'يُرسل المقطع مباشرة، مع نسخ الوصف والوسوم',

@@ -221,7 +221,6 @@ void main() {
       expect(creationState.surah, 33);
       expect(creationState.startAyah, 56);
       expect(creationState.endAyah, 56);
-      expect(creationState.seriesTarget, isNull);
       expect(find.text('Choose the voice'), findsOneWidget);
       expect(find.text(reciters.first.name), findsOneWidget);
     });

@@ -10,7 +10,6 @@ import '../data/settings_service.dart';
 import '../data/quran_repository.dart';
 import '../data/reel_duration.dart';
 import '../data/reel_limits.dart';
-import '../data/series_library.dart';
 import '../data/user_audio_service.dart';
 import '../l10n/l10n.dart';
 import '../state/creation_state.dart';
@@ -42,8 +41,8 @@ import 'background_screen.dart';
 class VersesScreen extends StatefulWidget {
   /// Opens with the range already in [creationState] selected and
   /// scrolled into view, instead of on nothing. The verse of the day
-  /// and a series reel both arrive knowing their verses; the screen
-  /// then exists so the user can *adjust* them, not choose them.
+  /// arrives knowing its verses; the screen then exists so the user can
+  /// *adjust* them, not choose them.
   final bool preselect;
 
   const VersesScreen({super.key, this.preselect = false});
@@ -476,9 +475,6 @@ class _VersesScreenState extends State<VersesScreen>
     });
     creationState.selectSurah(picked.number);
     if (a != null) creationState.selectRange(a, picked.endAyah ?? a);
-    // Another surah is another reel: whatever series this one was
-    // opened from, it no longer stands for that reel of it.
-    creationState.setSeriesTarget(null);
     if (!sameSurah) {
       // Nothing of the old surah stays on the line while the new one's
       // verses load.
@@ -798,25 +794,6 @@ class _VersesScreenState extends State<VersesScreen>
     // The next screens have voices of their own.
     _live?.pause();
     final r = creationState.reciter;
-    // A series reel whose run the user moved: the plan follows them,
-    // so the day's card reads back the verses they chose rather than
-    // the ones the planner dealt.
-    final target = creationState.seriesTarget;
-    final s = _start, e = _end;
-    if (target != null && s != null && e != null) {
-      SeriesLibrary.setReelRange(
-        target.seriesId,
-        target.reelIndex,
-        startAyah: s,
-        endAyah: e,
-        estimateMs: ReelDuration.estimateMs(
-          _ayahs ?? const [],
-          startAyah: s,
-          endAyah: e,
-          pace: r?.pace ?? 1.0,
-        ),
-      );
-    }
     // An uploaded recitation goes by way of the timing screen: nothing
     // downstream can draw a verse until it knows which second of the
     // recording that verse is. Every other voice already has an exact

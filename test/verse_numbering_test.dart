@@ -226,11 +226,12 @@ void main() {
     await t.scrollUntilVisible(find.text('Customize'), 200);
     expect(find.text('1 line · Light'), findsOneWidget);
     // At the foot of the card of switches: the next row down from the
-    // last of them.
+    // last of them (the reminder, on a test host with neither of the
+    // phone-only share rows).
     final row = t.getRect(find.text('Customize'));
-    final series = t.getRect(find.text('Reel series on Home'));
-    expect(row.top, greaterThan(series.bottom));
-    expect(row.top - series.top, lessThan(80));
+    final above = t.getRect(find.text('My reminder'));
+    expect(row.top, greaterThan(above.bottom));
+    expect(row.top - above.top, lessThan(80));
 
     Finder page() => find
         .descendant(

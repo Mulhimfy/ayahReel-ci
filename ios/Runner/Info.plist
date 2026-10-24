@@ -56,6 +56,9 @@
 		<string>tiktok</string>
 		<string>snssdk1180</string>
 		<string>youtube</string>
+		<string>fb</string>
+		<string>instagram</string>
+		<string>whatsapp</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
