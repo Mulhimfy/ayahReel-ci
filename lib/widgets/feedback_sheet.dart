@@ -128,9 +128,7 @@ class _FeedbackSheetState extends State<_FeedbackSheet> {
     final t = Theme.of(context).textTheme;
     final l = L10n.of(context);
     final (title, body) = switch (widget.source) {
-      FeedbackSource.settings ||
-      FeedbackSource.rating =>
-        (l.feedbackSheetTitle, l.feedbackSheetBody),
+      FeedbackSource.settings => (l.feedbackSheetTitle, l.feedbackSheetBody),
       FeedbackSource.afterRender => (
           l.feedbackAfterRenderTitle,
           l.feedbackAfterRenderBody
@@ -221,7 +219,7 @@ class _FeedbackSheetState extends State<_FeedbackSheet> {
                         ),
                       ],
                       const SizedBox(height: 20),
-                      FeedbackField(
+                      _Field(
                         controller: _message,
                         hint: l.feedbackHint,
                         enabled: !_sending,
@@ -234,7 +232,7 @@ class _FeedbackSheetState extends State<_FeedbackSheet> {
                         textInputAction: TextInputAction.newline,
                       ),
                       const SizedBox(height: 12),
-                      FeedbackField(
+                      _Field(
                         controller: _contact,
                         hint: l.feedbackContactHint,
                         enabled: !_sending,
@@ -288,8 +286,8 @@ class _FeedbackSheetState extends State<_FeedbackSheet> {
 
 /// The sheet's input styling, which is the name dialog's — same fill,
 /// same gold focus ring — so a text box here does not read as a
-/// different app's. The rating sheet's note box is one too.
-class FeedbackField extends StatelessWidget {
+/// different app's.
+class _Field extends StatelessWidget {
   final TextEditingController controller;
   final String hint;
   final bool enabled;
@@ -300,8 +298,7 @@ class FeedbackField extends StatelessWidget {
   final TextInputAction textInputAction;
   final ValueChanged<String>? onSubmitted;
 
-  const FeedbackField({
-    super.key,
+  const _Field({
     required this.controller,
     required this.hint,
     required this.enabled,

@@ -6,16 +6,16 @@ import 'package:ayah_reels/data/verse_motion.dart';
 import 'package:ayah_reels/state/creation_state.dart';
 
 /// What a reel is made with before anybody chooses: its long verses one
-/// line at a time, the scenery changing with each line, no surah name,
-/// and the light passing through the words.
+/// line at a time, the scenery changing with each line, the surah's
+/// name at its head, and the light passing through the words.
 void main() {
   tearDown(() => SettingsService.state.value = AppSettings.defaults);
 
-  test('a new install makes reels line by line, untitled, in the light', () {
+  test('a new install makes reels line by line, titled, in the light', () {
     for (final s in [AppSettings.defaults, AppSettings.fromJson(const {})]) {
       expect(s.verseLines, 1);
       expect(s.scenesFollowLines, isTrue);
-      expect(s.surahTitle, isFalse);
+      expect(s.surahTitle, isTrue);
     }
     expect(VerseLines.preferred, 1);
     expect(CreationState().motion, VerseMotion.standard);
@@ -25,9 +25,10 @@ void main() {
   });
 
   test('what the preview builds wrote under the old keys is not read', () {
-    final s = AppSettings.fromJson(const {'verseLines': 0, 'surahTitle': true});
+    final s = AppSettings.fromJson(
+        const {'verseLines': 0, 'surahTitle': false, 'surahName': false});
     expect(s.verseLines, 1);
-    expect(s.surahTitle, isFalse);
+    expect(s.surahTitle, isTrue);
   });
 
   test('a choice survives the round trip through the settings file', () {
@@ -43,14 +44,14 @@ void main() {
   test('a new reel starts from them', () {
     final s = CreationState()..startNewReel();
     expect(s.verseLines, 1);
-    expect(s.surahTitle, isFalse);
+    expect(s.surahTitle, isTrue);
     expect(s.pacing, ScenePacing.perLine);
 
     SettingsService.state.value = AppSettings.defaults
-        .copyWith(verseLines: VerseLines.whole, surahTitle: true);
+        .copyWith(verseLines: VerseLines.whole, surahTitle: false);
     s.startNewReel();
     expect(s.verseLines, VerseLines.whole);
-    expect(s.surahTitle, isTrue);
+    expect(s.surahTitle, isFalse);
     // Whole verses: the scenery changes with the verse, as it always did.
     expect(s.pacing, ScenePacing.perAyah);
   });

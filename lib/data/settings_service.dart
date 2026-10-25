@@ -165,7 +165,8 @@ class AppSettings {
   final int lastAyah;
 
   /// Whether a reel's verse card carries the verse's number, and how —
-  /// see [VerseNumbering]. Off until the user turns it on.
+  /// see [VerseNumbering]. The verse-end mark until the user picks
+  /// otherwise.
   final VerseNumbering verseNumbering;
 
   /// Whether a reel's verse card leaves the translation out, and
@@ -198,8 +199,8 @@ class AppSettings {
   /// begun the way no reciter begins it.
   final bool basmala;
 
-  /// Whether a new reel carries the surah's name at its head. Off until
-  /// the user turns it on.
+  /// Whether a new reel carries the surah's name at its head. On until
+  /// the user turns it off.
   final bool surahTitle;
 
   const AppSettings({
@@ -239,7 +240,7 @@ class AppSettings {
     this.verseLines = 1,
     this.scenesFollowLines = true,
     this.basmala = true,
-    this.surahTitle = false,
+    this.surahTitle = true,
   });
 
   static const defaults = AppSettings(
@@ -379,11 +380,13 @@ class AppSettings {
         // Not 'verseLines' and 'surahTitle': the 2026-10-21 preview
         // builds wrote those keys with the defaults of the day (whole
         // verses, the name on), and a phone that ran one would keep
-        // them over these. No store build ever wrote either.
+        // them over these. Nor 'surahName': the previews of 21–25
+        // October wrote it on every save with that week's default, off.
+        // No store build ever wrote any of the three.
         'linesAtOnce': verseLines,
         'scenesFollowLines': scenesFollowLines,
         'basmala': basmala,
-        'surahName': surahTitle,
+        'showSurahName': surahTitle,
       };
 
   factory AppSettings.fromJson(Map<String, dynamic> j) => AppSettings(
@@ -455,13 +458,13 @@ class AppSettings {
         // have always carried a translation.
         verseTranslationOff: j['verseTranslationOff'] as bool? ?? false,
         highQualityVideo: j['highQualityVideo'] as bool? ?? false,
-        // One line at a time, and no surah name, until chosen; see
-        // [toJson] for why these two keys are new ones.
+        // One line at a time, and the surah's name, until chosen; see
+        // [toJson] for why these keys are new ones.
         verseLines: ((j['linesAtOnce'] as num?)?.toInt() ?? 1).clamp(0, 3),
         scenesFollowLines: j['scenesFollowLines'] as bool? ?? true,
         // Absent on every install that predates it: on.
         basmala: j['basmala'] as bool? ?? true,
-        surahTitle: j['surahName'] as bool? ?? false,
+        surahTitle: j['showSurahName'] as bool? ?? true,
       );
 }
 

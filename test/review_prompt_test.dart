@@ -19,14 +19,12 @@ void main() {
     int asks = 0,
     bool wentToListing = false,
     bool android = false,
-    bool answered = false,
   }) =>
       ReviewPrompt.decide(
         exports: exports,
         asks: asks,
         wentToListing: wentToListing,
         android: android,
-        answered: answered,
       );
 
   group('the ladder, on iOS', () {
@@ -107,14 +105,6 @@ void main() {
       expect(shown, [5, 10, 15, 20, 25, 30]);
     });
 
-    test('our sheet does not come back once its stars are picked', () {
-      // Whatever was picked: the store's button was in front of them
-      // either way, and asking again would be nagging.
-      expect(ask(exports: 10, asks: 1, android: true), ReviewAsk.banner);
-      expect(ask(exports: 10, asks: 1, android: true, answered: true),
-          ReviewAsk.none);
-    });
-
     test('our sheet never precedes the OS one', () {
       for (var n = 1; n <= 200; n++) {
         expect(ask(exports: n, asks: 0, android: true),
@@ -156,13 +146,23 @@ void main() {
       await t.pump(const Duration(milliseconds: 500));
 
       expect(find.text(L10n.en.rateSheetTitle), findsOneWidget);
-      expect(find.text(L10n.en.rateHowMany), findsOneWidget);
-      // Five stars to tap. Five open the store; fewer ask what would
-      // help, with the store's button still under the box (see
-      // rate_sheet_test), so no answer keeps anyone from the store.
-      for (var n = 1; n <= 5; n++) {
-        expect(find.byKey(ValueKey('rate-star-$n')), findsOneWidget);
-      }
+      expect(find.text(L10n.en.rateSheetBody), findsOneWidget);
+      // Five stars, filled, and none of them tappable: a sheet that
+      // collects the rating itself and forks on the answer is the
+      // pattern App Store guideline 5.6.1 exists to refuse. These are
+      // decoration in front of a link to the listing.
+      // Scoped to the sheet: the Settings row behind it wears the
+      // same star.
+      expect(
+        find.descendant(
+          of: find.byType(BottomSheet),
+          matching: find.byIcon(Icons.star_rounded),
+        ),
+        findsNWidgets(5),
+      );
+      // The button says which store it is about to leave for. The
+      // test host is neither phone, so it takes the Play branch.
+      expect(find.text(L10n.en.openPlayStore), findsOneWidget);
     });
 
     test('the Apple link lands on the review composer, not screenshots', () {
@@ -178,8 +178,7 @@ void main() {
       [L10n.en.rateAppTitle, ar.rateAppTitle],
       [L10n.en.rateAppSubtitle, ar.rateAppSubtitle],
       [L10n.en.rateSheetTitle, ar.rateSheetTitle],
-      [L10n.en.rateHowMany, ar.rateHowMany],
-      [L10n.en.rateWhatWouldHelp, ar.rateWhatWouldHelp],
+      [L10n.en.rateSheetBody, ar.rateSheetBody],
       [L10n.en.openAppStore, ar.openAppStore],
       [L10n.en.openPlayStore, ar.openPlayStore],
       [L10n.en.storeOpenFailed, ar.storeOpenFailed],

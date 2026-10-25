@@ -75,11 +75,11 @@ void main() {
   Color? colourOf(WidgetTester t, String text) =>
       t.widget<Text>(find.text(text)).style?.color;
 
-  testWidgets('a new install: one line at a time, the light, no surah name',
+  testWidgets('a new install: one line at a time, the light, the surah name',
       (t) async {
     await open(t);
     expect(find.byType(VerseStage), findsOneWidget);
-    expect(find.byType(SurahTitleLine), findsNothing);
+    expect(find.byType(SurahTitleLine), findsOneWidget);
     expect(colourOf(t, 'Line by line'), AppColors.goldBright);
     expect(colourOf(t, '1'), AppColors.goldBright);
     expect(colourOf(t, '2'), isNot(AppColors.goldBright));
@@ -142,14 +142,14 @@ void main() {
     expect(stage(t).highlight, isFalse);
   });
 
-  testWidgets('the surah name, on, heads the reel', (t) async {
+  testWidgets('the surah name heads the reel until turned off', (t) async {
     await open(t);
     await reach(t, find.text('Surah name'));
     await t.tap(find.text('Surah name'));
     await t.pumpAndSettle();
-    expect(SettingsService.state.value.surahTitle, isTrue);
+    expect(SettingsService.state.value.surahTitle, isFalse);
     await top(t);
-    expect(find.byType(SurahTitleLine), findsOneWidget);
+    expect(find.byType(SurahTitleLine), findsNothing);
   });
 
   testWidgets('back to the defaults puts this page back, and only it',
@@ -157,7 +157,7 @@ void main() {
     SettingsService.state.value = AppSettings.defaults.copyWith(
       verseLines: 3,
       scenesFollowLines: false,
-      surahTitle: true,
+      surahTitle: false,
       highQualityVideo: true,
       name: 'Yusuf',
     );
@@ -171,7 +171,7 @@ void main() {
     final s = SettingsService.state.value;
     expect(s.verseLines, VerseLines.preferred);
     expect(s.scenesFollowLines, isTrue);
-    expect(s.surahTitle, isFalse);
+    expect(s.surahTitle, isTrue);
     expect(s.highQualityVideo, isFalse);
     // Not this page's.
     expect(s.name, 'Yusuf');

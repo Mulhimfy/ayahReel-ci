@@ -1912,43 +1912,17 @@ class L10n {
   String get rateSheetTitle => _t('Enjoying AyahReel?', 'هل أعجبك؟',
       'AyahReel پسند آ رہا ہے؟', 'Menikmati AyahReel?',
       'Gefällt dir AyahReel?');
-
-  /// The rating sheet, under its stars before one is tapped.
-  String get rateHowMany => _t(
-      'How many stars would you give it?',
-      'كم نجمة تعطيه؟',
-      'آپ اسے کتنے ستارے دیں گے؟',
-      'Berapa bintang yang kamu berikan?',
-      'Wie viele Sterne würdest du geben?');
-
-  /// After fewer than five: the note box's heading.
-  String get rateWhatWouldHelp => _t(
-      'What would make it five stars? (optional)',
-      'ما الذي يجعله يستحق خمس نجوم؟ (اختياري)',
-      'اسے پانچ ستاروں کے لائق کیا بنائے گا؟ (اختیاری)',
-      'Apa yang membuatnya layak lima bintang? (opsional)',
-      'Was würde fünf Sterne daraus machen? (optional)');
-
-  /// One star's button, for a screen reader.
-  String rateStars(int n) => _t(
-      n == 1 ? '1 star' : '$n stars',
-      '$n من 5',
-      '$n ستارے',
-      '$n bintang',
-      n == 1 ? '1 Stern' : '$n Sterne');
-
-  /// After five stars, while the store opens: the store asks for the
-  /// stars again, and only those count, so a user who thinks tapping
-  /// ours was the rating would leave without one.
-  String rateFiveThanks({required bool appStore}) {
-    final store = appStore ? 'App Store' : 'Google Play';
-    return _t(
-        'Thank you! Give it five stars on ${appStore ? 'the App Store' : store} too — that’s where it counts.',
-        'شكرًا لك! أعطه خمس نجوم في $store أيضًا، فهناك يُحتسب التقييم.',
-        'شکریہ! $store پر بھی پانچ ستارے دیں، ریٹنگ وہیں شمار ہوتی ہے۔',
-        'Terima kasih! Beri lima bintang di $store juga — di sanalah penilaian dihitung.',
-        'Danke! Gib ${appStore ? 'im App Store' : 'bei Google Play'} auch fünf Sterne – dort zählt die Bewertung.');
-  }
+  String get rateSheetBody => _t(
+      'A rating on the store is what puts this in front of the next '
+          'person looking for a way to share a verse. It takes a minute.',
+      'تقييمك في المتجر يرفع التطبيق أمام من يبحث عن مقاطع قرآنية '
+          'يشاركها. دقيقة واحدة، وأثرها يدوم.',
+      'سٹور پر ایک ریٹنگ ہی اسے اس اگلے شخص کے سامنے لاتی ہے جو آیت '
+          'شیئر کرنے کا راستہ ڈھونڈ رہا ہے۔ ایک منٹ لگتا ہے۔',
+      'Penilaian di toko itulah yang menampilkan ini kepada orang '
+          'berikutnya yang mencari cara membagikan ayat. Hanya semenit.',
+      'Eine Bewertung im Store bringt das hier vor die Augen des '
+          'Nächsten, der einen Weg sucht, einen Vers zu teilen. Dauert eine Minute.');
 
   /// Says which store it is about to open, because the button leaves
   /// the app — a "Rate us" that silently jumps to another app is a
