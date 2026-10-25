@@ -96,9 +96,14 @@ void main() {
     put('ayah_thread_v1_ffeec96b.png', age: const Duration(days: 3));
     put('ayah_spark_v1_ffeec96b.png', age: const Duration(days: 3));
     put('ayah_title_v1_2_en_lt.png', age: const Duration(days: 3));
+    // Cards kept under what they look like, and their numbers.
+    put('ayah_c_0a1b2c3d4e5f60718293a4b5.png', age: const Duration(days: 3));
+    put('ayah_c_0a1b2c3d4e5f60718293a4b5.json', age: const Duration(days: 3));
     // Drawn today: the session that drew them may want them again.
     put('ayah_1f3a_3.png', age: const Duration(hours: 2));
     put('ayah_1f3a_255_p0_base.png', age: const Duration(hours: 2));
+    put('ayah_c_ffeeddccbbaa998877665544.png', age: const Duration(hours: 2));
+    put('ayah_c_ffeeddccbbaa998877665544.json', age: const Duration(hours: 2));
     put('ig_ayah_reel_b.mp4', age: const Duration(seconds: 30));
 
     VideoRenderer.sweepCache(tmp, keep: keep, now: now);
@@ -106,6 +111,8 @@ void main() {
     expect(left(), [
       'ayah_1f3a_255_p0_base.png',
       'ayah_1f3a_3.png',
+      'ayah_c_ffeeddccbbaa998877665544.json',
+      'ayah_c_ffeeddccbbaa998877665544.png',
       'ig_ayah_reel_b.mp4',
     ]);
   });

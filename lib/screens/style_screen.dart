@@ -19,6 +19,7 @@ import '../data/verse_font.dart';
 import '../data/verse_ink.dart';
 import '../data/verse_lines.dart';
 import '../data/verse_motion.dart';
+import '../data/verse_numbering.dart';
 import '../l10n/l10n.dart';
 import '../render/ayah_rasterizer.dart';
 import '../render/letterbox_layout.dart';
@@ -35,6 +36,7 @@ import '../widgets/ink_swatch.dart';
 import '../widgets/measure_height.dart';
 import '../widgets/motion_picker.dart';
 import '../widgets/reel_finish.dart';
+import '../widgets/popover.dart';
 import '../widgets/reel_watermark.dart';
 import '../widgets/surah_title.dart';
 import '../widgets/verse_stage.dart';
@@ -270,7 +272,9 @@ class _StyleScreenState extends State<StyleScreen> {
         // idea of the verse colour would then be showing the wrong
         // one.
         child: ListenableBuilder(
-          listenable: creationState,
+          // Settings too: the verse's number is a setting, chosen here
+          // and in Customize, and the frame shows it either way.
+          listenable: Listenable.merge([creationState, SettingsService.state]),
           builder: (context, _) => LayoutBuilder(
             builder: (context, box) {
               // The panel takes a fixed share, and every panel is laid
@@ -1386,12 +1390,155 @@ class _TypePanel extends StatelessWidget {
                 ),
                 if (p != TextPreset.values.last) const SizedBox(width: 8),
               ],
+              const SizedBox(width: 14),
+              // The verse's number, beside how it is set: one small chip,
+              // its four choices behind it.
+              const _VerseEndChip(),
             ],
           ),
           ),
         ),
       ],
     );
+  }
+}
+
+/// The verse's number on the card — the verse-end mark, the reference
+/// line, both or neither — as one chip at the end of the Type panel's
+/// last row: the mark itself, gold while a number shows, its choices in
+/// a popover. The same setting as Customize's, for every reel.
+class _VerseEndChip extends StatelessWidget {
+  const _VerseEndChip();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    final v = SettingsService.state.value.verseNumbering;
+    final on = v != VerseNumbering.off;
+    return Builder(
+      builder: (anchor) => A11yTap(
+        label: '${l.verseNumbersTitle}${l.comma} ${l.verseNumberingLabel(v)}',
+        onTap: () => _open(anchor, l, v),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => _open(anchor, l, v),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            height: 30,
+            padding: const EdgeInsets.symmetric(horizontal: 11),
+            decoration: BoxDecoration(
+              color: on
+                  ? AppColors.gold.withValues(alpha: 0.16)
+                  : AppColors.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: on ? AppColors.gold : AppColors.stroke,
+                width: on ? 1.5 : 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '\u06DD',
+                  style: AppTheme.quran(size: 15).copyWith(
+                    height: 1.0,
+                    color: on ? AppColors.goldBright : AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(width: 2),
+                Icon(Icons.expand_more_rounded,
+                    size: 14,
+                    color: on ? AppColors.goldBright : AppColors.textSecondary),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _open(BuildContext anchor, L10n l, VerseNumbering now) async {
+    HapticFeedback.selectionClick();
+    final picked = await showPopover<VerseNumbering>(
+      anchor,
+      preferAbove: true,
+      builder: (context) => Material(
+        type: MaterialType.transparency,
+        child: Container(
+          width: 230,
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceRaised,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.4),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 4, 14, 6),
+                child: Text(
+                  l.verseNumbersTitle.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.6,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              for (final v in VerseNumbering.values)
+                A11yTap(
+                  label: l.verseNumberingLabel(v),
+                  selected: v == now,
+                  onTap: () => Navigator.of(context).pop(v),
+                  child: InkWell(
+                    onTap: () => Navigator.of(context).pop(v),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 10),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              l.verseNumberingLabel(v),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: v == now
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                color: v == now
+                                    ? AppColors.goldBright
+                                    : AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                          if (v == now)
+                            const Icon(Icons.check_rounded,
+                                size: 16, color: AppColors.goldBright),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (picked == null || picked == now) return;
+    HapticFeedback.selectionClick();
+    await SettingsService.update(
+        SettingsService.state.value.copyWith(verseNumbering: picked));
   }
 }
 

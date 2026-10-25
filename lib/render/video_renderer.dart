@@ -720,7 +720,8 @@ abstract final class VideoRenderer {
                     name.startsWith('tanafus_story_')) &&
                 name.endsWith('.png'))) {
           if (e.lastModifiedSync().isBefore(stale)) drop(e);
-        } else if (_drawnForARender.hasMatch(name)) {
+        } else if (_drawnForARender.hasMatch(name) ||
+            _keptCard.hasMatch(name)) {
           if (e.lastModifiedSync().isBefore(old)) drop(e);
         }
       }
@@ -748,6 +749,11 @@ abstract final class VideoRenderer {
       r'|bgflat_.+|lbflat_.+|band_v1_.+|ded_v1_.+|title_v1_.+|thread_v1_.+'
       r'|spark_v1_.+'
       r'|still_.+)\.png$');
+
+  /// A verse card kept under what it looks like, and its numbers beside
+  /// it (`ayah_c_<digest>.png` / `.json`, see `AyahRasterizer`): reused
+  /// by any render that wants the same card, gone a day after drawing.
+  static final _keptCard = RegExp(r'^ayah_c_[0-9a-f]+\.(?:png|json)$');
 
   static DateTime _mtime(File f) {
     try {

@@ -86,6 +86,36 @@ class VerseRow {
   double get width => right - left;
   double get height => bottom - top;
 
+  /// This line as JSON, exactly: what a card kept on disk keeps of its
+  /// layout, so a card reused is placed as the one drawn (see
+  /// `AyahRasterizer`).
+  Map<String, Object> toJson() => {
+        't': tokens,
+        'b': [
+          for (final k in tokens)
+            if (boxes[k] case final r?) [k, r.left, r.top, r.right, r.bottom],
+        ],
+        'e': [left, right, top, bottom],
+      };
+
+  /// [toJson] read back; throws on anything else.
+  static VerseRow fromJson(Object? j) {
+    final m = j as Map;
+    double d(Object? x) => (x as num).toDouble();
+    final e = m['e'] as List;
+    return VerseRow(
+      tokens: [for (final t in m['t'] as List) t as int],
+      boxes: {
+        for (final b in m['b'] as List)
+          (b as List)[0] as int: Rect.fromLTRB(d(b[1]), d(b[2]), d(b[3]), d(b[4])),
+      },
+      left: d(e[0]),
+      right: d(e[1]),
+      top: d(e[2]),
+      bottom: d(e[3]),
+    );
+  }
+
   /// Where the thread runs: just under the letters. A share of the way
   /// down the line's tight box rather than its baseline, because the
   /// box is what every face reports alike.

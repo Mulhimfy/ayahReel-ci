@@ -14,6 +14,7 @@ import '../data/verse_motion.dart';
 import '../data/verse_font.dart';
 import '../data/verse_numbering.dart';
 import '../data/verse_translation.dart';
+import '../data/last_choices.dart';
 import '../l10n/l10n.dart';
 import '../render/ayah_rasterizer.dart';
 import '../render/verse_planner.dart';
@@ -796,15 +797,24 @@ class _ReelPreviewState extends State<_ReelPreview>
       ];
     }
     final first = c.background;
-    final out = <Widget>[_Ground(scene: first, width: w)];
+    // The last reel's scenery, when its file has been cleared since and
+    // the reel has none yet: its poster stands in, rather than the night.
+    final kept = first == null ? LastChoices.lastScene : null;
+    final out = <Widget>[
+      if (kept != null)
+        _Poster(scene: kept)
+      else
+        _Ground(scene: first, width: w),
+    ];
     if (n < 2) return out;
-    final own = first == null ? null : SceneCatalog.byId(first.id);
+    final own = first == null ? kept : SceneCatalog.byId(first.id);
+    final ownId = first?.id ?? kept?.id;
     // Portrait sceneries only: the preview is a full frame, with no
     // letterbox for a wide one to sit in.
     final tab = own != null && !own.wide ? own.tab : 'sky';
     for (final sc in SceneCatalog.inTab(tab)) {
       if (out.length >= math.min(n, 6)) break;
-      if (sc.id == first?.id || sc.wide) continue;
+      if (sc.id == ownId || sc.wide) continue;
       out.add(_Poster(scene: sc));
     }
     return out;

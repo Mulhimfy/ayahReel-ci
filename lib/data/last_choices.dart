@@ -134,6 +134,12 @@ abstract final class LastChoices {
   /// nothing has been picked since launch: a library scene that has
   /// been cleared from the cache is not fetched for this, and a photo
   /// that has been deleted is let go.
+  /// The library scenery the last reel was made on, whether or not its
+  /// file is still on the phone: what Customize's reel shows (its poster
+  /// is all that needs) when the reel itself has no scenery yet because
+  /// the file was cleared from the cache.
+  static Scene? lastScene;
+
   static Future<void> _seatScenery(ReelRecipe r, CreationState s) async {
     if (r.scenes.isEmpty) return;
     final ref = r.scenes.first;
@@ -152,6 +158,7 @@ abstract final class LastChoices {
       await SceneCatalog.load();
       final scene = SceneCatalog.byId(ref);
       if (scene != null) {
+        lastScene = scene;
         if (scene.bundled) {
           b = SceneCatalog.background(scene);
         } else {

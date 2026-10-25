@@ -284,13 +284,6 @@ const reciters = <Reciter>[
     source: AyahFiles.everyAyah('Muhsin_Al_Qasim_192kbps'),
   ),
   Reciter(
-    id: 'juhani',
-    name: 'Abdullah Al-Juhani',
-    arabicName: 'عبد الله الجهني',
-    style: 'Murattal · luminous, agile',
-    source: AyahFiles.everyAyah('Abdullaah_3awwaad_Al-Juhaynee_128kbps'),
-  ),
-  Reciter(
     id: 'budair',
     name: 'Salah Al-Budair',
     arabicName: 'صلاح البدير',

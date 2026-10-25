@@ -1,15 +1,20 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../data/app_version.dart';
 import '../data/band_glow.dart';
+import '../data/feedback_service.dart';
 import '../data/models.dart';
 import '../data/quran_text_service.dart';
 import '../data/surah_title_look.dart';
 import '../data/verse_lines.dart';
 import '../data/reel_effects.dart';
+import '../data/settings_service.dart';
 import '../data/verse_font.dart';
 import '../data/verse_ink.dart';
 import '../data/verse_numbering.dart';
@@ -90,8 +95,9 @@ abstract final class AyahRasterizer {
 
   /// Returns one PNG file per ayah — with the height it shrink-wrapped
   /// to, see [VerseCard] — transparent background, laid out at export
-  /// resolution. [fileTag] namespaces the files so renders with
-  /// different styling never overwrite each other mid-session.
+  /// resolution. Each card is kept under a digest of what it looks like
+  /// (see [_cardKey]) and reused by any later render that wants the same
+  /// card; [fileTag] no longer names cards, and is kept for callers.
   ///
   /// [onProgress] reports 0..1 across the set. A handful of cards is
   /// done before anything could show it; a long reel's few hundred are
@@ -135,8 +141,31 @@ abstract final class AyahRasterizer {
   }) async {
     final dir = await renderDir();
     final out = <VerseCard>[];
+    final style = _style(
+      textColor: textColor,
+      textScale: textScale,
+      preset: preset,
+      onLight: onLight,
+      typography: typography,
+      accent: accent,
+      ink: ink,
+      accentInk: accentInk,
+      // What AyahOverlay reads when it is handed none.
+      edition: edition ?? SettingsService.state.value.translation,
+      numbering: numbering,
+      surah: surah,
+      showTranslation: showTranslation,
+    );
     for (final ayah in ayahs) {
       if (keepGoing != null && !keepGoing()) break;
+      final key =
+          _cardKey(['verse', ayah.number, ayah.arabic, ayah.translation, style]);
+      final kept = _keptCard(dir, key);
+      if (kept != null) {
+        out.add((file: kept.file, height: kept.height));
+        onProgress?.call(out.length / ayahs.length);
+        continue;
+      }
       final shot = await _capture(
         MediaQuery(
           data: const MediaQueryData(
@@ -168,8 +197,7 @@ abstract final class AyahRasterizer {
           ),
         ),
       );
-      final f = File('${dir.path}/ayah_$fileTag${ayah.number}.png');
-      await writeWholeBytes(f, shot.bytes);
+      final f = await _keepCard(dir, key, shot.bytes, shot.height);
       out.add((file: f, height: shot.height));
       onProgress?.call(out.length / ayahs.length);
     }
@@ -200,7 +228,31 @@ abstract final class AyahRasterizer {
     String fileTag = '',
   }) async {
     final dir = await renderDir();
-    final bytes = await widgetToPng(
+    final key = _cardKey([
+      'lit',
+      ayah.number,
+      ayah.arabic,
+      ayah.translation,
+      tokenStart,
+      tokenEnd,
+      _style(
+        textColor: textColor,
+        textScale: textScale,
+        preset: preset,
+        onLight: onLight,
+        typography: typography,
+        accent: accent,
+        ink: ink,
+        accentInk: accentInk,
+        edition: edition ?? SettingsService.state.value.translation,
+        numbering: numbering,
+        surah: surah,
+        showTranslation: showTranslation,
+      ),
+    ]);
+    final kept = _keptCard(dir, key);
+    if (kept != null) return kept.file;
+    final shot = await _capture(
       MediaQuery(
         data: const MediaQueryData(
           size: Size(exportWidth, 1920),
@@ -229,10 +281,7 @@ abstract final class AyahRasterizer {
         ),
       ),
     );
-    final f = File(
-        '${dir.path}/ayah_$fileTag${ayah.number}_w${tokenStart}_$tokenEnd.png');
-    await writeWholeBytes(f, bytes);
-    return f;
+    return _keepCard(dir, key, shot.bytes, shot.height);
   }
 
   /// One unit's card — a whole verse, or one part of a verse cut into
@@ -268,7 +317,40 @@ abstract final class AyahRasterizer {
     String fileTag = '',
   }) async {
     final dir = await renderDir();
-    final text = VerseUnitCard.textOf(ayah, part).arabic;
+    final unitText = VerseUnitCard.textOf(ayah, part);
+    final text = unitText.arabic;
+    final translation = edition ?? QuranTextService.edition;
+    final key = _cardKey([
+      'unit',
+      ayah.number,
+      unitText.arabic,
+      unitText.translation,
+      part?.fit,
+      part == null || part.isLast,
+      part?.height,
+      highlight?.start,
+      highlight?.end,
+      dimFrom,
+      glint,
+      _style(
+        textColor: textColor,
+        textScale: textScale,
+        preset: preset,
+        onLight: onLight,
+        typography: typography,
+        accent: accent,
+        ink: ink,
+        accentInk: accentInk,
+        edition: translation,
+        numbering: numbering,
+        surah: surah,
+        showTranslation: showTranslation,
+      ),
+    ]);
+    final kept = _keptCard(dir, key, rows: measure);
+    if (kept != null) {
+      return (file: kept.file, height: kept.height, rows: kept.rows);
+    }
     var rows = const <VerseRow>[];
     final shot = await _capture(
       MediaQuery(
@@ -286,7 +368,7 @@ abstract final class AyahRasterizer {
             textScale: textScale,
             preset: preset,
             onLight: onLight,
-            translation: edition ?? QuranTextService.edition,
+            translation: translation,
             numbering: numbering,
             showTranslation: showTranslation,
             surah: surah,
@@ -303,10 +385,117 @@ abstract final class AyahRasterizer {
       ),
       inspect: measure ? (root) => rows = VerseRows.measure(root, text) : null,
     );
-    final unit = part == null ? '' : '_p${part.index}';
-    final f = File('${dir.path}/ayah_$fileTag${ayah.number}${unit}_$name.png');
-    await writeWholeBytes(f, shot.bytes);
+    final f = await _keepCard(dir, key, shot.bytes, shot.height,
+        rows: measure ? rows : null);
     return (file: f, height: shot.height, rows: rows);
+  }
+
+  // ---- cards kept between renders ------------------------------------
+
+  /// Bump whenever anything that draws a verse card changes in a way the
+  /// inputs of [_cardKey] do not say — a face, a mark, a glow — so a card
+  /// kept from before is drawn again instead of reused. A new build
+  /// (version or code date) draws everything again on its own.
+  static const drawingRev = 1;
+
+  /// What a card looks like, as a digest: its kind, its text, every input
+  /// that styles it, and the drawing's own revision. Two cards under one
+  /// key are the same pixels, so a card kept under it is the card.
+  ///
+  /// Every export used to draw every card again — with the recited word
+  /// lit, one card per word — though the same verses in the same styling
+  /// had been drawn a moment before: the preview's silent render that the
+  /// voice's word timing arriving restarts, a Save after a Share, a reel
+  /// opened again. Kept under this key they are drawn once.
+  static String _cardKey(List<Object?> inputs) => sha1
+      .convert(utf8.encode(jsonEncode([
+        drawingRev,
+        kAppVersion,
+        FeedbackService.codeDate,
+        exportWidth,
+        ...inputs,
+      ])))
+      .toString()
+      .substring(0, 24);
+
+  /// The styling a card's look answers to, as plain values.
+  static List<Object?> _style({
+    required Color textColor,
+    required double textScale,
+    required TextPreset preset,
+    required bool onLight,
+    required ReelTypography typography,
+    required Color? accent,
+    required VerseInk ink,
+    required VerseInk accentInk,
+    required VerseTranslation edition,
+    required VerseNumbering numbering,
+    required int surah,
+    required bool showTranslation,
+  }) =>
+      [
+        textColor.toARGB32(),
+        textScale,
+        preset.name,
+        onLight,
+        typography.verse.name,
+        typography.translation.name,
+        accent?.toARGB32(),
+        ink.name,
+        accentInk.name,
+        edition.name,
+        numbering.name,
+        surah,
+        showTranslation,
+      ];
+
+  static File _cardFile(Directory dir, String key) =>
+      File('${dir.path}/ayah_c_$key.png');
+  static File _cardMeta(Directory dir, String key) =>
+      File('${dir.path}/ayah_c_$key.json');
+
+  /// The card kept under [key], with what it was measured as, or null
+  /// when it was never drawn, or its picture or its numbers are gone or
+  /// unreadable. [rows]: the caller needs its lines too, and a card kept
+  /// without them is drawn again.
+  static ({File file, double height, List<VerseRow> rows})? _keptCard(
+      Directory dir, String key,
+      {bool rows = false}) {
+    try {
+      final png = _cardFile(dir, key);
+      final meta = _cardMeta(dir, key);
+      if (!png.existsSync() || png.lengthSync() == 0 || !meta.existsSync()) {
+        return null;
+      }
+      final j = jsonDecode(meta.readAsStringSync()) as Map;
+      final kept = j['rows'];
+      if (rows && kept is! List) return null;
+      return (
+        file: png,
+        height: (j['h'] as num).toDouble(),
+        rows: kept is List
+            ? [for (final r in kept) VerseRow.fromJson(r)]
+            : const <VerseRow>[],
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// [bytes] kept as the card for [key], its numbers beside it — written
+  /// after the picture, so numbers on disk always have their picture.
+  static Future<File> _keepCard(
+      Directory dir, String key, List<int> bytes, double height,
+      {List<VerseRow>? rows}) async {
+    final f = _cardFile(dir, key);
+    await writeWholeBytes(f, bytes);
+    await writeWhole(
+        _cardMeta(dir, key),
+        jsonEncode({
+          'h': height,
+          if (rows != null) 'rows': [for (final r in rows) r.toJson()],
+        }));
+    return f;
   }
 
   /// How tall a unit's card lays out at 1080 wide, without drawing it:
