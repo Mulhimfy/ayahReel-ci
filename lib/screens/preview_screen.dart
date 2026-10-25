@@ -14,6 +14,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 import '../data/audio_position.dart';
 import '../data/band_glow.dart';
+import '../data/breath_pace.dart';
 import '../data/debug_log.dart';
 import '../data/dedication.dart';
 import '../data/export_budget.dart';
@@ -468,10 +469,11 @@ class _PreviewScreenState extends State<PreviewScreen>
 
   /// Each verse's tokens' recited windows: what the thread and the
   /// light follow, here and in the export. [_trueTimes] where the voice
-  /// is word-timed, and [_nearTimes] for the verses its timing published
-  /// without vouching for them; the true ones win where both are in.
-  /// Only the motions read it: the lit word, the trail, the unveil and
-  /// the lines' cuts go by [_spans] alone.
+  /// is word-timed, [_nearTimes] for the verses its timing published
+  /// without vouching for them, and [_breathTimes] for the verses
+  /// neither has; the truer one wins where several are in. Only the
+  /// motions read it: the lit word, the trail, the unveil and the lines'
+  /// cuts go by [_spans] alone.
   Map<int, List<(int, int)?>>? _wordTimes;
 
   /// The windows from [_spans].
@@ -483,11 +485,16 @@ class _PreviewScreenState extends State<PreviewScreen>
   /// instead as a model placed its words.
   Map<int, List<(int, int)?>>? _nearTimes;
 
-  /// [_wordTimes] from its two halves; null while neither is in.
+  /// The windows the recording's own pauses give the verses nothing
+  /// else times (see [BreathPace]): every verse of an upload, and the
+  /// few of an app voice that neither tier has.
+  Map<int, List<(int, int)?>>? _breathTimes;
+
+  /// [_wordTimes] from its three layers; null while none is in.
   Map<int, List<(int, int)?>>? get _mergedTimes {
-    final near = _nearTimes, sure = _trueTimes;
-    if (near == null) return sure;
-    return {...near, ...?sure};
+    final near = _nearTimes, sure = _trueTimes, breath = _breathTimes;
+    if (near == null && breath == null) return sure;
+    return {...?breath, ...?near, ...?sure};
   }
 
   /// The long verses cut into lines, when this reel cuts them; null for
@@ -855,6 +862,8 @@ class _PreviewScreenState extends State<PreviewScreen>
     // The scenes may follow the lines, and the export draws them: both
     // are a different reel now.
     if (changed) _replan(drop: true);
+    // The pauses' pace reads each line in its own window.
+    unawaited(_loadBreaths());
   }
 
   /// Where the recitation is now, for the verse's motion.
@@ -943,6 +952,8 @@ class _PreviewScreenState extends State<PreviewScreen>
     setState(() => _motionChoice = m);
     creationState.setMotion(m);
     _restyled();
+    // The thread and the light may be on now, and need the pauses.
+    unawaited(_loadBreaths());
   }
 
   /// The motion, as a sheet that leaves the reel playing above it — and
@@ -1781,6 +1792,64 @@ class _PreviewScreenState extends State<PreviewScreen>
     });
     // The eager render drew those verses at an even pace.
     if (_motion.thread || _motion.light) _restyled();
+  }
+
+  /// What [_breathTimes] was last read for: the recording, the lines and
+  /// the verses it covers. The same again is nothing to do.
+  String? _breathKey;
+
+  /// The pace of the recording's own pauses for the verses nothing else
+  /// times, for the thread and the light (see [_breathTimes]). A voice
+  /// with word timing is waited for, so only the verses it leaves out
+  /// are read. Best-effort: without it those verses keep the even pace.
+  Future<void> _loadBreaths() async {
+    final rec = _recitation;
+    final ayahs = _ayahs;
+    if (rec == null || ayahs == null) return;
+    if (!_motion.thread && !_motion.light) return;
+    if (WordAlignService.supports(_reciter) &&
+        _spans == null &&
+        !_spansFailed) {
+      return;
+    }
+    final sure = _trueTimes, near = _nearTimes;
+    final plan = _linePlan;
+    final wanted = [
+      for (var a = _startAyah; a <= _endAyah; a++)
+        if (sure?[a] == null && near?[a] == null) a,
+    ];
+    final key = '${identityHashCode(rec)}|${plan?.fingerprint ?? ''}|'
+        '${wanted.join(',')}';
+    if (key == _breathKey) return;
+    _breathKey = key;
+    // What was read for other lines, or other verses, is not for these.
+    if (_breathTimes != null) {
+      setState(() {
+        _breathTimes = null;
+        _wordTimes = _mergedTimes;
+      });
+      _restyled();
+    }
+    if (wanted.isEmpty) return;
+    final env = await RecitationService.loudness(rec.audioPath);
+    if (!mounted || env == null || key != _breathKey) return;
+    final times = BreathPace.reelTimes(
+      env: env,
+      recitation: rec,
+      ayahs: ayahs,
+      startAyah: _startAyah,
+      endAyah: _endAyah,
+      plan: plan,
+      wants: wanted.toSet().contains,
+    );
+    rlog('breaths: ${times.length} of ${wanted.length} verse(s) paced');
+    if (times.isEmpty) return;
+    setState(() {
+      _breathTimes = times;
+      _wordTimes = _mergedTimes;
+    });
+    // The eager render drew those verses at an even pace.
+    _restyled();
   }
 
   /// Fetches word-timing data for this voice (one-time download shared
