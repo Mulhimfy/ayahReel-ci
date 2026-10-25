@@ -26,7 +26,7 @@ void main() {
     for (final s in everySet()) {
       final tags = s.resolved;
       expect(tags.where((t) => t == HashtagSet.mark).length, 1,
-          reason: '${s.key} must carry #AyahReel exactly once');
+          reason: '${s.key} must carry #${HashtagSet.mark} exactly once');
       final at = tags.indexOf(HashtagSet.mark);
       expect(at, greaterThan(0),
           reason: '${s.key} opens on the mark, where it is the first '
@@ -239,7 +239,7 @@ void main() {
 
       final first = hashtagSets(TagPlatform.instagram).first;
       expect(clipboard, first.text);
-      expect(clipboard, contains('#AyahReel'));
+      expect(clipboard, contains('#AyahReelApp'));
       expect(clipboard, startsWith('#quran '));
     });
 
@@ -287,7 +287,7 @@ void main() {
       await t.tap(find.text('Copy').first);
       await t.pump();
       expect(clipboard, contains('#SurahAlKahf'));
-      expect(clipboard, contains('#AyahReel'));
+      expect(clipboard, contains('#AyahReelApp'));
     });
   });
 }

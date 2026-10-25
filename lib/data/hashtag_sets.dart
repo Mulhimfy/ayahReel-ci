@@ -41,7 +41,11 @@ class HashtagSet {
   const HashtagSet(this.key, this.tags, {this.rtl = false});
 
   /// The app's signature, carried by every block that leaves here.
-  static const mark = 'AyahReel';
+  /// AyahReelApp rather than AyahReel: anyone's Quran-verse reel is an
+  /// "ayah reel", so the bare name's tag fills with other people's
+  /// videos. This one holds only reels made here, and says what made
+  /// them.
+  static const mark = 'AyahReelApp';
 
   /// The most hashtags a post on Instagram or TikTok keeps. Every block
   /// holds exactly this many, the mark counted.
