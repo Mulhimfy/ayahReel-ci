@@ -161,19 +161,19 @@ class L10n {
   String get createButton =>
       _t('Create', 'أنشئ', 'بنائیں', 'Buat', 'Erstellen');
   String get a11yOpensCreateChoice => _t(
-      'Choose a reel, a quiz or a card',
-      'اختر مقطعًا أو مسابقة أو بطاقة',
-      'ریل، کوئز یا کارڈ منتخب کریں',
-      'Pilih reel, kuis, atau kartu',
-      'Reel, Quiz oder Karte wählen');
+      'Choose a video, a quiz or a card',
+      'اختر فيديو أو مسابقة أو بطاقة',
+      'ویڈیو، کوئز یا کارڈ منتخب کریں',
+      'Pilih video, kuis, atau kartu',
+      'Video, Quiz oder Karte wählen');
   String get createChooserTitle => _t(
       'What would you like to make?',
       'ماذا تريد أن تصنع؟',
       'آپ کیا بنانا چاہیں گے؟',
       'Mau membuat apa?',
       'Was möchtest du machen?');
-  String get chooseReel => _t('Quran reel', 'مقطع قرآني', 'قرآنی ریل',
-      'Reel Al-Qur’an', 'Quran-Reel');
+  String get chooseReel => _t('Quran video', 'فيديو قرآني', 'قرآنی ویڈیو',
+      'Video Al-Qur’an', 'Quran-Video');
   String get chooseReelLine => _t(
       'A verse, a voice and a scenery, ready to share',
       'آية وصوت ومشهد، جاهز للمشاركة',
@@ -1102,8 +1102,8 @@ class L10n {
       'Foto oder Video\naus deiner Galerie');
   String get replace =>
       _t('Replace', 'استبدال', 'تبدیل کریں', 'Ganti', 'Ersetzen');
-  String get previewMyReel => _t('Preview my reel', 'معاينة مقطعي',
-      'میری ریل کا پیش منظر', 'Pratinjau reel saya', 'Reel-Vorschau');
+  String get previewMyReel => _t('Preview my video', 'معاينة الفيديو',
+      'میری ویڈیو کا پیش منظر', 'Pratinjau video saya', 'Video-Vorschau');
   String get galleryPickFailed => _t(
       'Couldn’t open your gallery. Try again.',
       'تعذّر فتح المعرض. حاول مجددًا.',
@@ -1129,8 +1129,8 @@ class L10n {
           'Erlaube ihn in den Einstellungen, um eigene Kulissen zu nutzen.');
 
   // ---- creation wizard: style ------------------------------------
-  String get styleMyReel => _t('Style my reel', 'نسّق مقطعي',
-      'میری ریل سنواریں', 'Tata gaya reel saya', 'Reel gestalten');
+  String get styleMyReel => _t('Style my video', 'نسّق الفيديو',
+      'میری ویڈیو سنواریں', 'Tata gaya video saya', 'Video gestalten');
   String get styleTitle => _t('Make it yours', 'اجعله على ذوقك',
       'اسے اپنا بنائیں', 'Jadikan milikmu', 'Mach es zu deinem');
   String get styleBody => _t(
@@ -1624,9 +1624,9 @@ class L10n {
       'جو ریلز آپ شیئر یا محفوظ کریں گے وہ یہاں نظر آئیں گی۔',
       'Reel yang Anda bagikan atau simpan akan muncul di sini.',
       'Reels, die du teilst oder speicherst, erscheinen hier.');
-  String get createFirstReel => _t('Create your first reel',
-      'أنشئ مقطعك الأول', 'اپنی پہلی ریل بنائیں', 'Buat reel pertama Anda',
-      'Erstell dein erstes Reel');
+  String get createFirstReel => _t('Create your first video',
+      'أنشئ أول فيديو لك', 'اپنی پہلی ویڈیو بنائیں', 'Buat video pertama Anda',
+      'Erstell dein erstes Video');
   String get deleteReelTitle => _t('Delete this reel?', 'حذف هذا المقطع؟',
       'یہ ریل حذف کریں؟', 'Hapus reel ini?', 'Dieses Reel löschen?');
   String get deleteReelBody => _t(
@@ -2903,8 +2903,8 @@ class L10n {
 
   /// The one door on the Friday card. Short: it shares the card's
   /// first row with the label.
-  String get makeSalawatReel => _t('Make the reel', 'اصنع المقطع',
-      'ریل بنائیں', 'Buat reelnya', 'Reel machen');
+  String get makeSalawatReel => _t('Make the video', 'اصنع الفيديو',
+      'ویڈیو بنائیں', 'Buat videonya', 'Video machen');
   String get makeThisVerse => _t('Make this verse', 'اصنع مقطع هذه الآية',
       'اس آیت کی ریل بنائیں', 'Buat ayat ini', 'Diesen Vers machen');
 
@@ -3135,11 +3135,11 @@ class L10n {
           '$verseFromTheQuran, $reference. $arabic. $translation',
           '$verseFromTheQuran, $reference. $arabic. $translation');
   String get a11yMakesVerseReel => _t(
-      'Makes a reel of this verse',
-      'يصنع مقطعًا لهذه الآية',
-      'اس آیت کی ریل بناتا ہے',
-      'Membuat reel dari ayat ini',
-      'Macht ein Reel aus diesem Vers');
+      'Makes a video of this verse',
+      'يصنع فيديو لهذه الآية',
+      'اس آیت کی ویڈیو بناتا ہے',
+      'Membuat video dari ayat ini',
+      'Macht ein Video aus diesem Vers');
 
   String get a11yChangesReminderTime => _t(
       'Changes the reminder time',
@@ -5419,14 +5419,14 @@ class L10n {
       'Buat sesuatu', 'Etwas machen');
 
   String get makeBlurb => _t(
-      'A reel to post, or a card to send. The verse is already chosen.',
-      'مقطع للنشر أو بطاقة للإرسال. الآية مختارة بالفعل.',
-      'پوسٹ کے لیے ریل، یا بھیجنے کے لیے کارڈ۔ آیت پہلے سے منتخب ہے۔',
-      'Reel untuk diunggah, atau kartu untuk dikirim. Ayatnya sudah dipilih.',
-      'Ein Reel zum Posten oder eine Karte zum Senden. Der Vers steht schon '
+      'A video to post, or a card to send. The verse is already chosen.',
+      'فيديو للنشر أو بطاقة للإرسال. الآية مختارة بالفعل.',
+      'پوسٹ کے لیے ویڈیو، یا بھیجنے کے لیے کارڈ۔ آیت پہلے سے منتخب ہے۔',
+      'Video untuk diunggah, atau kartu untuk dikirim. Ayatnya sudah dipilih.',
+      'Ein Video zum Posten oder eine Karte zum Senden. Der Vers steht schon '
           'fest.');
 
-  String get makeReel => _t('A reel', 'مقطع', 'ریل', 'Reel', 'Ein Reel');
+  String get makeReel => _t('A video', 'فيديو', 'ویڈیو', 'Video', 'Ein Video');
 
   String get makeReelHint => _t('Recited, with a moving picture',
       'بصوت القارئ وصورة متحركة', 'تلاوت کے ساتھ، چلتی تصویر پر',

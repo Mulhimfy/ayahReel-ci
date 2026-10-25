@@ -190,7 +190,7 @@ void main() {
       expect(find.textContaining('Verse from the Quran'), findsOneWidget);
       expect(find.textContaining('Verse of the day'), findsNothing);
       expect(find.text('It’s Jumu’ah'), findsNothing);
-      expect(find.text('Make the reel'), findsNothing);
+      expect(find.text('Make the video'), findsNothing);
     });
 
     testWidgets('on Friday: Jumu\'ah, the Salawat verse, one small door',
@@ -203,7 +203,7 @@ void main() {
       expect(find.text(jumuahVerse.arabic), findsOneWidget);
       expect(find.text(jumuahVerse.translation), findsOneWidget);
       expect(find.text('It’s Jumu’ah'), findsOneWidget);
-      expect(find.text('Make the reel'), findsOneWidget);
+      expect(find.text('Make the video'), findsOneWidget);
       expect(find.textContaining('Verse from the Quran'), findsNothing);
       // It says which day it is, and what the verse is. Not where the
       // verse is read, and no greeting on the user's behalf.
@@ -215,7 +215,7 @@ void main() {
     testWidgets('a tap sets the verse up and goes to the voice', (t) async {
       await t.pumpWidget(host(friday));
       await t.pump(const Duration(milliseconds: 100));
-      await t.tap(find.text('Make the reel'));
+      await t.tap(find.text('Make the video'));
       await t.pump();
       await t.pump(const Duration(milliseconds: 500));
       expect(creationState.surah, 33);
