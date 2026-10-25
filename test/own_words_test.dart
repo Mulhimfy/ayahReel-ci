@@ -184,4 +184,51 @@ void main() {
     final placed = await QulWords.forRecitation(untimed, rec);
     expect(placed![1]!.words.first, (1, 300, 700));
   });
+
+  test('the near tier: verses the timing did not vouch for, placed for '
+      'the light and the thread, apart from the word timing', () async {
+    OwnWords.debugSet(OwnWords.parseIndex({
+      'v': 1,
+      'voices': {
+        untimed.id: {
+          ...entry(surahs: [1]),
+          'rev': 'ab12',
+          'near': [112, 999, 'x'],
+        },
+      },
+    }));
+    final src = OwnWords.sources[untimed.id]!;
+    expect(src.near, {112});
+    // 112 has no trusted verse: the voice is not word-timed there, and
+    // nothing that says a voice is word-timed may be lit by its near
+    // tier.
+    expect(WordAlignService.supportsSurah(untimed, 112), isFalse);
+    // Its near tier, kept on the phone under its own name.
+    File('${dir.path}/n${untimed.id}.ab12_112.json')
+        .writeAsStringSync(jsonEncode(QulWords.encodeCompact({
+      1: const QulVerse(300, 2200, [(1, 300, 700), (2, 700, 1200),
+          (3, 1200, 1700), (4, 1700, 2200)]),
+    })));
+    const rec = Recitation(
+      reciterId: 'x',
+      surah: 112,
+      audioPath: 'unused.mp3',
+      timings: [AyahTiming(1, 0, 2600)],
+    );
+    final near = await WordAlignService.loadNear(untimed,
+        recitation: rec,
+        ayahs: const [
+          Ayah(number: 1, arabic: 'قُلْ هُوَ ٱللَّهُ أَحَدٌ', translation: ''),
+        ]);
+    expect(near![1], hasLength(4));
+    expect(near[1]!.first.startMs, 300);
+    // A surah the index names no near tier for is not asked for.
+    const other = Recitation(
+      reciterId: 'x',
+      surah: 113,
+      audioPath: 'unused.mp3',
+      timings: [AyahTiming(1, 0, 2600)],
+    );
+    expect(await QulWords.nearOf(untimed, other), isNull);
+  });
 }

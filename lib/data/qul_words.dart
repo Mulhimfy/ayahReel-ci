@@ -99,11 +99,19 @@ class QulSource {
   /// standing for good. Null for an index that has none.
   final String? ownRev;
 
+  /// The surahs [own] has a near tier in (the index's `near`): verses
+  /// the timing's gate did not vouch for, published as a model placed
+  /// them, for the light and the thread to follow rather than cross the
+  /// verse at an even pace. Never for the lit word, the trail or the
+  /// unveil, which say a voice is word-timed. See [QulWords.nearOf].
+  final Set<int> near;
+
   const QulSource(
     this.recitation,
     this.fit, {
     this.own,
     this.ownRev,
+    this.near = const {},
     this.biasMs = 0,
     this.verseOne = QulVerseOne.shift,
     this.verseOneBiasMs = 0,
@@ -537,9 +545,12 @@ abstract final class QulWords {
   /// One surah's verses, as QUL publishes them for [src]: from memory,
   /// then from disk, then from QUL. Null when it can't be had or can't
   /// be read; callers then have no words for the surah.
-  static Future<Map<int, QulVerse>?> versesOf(QulSource src, int surah) async {
+  static Future<Map<int, QulVerse>?> versesOf(QulSource src, int surah,
+      {bool near = false}) async {
+    if (near && src.own == null) return null;
     final key = src.own != null
-        ? 'o${src.own}${src.ownRev == null ? '' : '.${src.ownRev}'}_$surah'
+        ? '${near ? 'n' : 'o'}${src.own}'
+            '${src.ownRev == null ? '' : '.${src.ownRev}'}_$surah'
         : '${src.fit == QulFit.ayahFiles ? 'a' : 's'}${src.recitation}_$surah';
     final hit = _memory.remove(key);
     if (hit != null) return _memory[key] = hit;
@@ -555,14 +566,14 @@ abstract final class QulWords {
       }
       if (verses == null) {
         final count = surahIndex[surah - 1].ayahCount;
-        final json = await _fetch(src, surah, count);
+        final json = await _fetch(src, surah, count, near: near);
         verses = src.own != null
             ? decodeCompact(json)
             : src.fit == QulFit.ayahFiles
                 ? parseAyahSpans(json, surah)
                 : parse(json, surah);
         await writeWhole(f, jsonEncode(encodeCompact(verses)));
-        if (src.own != null) _dropStale(f, src.own!, surah);
+        if (src.own != null) _dropStale(f, near ? 'n' : 'o', src.own!, surah);
       }
     } catch (e) {
       rlog('qul: no words for ${src.recitation} surah $surah ($e)');
@@ -577,13 +588,15 @@ abstract final class QulWords {
 
   static final _memory = <String, Map<int, QulVerse>>{};
 
-  static Future<Object?> _fetch(QulSource src, int surah, int count) async {
+  static Future<Object?> _fetch(QulSource src, int surah, int count,
+      {bool near = false}) async {
     // A page holds ten verses unless asked for the whole surah.
     final own = src.own;
     // The app's own timing: one file per voice and surah, in the shape
-    // [encodeCompact] writes, served only with the app's key.
+    // [encodeCompact] writes, served only with the app's key; its near
+    // tier beside it, under near_<voice>.
     final url = own != null
-        ? Uri.parse('${WordsHost.base}/$own/$surah.json')
+        ? Uri.parse('${WordsHost.base}/${near ? 'near_' : ''}$own/$surah.json')
         : src.fit == QulFit.ayahFiles
         ? Uri.parse('$_api/ayah_segments/${src.recitation}'
             '?surah=$surah&per_page=$count')
@@ -745,10 +758,10 @@ abstract final class QulWords {
   /// The copies of [own]'s file for [surah] kept under an older
   /// revision, now that [kept] holds the current one: let go, so a voice
   /// published again does not leave the phone holding it twice.
-  static void _dropStale(File kept, String own, int surah) {
+  static void _dropStale(File kept, String tier, String own, int surah) {
     try {
-      final stale = RegExp(
-          '^o${RegExp.escape(own)}(\\.[0-9a-f]+)?_$surah\\.json\$');
+      final stale = RegExp('^$tier${RegExp.escape(own)}'
+          '(\\.[0-9a-f]+)?_$surah\\.json\$');
       for (final e in kept.parent.listSync()) {
         if (e is! File || e.path == kept.path) continue;
         if (stale.hasMatch(e.uri.pathSegments.last)) e.deleteSync();
@@ -834,7 +847,28 @@ abstract final class QulWords {
       Reciter reciter, Recitation rec) async {
     final src = sourceOf(reciter);
     if (src == null) return null;
-    final verses = await versesOf(src, rec.surah);
+    return _placeFrom(src, rec, await versesOf(src, rec.surah));
+  }
+
+  /// [forRecitation] for the near tier: the verses [reciter]'s own
+  /// timing published without vouching for them (see [QulSource.near]),
+  /// placed on [rec] the same way. Null for a voice or surah with none.
+  static Future<Map<int, Placed>?> nearOf(
+      Reciter reciter, Recitation rec) async {
+    final src = OwnWords.sources[reciter.id];
+    if (src == null || src.own == null || !src.near.contains(rec.surah)) {
+      return null;
+    }
+    // A surah with no trusted verse is in the trusted source's skip;
+    // its near tier is placed all the same.
+    final open = QulSource(0, src.fit,
+        own: src.own, ownRev: src.ownRev, near: src.near);
+    return _placeFrom(
+        open, rec, await versesOf(open, rec.surah, near: true));
+  }
+
+  static Future<Map<int, Placed>?> _placeFrom(
+      QulSource src, Recitation rec, Map<int, QulVerse>? verses) async {
     if (verses == null) return null;
     final env = src.fit == QulFit.ayahFiles
         ? null

@@ -462,8 +462,29 @@ class _PreviewScreenState extends State<PreviewScreen>
   Map<int, List<WordSpan>>? _spans;
   bool _spansFailed = false;
 
-  /// Each verse's tokens' recited windows, from [_spans].
+  /// Each verse's tokens' recited windows: what the thread and the
+  /// light follow, here and in the export. [_trueTimes] where the voice
+  /// is word-timed, and [_nearTimes] for the verses its timing published
+  /// without vouching for them; the true ones win where both are in.
+  /// Only the motions read it: the lit word, the trail, the unveil and
+  /// the lines' cuts go by [_spans] alone.
   Map<int, List<(int, int)?>>? _wordTimes;
+
+  /// The windows from [_spans].
+  Map<int, List<(int, int)?>>? _trueTimes;
+
+  /// The windows from the voice's near tier (see
+  /// [WordAlignService.loadNear]): a verse otherwise crossed at an even
+  /// pace, a second and more off where the reciter breathes, followed
+  /// instead as a model placed its words.
+  Map<int, List<(int, int)?>>? _nearTimes;
+
+  /// [_wordTimes] from its two halves; null while neither is in.
+  Map<int, List<(int, int)?>>? get _mergedTimes {
+    final near = _nearTimes, sure = _trueTimes;
+    if (near == null) return sure;
+    return {...near, ...?sure};
+  }
 
   /// The long verses cut into lines, when this reel cuts them; null for
   /// every verse whole. See [VersePlanner].
@@ -706,6 +727,7 @@ class _PreviewScreenState extends State<PreviewScreen>
       _startFadeTicker();
       if (!_clockTicker.isActive) _clockTicker.start();
       _loadHighlight();
+      unawaited(_loadNear());
       // Long verses are cut once the voice's word timing is in, when it
       // has any; a voice without it is cut on its pauses straight away.
       unawaited(_replanLines());
@@ -1738,6 +1760,24 @@ class _PreviewScreenState extends State<PreviewScreen>
     }
   }
 
+  /// The voice's near tier for this reel's verses, for the thread and
+  /// the light (see [_nearTimes]). Best-effort: without it those verses
+  /// are crossed at an even pace, as they always were.
+  Future<void> _loadNear() async {
+    final rec = _recitation;
+    final ayahs = _ayahs;
+    if (rec == null || ayahs == null) return;
+    final near = await WordAlignService.loadNear(_reciter,
+        recitation: rec, ayahs: ayahs);
+    if (!mounted || near == null || !identical(rec, _recitation)) return;
+    setState(() {
+      _nearTimes = VersePlanner.wordTimes(ayahs, near, _startAyah, _endAyah);
+      _wordTimes = _mergedTimes;
+    });
+    // The eager render drew those verses at an even pace.
+    if (_motion.thread || _motion.light) _restyled();
+  }
+
   /// Fetches word-timing data for this voice (one-time download shared
   /// by all reciters, cached forever) and derives the highlight plan.
   /// Best-effort: any failure just leaves the whole-ayah card.
@@ -1754,8 +1794,9 @@ class _PreviewScreenState extends State<PreviewScreen>
     }
     setState(() {
       _spans = spans;
-      _wordTimes =
+      _trueTimes =
           VersePlanner.wordTimes(_ayahs!, spans, _startAyah, _endAyah);
+      _wordTimes = _mergedTimes;
     });
     unawaited(_replanLines());
     final plan = WordAlignService.highlightPlan(

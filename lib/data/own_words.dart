@@ -126,11 +126,17 @@ abstract final class OwnWords {
       };
       if (have.isEmpty) continue;
       final rev = v['rev'];
+      final near = v['near'];
       out[id] = QulSource(
         0,
         fit,
         own: id,
         ownRev: rev is String && _rev.hasMatch(rev) ? rev : null,
+        near: {
+          if (near is List)
+            for (final s in near)
+              if (s is int && s >= 1 && s <= 114) s,
+        },
         skip: {
           for (var s = 1; s <= 114; s++)
             if (!have.contains(s)) s,

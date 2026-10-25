@@ -132,6 +132,30 @@ abstract final class WordAlignService {
 
   static Future<void>? _fetchInFlight;
 
+  /// The verses of [recitation]'s surah that the voice's own timing
+  /// publishes without vouching for them — its near tier (see
+  /// [QulSource.near]) — as [load] gives verses: for the light and the
+  /// thread to follow, never for the lit word. Null when the voice has
+  /// none for the surah, or it can't be had; never throws.
+  static Future<Map<int, List<WordSpan>>?> loadNear(Reciter reciter,
+      {required Recitation recitation, required List<Ayah> ayahs}) async {
+    try {
+      final placed = await QulWords.nearOf(reciter, recitation);
+      if (placed == null) return null;
+      final out = <int, List<WordSpan>>{};
+      for (final e in placed.entries) {
+        if (e.key < 1 || e.key > ayahs.length) continue;
+        final spans = fromMushafWords(ayahs[e.key - 1].arabic, e.value);
+        if (spans != null && spans.isNotEmpty) out[e.key] = spans;
+      }
+      rlog('align: ${reciter.id} near words on ${out.length} verse(s)');
+      return out.isEmpty ? null : out;
+    } catch (e) {
+      rlog('align: near words for ${reciter.id} failed ($e)');
+      return null;
+    }
+  }
+
   /// Word spans for one surah of one reciter, keyed by ayah number and
   /// relative to each ayah's start in the recording. Null when the
   /// reciter has no alignment data or it couldn't be fetched — callers
