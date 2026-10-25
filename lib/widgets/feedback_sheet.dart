@@ -301,6 +301,7 @@ class FeedbackField extends StatelessWidget {
   final ValueChanged<String>? onSubmitted;
 
   const FeedbackField({
+    super.key,
     required this.controller,
     required this.hint,
     required this.enabled,
