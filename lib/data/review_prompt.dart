@@ -49,13 +49,13 @@ enum ReviewAsk {
 /// Apple's allowance is three a year and the full [milestones] ladder
 /// spends exactly three, so an iOS user already gets every automatic
 /// ask that platform permits. Adding our own on top would buy at most
-/// a fourth — and guideline 1.1.7 names custom review prompts as a
-/// rejection. This app cannot pay that: a refused build burns the
-/// version train, not just the day (0.1.0, 0.1.1 and 1.0 are already
-/// spent that way). A near-zero gain against a version number is not a
-/// trade worth taking, so on iOS nothing of ours ever appears by
-/// itself. The Settings row stays — it is user-initiated, which is
-/// precisely what 1.1.7 does not touch.
+/// a fourth — and guideline 5.6.1 disallows custom review prompts.
+/// This app cannot pay that: a refused build burns the version train,
+/// not just the day (0.1.0, 0.1.1 and 1.0 are already spent that way).
+/// A near-zero gain against a version number is not a trade worth
+/// taking, so on iOS nothing of ours ever appears by itself. The
+/// Settings row stays — it is user-initiated, which is precisely what
+/// 5.6.1 does not touch.
 ///
 /// **Android: one OS sheet, then ours, repeating.** Play's quota makes
 /// a second and third `launchReviewFlow` near-certain no-ops, so the

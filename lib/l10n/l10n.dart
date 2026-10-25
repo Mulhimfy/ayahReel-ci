@@ -1913,9 +1913,6 @@ class L10n {
       'AyahReel پسند آ رہا ہے؟', 'Menikmati AyahReel?',
       'Gefällt dir AyahReel?');
 
-  /// Says which store it is about to open, because the button leaves
-  /// the app — a "Rate us" that silently jumps to another app is a
-  /// worse surprise than a longer label.
   /// The rating sheet, under its stars before one is tapped.
   String get rateHowMany => _t(
       'How many stars would you give it?',
@@ -1940,6 +1937,22 @@ class L10n {
       '$n bintang',
       n == 1 ? '1 Stern' : '$n Sterne');
 
+  /// After five stars, while the store opens: the store asks for the
+  /// stars again, and only those count, so a user who thinks tapping
+  /// ours was the rating would leave without one.
+  String rateFiveThanks({required bool appStore}) {
+    final store = appStore ? 'App Store' : 'Google Play';
+    return _t(
+        'Thank you! Give it five stars on ${appStore ? 'the App Store' : store} too — that’s where it counts.',
+        'شكرًا لك! أعطه خمس نجوم في $store أيضًا، فهناك يُحتسب التقييم.',
+        'شکریہ! $store پر بھی پانچ ستارے دیں، ریٹنگ وہیں شمار ہوتی ہے۔',
+        'Terima kasih! Beri lima bintang di $store juga — di sanalah penilaian dihitung.',
+        'Danke! Gib ${appStore ? 'im App Store' : 'bei Google Play'} auch fünf Sterne – dort zählt die Bewertung.');
+  }
+
+  /// Says which store it is about to open, because the button leaves
+  /// the app — a "Rate us" that silently jumps to another app is a
+  /// worse surprise than a longer label.
   String get openAppStore => _t('Open the App Store', 'افتح App Store',
       'App Store کھولیں', 'Buka App Store', 'App Store öffnen');
   String get openPlayStore => _t('Open Google Play', 'افتح Google Play',

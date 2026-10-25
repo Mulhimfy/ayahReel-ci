@@ -10,7 +10,7 @@ import 'package:ayah_reels/widgets/rate_sheet.dart';
 /// The rating sheet asks for stars, sends five to the store, and asks
 /// the rest what would make it five — with the store's button still in
 /// front of them, because a sheet that sent only the happy to the store
-/// would be review gating, which both stores forbid.
+/// would be review gating.
 void main() {
   const l = L10n.en;
 
@@ -57,5 +57,21 @@ void main() {
     expect(find.byType(FeedbackField), findsOneWidget);
     // The store is never kept from anyone.
     expect(find.text(l.openPlayStore), findsOneWidget);
+  });
+
+  testWidgets('five say the store asks for the stars again, and a change '
+      'of heart before it opens keeps the sheet', (t) async {
+    await open(t);
+    await t.tap(find.byKey(const ValueKey('rate-star-5')));
+    await t.pump();
+    expect(find.text(l.rateFiveThanks(appStore: false)), findsOneWidget);
+    expect(find.byType(FeedbackField), findsNothing);
+    await t.pump(rateStoreDelay ~/ 2);
+    await t.tap(find.byKey(const ValueKey('rate-star-4')));
+    await t.pump();
+    // Past the moment five would have opened the store.
+    await t.pump(rateStoreDelay);
+    expect(find.text(l.rateWhatWouldHelp), findsOneWidget);
+    expect(find.byType(FeedbackField), findsOneWidget);
   });
 }

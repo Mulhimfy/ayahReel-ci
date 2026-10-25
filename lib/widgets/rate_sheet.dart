@@ -26,12 +26,14 @@ import 'night_sky.dart';
 /// is that way back: it opens from the Settings row, and on Android
 /// after a run of reels (see [ReviewPrompt]).
 ///
-/// Five stars open the store. Fewer open a box for what would make it
-/// five — optional, straight to our inbox — with the store's button
-/// right under it all the same. The store is never kept from anyone:
-/// a sheet that sent only the happy to the store would be review
-/// gating, which both stores forbid; this one sends everyone, and asks
-/// the rest what to fix.
+/// Five stars say thank you, and that the store's own stars are the
+/// ones that count, then open the store. Fewer open a box for what
+/// would make it five — optional, straight to our inbox — with the
+/// store's button right under it all the same. The store is never kept
+/// from anyone: a sheet that sent only the happy to the store would be
+/// review gating — manipulating reviews to Apple (5.6.3), an opinion
+/// question before the rating to Google — so this one sends everyone,
+/// and asks the rest what to fix.
 Future<void> showRateSheet(BuildContext context) {
   HapticFeedback.selectionClick();
   return showModalBottomSheet<void>(
@@ -42,6 +44,11 @@ Future<void> showRateSheet(BuildContext context) {
     builder: (_) => const _RateSheet(),
   );
 }
+
+/// How long the thanks after five stars stays up before the store
+/// opens: long enough to read that the store asks for the stars again.
+@visibleForTesting
+const rateStoreDelay = Duration(milliseconds: 1600);
 
 class _RateSheet extends StatefulWidget {
   const _RateSheet();
@@ -85,9 +92,9 @@ class _RateSheetState extends State<_RateSheet> {
     setState(() => _stars = n);
     unawaited(ReviewPrompt.answered());
     if (n < 5) return;
-    // Five: to the store, where the stars count — after a beat, so the
-    // last star is seen to light.
-    await Future<void>.delayed(const Duration(milliseconds: 320));
+    // Five: to the store, where the stars count — after the thanks has
+    // been read, so nobody takes our stars for the rating itself.
+    await Future<void>.delayed(rateStoreDelay);
     if (mounted && _stars == 5) await _openStore();
   }
 
@@ -140,6 +147,11 @@ class _RateSheetState extends State<_RateSheet> {
     final t = Theme.of(context).textTheme;
     final l = L10n.of(context);
     final low = _stars > 0 && _stars < 5;
+    final line = _stars == 5
+        ? l.rateFiveThanks(appStore: Platform.isIOS)
+        : low
+            ? l.rateWhatWouldHelp
+            : l.rateHowMany;
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       child: Stack(
@@ -199,10 +211,12 @@ class _RateSheetState extends State<_RateSheet> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      Text(
-                        low ? l.rateWhatWouldHelp : l.rateHowMany,
-                        textAlign: TextAlign.center,
-                        style: t.bodyMedium?.copyWith(height: 1.55),
+                      A11yLive(
+                        child: Text(
+                          line,
+                          textAlign: TextAlign.center,
+                          style: t.bodyMedium?.copyWith(height: 1.55),
+                        ),
                       ),
                       AnimatedSize(
                         duration: const Duration(milliseconds: 240),

@@ -75,7 +75,7 @@ void main() {
     });
 
     test('our own sheet never appears by itself on iOS', () {
-      // Guideline 1.1.7 rejects custom review prompts. Nothing but the
+      // Guideline 5.6.1 disallows custom review prompts. Nothing but the
       // Settings row may open ours here — at any count, ever.
       for (var n = 1; n <= 200; n++) {
         for (var spent = 0; spent <= ReviewPrompt.milestones.length; spent++) {
