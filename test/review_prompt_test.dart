@@ -19,12 +19,14 @@ void main() {
     int asks = 0,
     bool wentToListing = false,
     bool android = false,
+    bool answered = false,
   }) =>
       ReviewPrompt.decide(
         exports: exports,
         asks: asks,
         wentToListing: wentToListing,
         android: android,
+        answered: answered,
       );
 
   group('the ladder, on iOS', () {
@@ -103,6 +105,14 @@ void main() {
         }
       }
       expect(shown, [5, 10, 15, 20, 25, 30]);
+    });
+
+    test('our sheet does not come back once its stars are picked', () {
+      // Whatever was picked: the store's button was in front of them
+      // either way, and asking again would be nagging.
+      expect(ask(exports: 10, asks: 1, android: true), ReviewAsk.banner);
+      expect(ask(exports: 10, asks: 1, android: true, answered: true),
+          ReviewAsk.none);
     });
 
     test('our sheet never precedes the OS one', () {

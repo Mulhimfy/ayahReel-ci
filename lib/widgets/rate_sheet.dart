@@ -1,30 +1,37 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../data/feedback_service.dart';
 import '../data/review_prompt.dart';
 import '../l10n/l10n.dart';
 import '../theme/app_theme.dart';
 import 'a11y.dart';
 import 'app_toast.dart';
+import 'feedback_sheet.dart';
 import 'glow_button.dart';
 import 'night_sky.dart';
 
-/// The route to the store that no quota can close.
+/// The route to the store that no quota can close, and the ear for
+/// everyone the app has not won over yet.
 ///
 /// The OS rating sheet is the only thing allowed to interrupt a user
 /// to ask for a rating, and both stores ration it — three times a year
 /// on iOS, an undisclosed and changeable allowance on Play — with no
 /// way for the app to learn whether any given call showed anything at
 /// all. So a user who wants to leave a rating, or who declined the
-/// system sheet once and changed their mind, has no way back in.
+/// system sheet once and changed their mind, has no way back in. This
+/// is that way back: it opens from the Settings row, and on Android
+/// after a run of reels (see [ReviewPrompt]).
 ///
-/// This is that way back: a sheet that only ever opens because someone
-/// tapped the Settings row, and whose one button is a link to the
-/// listing rather than a request for stars. That distinction is the
-/// whole design — see [ReviewPrompt] for why the automatic path stays
-/// native-only.
+/// Five stars open the store. Fewer open a box for what would make it
+/// five — optional, straight to our inbox — with the store's button
+/// right under it all the same. The store is never kept from anyone:
+/// a sheet that sent only the happy to the store would be review
+/// gating, which both stores forbid; this one sends everyone, and asks
+/// the rest what to fix.
 Future<void> showRateSheet(BuildContext context) {
   HapticFeedback.selectionClick();
   return showModalBottomSheet<void>(
@@ -36,19 +43,110 @@ Future<void> showRateSheet(BuildContext context) {
   );
 }
 
-class _RateSheet extends StatelessWidget {
+class _RateSheet extends StatefulWidget {
   const _RateSheet();
+
+  @override
+  State<_RateSheet> createState() => _RateSheetState();
+}
+
+class _RateSheetState extends State<_RateSheet> {
+  /// The stars tapped; 0 before any.
+  int _stars = 0;
+
+  final _note = TextEditingController();
+
+  /// While the note is on its way: the button shows it and nothing
+  /// sends it twice.
+  bool _sending = false;
+
+  /// Under the button after a failed send, until the next edit.
+  bool _failed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _note.addListener(_onEdit);
+  }
+
+  @override
+  void dispose() {
+    _note.removeListener(_onEdit);
+    _note.dispose();
+    super.dispose();
+  }
+
+  void _onEdit() {
+    if (mounted) setState(() => _failed = false);
+  }
+
+  Future<void> _pick(int n) async {
+    HapticFeedback.selectionClick();
+    setState(() => _stars = n);
+    unawaited(ReviewPrompt.answered());
+    if (n < 5) return;
+    // Five: to the store, where the stars count — after a beat, so the
+    // last star is seen to light.
+    await Future<void>.delayed(const Duration(milliseconds: 320));
+    if (mounted && _stars == 5) await _openStore();
+  }
+
+  Future<void> _openStore() async {
+    // Captured before the pop: the sheet's context is gone by the time
+    // the browser hand-off returns, and the snack has to outlive it.
+    final messenger = ScaffoldMessenger.of(context);
+    if (ModalRoute.of(context)?.isCurrent == true) Navigator.of(context).pop();
+    if (await ReviewPrompt.openListing()) return;
+    if (!messenger.mounted) return;
+    messenger
+      ..clearSnackBars()
+      ..showSnackBar(toast(
+        L10n.current.storeOpenFailed,
+        tone: ToastTone.problem,
+      ));
+  }
+
+  Future<void> _send() async {
+    final text = _note.text.trim();
+    if (text.isEmpty || _sending) return;
+    HapticFeedback.selectionClick();
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _sending = true;
+      _failed = false;
+    });
+    final ok = await FeedbackService.send(
+      message: '${'★' * _stars}${'☆' * (5 - _stars)} ($_stars/5)\n\n$text',
+      source: FeedbackSource.rating,
+    );
+    if (!mounted) return;
+    if (!ok) {
+      // The note stays in the box; a retry is one tap.
+      setState(() {
+        _sending = false;
+        _failed = true;
+      });
+      return;
+    }
+    final messenger = ScaffoldMessenger.of(context);
+    if (ModalRoute.of(context)?.isCurrent == true) Navigator.of(context).pop();
+    messenger
+      ..clearSnackBars()
+      ..showSnackBar(toast(L10n.current.feedbackThanks, tone: ToastTone.done));
+  }
 
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
     final l = L10n.of(context);
+    final low = _stars > 0 && _stars < 5;
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       child: Stack(
         children: [
           const Positioned.fill(
-            child: IgnorePointer(child: Starfield(count: 40, seed: 11)),
+            child: ExcludeSemantics(
+                child: IgnorePointer(child: Starfield(count: 40, seed: 11))),
           ),
           const Positioned(
             top: -90,
@@ -70,69 +168,103 @@ class _RateSheet extends StatelessWidget {
             child: SafeArea(
               top: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(26, 12, 26, 18),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 38,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: AppColors.stroke,
-                        borderRadius: BorderRadius.circular(2),
+                // The keyboard would cover the note's button otherwise.
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.viewInsetsOf(context).bottom),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(26, 12, 26, 18),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: AppColors.stroke,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Five filled stars, and no way to tap four.
-                    // Nothing here collects an opinion: a sheet that
-                    // asked for a rating and then routed the low ones
-                    // somewhere private is the exact pattern guideline
-                    // 1.1.7 was written to stop. This is decoration
-                    // that says which button is about to be pressed.
-                    const _Stars(),
-                    const SizedBox(height: 18),
-                    A11yHeader(
-                      child: Text(
-                        l.rateSheetTitle,
+                      const SizedBox(height: 18),
+                      _Stars(
+                        value: _stars,
+                        onPick: _sending ? null : _pick,
+                      ),
+                      const SizedBox(height: 14),
+                      A11yHeader(
+                        child: Text(
+                          l.rateSheetTitle,
+                          textAlign: TextAlign.center,
+                          style: t.headlineMedium
+                              ?.copyWith(fontSize: 22, height: 1.3),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        low ? l.rateWhatWouldHelp : l.rateHowMany,
                         textAlign: TextAlign.center,
-                        style: t.headlineMedium
-                            ?.copyWith(fontSize: 22, height: 1.3),
+                        style: t.bodyMedium?.copyWith(height: 1.55),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      l.rateSheetBody,
-                      textAlign: TextAlign.center,
-                      style: t.bodyMedium?.copyWith(height: 1.55),
-                    ),
-                    const SizedBox(height: 22),
-                    GlowButton(
-                      label: Platform.isIOS
-                          ? l.openAppStore
-                          : l.openPlayStore,
-                      icon: Icons.open_in_new_rounded,
-                      onPressed: () async {
-                        // Captured before the pop: the sheet's context
-                        // is gone by the time the browser hand-off
-                        // returns, and the snack has to outlive it.
-                        final messenger = ScaffoldMessenger.of(context);
-                        Navigator.of(context).pop();
-                        if (await ReviewPrompt.openListing()) return;
-                        if (!messenger.mounted) return;
-                        messenger
-                          ..clearSnackBars()
-                          ..showSnackBar(toast(
-                            L10n.current.storeOpenFailed,
-                            tone: ToastTone.problem,
-                          ));
-                      },
-                    ),
-                    const SizedBox(height: 6),
-                    QuietButton(
-                      label: l.notNow,
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 240),
+                        curve: Curves.easeOutCubic,
+                        alignment: Alignment.topCenter,
+                        child: !low
+                            ? const SizedBox(width: double.infinity)
+                            : Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const SizedBox(height: 16),
+                                  FeedbackField(
+                                    controller: _note,
+                                    hint: l.feedbackHint,
+                                    enabled: !_sending,
+                                    maxLines: 4,
+                                    maxLength:
+                                        FeedbackService.maxMessageLength,
+                                    keyboardType: TextInputType.multiline,
+                                    textInputAction: TextInputAction.newline,
+                                  ),
+                                  if (_failed) ...[
+                                    const SizedBox(height: 10),
+                                    A11yLive(
+                                      child: Text(
+                                        l.feedbackFailed,
+                                        textAlign: TextAlign.center,
+                                        style: t.bodySmall?.copyWith(
+                                            color: const Color(0xFFE9A08A),
+                                            height: 1.45),
+                                      ),
+                                    ),
+                                  ],
+                                  const SizedBox(height: 14),
+                                  GlowButton(
+                                    label: l.feedbackSend,
+                                    icon: Icons.send_rounded,
+                                    busy: _sending,
+                                    onPressed: _note.text.trim().isEmpty
+                                        ? null
+                                        : _send,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  // The store, for every rating.
+                                  QuietButton(
+                                    label: Platform.isIOS
+                                        ? l.openAppStore
+                                        : l.openPlayStore,
+                                    onPressed: _sending ? null : _openStore,
+                                  ),
+                                ],
+                              ),
+                      ),
+                      const SizedBox(height: 6),
+                      QuietButton(
+                        label: l.notNow,
+                        onPressed: _sending
+                            ? null
+                            : () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -143,21 +275,46 @@ class _RateSheet extends StatelessWidget {
   }
 }
 
+/// Five stars to tap, lit up to [value].
 class _Stars extends StatelessWidget {
-  const _Stars();
+  final int value;
+  final ValueChanged<int>? onPick;
+
+  const _Stars({required this.value, required this.onPick});
 
   @override
   Widget build(BuildContext context) {
+    final l = L10n.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(
-        5,
-        (_) => const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 3),
-          child:
-              Icon(Icons.star_rounded, size: 30, color: AppColors.goldBright),
-        ),
-      ),
+      children: [
+        for (var n = 1; n <= 5; n++)
+          A11yTap(
+            label: l.rateStars(n),
+            selected: value == n,
+            onTap: onPick == null ? null : () => onPick!(n),
+            child: GestureDetector(
+              key: ValueKey('rate-star-$n'),
+              behavior: HitTestBehavior.opaque,
+              onTap: onPick == null ? null : () => onPick!(n),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                child: AnimatedScale(
+                  scale: n <= value ? 1.12 : 1,
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOutBack,
+                  child: Icon(
+                    Icons.star_rounded,
+                    size: 38,
+                    color: n <= value
+                        ? AppColors.goldBright
+                        : AppColors.stroke.withValues(alpha: 0.9),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

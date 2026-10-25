@@ -1927,6 +1927,30 @@ class L10n {
   /// Says which store it is about to open, because the button leaves
   /// the app — a "Rate us" that silently jumps to another app is a
   /// worse surprise than a longer label.
+  /// The rating sheet, under its stars before one is tapped.
+  String get rateHowMany => _t(
+      'How many stars would you give it?',
+      'كم نجمة تعطيه؟',
+      'آپ اسے کتنے ستارے دیں گے؟',
+      'Berapa bintang yang kamu berikan?',
+      'Wie viele Sterne würdest du geben?');
+
+  /// After fewer than five: the note box's heading.
+  String get rateWhatWouldHelp => _t(
+      'What would make it five stars? (optional)',
+      'ما الذي يجعله يستحق خمس نجوم؟ (اختياري)',
+      'اسے پانچ ستاروں کے لائق کیا بنائے گا؟ (اختیاری)',
+      'Apa yang membuatnya layak lima bintang? (opsional)',
+      'Was würde fünf Sterne daraus machen? (optional)');
+
+  /// One star's button, for a screen reader.
+  String rateStars(int n) => _t(
+      n == 1 ? '1 star' : '$n stars',
+      '$n من 5',
+      '$n ستارے',
+      '$n bintang',
+      n == 1 ? '1 Stern' : '$n Sterne');
+
   String get openAppStore => _t('Open the App Store', 'افتح App Store',
       'App Store کھولیں', 'Buka App Store', 'App Store öffnen');
   String get openPlayStore => _t('Open Google Play', 'افتح Google Play',

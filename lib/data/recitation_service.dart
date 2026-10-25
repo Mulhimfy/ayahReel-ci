@@ -414,6 +414,9 @@ abstract final class RecitationService {
     final ayahs = [for (var a = start; a <= end; a++) a];
     final tag = '${start}_$end';
     var done = 0;
+    // Where the range ends: brought in once what is on disk runs longer
+    // than a reel may be.
+    var stop = ayahs.length;
     // How far along each file in flight is. The bar used to move only
     // as files were finished, and on a slow link ten long verses can
     // take a minute or more to finish together: a minute at nought,
@@ -422,61 +425,70 @@ abstract final class RecitationService {
     void report() {
       final inFlight = partly.values.fold(0.0, (a, b) => a + b);
       onProgress
-          ?.call(((done + inFlight) / ayahs.length * 0.95).clamp(0.0, 0.95));
+          ?.call(((done + inFlight) / stop * 0.95).clamp(0.0, 0.95));
     }
 
+    // Ten at a time, each lane taking the next verse the moment its own
+    // is in: a slow file holds up only its lane. (In batches of ten, one
+    // slow file kept the other nine lanes idle until it landed.)
     const lanes = 10;
+    var next = 0;
+    var failed = false;
     final client = http.Client();
-    try {
-      for (var s = 0; s < ayahs.length; s += lanes) {
-        final batch = <Future<void>>[];
-        for (var i = s; i < ayahs.length && i < s + lanes; i++) {
-          final a = ayahs[i];
-          final f = File('${parts.path}/${_ayahFileName(surah, a)}');
-          batch.add(() async {
-            await _download(client, source.url(surah, a), f, tag,
-                onFraction: onProgress == null
-                    ? null
-                    : (v) {
-                        partly[a] = v;
-                        report();
-                      });
-            try {
-              durations[a] ??= await _probeMs(f);
-            } catch (_) {
-              // Unreadable bytes (a portal's page, a cut file) would be
-              // reused by every later build: drop them so the next try
-              // fetches the file again.
-              _deleteQuietly(f);
-              rethrow;
-            }
-            partly.remove(a);
-            done++;
-            report();
-          }());
+    Future<void> lane() async {
+      while (!failed && next < stop) {
+        final a = ayahs[next++];
+        final f = File('${parts.path}/${_ayahFileName(surah, a)}');
+        try {
+          await _download(client, source.url(surah, a), f, tag,
+              onFraction: onProgress == null
+                  ? null
+                  : (v) {
+                      partly[a] = v;
+                      report();
+                    });
+          try {
+            durations[a] ??= await _probeMs(f);
+          } catch (_) {
+            // Unreadable bytes (a portal's page, a cut file) would be
+            // reused by every later build: drop them so the next try
+            // fetches the file again.
+            _deleteQuietly(f);
+            rethrow;
+          }
+        } catch (_) {
+          failed = true;
+          rethrow;
         }
-        await Future.wait(batch);
-        rlog('rec: $done/${ayahs.length} parts ready');
-        // Stop once what is already on disk runs longer than a reel
-        // may be. The ayah that crosses the line is kept — the preview
-        // trims to the last one that *fits*, and it can only know which
-        // that is from a timing that doesn't.
+        partly.remove(a);
+        done++;
+        report();
+        // Stop once what is already on disk runs longer than a reel may
+        // be. The ayah that crosses the line is kept — the preview trims
+        // to the last one that *fits*, and it can only know which that
+        // is from a timing that doesn't.
         var total = 0;
-        for (var i = 0; i < ayahs.length; i++) {
+        for (var i = 0; i < stop; i++) {
           final d = durations[ayahs[i]];
-          if (d == null) break; // not measured yet: settled next batch
+          if (d == null) break; // not measured yet: settled later
           total += d;
-          if (total > maxMs && i + 1 < ayahs.length) {
+          if (total > maxMs && i + 1 < stop) {
             rlog('rec: cap ${maxMs}ms reached at ayah ${ayahs[i]} — '
                 'dropping ${ayahs.length - i - 1} more');
-            ayahs.removeRange(i + 1, ayahs.length);
+            stop = i + 1;
             break;
           }
         }
       }
+    }
+
+    try {
+      await Future.wait([for (var l = 0; l < lanes; l++) lane()]);
     } finally {
       client.close();
     }
+    rlog('rec: $done/${ayahs.length} parts ready');
+    if (stop < ayahs.length) ayahs.removeRange(stop, ayahs.length);
     await durFile.writeAsString(jsonEncode(
         {for (final e in durations.entries) '${e.key}': e.value}));
 

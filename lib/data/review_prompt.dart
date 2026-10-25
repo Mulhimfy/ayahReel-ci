@@ -108,6 +108,11 @@ abstract final class ReviewPrompt {
   /// signal that ever stops the loop.
   static bool _wentToListing = false;
 
+  /// Set once the user has picked their stars in our sheet. Whatever
+  /// they picked, our own sheet does not come back by itself: they have
+  /// answered it, and the store's button was in front of them either way.
+  static bool _answered = false;
+
   /// Swappable so tests never touch a method channel.
   @visibleForTesting
   static InAppReview review = InAppReview.instance;
@@ -122,6 +127,7 @@ abstract final class ReviewPrompt {
       _exports = j['exports'] as int? ?? 0;
       _asks = j['asks'] as int? ?? 0;
       _wentToListing = j['wentToListing'] as bool? ?? false;
+      _answered = j['answered'] as bool? ?? false;
     } catch (_) {/* an unreadable file just means nobody has been asked */}
   }
 
@@ -147,6 +153,7 @@ abstract final class ReviewPrompt {
     required int asks,
     required bool wentToListing,
     required bool android,
+    bool answered = false,
   }) {
     if (wentToListing) return ReviewAsk.none;
     final ladder = android ? milestones.take(1).toList() : milestones;
@@ -155,7 +162,7 @@ abstract final class ReviewPrompt {
     }
     // iOS stops here, always. See the class doc for why ours may never
     // open itself there.
-    if (!android) return ReviewAsk.none;
+    if (!android || answered) return ReviewAsk.none;
     if (asks == 0) return ReviewAsk.none;
     if (exports % bannerEveryExports != 0) return ReviewAsk.none;
     return ReviewAsk.banner;
@@ -189,6 +196,7 @@ abstract final class ReviewPrompt {
         asks: _asks,
         wentToListing: _wentToListing,
         android: Platform.isAndroid,
+        answered: _answered,
       );
       if (ask != ReviewAsk.native) {
         await _persist();
@@ -247,12 +255,21 @@ abstract final class ReviewPrompt {
     }
   }
 
+  /// The user picked their stars in our sheet; see [_answered].
+  static Future<void> answered() async {
+    await init();
+    if (_answered) return;
+    _answered = true;
+    await _persist();
+  }
+
   static Future<void> _persist() async {
     try {
       await writeWhole(await _file(), jsonEncode({
         'exports': _exports,
         'asks': _asks,
         'wentToListing': _wentToListing,
+        'answered': _answered,
       }));
     } catch (_) {/* the ask is best-effort, like the rewards it follows */}
   }
@@ -266,10 +283,12 @@ abstract final class ReviewPrompt {
     int exports = 0,
     int asks = 0,
     bool wentToListing = false,
+    bool answered = false,
   }) {
     _loaded = true;
     _exports = exports;
     _asks = asks;
     _wentToListing = wentToListing;
+    _answered = answered;
   }
 }

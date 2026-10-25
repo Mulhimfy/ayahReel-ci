@@ -29,6 +29,10 @@ enum FeedbackSource {
   /// user who can say no more than "it didn't save" is still a report
   /// that can be acted on.
   exportTrouble,
+
+  /// The rating sheet, after fewer than five stars: the note is optional
+  /// and carries the stars at its head.
+  rating,
 }
 
 /// The one channel that carries a sentence from a user back to us.
