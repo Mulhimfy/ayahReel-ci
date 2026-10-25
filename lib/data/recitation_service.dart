@@ -1562,40 +1562,221 @@ abstract final class RecitationService {
       return LiveClip(ayah, f.path, from, to, windowMs: 0);
     }
     if (source is SurahFiles) {
-      final live = Directory('${dir.path}/live_$surah')
-        ..createSync(recursive: true);
-      final out = File('${live.path}/${_ayahFileName(surah, ayah)}');
-      // The ayah's window in the file, kept beside it: a second listen
-      // fetches nothing, and needs no network to find its place.
-      final note = File('${out.path}.json');
-      if (out.existsSync() && note.existsSync()) {
-        try {
-          final m = jsonDecode(note.readAsStringSync()) as Map<String, dynamic>;
-          return LiveClip(ayah, out.path, m['f'] as int, m['t'] as int,
-              originMs: m['o'] as int?);
-        } catch (_) {
-          // Unreadable: fetched again below.
-        }
-      }
-      final (lay, table) = await _liveSurah(reciter, source, dir, surah);
-      final w = table[ayah - 1];
-      final client = _surahClient(dir, source, surah);
-      try {
-        final at = await SurahSlice.fetch(client, source.url(surah), lay, out,
-            fromMs: w.startMs, toMs: w.endMs);
-        final from = (w.startMs - at).round();
-        final clip = LiveClip(
-            ayah, out.path, from < 0 ? 0 : from, (w.endMs - at).round(),
-            originMs: at.round());
-        await note.writeAsString(jsonEncode(
-            {'f': clip.fromMs, 't': clip.toMs, 'o': clip.originMs}));
-        return clip;
-      } finally {
-        client.close();
-      }
+      return _liveRunClip(reciter, source, dir, surah, ayah);
     }
     throw StateError('${reciter.id} has no recitation to play live');
   }
+
+  /// How much of a surah-file voice's recitation its listen fetches as
+  /// one file: a short run first, so the voice starts at once, then long
+  /// ones ahead of it; the rest of a surah whole when that is short.
+  static const liveFirstRunMs = 20000;
+  static const liveRunMs = 90000;
+  static const liveWholeRestMs = 60000;
+
+  /// The runs being fetched, by voice, surah and table. An ayah inside
+  /// one waits for it: the listen asks for the next few ayahs at once.
+  static final _liveRuns = <String, List<_LiveRun>>{};
+
+  /// [ayah] of a surah-file voice's listen, as a window of a *run*: one
+  /// file that holds it and the ayahs after it.
+  ///
+  /// The listen used to fetch each ayah as a file of its own and change
+  /// files at every ayah. A reciter who carries a verse into the next
+  /// (wasl: Al-Fatiha's first verses, in many voices) was heard to stop
+  /// between them, which no reel and no preview does. In one file the
+  /// player moves from ayah to ayah without a seam (see
+  /// `LiveRecitation`): a run changes files once a minute or so, and a
+  /// surah kept for offline use never does.
+  static Future<LiveClip> _liveRunClip(Reciter reciter, SurahFiles source,
+      Directory dir, int surah, int ayah) async {
+    final whole = _wholeFile(dir, surah);
+    final live = Directory('${dir.path}/live_$surah')
+      ..createSync(recursive: true);
+    // Named for the table that cut it: a run cut by a table since
+    // replaced is not heard again.
+    final own = _ownTable(reciter, surah);
+    final tag = own == null ? 'p' : 'v${own.rev}';
+    final runs = _liveRuns['${reciter.id}_${surah}_$tag'] ??= [];
+
+    // On the phone already, or on its way (then waited for); null when
+    // neither. Looked at without a pause: an ask that comes after this
+    // one's run is planned finds it.
+    LiveClip? kept() => _keptRunClip(live, tag, ayah);
+    _LiveRun? busy() {
+      for (final r in runs) {
+        if (r.first <= ayah && ayah <= r.last) return r;
+      }
+      return null;
+    }
+
+    if (!whole.existsSync()) {
+      for (var r = busy(); kept() == null && r != null; r = busy()) {
+        await r.done;
+      }
+      final c = kept();
+      if (c != null) return c;
+    }
+    final (lay, table) = await _liveSurah(reciter, source, dir, surah);
+    final w = table[ayah - 1];
+    // The whole surah on the phone: every ayah a window of the one file,
+    // and the runs fetched before it are not needed again.
+    if (whole.existsSync() && whole.lengthSync() > 0) {
+      if (runs.isEmpty) _dropOldLive(live, null);
+      return LiveClip(ayah, whole.path, w.startMs, w.endMs, originMs: 0);
+    }
+    // Asked again: another ayah's ask may have planned this one's run
+    // while the table was read.
+    for (var r = busy(); kept() == null && r != null; r = busy()) {
+      await r.done;
+    }
+    final c = kept();
+    if (c != null) return c;
+
+    // Never into a run already kept or on its way: an ayah in two runs
+    // could be heard from either, and the player would change files.
+    var stop = math.min(table.length, _nextKeptRun(live, tag, ayah) - 1);
+    for (final r in runs) {
+      if (r.first > ayah) stop = math.min(stop, r.first - 1);
+    }
+    // A run that carries on from one before it is a long one; the first
+    // of a listen is short, so it sounds at once.
+    final carriesOn = _keptRunClip(live, tag, ayah - 1) != null ||
+        runs.any((r) => r.first <= ayah - 1 && ayah - 1 <= r.last);
+    final last = liveRunEnd([for (final t in table) t.durationMs], ayah, stop,
+        carriesOn: carriesOn);
+    final out = File('${live.path}/run_${ayah}_$last.$tag.mp3');
+    final note = File('${out.path}.json');
+    Future<void> fetch() async {
+      final client = _surahClient(dir, source, surah);
+      try {
+        final at = await SurahSlice.fetch(client, source.url(surah), lay, out,
+            fromMs: w.startMs, toMs: table[last - 1].endMs);
+        // Each ayah's window in the run, kept beside it: a second listen
+        // fetches nothing, and needs no network to find its place.
+        await writeWhole(
+            note,
+            jsonEncode({
+              'o': at.round(),
+              'w': [
+                for (var a = ayah; a <= last; a++)
+                  [
+                    math.max(0, (table[a - 1].startMs - at).round()),
+                    (table[a - 1].endMs - at).round(),
+                  ],
+              ],
+            }));
+      } catch (_) {
+        _deleteQuietly(note);
+        _deleteQuietly(out);
+        rethrow;
+      } finally {
+        client.close();
+      }
+      _dropOldLive(live, tag, fetching: runs);
+    }
+
+    final job = fetch();
+    final run = _LiveRun(ayah, last, job.then<void>((_) {}, onError: (_) {}));
+    runs.add(run);
+    try {
+      await job;
+    } finally {
+      runs.remove(run);
+    }
+    return kept() ?? (throw StateError('run $ayah–$last of $surah not kept'));
+  }
+
+  /// The last ayah of the listen's run from [ayah], given every ayah's
+  /// length in [ms] (ayah 1 first), the last ayah the run may reach,
+  /// [stop], and whether it [carriesOn] from a run before it.
+  @visibleForTesting
+  static int liveRunEnd(List<int> ms, int ayah, int stop,
+      {required bool carriesOn}) {
+    int span(int from, int to) {
+      var total = 0;
+      for (var a = from; a <= to; a++) {
+        total += ms[a - 1];
+      }
+      return total;
+    }
+
+    if (span(ayah, stop) <= liveWholeRestMs) return stop;
+    final target = carriesOn ? liveRunMs : liveFirstRunMs;
+    var last = ayah;
+    var got = ms[ayah - 1];
+    while (last < stop && got < target) {
+      last++;
+      got += ms[last - 1];
+    }
+    // And no short run left behind it.
+    return span(last + 1, stop) <= liveFirstRunMs ? stop : last;
+  }
+
+  static final _runName = RegExp(r'^run_(\d+)_(\d+)\.(\w+)\.mp3\.json$');
+
+  /// [ayah]'s clip in a run kept in [live] under [tag], or null.
+  static LiveClip? _keptRunClip(Directory live, String tag, int ayah) {
+    if (ayah < 1) return null;
+    try {
+      for (final e in live.listSync()) {
+        final m = _runName.firstMatch(e.uri.pathSegments.last);
+        if (e is! File || m == null || m.group(3) != tag) continue;
+        final first = int.parse(m.group(1)!), last = int.parse(m.group(2)!);
+        if (ayah < first || ayah > last) continue;
+        final audio = File(e.path.substring(0, e.path.length - 5));
+        if (!audio.existsSync() || audio.lengthSync() == 0) continue;
+        final j = jsonDecode(e.readAsStringSync()) as Map<String, dynamic>;
+        final w = (j['w'] as List)[ayah - first] as List;
+        return LiveClip(
+            ayah, audio.path, (w[0] as num).toInt(), (w[1] as num).toInt(),
+            originMs: (j['o'] as num).toInt());
+      }
+    } catch (_) {
+      // Unreadable: fetched again.
+    }
+    return null;
+  }
+
+  /// The first ayah of the first run kept in [live] under [tag] that
+  /// starts after [ayah]; past the surah's end when there is none.
+  static int _nextKeptRun(Directory live, String tag, int ayah) {
+    var next = 1 << 30;
+    try {
+      for (final e in live.listSync()) {
+        final m = _runName.firstMatch(e.uri.pathSegments.last);
+        if (m == null || m.group(3) != tag) continue;
+        final first = int.parse(m.group(1)!);
+        if (first > ayah && first < next) next = first;
+      }
+    } catch (_) {}
+    return next;
+  }
+
+  /// Every listen file in [live] but the runs cut by [tag]'s table (all
+  /// of them, for no tag), and the parts of the runs still [fetching]:
+  /// the one-ayah files of the listen before runs, runs cut by a table
+  /// since replaced, and the parts of fetches that never finished.
+  static void _dropOldLive(Directory live, String? tag,
+      {Iterable<_LiveRun> fetching = const []}) {
+    final busy = {
+      for (final r in fetching) 'run_${r.first}_${r.last}.$tag.mp3'
+    };
+    try {
+      for (final e in live.listSync()) {
+        if (e is! File) continue;
+        final run = _anyRunFile.firstMatch(e.uri.pathSegments.last);
+        final keep = tag != null &&
+            run != null &&
+            run.group(2) == tag &&
+            (run.group(3) == null || busy.contains(run.group(1)));
+        if (!keep) e.deleteSync();
+      }
+    } catch (_) {}
+  }
+
+  static final _anyRunFile =
+      RegExp(r'^(run_\d+_\d+\.(\w+)\.mp3)(\.part)?(?:\.json)?$');
 
   /// The ayah table of a surah-file voice's [surah] — the whole
   /// timeline, exact, before a byte of audio has come — or null for a
@@ -1819,6 +2000,15 @@ class LiveClip {
       : windowMs = windowMs ?? fromMs;
 
   int get durationMs => toMs - fromMs;
+}
+
+/// A run of a surah-file voice's listen being fetched: ayahs [first] to
+/// [last] in one file, and when it is done (failed or not).
+class _LiveRun {
+  final int first;
+  final int last;
+  final Future<void> done;
+  const _LiveRun(this.first, this.last, this.done);
 }
 
 /// One in-flight fetch, and everybody waiting on it.

@@ -1004,7 +1004,7 @@ class _VersesScreenState extends State<VersesScreen>
           final isEdge = a.number == _start || a.number == _end;
           final reciting = a.number == lit;
           final here = reciting && _previewAyah == null;
-          return _VerseTile(
+          final tile = _VerseTile(
             key: _keyFor(a.number),
             ayah: a,
             selected: selected,
@@ -1019,8 +1019,108 @@ class _VersesScreenState extends State<VersesScreen>
             onLongPress: () => _extendTo(a.number),
             onListen: live == null ? null : () => _listenFrom(a.number),
           );
+          if (a.number != 1) return tile;
+          // A run from the surah's first verse: whether the reel opens on
+          // the basmala, asked where that verse is chosen.
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AnimatedSize(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                alignment: Alignment.topCenter,
+                child: _basmalaOffered
+                    ? const Padding(
+                        padding: EdgeInsets.only(bottom: 10),
+                        child: _BasmalaChip(),
+                      )
+                    : const SizedBox(width: double.infinity),
+              ),
+              tile,
+            ],
+          );
         },
       ),
+    );
+  }
+
+  /// Whether the reel can open on the basmala: it starts on the surah's
+  /// first verse, in a surah with a basmala of its own (Al-Fatiha's
+  /// first verse is the basmala, and At-Tawbah has none), recited by an
+  /// app voice rather than brought in by the user. The preview's rule.
+  bool get _basmalaOffered =>
+      _start == 1 &&
+      _surah != 1 &&
+      _surah != 9 &&
+      !(creationState.reciter?.isUserAudio ?? true);
+}
+
+/// Whether a reel from a surah's first verse opens on the reciter's
+/// basmala: Customize's switch, offered above the verse it is about.
+class _BasmalaChip extends StatelessWidget {
+  const _BasmalaChip();
+
+  static void _flip(bool on) {
+    HapticFeedback.selectionClick();
+    SettingsService.update(SettingsService.state.value.copyWith(basmala: !on));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    return ValueListenableBuilder<AppSettings>(
+      valueListenable: SettingsService.state,
+      builder: (context, s, _) {
+        final on = s.basmala;
+        final ink = on ? AppColors.goldBright : AppColors.textSecondary;
+        return Center(
+          child: A11yTap(
+            label: l.includeBasmala,
+            toggled: on,
+            onTap: () => _flip(on),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => _flip(on),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOutCubic,
+                height: 32,
+                padding: const EdgeInsetsDirectional.fromSTEB(10, 0, 14, 0),
+                decoration: BoxDecoration(
+                  color: on
+                      ? AppColors.gold.withValues(alpha: 0.10)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: on
+                        ? AppColors.gold.withValues(alpha: 0.45)
+                        : AppColors.stroke,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      on ? Icons.check_circle_rounded : Icons.circle_outlined,
+                      size: 16,
+                      color: ink,
+                    ),
+                    const SizedBox(width: 7),
+                    Text(
+                      l.includeBasmala,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: ink,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

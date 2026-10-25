@@ -6144,15 +6144,20 @@ class L10n {
       '$app ist nicht auf diesem Handy');
 
   /// Customize: the basmala before a surah's first verse.
-  String get basmalaTitle => _t('Basmala before verse 1',
+  String get basmalaTitle => _t('Bismillah before verse 1',
       'البسملة قبل الآية الأولى', 'پہلی آیت سے پہلے بسم اللہ',
       'Basmalah sebelum ayat 1', 'Basmala vor Vers 1');
   String get basmalaNote => _t(
-      'A reel from a surah’s first verse opens with the reciter’s own basmala',
+      'A reel from a surah’s first verse opens with the reciter’s own Bismillah',
       'المقطع من أول آية في السورة يبدأ ببسملة القارئ نفسه',
       'سورت کی پہلی آیت سے ریل قاری کی اپنی بسم اللہ سے شروع ہوتی ہے',
       'Reel dari ayat pertama surah dibuka dengan basmalah sang qari',
       'Ein Reel ab dem ersten Vers einer Sure beginnt mit der Basmala des Rezitators');
+
+  /// The verse picker, above a surah's first verse once it is chosen:
+  /// the same switch as [basmalaTitle].
+  String get includeBasmala => _t('Include Bismillah', 'تضمين البسملة',
+      'بسم اللہ شامل کریں', 'Sertakan Basmalah', 'Mit Basmala');
 
   /// The style step's panel for the surah's name.
   String get styleTabName => _t('Name', 'الاسم', 'نام', 'Nama', 'Name');

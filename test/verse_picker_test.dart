@@ -8,6 +8,7 @@ import 'package:ayah_reels/data/quran_repository.dart';
 import 'package:ayah_reels/data/quran_text_service.dart';
 import 'package:ayah_reels/data/reel_duration.dart';
 import 'package:ayah_reels/data/reel_limits.dart';
+import 'package:ayah_reels/data/settings_service.dart';
 import 'package:ayah_reels/l10n/l10n.dart';
 import 'package:ayah_reels/screens/verses_screen.dart';
 import 'package:ayah_reels/state/creation_state.dart';
@@ -391,6 +392,73 @@ void main() {
       await holdAyah(t, 5);
       expect(creationState.endAyah, 4);
       expect(find.text(l.reelCapReached), findsOneWidget);
+    });
+  });
+
+  group('the basmala, asked above a surah\'s first verse', () {
+    setUp(() {
+      QuranTextService.seed(2, [
+        for (var n = 1; n <= 5; n++)
+          Ayah(
+            number: n,
+            arabic: 'ذَٰلِكَ ٱلْكِتَـٰبُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِّلْمُتَّقِينَ',
+            translation: 'Verse $n.',
+          ),
+      ]);
+      creationState
+        ..selectSurah(2)
+        ..debugForgetRange();
+      SettingsService.state.value = AppSettings.defaults;
+    });
+    tearDown(() {
+      QuranTextService.seed(2, null);
+      SettingsService.state.value = AppSettings.defaults;
+    });
+
+    testWidgets('once verse 1 is chosen, and it is Customize\'s switch',
+        (t) async {
+      sizeTallPhone(t);
+      await t.pumpWidget(host());
+      await t.pump();
+      expect(find.text(l.includeBasmala), findsNothing);
+
+      await tapAyah(t, 1);
+      expect(find.text(l.includeBasmala), findsOneWidget);
+      expect(SettingsService.state.value.basmala, isTrue);
+
+      await t.tap(find.text(l.includeBasmala));
+      await t.pump(const Duration(milliseconds: 300));
+      expect(SettingsService.state.value.basmala, isFalse);
+      await t.tap(find.text(l.includeBasmala));
+      await t.pump(const Duration(milliseconds: 300));
+      expect(SettingsService.state.value.basmala, isTrue);
+
+      // Still a run from verse 1 when it grows.
+      await tapAyah(t, 3);
+      expect(creationState.endAyah, 3);
+      expect(find.text(l.includeBasmala), findsOneWidget);
+    });
+
+    testWidgets('not for a run that starts later', (t) async {
+      sizeTallPhone(t);
+      await t.pumpWidget(host());
+      await t.pump();
+      await tapAyah(t, 2);
+      expect(creationState.startAyah, 2);
+      expect(find.text(l.includeBasmala), findsNothing);
+    });
+
+    testWidgets('not in Al-Fatiha, whose first verse is the basmala',
+        (t) async {
+      creationState
+        ..selectSurah(1)
+        ..debugForgetRange();
+      sizeTallPhone(t);
+      await t.pumpWidget(host());
+      await t.pump();
+      await tapAyah(t, 1);
+      expect(creationState.startAyah, 1);
+      expect(find.text(l.includeBasmala), findsNothing);
     });
   });
 
