@@ -48,6 +48,48 @@ enum ScenePacing {
   perLine,
 }
 
+/// Where a scenery was matched to the reel: the verse, and the word
+/// (display token, from 0) its line starts on — 0 for a verse matched
+/// whole.
+///
+/// What keeps a matched scenery on its verse whatever happens to the
+/// rest of the run: a scenery that could not be fetched, lines that
+/// come out longer or shorter than the estimate they were matched on,
+/// the basmala's card in front. Dealing the run out in order slid every
+/// scenery after any of those onto its neighbour's verse — the rain on
+/// the verse of the mountains, and the mountains on the rain.
+@immutable
+class SceneAnchor implements Comparable<SceneAnchor> {
+  final int ayah;
+  final int token;
+
+  const SceneAnchor(this.ayah, [this.token = 0]);
+
+  @override
+  int compareTo(SceneAnchor other) =>
+      ayah != other.ayah ? ayah - other.ayah : token - other.token;
+
+  List<int> toJson() => [ayah, token];
+
+  /// Null for anything that is not one.
+  static SceneAnchor? fromJson(Object? j) {
+    if (j is! List || j.length != 2 || j[0] is! int || j[1] is! int) {
+      return null;
+    }
+    return SceneAnchor(j[0] as int, j[1] as int);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is SceneAnchor && other.ayah == ayah && other.token == token;
+
+  @override
+  int get hashCode => Object.hash(ayah, token);
+
+  @override
+  String toString() => 'SceneAnchor($ayah:$token)';
+}
+
 /// How one scene gives way to the next.
 enum SceneTransition {
   /// Straight cut on the boundary.
@@ -189,6 +231,12 @@ class CreationState extends ChangeNotifier {
   /// scene takes a bigger share of what it is competing for — see
   /// [sceneWeights].
   final List<int> _sceneWeights = [];
+
+  /// Where the verses' own choice put each scenery, by scenery id; see
+  /// [SceneAnchor]. Only a matched run has them, and any scenery added
+  /// by hand, or a share given by hand, lets them all go: the run is
+  /// then the user's, dealt out in the order they picked.
+  final Map<String, SceneAnchor> _anchors = {};
   bool _multiScene = false;
   /// A process's first reel starts where [startNewReel] starts every
   /// other: following the lines when Settings has them and asks for it.
@@ -302,6 +350,11 @@ class CreationState extends ChangeNotifier {
   /// even hand, 2 is twice its neighbours' share. Always as long as
   /// [scenes].
   List<int> get sceneWeights => List.unmodifiable(_sceneWeights);
+
+  /// Each scenery's [SceneAnchor], in the order of [scenes]: all of
+  /// them for a run the verses matched, else nulls.
+  List<SceneAnchor?> get sceneAnchors =>
+      [for (final b in _scenes) _anchors[b.id]];
 
   /// How several sceneries divide the reel. See [ScenePacing].
   ScenePacing get pacing => _pacing;
@@ -687,6 +740,7 @@ class CreationState extends ChangeNotifier {
   void selectBackground(ReelBackground b) {
     _background = b;
     _backgroundChosen = true;
+    _anchors.clear();
     _scenes
       ..clear()
       ..add(b);
@@ -721,6 +775,7 @@ class CreationState extends ChangeNotifier {
   /// is the same scenery being re-seated, not a choice being undone.
   void seedBackground(ReelBackground b) {
     _background = b;
+    _anchors.clear();
     _scenes
       ..clear()
       ..add(b);
@@ -737,6 +792,7 @@ class CreationState extends ChangeNotifier {
     final w = weight.clamp(1, 3);
     if (_sceneWeights[index] == w) return;
     _sceneWeights[index] = w;
+    _anchors.clear();
     notifyListeners();
   }
 
@@ -758,6 +814,7 @@ class CreationState extends ChangeNotifier {
       return true;
     }
     if (_scenes.length >= limit) return false;
+    _anchors.clear();
     _scenes.add(b);
     // A scene joins on an even footing; giving it more room is a
     // separate decision, made where the reel can be seen.
@@ -766,6 +823,42 @@ class CreationState extends ChangeNotifier {
     _backgroundChosen = true;
     notifyListeners();
     return true;
+  }
+
+  /// The run the verses chose: [scenes] in reel order, each pinned by
+  /// [anchors] to the verse — or line — it was chosen for, on even
+  /// shares. Several put the picker into multi-scene mode; one is a
+  /// single-scenery reel.
+  void setMatchedScenes(
+      List<ReelBackground> scenes, List<SceneAnchor> anchors) {
+    if (scenes.isEmpty) return;
+    _scenes
+      ..clear()
+      ..addAll(scenes);
+    _sceneWeights
+      ..clear()
+      ..addAll([for (final _ in scenes) 1]);
+    _anchors.clear();
+    if (scenes.length > 1) {
+      _multiScene = true;
+      for (var i = 0; i < scenes.length && i < anchors.length; i++) {
+        _anchors[scenes[i].id] = anchors[i];
+      }
+    }
+    _background = scenes.first;
+    _backgroundChosen = true;
+    notifyListeners();
+  }
+
+  /// Pins the run's sceneries again — a saved reel's, when it is made
+  /// again — by scenery id. Ids not in the run are ignored.
+  void restoreSceneAnchors(Map<String, SceneAnchor> anchors) {
+    _anchors.clear();
+    for (final b in _scenes) {
+      final a = anchors[b.id];
+      if (a != null) _anchors[b.id] = a;
+    }
+    notifyListeners();
   }
 
   /// Drops scenes the reel no longer has verses for.
@@ -810,6 +903,7 @@ class CreationState extends ChangeNotifier {
     _multiScene = on;
     if (!on && _scenes.length > 1) {
       final first = _scenes.first;
+      _anchors.clear();
       _scenes
         ..clear()
         ..add(first);
@@ -888,6 +982,7 @@ class CreationState extends ChangeNotifier {
     // A run collapses to the scenery it opened on rather than emptying:
     // the scenery screen re-seeds from this, and a null background is a
     // state the wizard only ever passes through.
+    _anchors.clear();
     if (_scenes.length > 1) {
       final first = _scenes.first;
       _scenes

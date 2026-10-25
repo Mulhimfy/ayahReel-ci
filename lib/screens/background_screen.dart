@@ -171,11 +171,16 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
 
   /// The text of each line of the selection when its long verses go
   /// line by line; null when every verse is shown whole.
-  List<String>? _lineTexts(List<Ayah> ayahs) {
+  List<String>? _lineTexts(List<Ayah> ayahs) =>
+      _lineParts(ayahs)?.map((p) => p.text).toList();
+
+  /// [_lineTexts], each with the verse it is from and the token it
+  /// starts on: where a scenery chosen for the line is anchored.
+  List<({int ayah, int token, String text})>? _lineParts(List<Ayah> ayahs) {
     final s = creationState;
     if (s.verseLines == VerseLines.whole) return null;
     final settings = SettingsService.state.value;
-    return VersePlanner.estimateLines(
+    return VersePlanner.estimateParts(
       ayahs,
       s.startAyah,
       s.endAyah,
@@ -422,7 +427,16 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
       final limit = _sceneLimit;
       // With long verses going line by line and the scenery following
       // them, every line chooses its own scenery from its own words.
-      final lines = _followsLines ? _lineTexts(ayahs) : null;
+      final parts = _followsLines ? _lineParts(ayahs) : null;
+      final lines = parts?.map((p) => p.text).toList();
+      // Where each choice belongs: its verse, and with lines the word its
+      // line starts on. See [SceneAnchor].
+      SceneAnchor anchorOf(ScenePick p) {
+        if (parts == null) return SceneAnchor(p.firstAyah);
+        final line = parts[p.firstAyah - 1];
+        return SceneAnchor(line.ayah, line.token);
+      }
+
       final source = lines == null
           ? ayahs
           : [
@@ -461,15 +475,42 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
       if (!mounted) return;
       final resolved = <ReelBackground>[];
       final kept = <ScenePick>[];
+      final anchors = <SceneAnchor>[];
+      final used = {for (final p in picks) p.scene.id};
       for (var i = 0; i < picks.length; i++) {
         final scene = picks[i].scene;
-        if (scene.bundled) {
-          resolved.add(SceneCatalog.background(scene));
-          kept.add(picks[i]);
-        } else if (files[i] != null) {
+        if (scene.bundled || files[i] != null) {
           resolved.add(SceneCatalog.background(scene, file: files[i]));
           kept.add(picks[i]);
+          anchors.add(anchorOf(picks[i]));
+          continue;
         }
+        // Not fetched: the same words choose again among the sceneries
+        // on the phone, so the verse still shows what it says. Dropping
+        // it slid every scenery after it onto the verse before its own.
+        final again = SceneMatcher.match(
+          ayahs: source,
+          startAyah: picks[i].firstAyah,
+          endAyah: picks[i].lastAyah,
+          count: 1,
+          wide: wide,
+          catalog: [
+            for (final s in SceneCatalog.all)
+              if (!used.contains(s.id) &&
+                  (s.bundled || ready.contains(s.id)))
+                s,
+          ],
+          ready: ready,
+        );
+        if (again.isEmpty) continue;
+        final sub = again.first.scene;
+        final file = sub.bundled ? null : await SceneCatalog.cachedFile(sub);
+        if (!mounted) return;
+        if (!sub.bundled && file == null) continue;
+        used.add(sub.id);
+        resolved.add(SceneCatalog.background(sub, file: file));
+        kept.add(again.first);
+        anchors.add(anchorOf(picks[i]));
       }
       if (resolved.isEmpty) {
         messenger.showSnackBar(_toast(l.matchedNothing, tone: ToastTone.problem));
@@ -479,12 +520,9 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
       if (wide && creationState.layout != ReelLayout.letterbox) {
         creationState.setLayout(ReelLayout.letterbox);
       }
-      creationState.dropScenes((_) => false);
       if (resolved.length > 1) {
-        creationState.setMultiScene(true);
-        for (final b in resolved) {
-          creationState.toggleScene(b, limit: resolved.length);
-        }
+        // Each on the verse — or line — it was chosen for.
+        creationState.setMatchedScenes(resolved, anchors);
         // Picked a line at a time, so dealt out a line at a time: the
         // scenery changes as each line comes on.
         if (lines != null) creationState.setPacing(ScenePacing.perLine);

@@ -273,11 +273,18 @@ abstract final class VersePlanner {
   /// whose cuts end up untimeable is shown whole, so this is the most
   /// there will be.
   static List<String> estimateLines(List<Ayah> ayahs, int start, int end,
-      int lines, VerseLook look) {
+          int lines, VerseLook look) =>
+      [for (final p in estimateParts(ayahs, start, end, lines, look)) p.text];
+
+  /// [estimateLines], each with the verse it is from and the display
+  /// token it starts on (0 for a verse shown whole): where a scenery
+  /// chosen for a line belongs, whatever the lines come to later.
+  static List<({int ayah, int token, String text})> estimateParts(
+      List<Ayah> ayahs, int start, int end, int lines, VerseLook look) {
     final key = '$start-$end-$lines-${look.key}-${ayahs.length}';
     final hit = _estimates[key];
     if (hit != null) return hit;
-    final out = <String>[];
+    final out = <({int ayah, int token, String text})>[];
     for (var a = start; a <= end && a - 1 < ayahs.length; a++) {
       final text = ayahs[a - 1].arabic;
       final tokens = VerseText.tokens(text);
@@ -286,10 +293,14 @@ abstract final class VersePlanner {
           : VerseSplitter.split(
               tokens, (s, e) => linesOf(tokens, s, e, look, a) <= lines);
       if (cuts == null) {
-        out.add(text);
+        out.add((ayah: a, token: 0, text: text));
       } else {
         for (var i = 0; i < cuts.length - 1; i++) {
-          out.add(tokens.sublist(cuts[i], cuts[i + 1]).join(' '));
+          out.add((
+            ayah: a,
+            token: cuts[i],
+            text: tokens.sublist(cuts[i], cuts[i + 1]).join(' '),
+          ));
         }
       }
     }
@@ -302,9 +313,10 @@ abstract final class VersePlanner {
           VerseLook look) =>
       lines <= VerseLines.whole
           ? end - start + 1
-          : estimateLines(ayahs, start, end, lines, look).length;
+          : estimateParts(ayahs, start, end, lines, look).length;
 
-  static final _estimates = <String, List<String>>{};
+  static final _estimates =
+      <String, List<({int ayah, int token, String text})>>{};
 
   /// [ayah] as if recited at an even pace — every letter as long as the
   /// next, a breath before each line — and cut the way [plan] cuts it

@@ -116,6 +116,11 @@ abstract final class ScenePlan {
   /// verse cut into lines standing as its parts (see [VerseUnit]). Read
   /// only by [ScenePacing.perLine]; without them that pacing is per
   /// verse.
+  ///
+  /// [anchors], one per scene, put a run the verses matched back on the
+  /// verses it was matched for (see [SceneAnchor]); weights do not
+  /// apply to it. Without them, or under [ScenePacing.even], the run is
+  /// dealt out in order.
   static List<SceneCut> of({
     required int sceneCount,
     required Recitation recitation,
@@ -124,6 +129,7 @@ abstract final class ScenePlan {
     ScenePacing pacing = ScenePacing.perAyah,
     List<int> weights = const [],
     List<VerseUnit>? units,
+    List<SceneAnchor?> anchors = const [],
   }) {
     final slots = slotsFor(
       recitation: recitation,
@@ -134,6 +140,10 @@ abstract final class ScenePlan {
     );
     final segMs = recitation.timing(endAyah).endMs -
         recitation.startOf(startAyah);
+    if (pacing != ScenePacing.even &&
+        _placeable(anchors, sceneCount, startAyah, endAyah)) {
+      return _anchored([for (final a in anchors) a!], slots);
+    }
     final n = sceneCount.clamp(1, maxScenes(slots.length, segMs: segMs));
     final w = _weightsFor(n, weights);
     return pacing == ScenePacing.even
@@ -144,7 +154,7 @@ abstract final class ScenePlan {
   /// What a pacing deals scenes out over: a slot per verse, or — a scene
   /// per line — one per unit, so a verse cut into three lines is three
   /// slots.
-  static List<({int startMs, int endMs, int ayah})> slotsFor({
+  static List<({int startMs, int endMs, int ayah, int token})> slotsFor({
     required Recitation recitation,
     required int startAyah,
     required int endAyah,
@@ -154,7 +164,12 @@ abstract final class ScenePlan {
     if (pacing == ScenePacing.perLine && units != null && units.isNotEmpty) {
       return [
         for (final u in units)
-          (startMs: u.startMs, endMs: u.endMs, ayah: u.ayah),
+          (
+            startMs: u.startMs,
+            endMs: u.endMs,
+            ayah: u.ayah,
+            token: u.part?.tokenStart ?? 0,
+          ),
       ];
     }
     return [
@@ -166,6 +181,7 @@ abstract final class ScenePlan {
               : recitation.timing(a).startMs,
           endMs: recitation.timing(a).endMs,
           ayah: a,
+          token: 0,
         ),
     ];
   }
@@ -264,7 +280,7 @@ abstract final class ScenePlan {
   static List<SceneCut> _perSlot(
     int n,
     List<int> weights,
-    List<({int startMs, int endMs, int ayah})> slots,
+    List<({int startMs, int endMs, int ayah, int token})> slots,
   ) {
     final count = slots.length;
     if (n <= count) {
@@ -307,6 +323,83 @@ abstract final class ScenePlan {
       }
       scene += take;
     }
+    return cuts;
+  }
+
+  /// Whether [anchors] can place a run of [count] sceneries: one each,
+  /// inside the reel's verses, in reel order. A run picked by hand has
+  /// none, and a run matched for other verses is dealt out as one.
+  static bool _placeable(
+      List<SceneAnchor?> anchors, int count, int startAyah, int endAyah) {
+    if (count < 2 || anchors.length != count) return false;
+    SceneAnchor? before;
+    for (final a in anchors) {
+      if (a == null || a.ayah < startAyah || a.ayah > endAyah) return false;
+      if (before != null && a.compareTo(before) <= 0) return false;
+      before = a;
+    }
+    return true;
+  }
+
+  /// Every scenery from the slot its anchor falls in — the verse, or
+  /// the line holding the word its line started on when it was matched
+  /// — to the next scenery's.
+  ///
+  /// A slot no scenery is anchored in stays with the one before it: the
+  /// verse of a scenery that could not be fetched, a line the estimate
+  /// did not have. The slots ahead of the first anchor (the basmala's
+  /// card) open on the first. Sceneries anchored in one slot — lines
+  /// matched one by one, a verse now shown whole — share it evenly.
+  /// Every scenery is on screen, each on its own verse.
+  static List<SceneCut> _anchored(
+    List<SceneAnchor> anchors,
+    List<({int startMs, int endMs, int ayah, int token})> slots,
+  ) {
+    bool atOrBefore(({int startMs, int endMs, int ayah, int token}) s,
+            SceneAnchor a) =>
+        s.ayah < a.ayah || (s.ayah == a.ayah && s.token <= a.token);
+    final own = [for (final _ in slots) <int>[]];
+    var k = 0;
+    for (var i = 0; i < anchors.length; i++) {
+      while (k + 1 < slots.length && atOrBefore(slots[k + 1], anchors[i])) {
+        k++;
+      }
+      own[k].add(i);
+    }
+    final cuts = <SceneCut>[];
+    var scene = 0;
+    var from = slots.first.startMs;
+    var firstAyah = slots.first.ayah;
+    var lastAyah = firstAyah;
+    void close(int at) {
+      cuts.add(SceneCut(
+        scene: scene,
+        startMs: from,
+        endMs: at,
+        firstAyah: firstAyah,
+        lastAyah: lastAyah,
+      ));
+    }
+
+    for (var j = 0; j < slots.length; j++) {
+      final slot = slots[j];
+      final mine = own[j];
+      if (mine.isNotEmpty) {
+        final edges =
+            _slice(slot.startMs, slot.endMs, [for (final _ in mine) 1]);
+        for (var m = 0; m < mine.length; m++) {
+          // The first scenery has held the reel since its start.
+          if (mine[m] == 0) continue;
+          close(edges[m]);
+          scene = mine[m];
+          from = edges[m];
+          firstAyah = slot.ayah;
+          lastAyah = slot.ayah;
+        }
+      }
+      lastAyah = slot.ayah;
+    }
+    close(slots.last.endMs);
     return cuts;
   }
 

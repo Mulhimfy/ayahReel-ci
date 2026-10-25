@@ -62,6 +62,36 @@ void main() {
       expect(SceneMatcher.read('قُلْ هُوَ ٱللَّهُ أَحَدٌ'), isEmpty);
     });
 
+    test('words the lexicon would read in the wrong sense read as nothing',
+        () {
+      // "In His hand", "the comfort of eyes", "rank on rank", "the
+      // accursed", "shaped you": none of them a desert, the snow, a
+      // mountain or the fire, and each used to pick one.
+      const misread = {
+        'تَبَـٰرَكَ ٱلَّذِى بِيَدِهِ ٱلْمُلْكُ': 'desert',
+        'هَبْ لَنَا مِنْ أَزْوَٰجِنَا وَذُرِّيَّـٰتِنَا قُرَّةَ أَعْيُنٍ': 'snow',
+        'وَجَآءَ رَبُّكَ وَٱلْمَلَكُ صَفًّا صَفًّا': 'mountain',
+        'فَٱسْتَعِذْ بِٱللَّهِ مِنَ ٱلشَّيْطَـٰنِ ٱلرَّجِيمِ': 'mountain',
+        'وَصَوَّرَكُمْ فَأَحْسَنَ صُوَرَكُمْ': 'fire',
+        'لَتُفْسِدُنَّ فِى ٱلْأَرْضِ مَرَّتَيْنِ وَلَتَعْلُنَّ عُلُوًّا كَبِيرًا':
+            'mountain',
+      };
+      for (final e in misread.entries) {
+        expect(SceneMatcher.read(e.key).map((r) => r.motif.id),
+            isNot(contains(e.value)),
+            reason: e.key);
+      }
+      // While the rain and the mountains are still read as themselves.
+      expect(
+          SceneMatcher.read('وَأَنزَلْنَا مِنَ ٱلْمُعْصِرَٰتِ مَآءً ثَجَّاجًا')
+              .first
+              .motif
+              .id,
+          'rain');
+      expect(SceneMatcher.read('وَٱلْجِبَالَ أَوْتَادًا').first.motif.id,
+          'mountain');
+    });
+
     test('the evidence is the word as written in the verse', () {
       final r = SceneMatcher.read('وَٱلْجِبَالَ أَوْتَادًا').first;
       expect(r.evidence, 'وَٱلْجِبَالَ');

@@ -197,6 +197,10 @@ class _PreviewScreenState extends State<PreviewScreen>
   /// list rather than the singleton mid-gesture.
   List<int> _weights = creationState.sceneWeights;
 
+  /// Where the verses' own choice put each scenery, for a matched run;
+  /// see [SceneAnchor]. A share given by hand lets them go.
+  List<SceneAnchor?> _anchors = creationState.sceneAnchors;
+
   /// Whether the scene controls are unfolded. Shut by default: a reel
   /// that runs a scene per verse needs nothing said about it.
   bool _scenesOpen = false;
@@ -765,6 +769,7 @@ class _PreviewScreenState extends State<PreviewScreen>
         pacing: _pacing,
         weights: _weights,
         units: _units,
+        anchors: _anchors,
       ),
       _reelEndMs,
     );
@@ -1855,7 +1860,10 @@ class _PreviewScreenState extends State<PreviewScreen>
     HapticFeedback.mediumImpact();
     final before = _cuts;
     creationState.setSceneWeight(scene, next);
-    setState(() => _weights = creationState.sceneWeights);
+    setState(() {
+      _weights = creationState.sceneWeights;
+      _anchors = creationState.sceneAnchors;
+    });
     _replan(drop: true);
     _checkSceneLengths();
     // Per-verse cuts land on ayah boundaries, so a reel with a scene

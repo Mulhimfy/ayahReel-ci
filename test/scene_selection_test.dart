@@ -177,4 +177,36 @@ void main() {
     expect(creationState.textScale, 1.4);
     expect(creationState.textPreset, TextPreset.glow);
   });
+
+  test('a matched run is pinned to its verses until it is changed by hand',
+      () {
+    final run = [scene('a'), scene('b'), scene('c')];
+    creationState.setMatchedScenes(
+        run, const [SceneAnchor(1), SceneAnchor(2, 4), SceneAnchor(3)]);
+    expect(creationState.multiScene, isTrue);
+    expect(creationState.scenes, run);
+    expect(creationState.sceneAnchors,
+        const [SceneAnchor(1), SceneAnchor(2, 4), SceneAnchor(3)]);
+
+    // One taken out: the others stay where they were.
+    creationState.toggleScene(scene('b'), limit: 7);
+    expect(creationState.sceneAnchors, const [SceneAnchor(1), SceneAnchor(3)]);
+
+    // One added by hand: the run is the user's now, dealt in order.
+    creationState.toggleScene(scene('d'), limit: 7);
+    expect(creationState.sceneAnchors, [null, null, null]);
+
+    // And a share given by hand lets them go too.
+    creationState.setMatchedScenes(run, const [
+      SceneAnchor(1),
+      SceneAnchor(2),
+      SceneAnchor(3),
+    ]);
+    creationState.setSceneWeight(0, 2);
+    expect(creationState.sceneAnchors, [null, null, null]);
+
+    // A single match is a single scenery: nothing to pin.
+    creationState.setMatchedScenes([scene('e')], const [SceneAnchor(1)]);
+    expect(creationState.sceneAnchors, [null]);
+  });
 }

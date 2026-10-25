@@ -35,6 +35,10 @@ class ReelRecipe {
   /// / `video:<path>` for the user's own.
   final List<String> scenes;
   final List<int> sceneWeights;
+
+  /// Where the verses' own choice put each scenery, in the order of
+  /// [scenes]; empty for a run picked by hand. See [SceneAnchor].
+  final List<SceneAnchor?> sceneAnchors;
   final bool multiScene;
   final ScenePacing pacing;
   final SceneTransition transition;
@@ -109,6 +113,7 @@ class ReelRecipe {
     required this.endAyah,
     required this.scenes,
     required this.sceneWeights,
+    this.sceneAnchors = const [],
     required this.multiScene,
     required this.pacing,
     required this.transition,
@@ -164,6 +169,7 @@ class ReelRecipe {
         endAyah: s.endAyah,
         scenes: [for (final b in s.scenes) sceneRef(b)],
         sceneWeights: s.sceneWeights,
+        sceneAnchors: s.sceneAnchors,
         multiScene: s.multiScene,
         pacing: s.pacing,
         transition: s.transition,
@@ -204,6 +210,8 @@ class ReelRecipe {
         'endAyah': endAyah,
         'scenes': scenes,
         'sceneWeights': sceneWeights,
+        if (sceneAnchors.any((a) => a != null))
+          'sceneAnchors': [for (final a in sceneAnchors) a?.toJson()],
         'multiScene': multiScene,
         'pacing': pacing.name,
         'transition': transition.name,
@@ -260,6 +268,10 @@ class ReelRecipe {
         endAyah: j['endAyah'] as int? ?? 1,
         scenes: ((j['scenes'] as List?) ?? const []).cast<String>(),
         sceneWeights: ((j['sceneWeights'] as List?) ?? const []).cast<int>(),
+        sceneAnchors: [
+          for (final a in (j['sceneAnchors'] as List?) ?? const [])
+            SceneAnchor.fromJson(a),
+        ],
         multiScene: j['multiScene'] as bool? ?? false,
         pacing: _enum(ScenePacing.values, j['pacing'], ScenePacing.perAyah),
         transition: _enum(
@@ -368,5 +380,14 @@ class ReelRecipe {
       final at = from == null ? i : from[i];
       if (at < sceneWeights.length) s.setSceneWeight(i, sceneWeights[at]);
     }
+    // After the weights, which let anchors go: a matched run comes back
+    // on the verses it was matched for, a scenery that could not be had
+    // leaving its verse to the one before it.
+    s.restoreSceneAnchors({
+      for (var i = 0; i < resolved.length; i++)
+        if ((from == null ? i : from[i]) case final at
+            when at < sceneAnchors.length && sceneAnchors[at] != null)
+          resolved[i].id: sceneAnchors[at]!,
+    });
   }
 }

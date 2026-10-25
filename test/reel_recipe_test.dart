@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ayah_reels/data/fatiha_data.dart';
@@ -218,6 +220,63 @@ void main() {
     expect(s.backgroundChosen, isTrue);
     expect(s.overlayAlign, 0.3);
     expect(s.textPreset, TextPreset.minimal);
+  });
+
+  test('a matched run comes back on the verses it was matched for', () {
+    const r = ReelRecipe(
+      reciterId: 'alafasy',
+      surah: 78,
+      startAyah: 6,
+      endAyah: 14,
+      scenes: ['a', 'gone', 'b'],
+      sceneWeights: [1, 1, 1],
+      sceneAnchors: [SceneAnchor(7), SceneAnchor(9), SceneAnchor(14, 3)],
+      multiScene: true,
+      pacing: ScenePacing.perLine,
+      transition: SceneTransition.fade,
+      layout: ReelLayout.fullFrame,
+      roundedCorners: false,
+      backdrop: LetterboxBackdrop.colour,
+      backdropArgb: 0xFF000000,
+      preset: TextPreset.glow,
+      textArgb: 0xFFFFFFFF,
+      textScale: 1,
+      overlayAlign: 0.5,
+      wordHighlight: true,
+    );
+    final back = ReelRecipe.fromJson(
+        jsonDecode(jsonEncode(r.toJson())) as Map<String, dynamic>);
+    expect(back.sceneAnchors, r.sceneAnchors);
+
+    // The middle scenery could not be had: its verse goes to the one
+    // before, and the third keeps its own.
+    final s = CreationState();
+    back.applyScenes(s, const [still, still2], from: const [0, 2]);
+    expect(s.sceneAnchors, const [SceneAnchor(7), SceneAnchor(14, 3)]);
+
+    // A run picked by hand writes no anchors and reads back none.
+    const plain = ReelRecipe(
+      reciterId: 'alafasy',
+      surah: 1,
+      startAyah: 1,
+      endAyah: 7,
+      scenes: ['a'],
+      sceneWeights: [1],
+      multiScene: false,
+      pacing: ScenePacing.perAyah,
+      transition: SceneTransition.fade,
+      layout: ReelLayout.fullFrame,
+      roundedCorners: false,
+      backdrop: LetterboxBackdrop.colour,
+      backdropArgb: 0xFF000000,
+      preset: TextPreset.glow,
+      textArgb: 0xFFFFFFFF,
+      textScale: 1,
+      overlayAlign: 0.5,
+      wordHighlight: true,
+    );
+    expect(plain.toJson().containsKey('sceneAnchors'), isFalse);
+    expect(ReelRecipe.fromJson(plain.toJson()).sceneAnchors, isEmpty);
   });
 
   test('reopening a reel in the ink it started in leaves the ink free',

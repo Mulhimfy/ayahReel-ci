@@ -345,4 +345,134 @@ void main() {
     // still gets the last scene rather than an index out of range.
     expect(ScenePlan.indexAt(cuts, 99000), 2);
   });
+
+  group('a matched run stays on the verses it was matched for', () {
+    List<SceneCut> anchored(
+      List<SceneAnchor> anchors, {
+      ScenePacing pacing = ScenePacing.perAyah,
+      List<VerseUnit>? units,
+      int start = 1,
+      int end = 7,
+    }) =>
+        ScenePlan.of(
+          sceneCount: anchors.length,
+          recitation: rec,
+          startAyah: start,
+          endAyah: end,
+          pacing: pacing,
+          units: units,
+          anchors: anchors,
+        );
+
+    test('a scenery that could not be had leaves its verse to the one '
+        'before, and moves nothing else', () {
+      // Matched a scenery per verse; verse 3's never arrived.
+      final cuts = anchored([
+        for (final a in [1, 2, 4, 5, 6, 7]) SceneAnchor(a),
+      ]);
+      expectGapless(cuts);
+      expect([for (final c in cuts) (c.firstAyah, c.lastAyah)],
+          [(1, 1), (2, 3), (4, 4), (5, 5), (6, 6), (7, 7)]);
+      // Dealt out in order, the same six put verse 2's scenery on verse
+      // 3, and verse 1's on verse 2: each a verse off its own.
+      final dealt = plan(6);
+      expect((dealt[1].firstAyah, dealt[1].lastAyah), (3, 3));
+    });
+
+    test('lines that come out other than estimated keep each scenery on '
+        'its words', () {
+      VersePart part(int ayah, int i, int n, int t0, int t1) => VersePart(
+            ayah: ayah,
+            index: i,
+            count: n,
+            tokenStart: i,
+            tokenEnd: i + 1,
+            startMs: t0,
+            endMs: t1,
+            arabic: 'x',
+            translation: '',
+            fit: 1,
+          );
+      // Verse 4 in three lines and verse 7 in two, where the estimate
+      // the sceneries were matched on had verse 4 in two (tokens 0 and
+      // 2) and verse 7 in three (tokens 0, 1, 2).
+      final units = VerseUnit.of(
+          rec,
+          1,
+          7,
+          VerseLinePlan(2, {
+            4: [
+              part(4, 0, 3, 15000, 17500),
+              part(4, 1, 3, 17500, 19800),
+              part(4, 2, 3, 19800, 22000),
+            ],
+            7: [part(7, 0, 2, 33000, 39000), part(7, 1, 2, 39000, 46000)],
+          }));
+      final cuts = anchored(
+        const [
+          SceneAnchor(1),
+          SceneAnchor(2),
+          SceneAnchor(3),
+          SceneAnchor(4),
+          SceneAnchor(4, 2),
+          SceneAnchor(5),
+          SceneAnchor(6),
+          SceneAnchor(7),
+          SceneAnchor(7, 1),
+          SceneAnchor(7, 2),
+        ],
+        pacing: ScenePacing.perLine,
+        units: units,
+      );
+      expectGapless(cuts);
+      expect([for (final c in cuts) (c.startMs, c.endMs)], [
+        (0, 6000),
+        (6000, 11000),
+        (11000, 15000),
+        // Its first two lines: the third has a scenery of its own.
+        (15000, 19800),
+        (19800, 22000),
+        (22000, 26000),
+        (26000, 33000),
+        (33000, 39000),
+        // Two sceneries for one line now: it is shared.
+        (39000, 42500),
+        (42500, 46000),
+      ]);
+    });
+
+    test('the basmala\'s card opens on the first scenery', () {
+      const units = [
+        VerseUnit(0, null, 0, 3000),
+        VerseUnit(1, null, 3000, 6000),
+        VerseUnit(2, null, 6000, 11000),
+      ];
+      final cuts = anchored(
+        const [SceneAnchor(1), SceneAnchor(2)],
+        pacing: ScenePacing.perLine,
+        units: units,
+        end: 2,
+      );
+      expect([for (final c in cuts) (c.startMs, c.endMs, c.lastAyah)],
+          [(0, 6000, 1), (6000, 11000, 2)]);
+    });
+
+    test('anchors for other verses, or out of order, are not used', () {
+      final dealt = plan(3);
+      for (final bad in [
+        const [SceneAnchor(1), SceneAnchor(4), SceneAnchor(9)],
+        const [SceneAnchor(4), SceneAnchor(2), SceneAnchor(6)],
+        const [SceneAnchor(1), SceneAnchor(1), SceneAnchor(6)],
+      ]) {
+        expect(anchored(bad), dealt, reason: '$bad');
+      }
+    });
+
+    test('an even pace is even slices, anchored or not', () {
+      expect(
+          anchored([for (var a = 1; a <= 7; a++) SceneAnchor(a)],
+              pacing: ScenePacing.even),
+          plan(7, pacing: ScenePacing.even));
+    });
+  });
 }
