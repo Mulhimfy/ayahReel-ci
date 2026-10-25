@@ -280,7 +280,7 @@ MIN_RATE = 22050
 SHIPPED_BEFORE = {
     'alafasy', 'husary', 'abdulbasit', 'minshawi', 'sudais', 'shuraym',
     'muaiqly', 'hudhaify', 'dussary', 'shatri', 'ayyub', 'ajmi', 'qatami',
-    'qasim', 'juhani', 'budair', 'rifai', 'tablawi', 'jibreel', 'basfar',
+    'qasim', 'budair', 'rifai', 'tablawi', 'jibreel', 'basfar',
     'bukhatir', 'qahtani', 'matrood', 'neana', 'salamah', 'alaqimy', 'suesy',
     'alili', 'abdulkareem', 'sahl_yassin', 'jaber', 'abbad', 'sowaid',
     'tunaiji', 'husary_mujawwad', 'abdulbasit_mujawwad', 'minshawi_mujawwad',

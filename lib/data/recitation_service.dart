@@ -17,11 +17,13 @@ import 'ffmpeg_setup.dart';
 import 'models.dart';
 import 'reel_duration.dart';
 import 'reel_limits.dart';
+import 'own_words.dart';
 import 'surah_index.dart';
 import 'surah_slice.dart';
 import 'trouble.dart';
 import 'verse_tables.dart';
 import 'whole_file.dart';
+import 'words_host.dart';
 
 /// Builds and caches one [Recitation] per (reciter, surah, ayah range).
 ///
@@ -548,10 +550,13 @@ abstract final class RecitationService {
     final url = source.url(surah);
     final Mp3Layout lay;
     final List<AyahTiming> table;
+    final String ver;
     try {
       lay = await Mp3Layout.read(client, url);
-      table = SurahSlice.withFileEnd(
-          await _surahTable(source, dir, surah, count), lay.durationMs);
+      final got = await _surahTable(source, dir, surah, count,
+          own: _ownTable(reciter, surah));
+      table = SurahSlice.withFileEnd(got.table, lay.durationMs);
+      ver = _versionFor(got.rev);
     } catch (_) {
       client.close();
       rethrow;
@@ -615,7 +620,7 @@ abstract final class RecitationService {
 
       final full = start == 1 && last == count;
       final stem = '${dir.path}/'
-          '${full ? '$surah' : '${surah}_$tag'}.$_joinVersion';
+          '${full ? '$surah' : '${surah}_$tag'}.$ver';
       final audio = File('$stem.$_joinExt');
       await _encode(
         '-i "${slice.path}" '
@@ -655,7 +660,86 @@ abstract final class RecitationService {
   /// The published table for [surah], as checked by
   /// [SurahSlice.parseTable]. Fetched once and kept: it is a few
   /// kilobytes, and the file it describes doesn't change.
-  static Future<List<AyahTiming>> _surahTable(
+  /// Our own verse table for [reciter]'s [surah], when the timing's
+  /// index lists one (see [QulSource.tables]): the voice's id on the
+  /// host and the revision the table is published under; null otherwise,
+  /// and in a build that can't read the host.
+  static ({String id, String rev})? _ownTable(Reciter reciter, int surah) {
+    if (!WordsHost.enabled) return null;
+    final src = OwnWords.sources[reciter.id];
+    final id = src?.own;
+    if (src == null || id == null || !src.tables.contains(surah)) return null;
+    return (id: id, rev: src.ownRev ?? '0');
+  }
+
+  /// What a recitation's files are named with: the assembly's version,
+  /// and the revision of our own verse table when it was cut by one.
+  static String _versionFor(String? tableRev) =>
+      tableRev == null ? _joinVersion : '$_joinVersion.v$tableRev';
+
+  /// [_surahTable] from our own timing: [own]'s table for [surah], kept
+  /// on the phone under its revision (the copies of older revisions let
+  /// go), or null when it can't be had — the caller then uses the table
+  /// published beside the file, as before there was ours.
+  static Future<List<AyahTiming>?> _ownSurahTable(({String id, String rev}) own,
+      Directory dir, int surah, int count) async {
+    final f = File('${dir.path}/table_$surah.v${own.rev}.json');
+    if (f.existsSync()) {
+      try {
+        return SurahSlice.checkedTable(
+            _decodeTimings(f.readAsStringSync()), count);
+      } catch (_) {
+        // Cut short, or unreadable: fetched again.
+      }
+    }
+    final client = http.Client();
+    try {
+      final res = await Download.get(
+          client, Uri.parse('${WordsHost.base}/vt_${own.id}/$surah.json'),
+          headers: WordsHost.headers);
+      if (res.statusCode != 200) throw BadStatus(res.statusCode);
+      // Written in mp3quran's own shape, so read as one of its tables.
+      final t = SurahSlice.parseTable(
+          const Mp3QuranTiming(0), jsonDecode(res.body), surah, count);
+      await writeWhole(
+          f,
+          jsonEncode([
+            for (final w in t) {'a': w.ayah, 's': w.startMs, 'e': w.endMs},
+          ]));
+      try {
+        final old = RegExp('^table_$surah\\.v[0-9a-z]+\\.json\$');
+        for (final e in dir.listSync()) {
+          if (e is File &&
+              e.path != f.path &&
+              old.hasMatch(e.uri.pathSegments.last)) {
+            e.deleteSync();
+          }
+        }
+      } catch (_) {}
+      rlog('rec: our own verse table for surah $surah (${own.rev})');
+      return t;
+    } catch (e) {
+      rlog('rec: our own verse table for surah $surah not had ($e) — '
+          'using the published one');
+      return null;
+    } finally {
+      client.close();
+    }
+  }
+
+  static Future<({List<AyahTiming> table, String? rev})> _surahTable(
+      SurahFiles source, Directory dir, int surah, int count,
+      {({String id, String rev})? own}) async {
+    if (own != null) {
+      final t = await _ownSurahTable(own, dir, surah, count);
+      if (t != null) return (table: t, rev: own.rev);
+    }
+    return (table: await _publishedTable(source, dir, surah, count), rev: null);
+  }
+
+  /// The table published beside the surah's file (or, for a voice the
+  /// app carries a table for, that one).
+  static Future<List<AyahTiming>> _publishedTable(
       SurahFiles source, Directory dir, int surah, int count) async {
     final f = File('${dir.path}/table_$surah.json');
     if (source.timing case OwnTiming(:final table)) {
@@ -973,6 +1057,11 @@ abstract final class RecitationService {
   /// written.
   static Recitation? _fromDisk(Directory dir, Reciter reciter, int surah,
       int start, int end, int maxMs) {
+    // A recitation cut by our own verse table is named for the table's
+    // revision; one cut by the published table, from before ours, is
+    // not served once ours is there — that table is what put the text
+    // out of step with the voice.
+    final ver = _versionFor(_ownTable(reciter, surah)?.rev);
     Recitation? tryPair(File audio, File meta) {
       if (!audio.existsSync() || !meta.existsSync()) return null;
       try {
@@ -993,12 +1082,12 @@ abstract final class RecitationService {
       }
     }
 
-    final full = tryPair(
-        File('${dir.path}/$surah.$_joinVersion.$_joinExt'),
-        File('${dir.path}/$surah.$_joinVersion.json'));
+    final full = tryPair(File('${dir.path}/$surah.$ver.$_joinExt'),
+        File('${dir.path}/$surah.$ver.json'));
     if (full != null) return full;
 
-    final re = RegExp('^${surah}_(\\d+)_(\\d+)\\.$_joinVersion\\.json\$');
+    final re = RegExp(
+        '^${surah}_(\\d+)_(\\d+)\\.${RegExp.escape(ver)}\\.json\$');
     for (final f in dir.listSync()) {
       if (f is! File) continue;
       final m = re.firstMatch(f.uri.pathSegments.last);
@@ -1150,9 +1239,13 @@ abstract final class RecitationService {
     final source = reciter.source;
     if (source is SurahFiles) {
       final whole = _wholeFile(dir, surah);
+      final own = _ownTable(reciter, surah);
       return whole.existsSync() &&
           whole.lengthSync() > 0 &&
-          File('${dir.path}/table_$surah.json').existsSync();
+          (File('${dir.path}/table_$surah.json').existsSync() ||
+              (own != null &&
+                  File('${dir.path}/table_$surah.v${own.rev}.json')
+                      .existsSync()));
     }
     if (source is! AyahFiles) return true;
     final durations = _readDurations(File('${dir.path}/durations_$surah.json'));
@@ -1194,7 +1287,8 @@ abstract final class RecitationService {
     final client = http.Client();
     try {
       if (source is SurahFiles) {
-        await _surahTable(source, dir, surah, count);
+        await _surahTable(source, dir, surah, count,
+            own: _ownTable(reciter, surah));
         if (cancelled?.call() ?? false) return;
         final whole = _wholeFile(dir, surah);
         await _download(client, source.url(surah), whole, 'offline',
@@ -1408,8 +1502,12 @@ abstract final class RecitationService {
       final client = _surahClient(dir, source, surah);
       try {
         final lay = await Mp3Layout.read(client, source.url(surah));
-        final table = SurahSlice.withFileEnd(
-            await _surahTable(source, dir, surah, count), lay.durationMs);
+        // Our own table where there is one: a published table a verse off
+        // its audio is what played the start of the next verse at the end
+        // of this one, and then again at its own start.
+        final got = await _surahTable(source, dir, surah, count,
+            own: _ownTable(reciter, surah));
+        final table = SurahSlice.withFileEnd(got.table, lay.durationMs);
         return (lay, table);
       } finally {
         client.close();

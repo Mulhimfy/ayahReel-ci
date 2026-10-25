@@ -37,12 +37,11 @@ extension on CreateKind {
 
 /// Home's one door in: a pill of glass with lights drifting under it.
 ///
-/// It used to be a gold bar breathing a gold glow over a photograph,
-/// which read as yellow more than as light. This is the app's luminous
-/// inks instead (aurora, iris, moonlight and a breath of gold) moving
-/// slowly under frosted glass, the photograph showing through it, a
-/// glint crossing it now and then. The glow under it takes its colours
-/// from the same lights, so it stands off the picture without shouting.
+/// It was a gold bar breathing a gold glow, which read as yellow more
+/// than as light, then a pill of the app's blue-violet inks. It is gold
+/// again, but as light: the house golds moving slowly under frosted
+/// glass, the photograph showing through it, a glint crossing it now and
+/// then, the glow under it warm and low (see [MeshPalette.create]).
 ///
 /// [onPressed] is handed where the button is on screen: what it opens
 /// grows out of it.
@@ -115,24 +114,20 @@ class _CreateButtonState extends State<CreateButton>
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: radius,
+            // A warm glow under it, in its own golds, low enough to lift
+            // it off the photograph without a halo.
             boxShadow: const [
               BoxShadow(
-                color: Color(0x6E8F7BFF),
-                blurRadius: 30,
+                color: Color(0x5CD4A947),
+                blurRadius: 28,
                 spreadRadius: -6,
                 offset: Offset(0, 12),
               ),
               BoxShadow(
-                color: Color(0x4D36D39A),
-                blurRadius: 22,
+                color: Color(0x33B07A2A),
+                blurRadius: 20,
                 spreadRadius: -8,
-                offset: Offset(-8, 4),
-              ),
-              BoxShadow(
-                color: Color(0x404FB3FF),
-                blurRadius: 22,
-                spreadRadius: -8,
-                offset: Offset(8, 4),
+                offset: Offset(0, 4),
               ),
             ],
           ),
@@ -142,8 +137,8 @@ class _CreateButtonState extends State<CreateButton>
               palette: MeshPalette.create,
               clock: _clock,
               radius: radius,
-              opacity: 0.55,
-              glow: 0.78,
+              opacity: 0.6,
+              glow: 0.62,
               blur: 14,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 22),

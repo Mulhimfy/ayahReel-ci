@@ -199,6 +199,20 @@ void main() {
     }));
     final src = OwnWords.sources[untimed.id]!;
     expect(src.near, {112});
+    expect(src.tables, isEmpty);
+    // A verse table of our own, for the surahs the index names.
+    expect(
+        OwnWords.parseIndex({
+          'v': 1,
+          'voices': {
+            untimed.id: {
+              ...entry(surahs: [1]),
+              'tables': [2, 36, 0, 115, 'x'],
+            },
+          },
+        })[untimed.id]!
+            .tables,
+        {2, 36});
     // 112 has no trusted verse: the voice is not word-timed there, and
     // nothing that says a voice is word-timed may be lit by its near
     // tier.

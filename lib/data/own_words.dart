@@ -127,6 +127,7 @@ abstract final class OwnWords {
       if (have.isEmpty) continue;
       final rev = v['rev'];
       final near = v['near'];
+      final tables = v['tables'];
       out[id] = QulSource(
         0,
         fit,
@@ -135,6 +136,11 @@ abstract final class OwnWords {
         near: {
           if (near is List)
             for (final s in near)
+              if (s is int && s >= 1 && s <= 114) s,
+        },
+        tables: {
+          if (tables is List)
+            for (final s in tables)
               if (s is int && s >= 1 && s <= 114) s,
         },
         skip: {

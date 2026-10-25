@@ -20,15 +20,18 @@ class MeshPalette {
 
   const MeshPalette({required this.tint, required this.lights});
 
-  /// Home's Create: aurora green, iris violet and moonlit blue, with a
-  /// breath of the house gold.
+  /// Home's Create: the house gold, as light through glass — a warm
+  /// gold, a deeper amber, a pale champagne and a touch of bronze over a
+  /// dark warm tint. Gold like the verse's, not the blue-violet it was
+  /// (the owner, 2026-10-25), and kept soft: its lights stay low enough
+  /// that the button glows rather than shines.
   static const create = MeshPalette(
-    tint: Color(0xFF0E1424),
+    tint: Color(0xFF1A140B),
     lights: [
-      Color(0xFF36D39A),
-      Color(0xFF8F7BFF),
-      Color(0xFF4FB3FF),
-      Color(0xFFE0A93A),
+      Color(0xFFD4A947),
+      Color(0xFFB07A2A),
+      Color(0xFFEBD08E),
+      Color(0xFF8C6234),
     ],
   );
 

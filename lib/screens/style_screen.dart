@@ -794,9 +794,13 @@ class _VerseMover extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _MoverButton(
-            icon: Icons.expand_less_rounded, label: l.verseUp, onTap: onUp),
+            key: const ValueKey('verse-up'),
+            icon: Icons.expand_less_rounded,
+            label: l.verseUp,
+            onTap: onUp),
         const SizedBox(height: 10),
         _MoverButton(
+            key: const ValueKey('verse-down'),
             icon: Icons.expand_more_rounded,
             label: l.verseDown,
             onTap: onDown),
@@ -811,7 +815,10 @@ class _MoverButton extends StatelessWidget {
   final VoidCallback? onTap;
 
   const _MoverButton(
-      {required this.icon, required this.label, required this.onTap});
+      {super.key,
+      required this.icon,
+      required this.label,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {

@@ -106,12 +106,19 @@ class QulSource {
   /// unveil, which say a voice is word-timed. See [QulWords.nearOf].
   final Set<int> near;
 
+  /// The surahs [own]'s timing publishes a verse table for (the index's
+  /// `tables`): where each verse of the surah file starts and ends, as
+  /// the timing found them, in place of the table published beside the
+  /// file. See `RecitationService`.
+  final Set<int> tables;
+
   const QulSource(
     this.recitation,
     this.fit, {
     this.own,
     this.ownRev,
     this.near = const {},
+    this.tables = const {},
     this.biasMs = 0,
     this.verseOne = QulVerseOne.shift,
     this.verseOneBiasMs = 0,
@@ -862,7 +869,7 @@ abstract final class QulWords {
     // A surah with no trusted verse is in the trusted source's skip;
     // its near tier is placed all the same.
     final open = QulSource(0, src.fit,
-        own: src.own, ownRev: src.ownRev, near: src.near);
+        own: src.own, ownRev: src.ownRev, near: src.near, tables: src.tables);
     return _placeFrom(
         open, rec, await versesOf(open, rec.surah, near: true));
   }

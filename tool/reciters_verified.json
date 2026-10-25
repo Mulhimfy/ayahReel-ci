@@ -2352,24 +2352,6 @@
   "rate": 44100,
   "source": "ayah https://everyayah.com/data/Muhammad_Jibreel_128kbps"
  },
- "juhani": {
-  "base": "https://everyayah.com/data/Abdullaah_3awwaad_Al-Juhaynee_128kbps",
-  "checked": "2026-09-29",
-  "files_checked": 63,
-  "formats": [
-   [
-    128,
-    44100
-   ]
-  ],
-  "kbps": 128,
-  "kind": "ayah",
-  "name": "Abdullah Al-Juhani",
-  "pace": 0.861,
-  "problems": [],
-  "rate": 44100,
-  "source": "ayah https://everyayah.com/data/Abdullaah_3awwaad_Al-Juhaynee_128kbps"
- },
  "kanakri": {
   "aligned_share": 0.987,
   "base": "https://server6.mp3quran.net/kanakeri",
