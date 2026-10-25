@@ -423,6 +423,8 @@ void main() {
       expect(find.text(l.includeBasmala), findsNothing);
 
       await tapAyah(t, 1);
+      // The chip grows in over the frames after the tap.
+      await t.pump(const Duration(milliseconds: 300));
       expect(find.text(l.includeBasmala), findsOneWidget);
       expect(SettingsService.state.value.basmala, isTrue);
 
