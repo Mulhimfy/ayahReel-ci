@@ -1912,17 +1912,6 @@ class L10n {
   String get rateSheetTitle => _t('Enjoying AyahReel?', 'هل أعجبك؟',
       'AyahReel پسند آ رہا ہے؟', 'Menikmati AyahReel?',
       'Gefällt dir AyahReel?');
-  String get rateSheetBody => _t(
-      'A rating on the store is what puts this in front of the next '
-          'person looking for a way to share a verse. It takes a minute.',
-      'تقييمك في المتجر يرفع التطبيق أمام من يبحث عن مقاطع قرآنية '
-          'يشاركها. دقيقة واحدة، وأثرها يدوم.',
-      'سٹور پر ایک ریٹنگ ہی اسے اس اگلے شخص کے سامنے لاتی ہے جو آیت '
-          'شیئر کرنے کا راستہ ڈھونڈ رہا ہے۔ ایک منٹ لگتا ہے۔',
-      'Penilaian di toko itulah yang menampilkan ini kepada orang '
-          'berikutnya yang mencari cara membagikan ayat. Hanya semenit.',
-      'Eine Bewertung im Store bringt das hier vor die Augen des '
-          'Nächsten, der einen Weg sucht, einen Vers zu teilen. Dauert eine Minute.');
 
   /// Says which store it is about to open, because the button leaves
   /// the app — a "Rate us" that silently jumps to another app is a
