@@ -116,6 +116,7 @@ tool/verse_table_jobs.json.
 """
 import argparse
 import base64
+import bisect
 import glob
 import hashlib
 import json
@@ -572,6 +573,7 @@ def quiet_runs(env, q, lo_ms, hi_ms):
 
 PAUSE_MIN_MS = 200     # a breath, as verify_reciters.py's PAUSE_MIN_MS
 MAX_RESTART_MS = 15000  # the most of a restart a verse takes back
+RESTART_MIN_LETTERS = 3  # heard in it, for it to be one
 EARLY_GAP_MS = 600     # an early first letter: the wait for the rest
 EARLY_QUIET_MS = 300   # and the breath in it
 EARLY_MAX_RUNS = 2     # the most letters dropped
@@ -583,7 +585,40 @@ def found_v1(one):
     return one['floor_ms'] if one and one.get('applied') else None
 
 
-def verse_rows(surah, verses, env, fm, v1_at=None):
+def pack_frames(frames):
+    """Sorted frame numbers as text: each the gap since the one before,
+    a LEB128 varint, base64 (a two-hour surah's letters in ~100 kB)."""
+    out, prev = bytearray(), 0
+    for f in frames:
+        varint(int(f) - prev, out)
+        prev = int(f)
+    return base64.b64encode(bytes(out)).decode('ascii')
+
+
+def unpack_frames(text):
+    b = base64.b64decode(text)
+    out, i, prev = [], 0, 0
+    while i < len(b):
+        n = sh = 0
+        while True:
+            x = b[i]
+            i += 1
+            n |= (x & 0x7F) << sh
+            sh += 7
+            if not x & 0x80:
+                break
+        prev += n
+        out.append(prev)
+    return out
+
+
+def heard_ms(model, logp):
+    """Where the model hears a letter, over the whole file: the frames
+    its best path (heard) sets a letter at, as ms."""
+    return [int(f * model.frame_ms) for _, f in heard(model, logp, len(logp))]
+
+
+def verse_rows(surah, verses, env, fm, v1_at=None, heard_at=None):
     """[ayah, start, end, conf, conf_min, jumps, ignored] for every verse,
     in ms of the file's frame clock, whole 10 ms; and the fixes made.
     [v1_at]: where verse_one found verse 1 to begin (the end of the pause
@@ -611,7 +646,16 @@ def verse_rows(surah, verses, env, fm, v1_at=None):
       Al-Salimi's 67:26 6.4 s, where QUL's own words show the first start.
       So where sound follows the breath after the previous verse and
       comes before this verse's first word (at least PAUSE_MIN_MS of it,
-      and no more than MAX_RESTART_MS before), the verse takes it.
+      and no more than MAX_RESTART_MS before), the verse takes it — if
+      the model hears words in it ([heard_at]: RESTART_MIN_LETTERS letters
+      or more). Sound with no words in it is no restart, and stays with
+      the verse before: of Islam Sobhi's 65 such stretches (2026-10-26),
+      50 were 0.4-11 s between two breaths that the model hears not one
+      letter in (p(blank) 0.997-1.000 over them, 0.80 over his
+      recitation), and two more held only a syllable before it (the
+      verse's first, then the word from its start after the breath, or
+      the verse before's last word again). Taken back, they made a verse
+      begin up to 11 s before its words, and a reel of it open on them.
     """
     n = W.text.COUNTS[surah - 1]
     fixes = []
@@ -667,7 +711,9 @@ def verse_rows(surah, verses, env, fm, v1_at=None):
             continue
         onset = runs[0][1]           # sound returns after the breath
         loud = sum(1 for k in range(onset // 10, s // 10) if env[k] > q) * 10
-        if onset < s - 300 and loud >= PAUSE_MIN_MS and \
+        words = heard_at is None or bisect.bisect_left(heard_at, s - 100) - \
+            bisect.bisect_left(heard_at, onset) >= RESTART_MIN_LETTERS
+        if onset < s - 300 and loud >= PAUSE_MIN_MS and words and \
                 s - onset <= MAX_RESTART_MS:
             fixes.append(dict(ayah=a, fix='restart', was=s,
                               now=onset + START_SHIFT))
@@ -757,8 +803,11 @@ def make(args):
             rec['opening'] = None if not res['opening'] else [
                 int(res['opening'][0] * fm), int(res['opening'][1] * fm)]
             verses = windows(s, res, env, fm)
+            heard_at = heard_ms(m, logp)
+            rec['heard'] = pack_frames(heard_at)
             rec['verses'], rec['fixes'] = verse_rows(s, verses, env, fm,
-                                                     v1_at=found_v1(one))
+                                                     v1_at=found_v1(one),
+                                                     heard_at=heard_at)
             rec['words'] = {str(a): v for a, v in verses.items()}
             rec['guess_off_s'] = round(max(
                 abs(v[1] - guess[v[0]][0]) for v in rec['verses']) / 1000, 1)
@@ -807,14 +856,16 @@ def rows_again(args):
                 print(f'surah {s}: not aligned again ({info.get("why")})')
                 continue
             verses = windows(s, res, env, m.frame_ms)
-            d.update(info, verse_one=one)
+            d.update(info, verse_one=one, heard=pack_frames(heard_ms(m, logp)))
             d['opening'] = None if not res['opening'] else [
                 int(res['opening'][0] * m.frame_ms),
                 int(res['opening'][1] * m.frame_ms)]
         else:
             verses = {int(a): v for a, v in d['words'].items()}
+        heard_at = unpack_frames(d['heard']) if d.get('heard') else None
         d['verses'], d['fixes'] = verse_rows(
-            s, verses, env, models_frame_ms(), v1_at=found_v1(d.get('verse_one')))
+            s, verses, env, models_frame_ms(), v1_at=found_v1(d.get('verse_one')),
+            heard_at=heard_at)
         d['words'] = {str(a): v for a, v in verses.items()}
         json.dump(d, open(f, 'w'), separators=(',', ':'))
         print(f"surah {s}: {len(d['fixes'])} fixes "
