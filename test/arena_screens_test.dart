@@ -157,9 +157,14 @@ void main() {
     // scrollUntilVisible. Its middle is set into the upper half rather
     // than dragged there: a drag ends in a fling, which carries a long
     // page (the result's, with its card of reasons to send the code)
-    // right past it.
-    await Scrollable.ensureVisible(t.element(f), alignment: 0.35);
-    await t.pump(const Duration(milliseconds: 1200));
+    // right past it. Set again while what is above it is still settling.
+    for (var i = 0; i < 5; i++) {
+      await Scrollable.ensureVisible(t.element(f), alignment: 0.35);
+      await t.pump(const Duration(milliseconds: 300));
+      final dy = t.getCenter(f).dy;
+      if (dy > 120 && dy < 620) break;
+    }
+    await t.pump(const Duration(milliseconds: 900));
   }
 
   /// Pumps until [f] is gone, a tenth of a second at a time, for up to
