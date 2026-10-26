@@ -583,6 +583,10 @@ def layout(url):
     Kept in the cache like everything else here: delete
     build/verify_reciters to check the files afresh."""
     key = re.sub(r'[^A-Za-z0-9]+', '_', url)
+    # A file name holds 255 bytes: a long address (archive.org's, in the
+    # title's own words) is named by its start and its digest.
+    if len(key) > 150:
+        key = key[:100] + '_' + hashlib.sha256(url.encode()).hexdigest()[:16]
     path = os.path.join(CACHE, 'layout', key + '.json')
     if os.path.exists(path):
         return json.load(open(path))
