@@ -917,10 +917,17 @@ def speaker(args):
             'Range': f'bytes=0-{SPEAKER_BYTES - 1}'}, timeout=180)
         if st not in (200, 206):
             raise RuntimeError(f'{url}: HTTP {st}')
+        # Whatever it is encoded as (an m4a whole, or an mp3's start), from
+        # a file: an m4a may keep its index at the end, past any pipe.
+        tmp = os.path.join(args.work, 'speaker_in')
+        os.makedirs(args.work, exist_ok=True)
+        with open(tmp, 'wb') as f:
+            f.write(b)
         pcm = subprocess.run(
-            ['ffmpeg', '-v', 'quiet', '-f', 'mp3', '-i', '-', '-ac', '1',
+            ['ffmpeg', '-v', 'quiet', '-i', tmp, '-ac', '1',
              '-ar', '16000', '-f', 'f32le', '-'],
-            input=b, capture_output=True).stdout
+            capture_output=True).stdout
+        os.remove(tmp)
         x = np.frombuffer(pcm[:len(pcm) // 4 * 4], dtype='<f4')
         n = SPEAKER_SEG_S * 16000
         start = min(SPEAKER_SKIP_S * 16000, max(0, len(x) - n))
