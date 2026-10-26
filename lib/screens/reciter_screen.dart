@@ -58,6 +58,13 @@ enum _Door { audio, video }
 class _ReciterScreenState extends State<ReciterScreen>
     with WidgetsBindingObserver {
   final _player = AudioPlayer();
+
+  /// Moved on by every pick and by every way off this screen. A sample
+  /// that has to be fetched is slower than a tap: one whose fetch ends
+  /// after either is not played. It used to start on the screen after
+  /// Continue, over whatever was there (the owner, 2026-10-26: a test
+  /// Al-Fatiha verse overlapping once a voice was picked).
+  int _sampleTurn = 0;
   Reciter? _selected;
 
   /// The upload in play, if there is one — from this session, or
@@ -212,6 +219,7 @@ class _ReciterScreenState extends State<ReciterScreen>
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() => _selected = r);
     creationState.selectReciter(r);
+    final turn = ++_sampleTurn;
     // A stop that fails (a player in a bad state) must not cost the
     // preview, or below, the picker itself.
     await _player.stop().catchError((_) {});
@@ -228,9 +236,14 @@ class _ReciterScreenState extends State<ReciterScreen>
       } else {
         final f = await RecitationService.sampleAyah(r, 1, 2);
         // The fetch is slower than a tap. If another voice was picked
-        // while it ran, that one is the selection and this sample is
-        // no longer the one to play.
-        if (!mounted || _selected?.id != r.id) return;
+        // while it ran, or the screen was left or covered, this sample
+        // is no longer one to play.
+        if (!mounted ||
+            turn != _sampleTurn ||
+            _selected?.id != r.id ||
+            !(ModalRoute.of(context)?.isCurrent ?? false)) {
+          return;
+        }
         await _player.play(DeviceFileSource(f.path));
       }
     } catch (_) {
@@ -245,6 +258,7 @@ class _ReciterScreenState extends State<ReciterScreen>
     final r = UserAudioService.reciterFor(a);
     setState(() => _selected = r);
     creationState.selectReciter(r);
+    _sampleTurn++;
     await _player.stop().catchError((_) {});
     try {
       await _player.play(DeviceFileSource(a.audioPath));
@@ -294,6 +308,7 @@ class _ReciterScreenState extends State<ReciterScreen>
   /// being looked for costs one tap, and it is the tap that makes the
   /// file findable at all.
   Future<void> _chooseFile() async {
+    _sampleTurn++;
     await _player.stop().catchError((_) {});
     if (!mounted) return;
     final l = L10n.of(context);
@@ -387,6 +402,7 @@ class _ReciterScreenState extends State<ReciterScreen>
   }
 
   void _continue() {
+    _sampleTurn++;
     _player.stop();
     final custom = widget.onContinue;
     final r = _selected;
@@ -416,6 +432,7 @@ class _ReciterScreenState extends State<ReciterScreen>
         leading: BackButton(
           color: AppColors.textSecondary,
           onPressed: () {
+            _sampleTurn++;
             _player.stop();
             Navigator.of(context).pop();
           },

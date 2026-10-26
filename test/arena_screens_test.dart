@@ -154,14 +154,11 @@ void main() {
     await t.scrollUntilVisible(f, 200,
         scrollable: find.byType(Scrollable).first);
     // A target that is built but below the fold is not dragged to by
-    // scrollUntilVisible; bring its middle into the upper half by hand.
-    for (var i = 0; i < 6; i++) {
-      final dy = t.getCenter(f).dy;
-      if (dy > 120 && dy < 620) break;
-      await t.drag(find.byType(Scrollable).first,
-          Offset(0, -(dy - 400).clamp(-320.0, 320.0)));
-      await t.pump(const Duration(milliseconds: 300));
-    }
+    // scrollUntilVisible. Its middle is set into the upper half rather
+    // than dragged there: a drag ends in a fling, which carries a long
+    // page (the result's, with its card of reasons to send the code)
+    // right past it.
+    await Scrollable.ensureVisible(t.element(f), alignment: 0.35);
     await t.pump(const Duration(milliseconds: 1200));
   }
 
