@@ -31,6 +31,14 @@ make  Each surah file is decoded on the app's frame clock (the bare
       first letter, a restart). Every verse of every surah is kept: a
       table can't skip a verse.
 
+      Sound before the surah's first words costs the search little
+      (LEAD_COST), so that what a file opens with before the surah — a
+      later verse recited as a preview, as YouTube uploads do, a jingle —
+      is left out of it; and where the search still put verse 1 before
+      its own words, inside such a preview or inside the basmala (whose
+      letters it borrowed for a الٓمٓ the model hears nothing of), it is
+      searched again from where those words are heard (verse_one).
+
 eval  The table against where verses really start: the first word of
       every verse after the first, as the Quranic Universal Library
       times it word by word for recordings it vouches for (ayahreel-
@@ -127,6 +135,12 @@ DART = os.path.join(ROOT, 'lib', 'data', 'verse_tables.dart')
 OWN = os.environ.get('OWN_TABLES', '')
 
 BAND_S = 240.0     # see make, above
+# What a frame of sound before the surah's first words costs the search,
+# where sound between verses and after the last costs GARBAGE (3.0):
+# little, so that what a file opens with before the surah is left out
+# rather than hidden in the blanks of the opening's or verse 1's tokens.
+# See verse_one.
+LEAD_COST = 0.2
 GUARD_S = 20.0
 MAX_BAND_S = 960.0
 MAX_CELLS = 7.0e9  # the search's backpointers, a byte a cell
@@ -196,10 +210,12 @@ def even_pace(env, surah):
     return table, opening
 
 
-def search(model, logp, surah, guess, opening, band_s):
+def search(model, logp, surah, guess, opening, band_s, floor_ms=None):
     """pipeline/longform.align_surah, with the band's edges watched: the
     alignment, and what the search cost and how near the path came to
-    the band's edge (slack_s; None when it never could)."""
+    the band's edge (slack_s; None when it never could). Sound before the
+    surah's first words costs LEAD_COST a frame, sound between verses and
+    after the last GARBAGE. [floor_ms]: verse 1 begins no earlier."""
     import numpy as np
     L = W.longform
     fm = model.frame_ms
@@ -225,25 +241,39 @@ def search(model, logp, surah, guess, opening, band_s):
     hi[-1] = S - 1
     lo = np.minimum.accumulate(lo[::-1])[::-1]
     hi = np.maximum.accumulate(hi)
+    band_lo, band_hi = lo.copy(), hi.copy()
+    if floor_ms is not None and verses[0] == 1:
+        # Before the floor, no state of verse 1 or after: the opening,
+        # and the sound outside the surah and after the opening, only.
+        k = next(i for i, wi in enumerate(c.word)
+                 if wi >= 0 and words[wi][0] == 1)
+        f = min(total, max(0, int(floor_ms / fm)))
+        hi[:f] = np.minimum(hi[:f], k - 1)
+        lo = np.minimum(lo, hi)
     cells = int((hi - lo + 1).sum())
     info = dict(band_s=band_s, cells=cells)
     if cells > MAX_CELLS:
         return None, dict(info, why='band too wide for memory')
+    # Every garbage state but the one before the surah's first words
+    # (state 0) costs GAP_GARBAGE: between verses, and after the last.
     isgap = np.zeros(S, np.bool_)
     for s, t_ in enumerate(c.tok):
-        if t_ == -1 and s not in (0, S - 1):
+        if t_ == -1 and s != 0:
             isgap[s] = True
     score, path = L._banded(np.ascontiguousarray(logp, np.float32), tok, ptr,
-                            src, w, init, final, np.float32(L.GARBAGE),
+                            src, w, init, final, np.float32(LEAD_COST),
                             np.float32(L.GAP_GARBAGE), isgap, lo, hi)
     if path[0] < 0:
         return None, dict(info, why='no path')
     # How near the edges the path came: the lowest state the band allowed
     # at each frame (none below state 0) and the highest (none above the
-    # last), in the frames where the table expects them.
+    # last), in the frames where the table expects them. A floor is no
+    # edge of the band.
     e = exp[path]
-    lo_gap = np.where(lo == 0, np.iinfo(np.int64).max // 4, e - exp[lo])
-    hi_gap = np.where(hi == S - 1, np.iinfo(np.int64).max // 4, exp[hi] - e)
+    lo_gap = np.where(band_lo == 0, np.iinfo(np.int64).max // 4,
+                      e - exp[band_lo])
+    hi_gap = np.where(band_hi == S - 1, np.iinfo(np.int64).max // 4,
+                      exp[band_hi] - e)
     slack = int(min(lo_gap.min(), hi_gap.min()))
     info['slack_s'] = None if slack > 10 ** 12 else round(slack * fm / 1000, 1)
     rows = np.arange(total)
@@ -277,6 +307,231 @@ def search(model, logp, surah, guess, opening, band_s):
                                             model.delimiter, v0, v1))
     info['score'] = float(score)
     return dict(verses=res, opening=opening_frames), info
+
+
+# ---- verse 1, where its words are ---------------------------------------
+
+HEARD_S = 150.0         # how far into a file verse 1's words are looked for
+HEARD_LETTERS = 48      # how much of the surah's text, from verse 1
+HEARD_GAP_MS = 3000     # a run of heard letters breaks at a silence this long
+PAUSE_BEFORE_MS = 300   # the pause a reciter takes before verse 1, at least
+V1_EARLY_MS = 1000      # how far before that pause verse 1 may be put
+V1_QUIET_MS = 1000      # a quiet stretch verse 1 can't begin inside
+FLOOR_SLACK_MS = 200    # how far before the pause's end its first token may be
+
+_FOLD = {'أ': 'ا', 'إ': 'ا', 'آ': 'ا', 'ٱ': 'ا', 'ة': 'ه', 'ى': 'ي',
+         'ؤ': 'و', 'ئ': 'ي'}
+# A letter of the muqatta'at as recited, by its name, in the letters of
+# an ordinary word it lasts as long as (ayahreel-words' text._SPOKEN).
+_SPOKEN = {'ا': 3, 'ح': 3, 'ي': 3, 'ط': 3, 'ه': 3, 'ر': 3,
+           'ن': 8, 'ق': 8, 'ص': 8, 'ع': 8, 'س': 8, 'ل': 8, 'ك': 8, 'م': 8}
+
+
+def _bare(text):
+    """Arabic letters only, one form each: what a model's best guess and
+    the text are compared by."""
+    out = []
+    for ch in text:
+        ch = _FOLD.get(ch, ch)
+        if 'ء' <= ch <= 'ي' and ch != 'ـ':
+            out.append(ch)
+    return ''.join(out)
+
+
+def _spoken(word):
+    """[word]'s length in letters as recited: one of the muqatta'at (the
+    words written with no vowel marks) by its letters' names."""
+    if any('ً' <= ch <= 'ْ' for ch in word):
+        return len(_bare(word))
+    return sum(_SPOKEN.get(ch, 3) for ch in _bare(word))
+
+
+def heard(model, logp, frames):
+    """What the model hears in the first [frames]: its likeliest token at
+    each frame, repeats and blanks dropped (CTC's best path), as
+    (letter, frame) for each letter."""
+    inv = {i: c for c, i in model.vocab.items()}
+    out, prev = [], None
+    for f, t in enumerate(logp[:frames].argmax(1)):
+        t = int(t)
+        if t != prev and t != model.blank and t != model.delimiter:
+            ch = _bare(inv.get(t, ''))
+            if ch:
+                out.append((ch, f))
+        prev = t
+    return out
+
+
+def find_text(letters, target, max_gap):
+    """Where [target] (bare letters) best matches in [letters], a run of
+    (letter, frame): Smith-Waterman, +2 a letter matched, -1 a letter
+    wrong, missed or extra, and a run of heard letters broken where
+    [max_gap] frames pass between two of them. (score, index of the first
+    heard letter matched, index of the target letter it matched), or
+    None."""
+    n, m = len(letters), len(target)
+    if not n or not m:
+        return None
+    prev, pst = [0] * (m + 1), [None] * (m + 1)
+    best = (0, None)
+    for i in range(1, n + 1):
+        cur, cst = [0] * (m + 1), [None] * (m + 1)
+        li, fi = letters[i - 1]
+        joined = i == 1 or fi - letters[i - 2][1] <= max_gap
+        for j in range(1, m + 1):
+            opts = []
+            if joined and prev[j - 1] > 0:
+                opts.append((prev[j - 1] + (2 if li == target[j - 1] else -1),
+                             pst[j - 1]))
+            elif li == target[j - 1]:
+                opts.append((2, (i - 1, j - 1)))
+            if joined and prev[j] > 0:
+                opts.append((prev[j] - 1, pst[j]))
+            if cur[j - 1] > 0:
+                opts.append((cur[j - 1] - 1, cst[j - 1]))
+            if not opts:
+                continue
+            sc, st = max(opts, key=lambda x: x[0])
+            if sc > 0:
+                cur[j], cst[j] = sc, st
+                if sc > best[0]:
+                    best = (sc, st)
+        prev, pst = cur, cst
+    if best[1] is None:
+        return None
+    return best[0], best[1][0], best[1][1]
+
+
+def letter_ms(env, surah):
+    """How long a letter lasts in this file, recited at an even pace (as
+    even_pace lays the surah out)."""
+    import numpy as np
+    q = W.audio.quiet_below(env)
+    loud = np.nonzero(env > q)[0]
+    t0, t1 = int(loud[0]) * 10, (int(loud[-1]) + 1) * 10
+    n = W.text.COUNTS[surah - 1]
+    op = (W.text.ISTIADHA if surah in (1, 9) else
+          W.text.ISTIADHA + ' ' + W.text.BASMALA).split(' ')
+    w_op = sum(letters(w) for w in op) + 2 * PAUSE_LETTERS
+    w = sum(letters(x) for a in range(1, n + 1) for x in W.text.words(surah, a))
+    return (t1 - t0) / (w_op + w + PAUSE_LETTERS * n)
+
+
+def verse_one(model, logp, env, surah, res):
+    """Whether the search put verse 1 before its words, and where it
+    begins then: dict(floor_ms=…) when it did, with what was found.
+
+    A file may open with something before the surah — a later verse
+    recited as a preview, as YouTube uploads do (Islam Sobhi's Al-Qari'a
+    opens with 101:6-9, his Al-Ankabut with 29:41, his Al-Masad with the
+    end of its own verse 1), a channel's jingle — and a verse 1 may open
+    with words the model hears nothing of: the muqatta'at (الٓمٓ, نٓ),
+    recited as the letters' names, or a لَآ run into the next word. The
+    search, free to wait in blanks, may then take verse 1's letters from
+    inside the preview, or from the basmala (Al-Baqarah's الٓمٓ from its
+    ٱلرَّحْمَـٰنِ), and put verse 1 seconds early. LEAD_COST leaves most
+    previews out of the surah; this finds verse 1 by its words for the
+    rest:
+
+    - Where its words are heard: the surah's first HEARD_LETTERS letters
+      (verse 1, then on) found in what the model hears over the first
+      HEARD_S (find_text), by their letters, which a preview of other
+      verses, a basmala, a silence can't stand in for; the first heard
+      letter matched, and how much of the text before it went unheard.
+    - Verse 1 then begins where the reciter's voice returns after a
+      pause (PAUSE_BEFORE_MS or more) before it, the last that leaves
+      the unheard letters half their even-pace length (letter_ms) at
+      least: the pause after a preview or the basmala.
+    - Or, where verse 1 was put inside a quiet stretch of V1_QUIET_MS or
+      more (the faded end of a preview whose words the model garbles),
+      where that stretch ends.
+
+    When verse 1 was put V1_EARLY_MS or more before that, make searches
+    again with no state of verse 1 allowed before it (less FLOOR_SLACK_MS:
+    a soft onset is heard a little before the loudness says the pause
+    ends), and verse_rows starts verse 1 there, or at its first letter if
+    that is heard sooner. Measured on Islam Sobhi's 110 files (2026-10-26):
+    the first search, at a lead of 3.0, put verse 1 1-14 s early in 17 of
+    them (11 previews, 6 unheard first words); LEAD_COST alone mends 8;
+    this the other 9 (2, 15, 33, 34, 68, 75, 90, 101, 111), each to the
+    pause read by hand off the loudness and what the model hears, and it
+    fires on no other (18 and 54 only meet their early-letter fix sooner).
+    """
+    fm = model.frame_ms
+    n = W.text.COUNTS[surah - 1]
+    v1 = int(res['verses'][1]['frames'][0] * fm)
+    out = dict(searched_ms=v1)
+    floors = []
+    letters_ = heard(model, logp, int(HEARD_S * 1000 / fm))
+    words = []
+    a = 1
+    while a <= n and sum(len(_bare(w)) for w in words) < HEARD_LETTERS:
+        words += W.text.words(surah, a)
+        a += 1
+    starts, target = [], ''
+    for w in words:
+        starts.append(len(target))
+        target += _bare(w)
+    target = target[:HEARD_LETTERS]
+    hit = find_text(letters_, target, int(HEARD_GAP_MS / fm))
+    # Half a perfect score at least: the most of a preview's words.
+    if hit is not None and hit[0] >= len(target):
+        score, i0, j0 = hit
+        at = int(letters_[i0][1] * fm)
+        k = max(i for i, st in enumerate(starts) if st <= j0)
+        unheard = sum(_spoken(w) for w in words[:k]) + j0 - starts[k]
+        need = 0.5 * unheard * letter_ms(env, surah)
+        q = W.audio.quiet_below(env[:at // 10 + 3000])
+        pause = None
+        for p0, p1 in reversed(quiet_runs(env, q, 0, at + 100)):
+            if p1 - p0 >= PAUSE_BEFORE_MS and at - p1 >= need:
+                pause = p1
+                break
+        out.update(heard_ms=at, score=f'{score}/{2 * len(target)}',
+                   unheard=unheard, pause_ms=pause)
+        if pause is not None and v1 < pause - V1_EARLY_MS:
+            floors.append(pause)
+    q = W.audio.quiet_below(env[:v1 // 10 + 3000])
+    for p0, p1 in quiet_runs(env, q, 0, v1 + 60000):
+        if p0 <= v1 < p1 and p1 - p0 >= V1_QUIET_MS and \
+                p1 - v1 >= V1_EARLY_MS:
+            out['quiet_ms'] = [p0, p1]
+            floors.append(p1)
+    if floors:
+        out['floor_ms'] = max(floors)
+    return out
+
+
+def align(model, logp, env, surah, guess, opening, band, tag=''):
+    """The whole search: in a band widened while it binds the path, then
+    verse 1 searched again where verse_one finds it put early. Returns
+    (res, info, one): one is verse_one's finding, with applied=True when
+    the second search was kept."""
+    while True:
+        res, info = search(model, logp, surah, guess, opening, band)
+        slack = info.get('slack_s')
+        if res is not None and (slack is None or slack >= GUARD_S):
+            break
+        if band * 2 > MAX_BAND_S or info['cells'] > MAX_CELLS:
+            return res, info, None
+        print(f"{tag}band {band:.0f} s: "
+              f"{info.get('why') or f'slack {slack} s'}; searching "
+              f"again wider", flush=True)
+        band *= 2
+    if 1 not in res['verses']:
+        return res, info, None
+    one = verse_one(model, logp, env, surah, res)
+    if 'floor_ms' not in one:
+        return res, info, one
+    res2, info2 = search(model, logp, surah, guess, opening, band,
+                         floor_ms=one['floor_ms'] - FLOOR_SLACK_MS)
+    slack2 = info2.get('slack_s')
+    if res2 is not None and len(res2['verses']) >= len(res['verses']) and \
+            (slack2 is None or slack2 >= GUARD_S):
+        one['applied'] = True
+        return res2, info2, one
+    one['refused'] = info2.get('why') or 'fewer verses, or the band bound it'
+    return res, info, one
 
 
 def windows(surah, res, env, fm):
@@ -322,9 +577,19 @@ EARLY_QUIET_MS = 300   # and the breath in it
 EARLY_MAX_RUNS = 2     # the most letters dropped
 
 
-def verse_rows(surah, verses, env, fm):
+def found_v1(one):
+    """Where verse 1 begins when verse_one found it and the search was
+    made again from there, else None."""
+    return one['floor_ms'] if one and one.get('applied') else None
+
+
+def verse_rows(surah, verses, env, fm, v1_at=None):
     """[ayah, start, end, conf, conf_min, jumps, ignored] for every verse,
     in ms of the file's frame clock, whole 10 ms; and the fixes made.
+    [v1_at]: where verse_one found verse 1 to begin (the end of the pause
+    before it), which it starts at, less START_SHIFT, unless its first
+    letter is heard sooner: its first words may be ones the model hears
+    nothing of, and their letters set down anywhere after the pause.
 
     A verse starts at its first word, less START_SHIFT, and ends where its
     last word does. Two things the alignment gets wrong are mended here,
@@ -388,6 +653,10 @@ def verse_rows(surah, verses, env, fm):
                 s = s2
         starts[a] = int(s)
         ends[a] = int(max(e for _, _, e in ws))
+    if v1_at is not None and int(v1_at) + START_SHIFT < starts[1]:
+        s1 = int(v1_at) + START_SHIFT
+        fixes.append(dict(ayah=1, fix='verse 1 heard', was=starts[1], now=s1))
+        starts[1] = s1
     for a in range(2, n + 1):
         pe, s = ends[a - 1], starts[a]
         if s - pe < PAUSE_MIN_MS + 300:
@@ -468,24 +737,14 @@ def make(args):
         audio_ms = len(wave) / 16
         del wave
         guess, opening = even_pace(env, s)
-        band = BAND_S
-        while True:
-            res, info = search(m, logp, s, guess, opening, band)
-            slack = info.get('slack_s')
-            if res is not None and (slack is None or slack >= GUARD_S):
-                break
-            if band * 2 > MAX_BAND_S or info['cells'] > MAX_CELLS:
-                break
-            print(f"{args.id} {s}: band {band:.0f} s: "
-                  f"{info.get('why') or f'slack {slack} s'}; searching "
-                  f"again wider", flush=True)
-            band *= 2
+        res, info, one = align(m, logp, env, s, guess, opening, BAND_S,
+                               tag=f'{args.id} {s}: ')
         rec = dict(surah=s, url=url, final_url=final, kbps=lay['kbps'],
                    rate=lay['rate'],
                    info_frame=lay['info'],
                    lame_skip_ms=W.audio.lame_skip_ms(lay),
                    audio_ms=int(audio_ms), model=MODEL,
-                   model_s=round(model_s, 1), **info)
+                   model_s=round(model_s, 1), **info, verse_one=one)
         if res is None or (info.get('slack_s') is not None and
                            info['slack_s'] < GUARD_S):
             rec['error'] = info.get('why') or 'the band bound the path'
@@ -498,7 +757,8 @@ def make(args):
             rec['opening'] = None if not res['opening'] else [
                 int(res['opening'][0] * fm), int(res['opening'][1] * fm)]
             verses = windows(s, res, env, fm)
-            rec['verses'], rec['fixes'] = verse_rows(s, verses, env, fm)
+            rec['verses'], rec['fixes'] = verse_rows(s, verses, env, fm,
+                                                     v1_at=found_v1(one))
             rec['words'] = {str(a): v for a, v in verses.items()}
             rec['guess_off_s'] = round(max(
                 abs(v[1] - guess[v[0]][0]) for v in rec['verses']) / 1000, 1)
@@ -541,13 +801,20 @@ def rows_again(args):
             logp = np.load(os.path.join(args.tables, f'logp_{s}.npz'))[
                 'logp'].astype(np.float32)
             guess, opening = even_pace(env, s)
-            res, info = search(m, logp, s, guess, opening, d['band_s'])
+            res, info, one = align(m, logp, env, s, guess, opening,
+                                   d['band_s'], tag=f'surah {s}: ')
+            if res is None or len(res['verses']) != W.text.COUNTS[s - 1]:
+                print(f'surah {s}: not aligned again ({info.get("why")})')
+                continue
             verses = windows(s, res, env, m.frame_ms)
-            d.update(info)
+            d.update(info, verse_one=one)
+            d['opening'] = None if not res['opening'] else [
+                int(res['opening'][0] * m.frame_ms),
+                int(res['opening'][1] * m.frame_ms)]
         else:
             verses = {int(a): v for a, v in d['words'].items()}
-        d['verses'], d['fixes'] = verse_rows(s, verses, env,
-                                             models_frame_ms())
+        d['verses'], d['fixes'] = verse_rows(
+            s, verses, env, models_frame_ms(), v1_at=found_v1(d.get('verse_one')))
         d['words'] = {str(a): v for a, v in verses.items()}
         json.dump(d, open(f, 'w'), separators=(',', ':'))
         print(f"surah {s}: {len(d['fixes'])} fixes "
@@ -991,8 +1258,10 @@ def speaker(args):
     print(json.dumps(res, indent=1))
     if args.json:
         json.dump(res, open(args.json, 'w'), indent=1)
-    return 0 if parted and all(c['verdict'] == 'his'
-                               for c in cands.values()) else 1
+    # A report, not a gate: a candidate found not his is the check
+    # working, and the verdicts are for a person to read (and to record
+    # in verify_reciters.SPEAKER_CHECKED), not a failed job.
+    return 0
 
 
 # ---- plan: the workflow's matrix -----------------------------------------
@@ -1017,7 +1286,10 @@ def plan(args):
     speakers = [j for j in jobs if j.get('speaker')]
     summary = {}
     for j in jobs:
-        if not j.get('screen') and not j.get('speaker'):
+        # "summary": false for a job that makes only part of a voice's
+        # tables, which the whole-voice check would fail.
+        if not j.get('screen') and not j.get('speaker') and \
+                j.get('summary', True):
             summary.setdefault(j['id'], {k: j[k] for k in (
                 'id', 'base', 'padded', 'truth', 'published', 'urls')
                 if k in j})

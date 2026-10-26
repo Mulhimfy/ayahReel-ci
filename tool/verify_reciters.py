@@ -184,6 +184,21 @@ the above, as a voice of its own, and then:
      recorded in SPEAKER_CHECKED. Its source names the files by their
      digest (elsewhere_digest), so a file moved is verified again.
 
+     Islam Sobhi (sobhi, 2026-10-26): mp3quran 253, his one complete
+     recording, has 109 surahs and no table; 29 of them only at a variable
+     bitrate, and its Al-Qamar holds a second take after the first.
+     archive.org's 002_20221103_202211 has those takes at a constant
+     bitrate behind a 10-26 s intro, each found in mp3quran's file at a
+     median 0.95-0.99, and Way2Quran has Al-Jinn's (from tvQuran, 0.99).
+     mp3quran sends the five it lacks to Al-Minshawi's r1. Of what other
+     hosts offer under his name for them, Way2Quran's As-Saffat,
+     Az-Zumar, Ghafir and Al-Jathiya are another reciter's (0.30-0.54
+     against his files), as are the same four in archive.org's
+     002_20261005_202610 (24 kbps m4a besides); At-Talaq can't be told
+     (0.69 and 0.75 against his files, 0.58 and 0.48 against his At-Tawbah
+     on Way2Quran); archive.org's Ghafir at 160 kbps is his
+     (SPEAKER_CHECKED). So he lacks 37, 39, 45 and 65.
+
 Results go to tool/reciters_verified.json; test/reciter_sources_test.dart
 refuses a build where a reciter in the app has no passing entry there,
 or where the entry was made for a different source.
@@ -288,7 +303,14 @@ USER_ACCEPTED = {
 # found in (the base hasn't the surah), taken as the reciter's because
 # tool/verse_table.py speaker heard his voice in each: {voice: {surahs,
 # how}}.
-SPEAKER_CHECKED = {}
+SPEAKER_CHECKED = {
+    'sobhi': dict(surahs=[40], how=(
+        'tool/verse_table.py speaker, ayahreel-words-ci tables run '
+        '40314478734 (2026-10-26): 0.742 against his own files (they come '
+        'to 0.75-0.93 of one another, eight other reciters to 0.27-0.64), '
+        "0.757 against Way2Quran's At-Tawbah of his (his files 0.49-0.76 "
+        "there, the others' 0.23-0.59)")),
+}
 
 
 MIN_KBPS = 64
@@ -1010,7 +1032,11 @@ def elsewhere_check(r, s):
         'Range': f'bytes=0-{ELSEWHERE_BYTES - 1}'}, timeout=180)
     if st2 not in (200, 206) or not b2:
         return dict(out, ok=False, why=f'HTTP {st2}')
-    xa, xb = decode_pcm(b), decode_pcm(b2)
+    try:
+        xa, xb = decode_pcm(b), decode_pcm(b2)
+    except subprocess.CalledProcessError as e:
+        return dict(out, ok=False, why='not decodable as mp3: ' + (
+            e.stderr or b'').decode('utf8', 'replace').strip()[:160])
     sr = XRATE // 1000
     snd = sound(env_of(xa), (0, len(xa) // sr))
     if not snd:
