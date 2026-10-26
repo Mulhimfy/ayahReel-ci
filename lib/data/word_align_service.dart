@@ -11,7 +11,7 @@ import 'debug_log.dart';
 import 'models.dart';
 import 'qul_words.dart';
 import 'recitation_service.dart' show LiveClip;
-import 'verse_lines.dart' show VerseText;
+import 'verse_lines.dart' show TokenTimes, VerseText;
 
 /// Word-precise timing data from the quran-align project
 /// (github.com/cpfair/quran-align, CC BY 4.0): word timestamps computed
@@ -500,12 +500,20 @@ abstract final class WordAlignService {
     final n = arabic.split(' ').length;
     final times = List<(int, int)?>.filled(n, null);
     final held = <int>{};
+    // The recitation in its order, kept when it goes back over words: the
+    // light and the thread follow it there (TokenTimes).
+    final recited = <(int, int, int, int)>[];
+    var back = false;
+    var lastStart = -1;
     for (final s in spans) {
       final r = displayRange(arabic, s.startWord, s.endWord);
       if (r == null || s.endMs <= s.startMs) continue;
+      if (r.start < lastStart) back = true;
+      lastStart = r.start;
+      recited.add((r.start, r.end < n ? r.end : n, s.startMs, s.endMs));
       // The first time a word is recited: a reciter who takes words
-      // again after a breath has already reached them, and the thread,
-      // the light and the line's change go by where they were reached.
+      // again after a breath has already reached them, and the line's
+      // change goes by where they were reached.
       for (var k = r.start; k < r.end && k < n; k++) {
         times[k] ??= (s.startMs, s.endMs);
       }
@@ -513,7 +521,7 @@ abstract final class WordAlignService {
         held.add(k);
       }
     }
-    return (times: times, held: held);
+    return (times: TokenTimes(times, back ? recited : null), held: held);
   }
 
   /// Turns raw spans into per-ayah highlight windows for the selected

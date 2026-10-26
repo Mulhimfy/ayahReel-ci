@@ -187,6 +187,11 @@ class AppSettings {
   /// the user turns it off.
   final bool surahTitle;
 
+  /// Whether the user put away the note that, for a reel on their own
+  /// recording, the light and the thread follow its pauses (OwnAudioNote).
+  /// Shown until then; a small lightbulb brings it back.
+  final bool ownAudioNoteHidden;
+
   const AppSettings({
     required this.streakReminderOn,
     required this.personalReminderOn,
@@ -223,6 +228,7 @@ class AppSettings {
     this.scenesFollowLines = true,
     this.basmala = true,
     this.surahTitle = true,
+    this.ownAudioNoteHidden = false,
   });
 
   static const defaults = AppSettings(
@@ -274,6 +280,7 @@ class AppSettings {
     bool? scenesFollowLines,
     bool? basmala,
     bool? surahTitle,
+    bool? ownAudioNoteHidden,
   }) {
     return AppSettings(
       streakReminderOn: streakReminderOn ?? this.streakReminderOn,
@@ -312,6 +319,7 @@ class AppSettings {
       scenesFollowLines: scenesFollowLines ?? this.scenesFollowLines,
       basmala: basmala ?? this.basmala,
       surahTitle: surahTitle ?? this.surahTitle,
+      ownAudioNoteHidden: ownAudioNoteHidden ?? this.ownAudioNoteHidden,
     );
   }
 
@@ -363,6 +371,7 @@ class AppSettings {
         'sceneEveryLine': scenesFollowLines,
         'basmala': basmala,
         'showSurahName': surahTitle,
+        'ownAudioNoteHidden': ownAudioNoteHidden,
       };
 
   factory AppSettings.fromJson(Map<String, dynamic> j) => AppSettings(
@@ -438,6 +447,7 @@ class AppSettings {
         // Absent on every install that predates it: on.
         basmala: j['basmala'] as bool? ?? true,
         surahTitle: j['showSurahName'] as bool? ?? true,
+        ownAudioNoteHidden: j['ownAudioNoteHidden'] as bool? ?? false,
       );
 }
 

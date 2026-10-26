@@ -266,17 +266,38 @@ enum MotionPreset {
 /// pace over its share of the unit.
 @immutable
 class RowProgress {
-  /// (ms into the unit, pixels from the right edge), ascending in time
-  /// and never going back.
+  /// (ms into the unit, pixels from the right edge), ascending in time.
+  /// The position goes back only where the reciter does (a line from
+  /// TokenTimes.recited; see VerseRow.progressFromWords).
   final List<(int, double)> points;
 
   /// The line's width in pixels: where the progress ends.
   final double width;
 
-  const RowProgress(this.points, this.width);
+  /// When the voice is on this line, in ms into the unit: what its light
+  /// and its spark show for, each stretch with its own tail. Null for
+  /// one stretch, from the first point to the last; more only where the
+  /// reciter went back onto the line after leaving it.
+  final List<(int, int)>? _visits;
+
+  const RowProgress(this.points, this.width, [this._visits]);
 
   int get startMs => points.isEmpty ? 0 : points.first.$1;
   int get endMs => points.isEmpty ? 0 : points.last.$1;
+
+  /// The stretches the voice is on this line, in order.
+  List<(int, int)> get visits =>
+      _visits ?? (points.isEmpty ? const [] : [(startMs, endMs)]);
+
+  /// The stretch of [visits] that [ms] falls in or within [tailMs] after
+  /// the end of; the later one where two do.
+  (int, int)? visitAt(int ms, int tailMs) {
+    final v = visits;
+    for (var i = v.length - 1; i >= 0; i--) {
+      if (ms >= v[i].$1 && ms <= v[i].$2 + tailMs) return v[i];
+    }
+    return null;
+  }
 
   double at(int ms) {
     if (points.isEmpty) return 0;

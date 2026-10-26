@@ -119,6 +119,22 @@ void main() {
 
   const l = L10n.en;
 
+  /// Taps the verse's flat colour [argb]. The flat colours run in one
+  /// line that scrolls, so one further along it is scrolled to first.
+  Future<void> tapVerseColour(WidgetTester t, int argb) async {
+    String label(int c) =>
+        '${l.styleVerseColour}${l.comma} ${l.a11yColourSwatch(c)}';
+    final line = t.element(find
+        .ancestor(
+            of: find.bySemanticsLabel(label(versePalette.first)),
+            matching: find.byType(Scrollable))
+        .first);
+    final target = find.bySemanticsLabel(label(argb));
+    await t.scrollUntilVisible(target, 74,
+        scrollable: find.byElementPredicate((e) => identical(e, line)));
+    await t.tap(target);
+  }
+
   testWidgets('the frame is a still: no decoder, no playing video',
       (t) async {
     await open(t);
@@ -222,11 +238,9 @@ void main() {
     await open(t);
     await openTab(t, l.styleTabColour);
 
-    // The label names the target as well as the colour. Every colour is
-    // in view: nothing to scroll to.
+    // The label names the target as well as the colour.
     const mint = 0xFF9FE8C9;
-    await t.tap(find.bySemanticsLabel(
-        '${l.styleVerseColour}${l.comma} ${l.a11yColourSwatch(mint)}'));
+    await tapVerseColour(t, mint);
     await settle(t);
     expect(creationState.textArgb, mint);
     expect(creationState.accentArgb, accentOnDark, reason: 'accent untouched');
@@ -341,8 +355,7 @@ void main() {
     expect(find.textContaining(l.inkName(VerseInk.iris)), findsWidgets);
 
     const mint = 0xFF9FE8C9;
-    await t.tap(find.bySemanticsLabel(
-        '${l.styleVerseColour}${l.comma} ${l.a11yColourSwatch(mint)}'));
+    await tapVerseColour(t, mint);
     await settle(t);
     expect(creationState.verseInk, VerseInk.none);
     expect(creationState.textArgb, mint);

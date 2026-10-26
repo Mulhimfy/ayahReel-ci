@@ -253,7 +253,7 @@ class RenderVerseFlourish extends RenderProxyBox {
         // The spark rides the growing end, and is not there while the
         // card itself is still arriving or already leaving: it is a
         // still picture in the export, which cannot fade with it.
-        final sparkOn = ms <= p.endMs + 120 &&
+        final sparkOn = p.visitAt(ms, 120) != null &&
             ms >= w.inMs &&
             ms <= _w.unitMs - w.outMs;
         if (sparkOn) SparkLook.paint(canvas, Offset(r.right - g, y), s, _w.accent);
@@ -275,8 +275,9 @@ class RenderVerseFlourish extends RenderProxyBox {
       final r = rows[i];
       final pr = progress[i];
       if (pr.points.isEmpty) continue;
-      if (ms < pr.startMs || ms > pr.endMs + LightLook.tailMs) continue;
-      final tail = LightLook.tailAt(ms, pr.endMs);
+      final visit = pr.visitAt(ms, LightLook.tailMs);
+      if (visit == null) continue;
+      final tail = LightLook.tailAt(ms, visit.$2);
       final cx = r.right - pr.at(ms);
       for (final (width, a) in LightLook.layers) {
         final w = width * s;

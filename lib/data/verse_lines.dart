@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -1047,6 +1048,35 @@ class VerseLinePlan {
   int get hashCode => Object.hash(lines, fingerprint);
 }
 
+/// Each of a verse's tokens' recited windows — the first time each is
+/// reached, what a line changes by — and, where the reciter went back
+/// over words (a waqf, then the words before it again), the recitation
+/// in its own order: [recited], for each stretch the tokens it covers,
+/// [first, end), and its window. The light and the thread follow it
+/// (VerseRow.progressFromWords), going back with the reciter; to
+/// everything else it is the plain list of first windows.
+class TokenTimes extends ListBase<(int, int)?> {
+  TokenTimes(this._times, [this.recited]);
+
+  final List<(int, int)?> _times;
+
+  /// (first token, end token, start ms, end ms) in recited order; null
+  /// when the recitation never goes back.
+  final List<(int, int, int, int)>? recited;
+
+  @override
+  int get length => _times.length;
+
+  @override
+  set length(int n) => _times.length = n;
+
+  @override
+  (int, int)? operator [](int i) => _times[i];
+
+  @override
+  void operator []=(int i, (int, int)? v) => _times[i] = v;
+}
+
 /// One thing on screen in turn: a whole verse, or one part of a cut one.
 /// Scenes can change on these (see `ScenePlan`), and the motion runs on
 /// them (see `VerseMotion`).
@@ -1065,18 +1095,32 @@ class VerseUnit {
 
   /// [verseTimes] — each of the verse's tokens' recited windows, in ms
   /// from the verse's start — as this unit's own: its tokens only, in
-  /// ms from the unit's start. Null without word timing.
+  /// ms from the unit's start. Null without word timing. A [TokenTimes]
+  /// keeps its recited order: a stretch wholly before the unit becomes
+  /// -1..0, one wholly after it n..n+1 (the voice is off this card).
   List<(int, int)?>? timesIn(List<(int, int)?>? verseTimes, int verseStartMs) {
     if (verseTimes == null) return null;
     final from = part?.tokenStart ?? 0;
     final to = part?.tokenEnd ?? verseTimes.length;
     final shift = verseStartMs - startMs;
-    return [
+    final own = [
       for (var k = from; k < to && k < verseTimes.length; k++)
         verseTimes[k] == null
             ? null
             : (verseTimes[k]!.$1 + shift, verseTimes[k]!.$2 + shift),
     ];
+    final recited = verseTimes is TokenTimes ? verseTimes.recited : null;
+    if (recited == null) return own;
+    final n = own.length;
+    return TokenTimes(own, [
+      for (final (a, b, s, e) in recited)
+        (
+          b <= from ? -1 : (a >= to ? n : math.max(a, from) - from),
+          b <= from ? 0 : (a >= to ? n + 1 : math.min(b, to) - from),
+          s + shift,
+          e + shift,
+        ),
+    ]);
   }
 
   /// The verse's units over `[startAyah, endAyah]`, in order and gapless

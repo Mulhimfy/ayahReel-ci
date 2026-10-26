@@ -536,6 +536,8 @@ class _ArenaResultScreenState extends State<ArenaResultScreen> {
                               icon: Icons.replay_rounded,
                               onPressed: _again,
                             ),
+                            const SizedBox(height: 16),
+                            const _SharePitch(),
                           ],
                         ),
                       ),
@@ -1080,6 +1082,95 @@ class _Steps extends StatelessWidget {
           step(Icons.send_rounded, l.arenaStepShare),
           arrow,
           step(Icons.leaderboard_rounded, l.arenaStepCompare),
+        ],
+      ),
+    );
+  }
+}
+
+/// Why the code is worth sending, under the buttons: a card of three
+/// short lines, each a different pull (the owner's ask, 2026-10-26) —
+/// it is fair and it is theirs too (the same ten questions, in the same
+/// order: the code is the seed, see ArenaRound.generate), it is a
+/// friendly contest (the score is the one to beat), and it is a good
+/// deed passed on (the hadith of the one who guides to good).
+class _SharePitch extends StatelessWidget {
+  const _SharePitch();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = L10n.of(context);
+    Widget row(IconData icon, String text, {String? source}) => Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 26,
+                height: 26,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.gold.withValues(alpha: 0.12),
+                  border:
+                      Border.all(color: AppColors.gold.withValues(alpha: 0.4)),
+                ),
+                child: Icon(icon, size: 13, color: AppColors.goldBright),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text.rich(
+                  TextSpan(children: [
+                    TextSpan(text: text),
+                    if (source != null)
+                      TextSpan(
+                        text: '  $source',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.gold.withValues(alpha: 0.85),
+                        ),
+                      ),
+                  ]),
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    height: 1.4,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.gold.withValues(alpha: 0.10),
+            AppColors.surface.withValues(alpha: 0.6),
+          ],
+        ),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.32)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l.arenaPitchTitle,
+            style: const TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w700,
+              height: 1.3,
+              color: AppColors.goldBright,
+            ),
+          ),
+          row(Icons.copy_rounded, l.arenaPitchSame),
+          row(Icons.leaderboard_rounded, l.arenaPitchBeat),
+          row(Icons.auto_awesome_rounded, l.arenaPitchReward,
+              source: l.arenaPitchRewardSource),
         ],
       ),
     );

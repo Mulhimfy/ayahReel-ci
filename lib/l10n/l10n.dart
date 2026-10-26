@@ -1272,6 +1272,25 @@ class L10n {
       'تلاوت شدہ لفظ نمایاں کریں',
       'Sorot kata yang dibaca',
       'Rezitiertes Wort hervorheben');
+  /// Under that switch: the reel's verses no word timing reaches, which
+  /// play without the per-word shading (the owner's ask, 2026-10-26).
+  String noWordTimingFor(List<int> verses) {
+    final shown = verses.length > 8
+        ? '${verses.take(8).join('$comma ')}$comma …'
+        : verses.join('$comma ');
+    final one = verses.length == 1;
+    return one
+        ? _t('No word timing for verse $shown: it plays without per-word shading.',
+            'لا توقيت للكلمات في الآية $shown: تُعرض دون تظليل كلمة بكلمة.',
+            'آیت $shown کے الفاظ کی ٹائمنگ نہیں: یہ لفظ بہ لفظ روشنی کے بغیر چلے گی۔',
+            'Ayat $shown tanpa waktu per kata: tampil tanpa sorotan per kata.',
+            'Keine Wort-Zeiten für Vers $shown: er läuft ohne Hervorhebung Wort für Wort.')
+        : _t('No word timing for verses $shown: they play without per-word shading.',
+            'لا توقيت للكلمات في الآيات $shown: تُعرض دون تظليل كلمة بكلمة.',
+            'آیات $shown کے الفاظ کی ٹائمنگ نہیں: یہ لفظ بہ لفظ روشنی کے بغیر چلیں گی۔',
+            'Ayat $shown tanpa waktu per kata: tampil tanpa sorotan per kata.',
+            'Keine Wort-Zeiten für die Verse $shown: sie laufen ohne Hervorhebung Wort für Wort.');
+  }
   /// The same, where a line has room for two words.
   String get wordLightShort => _t('Highlight word', 'إبراز الكلمة',
       'لفظ نمایاں', 'Sorot kata', 'Wort hervorheben');
@@ -4452,6 +4471,34 @@ class L10n {
       'دیکھیں کون ہراتا ہے', 'Lihat siapa yang mengalahkannya',
       'Sieh, wer ihn schlägt');
 
+  /// Under the result's buttons: why the code is worth sending.
+  String get arenaPitchTitle => _t(
+      'Send it on — they get your exact quiz',
+      'أرسله — يصلهم اختبارك نفسه',
+      'آگے بھیجیں — انہیں آپ ہی کا کوئز ملے گا',
+      'Kirimkan — mereka dapat kuis yang sama persis',
+      'Weitersenden — sie bekommen genau dein Quiz');
+  String get arenaPitchSame => _t(
+      'The same 10 questions, in the same order: your code opens them.',
+      'الأسئلة العشرة نفسها وبالترتيب نفسه: رمزك هو مفتاحها.',
+      'وہی 10 سوال، اسی ترتیب میں: آپ کا کوڈ انہیں کھولتا ہے۔',
+      '10 soal yang sama, urutan yang sama: kodemu yang membukanya.',
+      'Dieselben 10 Fragen in derselben Reihenfolge: dein Code öffnet sie.');
+  String get arenaPitchBeat => _t(
+      'Your score is the one to beat. See who knows the Quran better.',
+      'نتيجتك هي التحدي. لنرَ من يعرف القرآن أكثر.',
+      'آپ کا اسکور ہی ہدف ہے۔ دیکھیں قرآن کون زیادہ جانتا ہے۔',
+      'Skormu yang harus dikalahkan. Siapa paling paham Al-Qur\'an?',
+      'Dein Ergebnis ist die Messlatte. Wer kennt den Koran besser?');
+  String get arenaPitchReward => _t(
+      '“Whoever guides to good has a reward like the one who does it.”',
+      '«مَنْ دَلَّ عَلَى خَيْرٍ فَلَهُ مِثْلُ أَجْرِ فَاعِلِهِ»',
+      '«جس نے بھلائی کی راہ دکھائی، اسے اس پر عمل کرنے والے جتنا اجر ملے گا»',
+      '“Siapa yang menunjukkan kebaikan, baginya pahala seperti pelakunya.”',
+      '„Wer zum Guten hinführt, hat den Lohn dessen, der es tut.“');
+  String get arenaPitchRewardSource => _t('— Sahih Muslim', '— رواه مسلم',
+      '— صحیح مسلم', '— HR. Muslim', '— Sahih Muslim');
+
   /// The Cards tab's door: it opens the lobby, as the roundel at the
   /// top does, and says so.
   String get arenaEnter => _t('Play Tanafus', 'العب تنافُس', 'تنافُس کھیلیں',
@@ -6193,6 +6240,30 @@ class L10n {
       'Cara ayat bergerak saat dibacakan. Reel yang Anda simpan bergerak sama.',
       'Wie sich der Vers beim Rezitieren bewegt. Dein gespeichertes Reel '
           'bewegt sich genauso.');
+  /// For a reel on the user's own recording (OwnAudioNote): kind and
+  /// plain, and Still always there. [still] is Still's own name.
+  String ownAudioMotionNote(String still) => _t(
+      'With your own recording, the light and the thread can’t know '
+          'exactly when each word is said, so they follow the pauses in '
+          'your recording: a gentle best guess. If you’d prefer, you can '
+          'always choose $still.',
+      'مع تسجيلك الخاص لا يعرف النور والخيط متى تُقال كل كلمة بالضبط، '
+          'فيتبعان وقفات تسجيلك: تقديرٌ لطيف. وإن شئت، يمكنك دائمًا '
+          'اختيار «$still».',
+      'آپ کی اپنی ریکارڈنگ میں نور اور دھاگا ٹھیک سے نہیں جان سکتے کہ ہر '
+          'لفظ کب ادا ہوا، اس لیے وہ آپ کی ریکارڈنگ کے وقفوں کے ساتھ چلتے '
+          'ہیں: ایک نرم سا اندازہ۔ چاہیں تو آپ ہمیشہ «$still» چن سکتے ہیں۔',
+      'Dengan rekamanmu sendiri, cahaya dan benang tidak bisa tahu persis '
+          'kapan tiap kata diucapkan, jadi keduanya mengikuti jeda '
+          'rekamanmu: perkiraan yang lembut. Kalau lebih suka, kamu selalu '
+          'bisa memilih $still.',
+      'Bei deiner eigenen Aufnahme wissen Licht und Faden nicht genau, '
+          'wann jedes Wort gesprochen wird, also folgen sie den Pausen '
+          'deiner Aufnahme: eine sanfte Schätzung. Wenn dir das lieber '
+          'ist, kannst du jederzeit „$still“ wählen.');
+  /// The put-away note's pill, which opens it again.
+  String get ownAudioNoteAgain => _t('About the light', 'عن النور',
+      'نور کے بارے میں', 'Tentang cahaya', 'Über das Licht');
   String motionPresetName(String key) => switch (key) {
         'still' => _t('Still', 'ثابت', 'ساکن', 'Diam', 'Ruhig'),
         'thread' => _t('Golden thread', 'خيط ذهبي', 'سنہری دھاگا',

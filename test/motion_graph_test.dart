@@ -167,6 +167,61 @@ void main() {
     expect(g, contains('fade=t=out:st=2.600:d=0.220:alpha=1'));
   });
 
+  test('a line the reciter comes back to lights again', () {
+    final back = [
+      MotionRow(
+        left: 140,
+        right: 940,
+        top: 60,
+        bottom: 150,
+        threadY: 132,
+        progress: const RowProgress(
+          [(300, 0), (900, 300), (1499, 300), (1500, 100), (2600, 800)],
+          800,
+          [(300, 900), (1500, 2600)],
+        ),
+      ),
+    ];
+    final f = StringBuffer();
+    final last = VerseMotionGraph.write(
+      f,
+      prev: 'v0',
+      cards: const [
+        MotionCard(
+            input: 3,
+            startMs: 500,
+            endMs: 3500,
+            unitStartMs: 500,
+            unitEndMs: 3500),
+      ],
+      units: [
+        MotionUnit(
+            startMs: 500,
+            endMs: 3500,
+            cardTop: 800,
+            cardH: 300,
+            rows: back,
+            glintInput: 9),
+      ],
+      motion: const VerseMotion(thread: true, light: true),
+      passStartMs: 0,
+      passEndMs: 6000,
+      baseY: '(H-h)*0.500',
+      threadInput: 7,
+      sparkInput: 8,
+    );
+    final g = f.toString();
+    expect(wiring(g, 'v0'), [last], reason: g);
+    // Each layer of the light is cut twice, once for each time the voice
+    // is on the line, each with its own tail.
+    expect(g, contains('[qg9_r3]null,split=2'));
+    expect(g, contains('fade=t=out:st=0.900:d=0.220:alpha=1'));
+    expect(g, contains('fade=t=out:st=2.600:d=0.220:alpha=1'));
+    // The spark too; the thread is one, going back with the voice.
+    expect(g, contains('[8:v]split=2'));
+    expect(g, contains('[7:v]format=rgba,split=1[qt0]'));
+  });
+
   test('uses() names what a pass needs', () {
     final u = VerseMotionGraph.uses(
       units: [

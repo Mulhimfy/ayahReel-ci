@@ -74,6 +74,7 @@ import '../widgets/surah_title.dart';
 import '../widgets/telegram_invite.dart';
 import '../widgets/verse_stage.dart';
 import '../widgets/verses_milestone.dart';
+import '../widgets/own_audio_note.dart';
 import 'home_shell.dart';
 
 /// An app Share can hand the finished reel to directly, skipping the
@@ -454,6 +455,18 @@ class _PreviewScreenState extends State<PreviewScreen>
           : null;
 
   late int _ayahIndex = _startAyah - 1;
+
+  /// The reel's verses the voice's word timing does not reach: no
+  /// per-word shading there (said under the highlight switch). Empty
+  /// until the timing is in, and for a voice with none at all.
+  List<int> get _untimedVerses {
+    final spans = _spans;
+    if (spans == null || _hlPlan == null) return const [];
+    return [
+      for (var a = _startAyah; a <= _endAyah; a++)
+        if (spans[a] == null || spans[a]!.isEmpty) a,
+    ];
+  }
 
   /// Word-highlight windows for the selection (null: no data for this
   /// voice, still fetching, or selection too long — card stays whole).
@@ -2795,6 +2808,10 @@ class _PreviewScreenState extends State<PreviewScreen>
         child: Column(
           children: [
             const SizedBox(height: 8),
+            // The user's own recording: how the light follows it, at the
+            // top, until put away (OwnAudioNote).
+            if (_reciter.isUserAudio)
+              const OwnAudioNote(padding: EdgeInsets.fromLTRB(16, 0, 16, 8)),
             Expanded(
               child: Center(
                 child: ClipRRect(
@@ -3123,6 +3140,23 @@ class _PreviewScreenState extends State<PreviewScreen>
                       ],
                       ),
                     ),
+                    // The verses no word timing reaches play without the
+                    // per-word shading: said under the switch, by number.
+                    if (_untimedVerses.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 2),
+                        child: Text(
+                          l.noWordTimingFor(_untimedVerses),
+                          textAlign: TextAlign.center,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontSize: 10.5,
+                                    height: 1.35,
+                                    color: AppColors.textSecondary
+                                        .withValues(alpha: 0.85),
+                                  ),
+                        ),
+                      ),
                   ],
                   const SizedBox(height: 8),
                   if (_rendering) ...[

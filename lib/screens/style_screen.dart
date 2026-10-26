@@ -33,6 +33,7 @@ import '../widgets/colour_picker.dart';
 import '../widgets/glow_button.dart';
 import '../widgets/illumination.dart' show Khatam;
 import '../widgets/ink_swatch.dart';
+import '../widgets/own_audio_note.dart';
 import '../widgets/measure_height.dart';
 import '../widgets/motion_picker.dart';
 import '../widgets/reel_finish.dart';
@@ -299,6 +300,11 @@ class _StyleScreenState extends State<StyleScreen> {
                       ],
                     ),
                   ),
+                  // The user's own recording, with its motion open: how
+                  // the light follows it, at the top (OwnAudioNote).
+                  if (_panel == _Panel.motion && creationState.usesUserAudio)
+                    const OwnAudioNote(
+                        padding: EdgeInsets.fromLTRB(16, 8, 16, 0)),
                   const SizedBox(height: 10),
                   Expanded(
                     child: Stack(

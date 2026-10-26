@@ -143,11 +143,12 @@ abstract final class VerseMotionGraph {
         if (r.progress.points.isEmpty) continue;
         if (motion.thread) {
           if (_threadSpan(u, r, passStartMs, passEndMs) != null) thread = true;
-          if (_sparkSpan(u, r, w, passStartMs, passEndMs) != null) {
+          if (_sparkSpans(u, r, w, passStartMs, passEndMs).isNotEmpty) {
             spark = true;
           }
         }
-        if (motion.light && _lightSpan(u, r, passStartMs, passEndMs) != null) {
+        if (motion.light &&
+            _lightSpans(u, r, passStartMs, passEndMs).isNotEmpty) {
           glint.add(i);
         }
       }
@@ -161,18 +162,31 @@ abstract final class VerseMotionGraph {
       _clip(math.max(math.max(u.startMs + r.progress.startMs, u.startMs), p0),
           math.min(u.endMs, p1));
 
-  static (int, int)? _sparkSpan(MotionUnit u, MotionRow r,
+  /// The spark's stretches on a line: one for each time the voice is on
+  /// it (RowProgress.visits).
+  static List<(int, int)> _sparkSpans(MotionUnit u, MotionRow r,
           ({int inMs, int outMs}) w, int p0, int p1) =>
-      _clip(
-          math.max(
-              math.max(u.startMs + r.progress.startMs, u.startMs + w.inMs), p0),
-          math.min(math.min(u.startMs + r.progress.endMs + 120, u.endMs - w.outMs),
-              p1));
+      [
+        for (final (v0, v1) in r.progress.visits)
+          if (_clip(math.max(math.max(u.startMs + v0, u.startMs + w.inMs), p0),
+                  math.min(math.min(u.startMs + v1 + 120, u.endMs - w.outMs),
+                      p1))
+              case final c?)
+            c,
+      ];
 
-  static (int, int)? _lightSpan(MotionUnit u, MotionRow r, int p0, int p1) =>
-      _clip(math.max(math.max(u.startMs + r.progress.startMs, u.startMs), p0),
-          math.min(math.min(u.startMs + r.progress.endMs + LightLook.tailMs,
-              u.endMs), p1));
+  /// The light's stretches on a line, each with where its tail starts
+  /// (absolute): one for each time the voice is on it.
+  static List<((int, int), int)> _lightSpans(
+          MotionUnit u, MotionRow r, int p0, int p1) =>
+      [
+        for (final (v0, v1) in r.progress.visits)
+          if (_clip(math.max(math.max(u.startMs + v0, u.startMs), p0),
+                  math.min(math.min(u.startMs + v1 + LightLook.tailMs,
+                      u.endMs), p1))
+              case final c?)
+            (c, u.startMs + v1),
+      ];
 
   /// [fromMs]..[toMs] of a still made a stream, in unit time (so the
   /// filters in [filters] read unit time as `t`), then put on the pass's
@@ -300,7 +314,7 @@ abstract final class VerseMotionGraph {
     // one used several times is split that many ways.
     final threadSpans = <(MotionUnit, MotionRow, (int, int))>[];
     final sparkSpans = <(MotionUnit, MotionRow, (int, int))>[];
-    final lightSpans = <int, List<(MotionRow, (int, int))>>{};
+    final lightSpans = <int, List<(MotionRow, (int, int), int)>>{};
     for (var i = 0; i < units.length; i++) {
       final u = units[i];
       if (u.endMs <= passStartMs || u.startMs >= passEndMs) continue;
@@ -310,12 +324,16 @@ abstract final class VerseMotionGraph {
         if (motion.thread && threadInput != null) {
           final t = _threadSpan(u, r, passStartMs, passEndMs);
           if (t != null) threadSpans.add((u, r, t));
-          final s = _sparkSpan(u, r, w, passStartMs, passEndMs);
-          if (s != null && sparkInput != null) sparkSpans.add((u, r, s));
+          if (sparkInput != null) {
+            for (final s in _sparkSpans(u, r, w, passStartMs, passEndMs)) {
+              sparkSpans.add((u, r, s));
+            }
+          }
         }
         if (motion.light && u.glintInput != null && use.glintUnits.contains(i)) {
-          final l = _lightSpan(u, r, passStartMs, passEndMs);
-          if (l != null) (lightSpans[i] ??= []).add((r, l));
+          for (final (l, end) in _lightSpans(u, r, passStartMs, passEndMs)) {
+            (lightSpans[i] ??= []).add((r, l, end));
+          }
         }
       }
     }
@@ -348,10 +366,9 @@ abstract final class VerseMotionGraph {
       final tu = _unitT(u.startMs, passStartMs);
       final off = motion.offsetExpr(tu, u.endMs - u.startMs);
       for (var k = 0; k < rows.length; k++) {
-        final (r, (l0, l1)) = rows[k];
+        final (r, (l0, l1), lightEnd) = rows[k];
         final top = r.top.floor().clamp(0, math.max(0, u.cardH.floor() - 2));
         final h = math.max(2, math.min(r.bottom.ceil(), u.cardH.floor()) - top);
-        final lightEnd = u.startMs + r.progress.endMs;
         for (var j = 0; j < layers.length; j++) {
           final src = 'qg${g}_l${j}_$k';
           final bw = layers[j].$1.round();

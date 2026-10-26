@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../data/verse_lines.dart' show TokenTimes;
 import '../data/verse_motion.dart';
 
 /// Marks the verse's Arabic paragraph inside a card, so the card's
@@ -137,8 +138,11 @@ class VerseRow {
 
   /// This line's progress from word timing: [times] are each token's
   /// window relative to the unit's start (null for a token nothing
-  /// timed).
+  /// timed). Where they carry the recitation's own order (a
+  /// [TokenTimes] whose reciter went back over words), it follows that.
   RowProgress progressFromWords(List<(int, int)?> times, int tokenOffset) {
+    final recited = times is TokenTimes ? times.recited : null;
+    if (recited != null) return _progressRecited(recited, tokenOffset);
     final words = <({int startMs, int endMs, double from, double to})>[];
     for (final k in tokens) {
       final i = k + tokenOffset;
@@ -154,6 +158,76 @@ class VerseRow {
       ));
     }
     return RowProgress.words(words, width);
+  }
+
+  /// [progressFromWords] where the reciter went back over words, from
+  /// the recitation in its order ([TokenTimes.recited], in the unit's
+  /// tokens). A stretch on this line's words moves it along them, back
+  /// as well as on. While the voice is on words before the line, once it
+  /// was reached, the line is back at its start; on words after it, it
+  /// is done. Its light shows each time the voice is on it
+  /// (RowProgress.visits): a line the voice comes back to lights again.
+  RowProgress _progressRecited(
+      List<(int, int, int, int)> recited, int tokenOffset) {
+    final mine = [for (final k in tokens) k + tokenOffset];
+    if (mine.isEmpty) return RowProgress(const [], width);
+    final first = mine.first;
+    final last = mine.last;
+    final pts = <(int, double)>[];
+    void add(int t, double v, {bool jump = false}) {
+      // Never back in time; a jump back in place is a millisecond's.
+      if (pts.isNotEmpty && t <= pts.last.$1) t = pts.last.$1 + 1;
+      // A jump (back, or onto the line from elsewhere): it waits where it
+      // was, then moves when the voice does, rather than drifting there
+      // through the breath before.
+      if (jump && pts.isNotEmpty && v != pts.last.$2 && t - pts.last.$1 > 1) {
+        pts.add((t - 1, pts.last.$2));
+      }
+      pts.add((t, v.clamp(0.0, width)));
+    }
+
+    final visits = <(int, int)>[];
+    int? since; // when the voice came onto the line, while it is on it
+    var until = 0; // the end of its last stretch on the line
+    var reached = false;
+    for (final (a, b, s, e) in recited) {
+      final end = e > s ? e : s + 1;
+      if (b > first && a <= last) {
+        final on = [
+          for (final i in mine)
+            if (i >= a && i < b) i,
+        ];
+        final b0 = on.isEmpty ? null : boxes[on.first - tokenOffset];
+        final b1 = on.isEmpty ? null : boxes[on.last - tokenOffset];
+        if (b0 == null || b1 == null) continue;
+        final x = right - b0.right;
+        add(s, x,
+            jump: since == null || (pts.isNotEmpty && x < pts.last.$2));
+        since ??= pts.last.$1;
+        add(end, right - b1.left);
+        until = pts.last.$1;
+        reached = true;
+      } else if (reached) {
+        if (since != null) {
+          visits.add((since, until));
+          since = null;
+          // On to the next line: this one's last word reaches its far
+          // end, as RowProgress.words has it.
+          if (a > last && pts.last.$2 < width) {
+            pts[pts.length - 1] = (pts.last.$1, width);
+          }
+        }
+        // Back before the line: it is at its start until the voice is
+        // on it again.
+        if (b <= first && pts.last.$2 > 0) add(s, 0, jump: true);
+      }
+    }
+    if (pts.isEmpty) return RowProgress(const [], width);
+    if (since != null) {
+      visits.add((since, until));
+      if (pts.last.$2 < width) pts[pts.length - 1] = (pts.last.$1, width);
+    }
+    return RowProgress(pts, width, visits);
   }
 }
 

@@ -2540,9 +2540,19 @@ abstract final class VideoRenderer {
 
     for (final ayah in w.keys.toList()..sort()) {
       mix(ayah);
-      for (final t in w[ayah]!) {
+      final times = w[ayah]!;
+      for (final t in times) {
         mix(t?.$1 ?? -1);
         mix(t?.$2 ?? -1);
+      }
+      // Where the reciter went back, the light follows: its own order.
+      if (times is TokenTimes && times.recited != null) {
+        for (final (a, b, s, e) in times.recited!) {
+          mix(a);
+          mix(b);
+          mix(s);
+          mix(e);
+        }
       }
     }
     return '_wt${x.toRadixString(36)}';
