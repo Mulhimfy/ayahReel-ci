@@ -23,7 +23,35 @@ enum TitleFace {
   diwani('Katibeh', 'Marcellus', 1.2, 1.15),
 
   /// Heavy, for a title that has to carry across the room.
-  bold('Jomhuria', 'Cinzel', 1.38, 1.0);
+  bold('Jomhuria', 'Cinzel', 1.38, 1.0),
+
+  // More faces, the owner's ask (2026-10-26): every one already bundled
+  // for the verse or the app, so none is a new file. Added at the end:
+  // [SurahTitleLook.code] names a face by its index.
+
+  /// The mushaf's own face, as its page heads the surah.
+  mushaf('HafsUthmani', 'Cormorant', 0.9, 1.6),
+
+  /// Qahiri: a display Kufi in the Fatimid manner.
+  qahiri('Qahiri', 'Cinzel', 0.95, 1.3),
+
+  /// El Messiri: a soft, modern naskh.
+  messiri('ElMessiri', 'PlayfairDisplay', 0.9, 1.4),
+
+  /// Mirza: naskh with the swing of nastaliq.
+  mirza('Mirza', 'Prata', 1.0, 1.45),
+
+  /// Scheherazade: the classic book naskh.
+  scheherazade('ScheherazadeNew', 'GildaDisplay', 0.9, 1.55),
+
+  /// Lateef: the gentle naskh of the Sindhi books.
+  lateef('Lateef', 'Italiana', 1.05, 1.45),
+
+  /// Changa: geometric and contemporary.
+  changa('Changa', 'Jost', 0.85, 1.3),
+
+  /// Markazi: an elegant text face.
+  markazi('MarkaziText', 'DMSerifDisplay', 0.95, 1.35);
 
   const TitleFace(this.arabic, this.latin, this.scale, this.height);
 

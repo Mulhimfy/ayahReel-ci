@@ -1772,6 +1772,7 @@ class _ColourPanel extends StatelessWidget {
       const SizedBox(height: 8),
       _MiniHeading(l.styleSolid),
       _Strip(
+        size: 26,
         chosen: custom ? flat.length : (at >= 0 ? at : null),
         children: [
           for (final c in flat)
@@ -1932,7 +1933,7 @@ class _Strip extends StatefulWidget {
   final int? chosen;
   final double size;
 
-  const _Strip({required this.children, this.chosen, this.size = 26});
+  const _Strip({required this.children, this.chosen, required this.size});
 
   @override
   State<_Strip> createState() => _StripState();
@@ -2834,6 +2835,16 @@ class _TitlePanel extends StatelessWidget {
         : look.argb == 0
             ? l.titleGold
             : l.colourName(look.argb);
+    // The colours the verse is offered, after the title's own few, and
+    // the mixer for any other (the owner's ask, 2026-10-26).
+    final flats = [
+      ...SurahTitleLook.flats,
+      for (final c in versePalette)
+        if (!SurahTitleLook.flats.contains(c)) c,
+    ];
+    final mixed = look.ink == VerseInk.none &&
+        look.argb != 0 &&
+        !flats.contains(look.argb);
     return _PanelBody(
       children: [
         Padding(
@@ -2910,13 +2921,21 @@ class _TitlePanel extends StatelessWidget {
               onTap: () => set(look.withFlat(0)),
               child: _SolidDisc(argb: AppColors.goldBright.toARGB32(), size: 24),
             ),
-            for (final c in SurahTitleLook.flats)
+            for (final c in flats)
               _Ringed(
                 label: '${l.styleTabName}${l.comma} ${l.a11yColourSwatch(c)}',
                 selected: look.ink == VerseInk.none && look.argb == c,
                 onTap: () => set(look.withFlat(c)),
                 child: _SolidDisc(argb: c, size: 24),
               ),
+            CustomColourCircle(
+              size: 24,
+              current: look.argb == 0
+                  ? AppColors.goldBright.toARGB32()
+                  : look.argb,
+              chosen: mixed,
+              onPick: (c) => set(look.withFlat(c)),
+            ),
           ],
         ),
         const SizedBox(height: 2),

@@ -6159,6 +6159,18 @@ class L10n {
         TitleFace.diwani =>
           _t('Calligraphy', 'خط فني', 'خطاطی', 'Kaligrafi', 'Kalligrafie'),
         TitleFace.bold => _t('Bold', 'عريض', 'موٹا', 'Tebal', 'Fett'),
+        TitleFace.mushaf => _t('Mushaf', 'المصحف', 'مصحف', 'Mushaf', 'Mushaf'),
+        TitleFace.qahiri =>
+          _t('Qahiri', 'قاهري', 'قاہری', 'Qahiri', 'Qahiri'),
+        TitleFace.messiri =>
+          _t('Messiri', 'المسيري', 'مسیری', 'Messiri', 'Messiri'),
+        TitleFace.mirza => _t('Mirza', 'ميرزا', 'مرزا', 'Mirza', 'Mirza'),
+        TitleFace.scheherazade => _t('Scheherazade', 'شهرزاد', 'شہرزاد',
+            'Scheherazade', 'Scheherazade'),
+        TitleFace.lateef => _t('Lateef', 'لطيف', 'لطیف', 'Lateef', 'Lateef'),
+        TitleFace.changa => _t('Changa', 'شانغا', 'چانگا', 'Changa', 'Changa'),
+        TitleFace.markazi =>
+          _t('Markazi', 'مركزي', 'مرکزی', 'Markazi', 'Markazi'),
       };
   String titleFrameName(TitleFrame f) => switch (f) {
         TitleFrame.rules =>
