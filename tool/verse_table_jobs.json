@@ -1,0 +1,872 @@
+{
+ "calib": [
+  {
+   "id": "ghamdi_own",
+   "base": "https://server7.mp3quran.net/s_gmd",
+   "surahs": "2",
+   "truth": "ghamdi",
+   "published": "mp3quran 30",
+   "keep_logp": true
+  },
+  {
+   "id": "ghamdi_own",
+   "base": "https://server7.mp3quran.net/s_gmd",
+   "surahs": "1,3,4,18,36,55,67,78,112-114",
+   "truth": "ghamdi",
+   "published": "mp3quran 30",
+   "keep_logp": true
+  },
+  {
+   "id": "salimi_own",
+   "base": "https://server14.mp3quran.net/mansor",
+   "surahs": "2",
+   "truth": "salimi",
+   "published": "mp3quran 245",
+   "keep_logp": true
+  },
+  {
+   "id": "salimi_own",
+   "base": "https://server14.mp3quran.net/mansor",
+   "surahs": "1,3,4,18,36,55,67,78,112-114",
+   "truth": "salimi",
+   "published": "mp3quran 245",
+   "keep_logp": true
+  },
+  {
+   "id": "albanna_own",
+   "base": "https://download.quranicaudio.com/quran/mahmood_ali_albana",
+   "surahs": "2",
+   "truth": "albanna",
+   "published": "qul 129",
+   "keep_logp": true
+  },
+  {
+   "id": "albanna_own",
+   "base": "https://download.quranicaudio.com/quran/mahmood_ali_albana",
+   "surahs": "1,3,4,18,36,55,67,78,112-114",
+   "truth": "albanna",
+   "published": "qul 129",
+   "keep_logp": true
+  },
+  {
+   "id": "alafasy_2_own",
+   "base": "https://download.quranicaudio.com/quran/mishaari_california",
+   "surahs": "2",
+   "published": "qul 95",
+   "keep_logp": true
+  },
+  {
+   "id": "alafasy_2_own",
+   "base": "https://download.quranicaudio.com/quran/mishaari_california",
+   "surahs": "1,18,36,55,67,78,112-114",
+   "published": "qul 95",
+   "keep_logp": true
+  }
+ ],
+ "screen1": [
+  {
+   "id": "ayyub_r2",
+   "screen": true,
+   "ref": "ayyub",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-ayyub/r2"
+  },
+  {
+   "id": "muaiqly_r1",
+   "screen": true,
+   "ref": "muaiqly",
+   "base": "https://cdn.mp3quran.net/audio/maher-muaiqly/r1"
+  },
+  {
+   "id": "muaiqly_1422",
+   "screen": true,
+   "ref": "muaiqly",
+   "base": "https://download.quranicaudio.com/quran/maher_almu3aiqly/year1422-1423"
+  },
+  {
+   "id": "muaiqly_1424",
+   "screen": true,
+   "ref": "muaiqly",
+   "base": "https://download.quranicaudio.com/quran/maher_almu3aiqly/year1424-1425"
+  },
+  {
+   "id": "jibreel_r1",
+   "screen": true,
+   "ref": "jibreel",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-jibreel/r1"
+  },
+  {
+   "id": "minshawi_r4",
+   "screen": true,
+   "ref": "minshawi",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-minshawi/r4"
+  },
+  {
+   "id": "luhaidan_qa",
+   "screen": true,
+   "ref": "surah https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1 SSS mp3quran 107",
+   "base": "https://download.quranicaudio.com/quran/muhammad_alhaidan",
+   "surahs": "1,93,97,103,108,110,113,114"
+  }
+ ],
+ "luhaidan": [
+  {
+   "id": "luhaidan",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1",
+   "surahs": "1-3",
+   "keep_logp": true
+  },
+  {
+   "id": "luhaidan",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1",
+   "surahs": "4-6",
+   "keep_logp": true
+  },
+  {
+   "id": "luhaidan",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1",
+   "surahs": "7-10",
+   "keep_logp": true
+  },
+  {
+   "id": "luhaidan",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1",
+   "surahs": "11-17",
+   "keep_logp": true
+  },
+  {
+   "id": "luhaidan",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1",
+   "surahs": "18-25",
+   "keep_logp": true
+  },
+  {
+   "id": "luhaidan",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1",
+   "surahs": "26-36",
+   "keep_logp": true
+  },
+  {
+   "id": "luhaidan",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1",
+   "surahs": "37-52",
+   "keep_logp": true
+  },
+  {
+   "id": "luhaidan",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1",
+   "surahs": "53-114",
+   "keep_logp": true
+  }
+ ],
+ "budair_2": [
+  {
+   "id": "budair_2",
+   "base": "https://cdn.mp3quran.net/audio/salah-budair/r1",
+   "surahs": "1-3",
+   "published": "mp3quran 43",
+   "keep_logp": true
+  },
+  {
+   "id": "budair_2",
+   "base": "https://cdn.mp3quran.net/audio/salah-budair/r1",
+   "surahs": "4-6",
+   "published": "mp3quran 43",
+   "keep_logp": true
+  },
+  {
+   "id": "budair_2",
+   "base": "https://cdn.mp3quran.net/audio/salah-budair/r1",
+   "surahs": "7-10",
+   "published": "mp3quran 43",
+   "keep_logp": true
+  },
+  {
+   "id": "budair_2",
+   "base": "https://cdn.mp3quran.net/audio/salah-budair/r1",
+   "surahs": "11-17",
+   "published": "mp3quran 43",
+   "keep_logp": true
+  },
+  {
+   "id": "budair_2",
+   "base": "https://cdn.mp3quran.net/audio/salah-budair/r1",
+   "surahs": "18-25",
+   "published": "mp3quran 43",
+   "keep_logp": true
+  },
+  {
+   "id": "budair_2",
+   "base": "https://cdn.mp3quran.net/audio/salah-budair/r1",
+   "surahs": "26-36",
+   "published": "mp3quran 43",
+   "keep_logp": true
+  },
+  {
+   "id": "budair_2",
+   "base": "https://cdn.mp3quran.net/audio/salah-budair/r1",
+   "surahs": "37-51",
+   "published": "mp3quran 43",
+   "keep_logp": true
+  },
+  {
+   "id": "budair_2",
+   "base": "https://cdn.mp3quran.net/audio/salah-budair/r1",
+   "surahs": "52-114",
+   "published": "mp3quran 43",
+   "keep_logp": true
+  }
+ ],
+ "muaiqly_2": [
+  {
+   "id": "muaiqly_2",
+   "base": "https://audio-cdn.tarteel.ai/quran/surah/maherAlMuaiqly/murattal/mp3",
+   "surahs": "1-4",
+   "published": "qul 65",
+   "keep_logp": true
+  },
+  {
+   "id": "muaiqly_2",
+   "base": "https://audio-cdn.tarteel.ai/quran/surah/maherAlMuaiqly/murattal/mp3",
+   "surahs": "5-9",
+   "published": "qul 65",
+   "keep_logp": true
+  },
+  {
+   "id": "muaiqly_2",
+   "base": "https://audio-cdn.tarteel.ai/quran/surah/maherAlMuaiqly/murattal/mp3",
+   "surahs": "10-19",
+   "published": "qul 65",
+   "keep_logp": true
+  },
+  {
+   "id": "muaiqly_2",
+   "base": "https://audio-cdn.tarteel.ai/quran/surah/maherAlMuaiqly/murattal/mp3",
+   "surahs": "20-32",
+   "published": "qul 65",
+   "keep_logp": true
+  },
+  {
+   "id": "muaiqly_2",
+   "base": "https://audio-cdn.tarteel.ai/quran/surah/maherAlMuaiqly/murattal/mp3",
+   "surahs": "33-52",
+   "published": "qul 65",
+   "keep_logp": true
+  },
+  {
+   "id": "muaiqly_2",
+   "base": "https://audio-cdn.tarteel.ai/quran/surah/maherAlMuaiqly/murattal/mp3",
+   "surahs": "53-114",
+   "published": "qul 65",
+   "keep_logp": true
+  }
+ ],
+ "husary_2": [
+  {
+   "id": "husary_2",
+   "base": "https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a",
+   "surahs": "1-3",
+   "published": "qul 122",
+   "keep_logp": true
+  },
+  {
+   "id": "husary_2",
+   "base": "https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a",
+   "surahs": "4-6",
+   "published": "qul 122",
+   "keep_logp": true
+  },
+  {
+   "id": "husary_2",
+   "base": "https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a",
+   "surahs": "7-10",
+   "published": "qul 122",
+   "keep_logp": true
+  },
+  {
+   "id": "husary_2",
+   "base": "https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a",
+   "surahs": "11-17",
+   "published": "qul 122",
+   "keep_logp": true
+  },
+  {
+   "id": "husary_2",
+   "base": "https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a",
+   "surahs": "18-25",
+   "published": "qul 122",
+   "keep_logp": true
+  },
+  {
+   "id": "husary_2",
+   "base": "https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a",
+   "surahs": "26-36",
+   "published": "qul 122",
+   "keep_logp": true
+  },
+  {
+   "id": "husary_2",
+   "base": "https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a",
+   "surahs": "37-50",
+   "published": "qul 122",
+   "keep_logp": true
+  },
+  {
+   "id": "husary_2",
+   "base": "https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a",
+   "surahs": "51-114",
+   "published": "qul 122",
+   "keep_logp": true
+  }
+ ],
+ "minshawi_2": [
+  {
+   "id": "minshawi_2",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-minshawi/r4",
+   "surahs": "1-2",
+   "keep_logp": true
+  },
+  {
+   "id": "minshawi_2",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-minshawi/r4",
+   "surahs": "3-5",
+   "keep_logp": true
+  },
+  {
+   "id": "minshawi_2",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-minshawi/r4",
+   "surahs": "6-9",
+   "keep_logp": true
+  },
+  {
+   "id": "minshawi_2",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-minshawi/r4",
+   "surahs": "10-15",
+   "keep_logp": true
+  },
+  {
+   "id": "minshawi_2",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-minshawi/r4",
+   "surahs": "17,18,19,20,21,22,25",
+   "keep_logp": true
+  },
+  {
+   "id": "minshawi_2",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-minshawi/r4",
+   "surahs": "26,27,28,29,30,31,32,33,36,37",
+   "keep_logp": true
+  },
+  {
+   "id": "minshawi_2",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-minshawi/r4",
+   "surahs": "38-53",
+   "keep_logp": true
+  },
+  {
+   "id": "minshawi_2",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-minshawi/r4",
+   "surahs": "54-114",
+   "keep_logp": true
+  }
+ ],
+ "screen3": [
+  {
+   "id": "luhaidan_qa",
+   "screen": true,
+   "ref": "surah https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1 SSS mp3quran 107",
+   "base": "https://download.quranicaudio.com/quran/muhammad_alhaidan",
+   "surahs": "1,93,97,103,108,110,113,114"
+  },
+  {
+   "id": "ayyub_r2",
+   "screen": true,
+   "ref": "ayyub",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-ayyub/r2"
+  },
+  {
+   "id": "muaiqly_1424",
+   "screen": true,
+   "ref": "muaiqly",
+   "base": "https://download.quranicaudio.com/quran/maher_almu3aiqly/year1424-1425"
+  },
+  {
+   "id": "hudhaify_mq74",
+   "screen": true,
+   "ref": "hudhaify",
+   "base": "https://cdn.mp3quran.net/audio/ali-hudhaifi/r1"
+  },
+  {
+   "id": "husary_iza3a",
+   "screen": true,
+   "ref": "husary",
+   "base": "https://download.quranicaudio.com/quran/mahmood_khaleel_al-husaree_iza3a"
+  }
+ ],
+ "luhaidan_2": [
+  {
+   "id": "luhaidan_2",
+   "base": "https://download.quranicaudio.com/quran/muhammad_alhaidan",
+   "surahs": "1,3,4,5",
+   "keep_logp": true
+  },
+  {
+   "id": "luhaidan_2",
+   "base": "https://download.quranicaudio.com/quran/muhammad_alhaidan",
+   "surahs": "7-10",
+   "keep_logp": true
+  },
+  {
+   "id": "luhaidan_2",
+   "base": "https://download.quranicaudio.com/quran/muhammad_alhaidan",
+   "surahs": "11-17",
+   "keep_logp": true
+  },
+  {
+   "id": "luhaidan_2",
+   "base": "https://download.quranicaudio.com/quran/muhammad_alhaidan",
+   "surahs": "18-25",
+   "keep_logp": true
+  },
+  {
+   "id": "luhaidan_2",
+   "base": "https://download.quranicaudio.com/quran/muhammad_alhaidan",
+   "surahs": "26-38",
+   "keep_logp": true
+  },
+  {
+   "id": "luhaidan_2",
+   "base": "https://download.quranicaudio.com/quran/muhammad_alhaidan",
+   "surahs": "39-55",
+   "keep_logp": true
+  },
+  {
+   "id": "luhaidan_2",
+   "base": "https://download.quranicaudio.com/quran/muhammad_alhaidan",
+   "surahs": "56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,113,114",
+   "keep_logp": true
+  }
+ ],
+ "ayyub_2": [
+  {
+   "id": "ayyub_2",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-ayyub/r2",
+   "surahs": "1-3",
+   "keep_logp": true
+  },
+  {
+   "id": "ayyub_2",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-ayyub/r2",
+   "surahs": "4-6",
+   "keep_logp": true
+  },
+  {
+   "id": "ayyub_2",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-ayyub/r2",
+   "surahs": "7-11",
+   "keep_logp": true
+  },
+  {
+   "id": "ayyub_2",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-ayyub/r2",
+   "surahs": "12-20",
+   "keep_logp": true
+  },
+  {
+   "id": "ayyub_2",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-ayyub/r2",
+   "surahs": "21-32",
+   "keep_logp": true
+  },
+  {
+   "id": "ayyub_2",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-ayyub/r2",
+   "surahs": "33-45",
+   "keep_logp": true
+  },
+  {
+   "id": "ayyub_2",
+   "base": "https://cdn.mp3quran.net/audio/muhammad-ayyub/r2",
+   "surahs": "46-114",
+   "keep_logp": true
+  }
+ ],
+ "sobhi": [
+  {
+   "id": "sobhi",
+   "base": "https://cdn.mp3quran.net/audio/islam-sobhi/r1",
+   "surahs": "1-3",
+   "keep_logp": true,
+   "urls": {
+    "17": "https://archive.org/download/002_20221103_202211/017.mp3",
+    "21": "https://archive.org/download/002_20221103_202211/021.mp3",
+    "23": "https://archive.org/download/002_20221103_202211/023.mp3",
+    "24": "https://archive.org/download/002_20221103_202211/024.mp3",
+    "25": "https://archive.org/download/002_20221103_202211/025.mp3",
+    "29": "https://archive.org/download/002_20221103_202211/029.mp3",
+    "30": "https://archive.org/download/002_20221103_202211/030.mp3",
+    "37": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/037.mp3",
+    "38": "https://archive.org/download/002_20221103_202211/038.mp3",
+    "39": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/039.mp3",
+    "40": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/040.mp3",
+    "45": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/045.mp3",
+    "47": "https://archive.org/download/002_20221103_202211/047.mp3",
+    "48": "https://archive.org/download/002_20221103_202211/048.mp3",
+    "49": "https://archive.org/download/002_20221103_202211/049.mp3",
+    "52": "https://archive.org/download/002_20221103_202211/052.mp3",
+    "54": "https://archive.org/download/002_20221103_202211/054.mp3",
+    "57": "https://archive.org/download/002_20221103_202211/057.mp3",
+    "62": "https://archive.org/download/002_20221103_202211/062.mp3",
+    "65": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/065.mp3",
+    "72": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/072.mp3",
+    "74": "https://archive.org/download/002_20221103_202211/074.mp3",
+    "95": "https://archive.org/download/002_20221103_202211/095.mp3",
+    "98": "https://archive.org/download/002_20221103_202211/098.mp3",
+    "99": "https://archive.org/download/002_20221103_202211/099.mp3",
+    "100": "https://archive.org/download/002_20221103_202211/100.mp3",
+    "101": "https://archive.org/download/002_20221103_202211/101.mp3",
+    "104": "https://archive.org/download/002_20221103_202211/104.mp3",
+    "105": "https://archive.org/download/002_20221103_202211/105%E2%80%8B.mp3",
+    "106": "https://archive.org/download/002_20221103_202211/106.mp3",
+    "107": "https://archive.org/download/002_20221103_202211/107.mp3",
+    "108": "https://archive.org/download/002_20221103_202211/108.mp3",
+    "109": "https://archive.org/download/002_20221103_202211/109.mp3",
+    "110": "https://archive.org/download/002_20221103_202211/110.mp3",
+    "111": "https://archive.org/download/002_20221103_202211/111.mp3"
+   }
+  },
+  {
+   "id": "sobhi",
+   "base": "https://cdn.mp3quran.net/audio/islam-sobhi/r1",
+   "surahs": "4-6",
+   "keep_logp": true,
+   "urls": {
+    "17": "https://archive.org/download/002_20221103_202211/017.mp3",
+    "21": "https://archive.org/download/002_20221103_202211/021.mp3",
+    "23": "https://archive.org/download/002_20221103_202211/023.mp3",
+    "24": "https://archive.org/download/002_20221103_202211/024.mp3",
+    "25": "https://archive.org/download/002_20221103_202211/025.mp3",
+    "29": "https://archive.org/download/002_20221103_202211/029.mp3",
+    "30": "https://archive.org/download/002_20221103_202211/030.mp3",
+    "37": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/037.mp3",
+    "38": "https://archive.org/download/002_20221103_202211/038.mp3",
+    "39": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/039.mp3",
+    "40": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/040.mp3",
+    "45": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/045.mp3",
+    "47": "https://archive.org/download/002_20221103_202211/047.mp3",
+    "48": "https://archive.org/download/002_20221103_202211/048.mp3",
+    "49": "https://archive.org/download/002_20221103_202211/049.mp3",
+    "52": "https://archive.org/download/002_20221103_202211/052.mp3",
+    "54": "https://archive.org/download/002_20221103_202211/054.mp3",
+    "57": "https://archive.org/download/002_20221103_202211/057.mp3",
+    "62": "https://archive.org/download/002_20221103_202211/062.mp3",
+    "65": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/065.mp3",
+    "72": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/072.mp3",
+    "74": "https://archive.org/download/002_20221103_202211/074.mp3",
+    "95": "https://archive.org/download/002_20221103_202211/095.mp3",
+    "98": "https://archive.org/download/002_20221103_202211/098.mp3",
+    "99": "https://archive.org/download/002_20221103_202211/099.mp3",
+    "100": "https://archive.org/download/002_20221103_202211/100.mp3",
+    "101": "https://archive.org/download/002_20221103_202211/101.mp3",
+    "104": "https://archive.org/download/002_20221103_202211/104.mp3",
+    "105": "https://archive.org/download/002_20221103_202211/105%E2%80%8B.mp3",
+    "106": "https://archive.org/download/002_20221103_202211/106.mp3",
+    "107": "https://archive.org/download/002_20221103_202211/107.mp3",
+    "108": "https://archive.org/download/002_20221103_202211/108.mp3",
+    "109": "https://archive.org/download/002_20221103_202211/109.mp3",
+    "110": "https://archive.org/download/002_20221103_202211/110.mp3",
+    "111": "https://archive.org/download/002_20221103_202211/111.mp3"
+   }
+  },
+  {
+   "id": "sobhi",
+   "base": "https://cdn.mp3quran.net/audio/islam-sobhi/r1",
+   "surahs": "7-10",
+   "keep_logp": true,
+   "urls": {
+    "17": "https://archive.org/download/002_20221103_202211/017.mp3",
+    "21": "https://archive.org/download/002_20221103_202211/021.mp3",
+    "23": "https://archive.org/download/002_20221103_202211/023.mp3",
+    "24": "https://archive.org/download/002_20221103_202211/024.mp3",
+    "25": "https://archive.org/download/002_20221103_202211/025.mp3",
+    "29": "https://archive.org/download/002_20221103_202211/029.mp3",
+    "30": "https://archive.org/download/002_20221103_202211/030.mp3",
+    "37": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/037.mp3",
+    "38": "https://archive.org/download/002_20221103_202211/038.mp3",
+    "39": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/039.mp3",
+    "40": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/040.mp3",
+    "45": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/045.mp3",
+    "47": "https://archive.org/download/002_20221103_202211/047.mp3",
+    "48": "https://archive.org/download/002_20221103_202211/048.mp3",
+    "49": "https://archive.org/download/002_20221103_202211/049.mp3",
+    "52": "https://archive.org/download/002_20221103_202211/052.mp3",
+    "54": "https://archive.org/download/002_20221103_202211/054.mp3",
+    "57": "https://archive.org/download/002_20221103_202211/057.mp3",
+    "62": "https://archive.org/download/002_20221103_202211/062.mp3",
+    "65": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/065.mp3",
+    "72": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/072.mp3",
+    "74": "https://archive.org/download/002_20221103_202211/074.mp3",
+    "95": "https://archive.org/download/002_20221103_202211/095.mp3",
+    "98": "https://archive.org/download/002_20221103_202211/098.mp3",
+    "99": "https://archive.org/download/002_20221103_202211/099.mp3",
+    "100": "https://archive.org/download/002_20221103_202211/100.mp3",
+    "101": "https://archive.org/download/002_20221103_202211/101.mp3",
+    "104": "https://archive.org/download/002_20221103_202211/104.mp3",
+    "105": "https://archive.org/download/002_20221103_202211/105%E2%80%8B.mp3",
+    "106": "https://archive.org/download/002_20221103_202211/106.mp3",
+    "107": "https://archive.org/download/002_20221103_202211/107.mp3",
+    "108": "https://archive.org/download/002_20221103_202211/108.mp3",
+    "109": "https://archive.org/download/002_20221103_202211/109.mp3",
+    "110": "https://archive.org/download/002_20221103_202211/110.mp3",
+    "111": "https://archive.org/download/002_20221103_202211/111.mp3"
+   }
+  },
+  {
+   "id": "sobhi",
+   "base": "https://cdn.mp3quran.net/audio/islam-sobhi/r1",
+   "surahs": "11-17",
+   "keep_logp": true,
+   "urls": {
+    "17": "https://archive.org/download/002_20221103_202211/017.mp3",
+    "21": "https://archive.org/download/002_20221103_202211/021.mp3",
+    "23": "https://archive.org/download/002_20221103_202211/023.mp3",
+    "24": "https://archive.org/download/002_20221103_202211/024.mp3",
+    "25": "https://archive.org/download/002_20221103_202211/025.mp3",
+    "29": "https://archive.org/download/002_20221103_202211/029.mp3",
+    "30": "https://archive.org/download/002_20221103_202211/030.mp3",
+    "37": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/037.mp3",
+    "38": "https://archive.org/download/002_20221103_202211/038.mp3",
+    "39": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/039.mp3",
+    "40": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/040.mp3",
+    "45": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/045.mp3",
+    "47": "https://archive.org/download/002_20221103_202211/047.mp3",
+    "48": "https://archive.org/download/002_20221103_202211/048.mp3",
+    "49": "https://archive.org/download/002_20221103_202211/049.mp3",
+    "52": "https://archive.org/download/002_20221103_202211/052.mp3",
+    "54": "https://archive.org/download/002_20221103_202211/054.mp3",
+    "57": "https://archive.org/download/002_20221103_202211/057.mp3",
+    "62": "https://archive.org/download/002_20221103_202211/062.mp3",
+    "65": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/065.mp3",
+    "72": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/072.mp3",
+    "74": "https://archive.org/download/002_20221103_202211/074.mp3",
+    "95": "https://archive.org/download/002_20221103_202211/095.mp3",
+    "98": "https://archive.org/download/002_20221103_202211/098.mp3",
+    "99": "https://archive.org/download/002_20221103_202211/099.mp3",
+    "100": "https://archive.org/download/002_20221103_202211/100.mp3",
+    "101": "https://archive.org/download/002_20221103_202211/101.mp3",
+    "104": "https://archive.org/download/002_20221103_202211/104.mp3",
+    "105": "https://archive.org/download/002_20221103_202211/105%E2%80%8B.mp3",
+    "106": "https://archive.org/download/002_20221103_202211/106.mp3",
+    "107": "https://archive.org/download/002_20221103_202211/107.mp3",
+    "108": "https://archive.org/download/002_20221103_202211/108.mp3",
+    "109": "https://archive.org/download/002_20221103_202211/109.mp3",
+    "110": "https://archive.org/download/002_20221103_202211/110.mp3",
+    "111": "https://archive.org/download/002_20221103_202211/111.mp3"
+   }
+  },
+  {
+   "id": "sobhi",
+   "base": "https://cdn.mp3quran.net/audio/islam-sobhi/r1",
+   "surahs": "18-25",
+   "keep_logp": true,
+   "urls": {
+    "17": "https://archive.org/download/002_20221103_202211/017.mp3",
+    "21": "https://archive.org/download/002_20221103_202211/021.mp3",
+    "23": "https://archive.org/download/002_20221103_202211/023.mp3",
+    "24": "https://archive.org/download/002_20221103_202211/024.mp3",
+    "25": "https://archive.org/download/002_20221103_202211/025.mp3",
+    "29": "https://archive.org/download/002_20221103_202211/029.mp3",
+    "30": "https://archive.org/download/002_20221103_202211/030.mp3",
+    "37": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/037.mp3",
+    "38": "https://archive.org/download/002_20221103_202211/038.mp3",
+    "39": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/039.mp3",
+    "40": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/040.mp3",
+    "45": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/045.mp3",
+    "47": "https://archive.org/download/002_20221103_202211/047.mp3",
+    "48": "https://archive.org/download/002_20221103_202211/048.mp3",
+    "49": "https://archive.org/download/002_20221103_202211/049.mp3",
+    "52": "https://archive.org/download/002_20221103_202211/052.mp3",
+    "54": "https://archive.org/download/002_20221103_202211/054.mp3",
+    "57": "https://archive.org/download/002_20221103_202211/057.mp3",
+    "62": "https://archive.org/download/002_20221103_202211/062.mp3",
+    "65": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/065.mp3",
+    "72": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/072.mp3",
+    "74": "https://archive.org/download/002_20221103_202211/074.mp3",
+    "95": "https://archive.org/download/002_20221103_202211/095.mp3",
+    "98": "https://archive.org/download/002_20221103_202211/098.mp3",
+    "99": "https://archive.org/download/002_20221103_202211/099.mp3",
+    "100": "https://archive.org/download/002_20221103_202211/100.mp3",
+    "101": "https://archive.org/download/002_20221103_202211/101.mp3",
+    "104": "https://archive.org/download/002_20221103_202211/104.mp3",
+    "105": "https://archive.org/download/002_20221103_202211/105%E2%80%8B.mp3",
+    "106": "https://archive.org/download/002_20221103_202211/106.mp3",
+    "107": "https://archive.org/download/002_20221103_202211/107.mp3",
+    "108": "https://archive.org/download/002_20221103_202211/108.mp3",
+    "109": "https://archive.org/download/002_20221103_202211/109.mp3",
+    "110": "https://archive.org/download/002_20221103_202211/110.mp3",
+    "111": "https://archive.org/download/002_20221103_202211/111.mp3"
+   }
+  },
+  {
+   "id": "sobhi",
+   "base": "https://cdn.mp3quran.net/audio/islam-sobhi/r1",
+   "surahs": "26-36",
+   "keep_logp": true,
+   "urls": {
+    "17": "https://archive.org/download/002_20221103_202211/017.mp3",
+    "21": "https://archive.org/download/002_20221103_202211/021.mp3",
+    "23": "https://archive.org/download/002_20221103_202211/023.mp3",
+    "24": "https://archive.org/download/002_20221103_202211/024.mp3",
+    "25": "https://archive.org/download/002_20221103_202211/025.mp3",
+    "29": "https://archive.org/download/002_20221103_202211/029.mp3",
+    "30": "https://archive.org/download/002_20221103_202211/030.mp3",
+    "37": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/037.mp3",
+    "38": "https://archive.org/download/002_20221103_202211/038.mp3",
+    "39": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/039.mp3",
+    "40": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/040.mp3",
+    "45": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/045.mp3",
+    "47": "https://archive.org/download/002_20221103_202211/047.mp3",
+    "48": "https://archive.org/download/002_20221103_202211/048.mp3",
+    "49": "https://archive.org/download/002_20221103_202211/049.mp3",
+    "52": "https://archive.org/download/002_20221103_202211/052.mp3",
+    "54": "https://archive.org/download/002_20221103_202211/054.mp3",
+    "57": "https://archive.org/download/002_20221103_202211/057.mp3",
+    "62": "https://archive.org/download/002_20221103_202211/062.mp3",
+    "65": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/065.mp3",
+    "72": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/072.mp3",
+    "74": "https://archive.org/download/002_20221103_202211/074.mp3",
+    "95": "https://archive.org/download/002_20221103_202211/095.mp3",
+    "98": "https://archive.org/download/002_20221103_202211/098.mp3",
+    "99": "https://archive.org/download/002_20221103_202211/099.mp3",
+    "100": "https://archive.org/download/002_20221103_202211/100.mp3",
+    "101": "https://archive.org/download/002_20221103_202211/101.mp3",
+    "104": "https://archive.org/download/002_20221103_202211/104.mp3",
+    "105": "https://archive.org/download/002_20221103_202211/105%E2%80%8B.mp3",
+    "106": "https://archive.org/download/002_20221103_202211/106.mp3",
+    "107": "https://archive.org/download/002_20221103_202211/107.mp3",
+    "108": "https://archive.org/download/002_20221103_202211/108.mp3",
+    "109": "https://archive.org/download/002_20221103_202211/109.mp3",
+    "110": "https://archive.org/download/002_20221103_202211/110.mp3",
+    "111": "https://archive.org/download/002_20221103_202211/111.mp3"
+   }
+  },
+  {
+   "id": "sobhi",
+   "base": "https://cdn.mp3quran.net/audio/islam-sobhi/r1",
+   "surahs": "37-52",
+   "keep_logp": true,
+   "urls": {
+    "17": "https://archive.org/download/002_20221103_202211/017.mp3",
+    "21": "https://archive.org/download/002_20221103_202211/021.mp3",
+    "23": "https://archive.org/download/002_20221103_202211/023.mp3",
+    "24": "https://archive.org/download/002_20221103_202211/024.mp3",
+    "25": "https://archive.org/download/002_20221103_202211/025.mp3",
+    "29": "https://archive.org/download/002_20221103_202211/029.mp3",
+    "30": "https://archive.org/download/002_20221103_202211/030.mp3",
+    "37": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/037.mp3",
+    "38": "https://archive.org/download/002_20221103_202211/038.mp3",
+    "39": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/039.mp3",
+    "40": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/040.mp3",
+    "45": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/045.mp3",
+    "47": "https://archive.org/download/002_20221103_202211/047.mp3",
+    "48": "https://archive.org/download/002_20221103_202211/048.mp3",
+    "49": "https://archive.org/download/002_20221103_202211/049.mp3",
+    "52": "https://archive.org/download/002_20221103_202211/052.mp3",
+    "54": "https://archive.org/download/002_20221103_202211/054.mp3",
+    "57": "https://archive.org/download/002_20221103_202211/057.mp3",
+    "62": "https://archive.org/download/002_20221103_202211/062.mp3",
+    "65": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/065.mp3",
+    "72": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/072.mp3",
+    "74": "https://archive.org/download/002_20221103_202211/074.mp3",
+    "95": "https://archive.org/download/002_20221103_202211/095.mp3",
+    "98": "https://archive.org/download/002_20221103_202211/098.mp3",
+    "99": "https://archive.org/download/002_20221103_202211/099.mp3",
+    "100": "https://archive.org/download/002_20221103_202211/100.mp3",
+    "101": "https://archive.org/download/002_20221103_202211/101.mp3",
+    "104": "https://archive.org/download/002_20221103_202211/104.mp3",
+    "105": "https://archive.org/download/002_20221103_202211/105%E2%80%8B.mp3",
+    "106": "https://archive.org/download/002_20221103_202211/106.mp3",
+    "107": "https://archive.org/download/002_20221103_202211/107.mp3",
+    "108": "https://archive.org/download/002_20221103_202211/108.mp3",
+    "109": "https://archive.org/download/002_20221103_202211/109.mp3",
+    "110": "https://archive.org/download/002_20221103_202211/110.mp3",
+    "111": "https://archive.org/download/002_20221103_202211/111.mp3"
+   }
+  },
+  {
+   "id": "sobhi",
+   "base": "https://cdn.mp3quran.net/audio/islam-sobhi/r1",
+   "surahs": "53-114",
+   "keep_logp": true,
+   "urls": {
+    "17": "https://archive.org/download/002_20221103_202211/017.mp3",
+    "21": "https://archive.org/download/002_20221103_202211/021.mp3",
+    "23": "https://archive.org/download/002_20221103_202211/023.mp3",
+    "24": "https://archive.org/download/002_20221103_202211/024.mp3",
+    "25": "https://archive.org/download/002_20221103_202211/025.mp3",
+    "29": "https://archive.org/download/002_20221103_202211/029.mp3",
+    "30": "https://archive.org/download/002_20221103_202211/030.mp3",
+    "37": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/037.mp3",
+    "38": "https://archive.org/download/002_20221103_202211/038.mp3",
+    "39": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/039.mp3",
+    "40": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/040.mp3",
+    "45": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/045.mp3",
+    "47": "https://archive.org/download/002_20221103_202211/047.mp3",
+    "48": "https://archive.org/download/002_20221103_202211/048.mp3",
+    "49": "https://archive.org/download/002_20221103_202211/049.mp3",
+    "52": "https://archive.org/download/002_20221103_202211/052.mp3",
+    "54": "https://archive.org/download/002_20221103_202211/054.mp3",
+    "57": "https://archive.org/download/002_20221103_202211/057.mp3",
+    "62": "https://archive.org/download/002_20221103_202211/062.mp3",
+    "65": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/065.mp3",
+    "72": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/072.mp3",
+    "74": "https://archive.org/download/002_20221103_202211/074.mp3",
+    "95": "https://archive.org/download/002_20221103_202211/095.mp3",
+    "98": "https://archive.org/download/002_20221103_202211/098.mp3",
+    "99": "https://archive.org/download/002_20221103_202211/099.mp3",
+    "100": "https://archive.org/download/002_20221103_202211/100.mp3",
+    "101": "https://archive.org/download/002_20221103_202211/101.mp3",
+    "104": "https://archive.org/download/002_20221103_202211/104.mp3",
+    "105": "https://archive.org/download/002_20221103_202211/105%E2%80%8B.mp3",
+    "106": "https://archive.org/download/002_20221103_202211/106.mp3",
+    "107": "https://archive.org/download/002_20221103_202211/107.mp3",
+    "108": "https://archive.org/download/002_20221103_202211/108.mp3",
+    "109": "https://archive.org/download/002_20221103_202211/109.mp3",
+    "110": "https://archive.org/download/002_20221103_202211/110.mp3",
+    "111": "https://archive.org/download/002_20221103_202211/111.mp3"
+   }
+  },
+  {
+   "id": "sobhi_voice",
+   "speaker": true,
+   "refs": {
+    "mq_012": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/012.mp3",
+    "mq_018": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/018.mp3",
+    "mq_019": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/019.mp3",
+    "mq_036": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/036.mp3",
+    "mq_055": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/055.mp3",
+    "mq_056": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/056.mp3",
+    "mq_067": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/067.mp3",
+    "mq_078": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/078.mp3"
+   },
+   "cands": {
+    "w2q_037": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/037.mp3",
+    "w2q_039": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/039.mp3",
+    "w2q_040": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/040.mp3",
+    "w2q_045": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/045.mp3",
+    "w2q_065": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/065.mp3",
+    "control_w2q_009_his": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/009.mp3",
+    "control_ia_023_his": "https://archive.org/download/002_20221103_202211/023.mp3",
+    "control_dosari_037_not": "https://cdn.mp3quran.net/audio/yasser-dosari/r1/037.mp3"
+   },
+   "others": {
+    "luhaidan_039": "https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1/039.mp3",
+    "abkar_039": "https://cdn.mp3quran.net/audio/idrees-abkar/r1/039.mp3",
+    "alafasy_039": "https://cdn.mp3quran.net/audio/mishary-alafasy/r1/039.mp3",
+    "kurdi_039": "https://cdn.mp3quran.net/audio/raad-kurdi/r1/039.mp3",
+    "mousa_039": "https://cdn.mp3quran.net/audio/abdullah-mousa/r1/039.mp3",
+    "salimi_039": "https://cdn.mp3quran.net/audio/mansour-salimi/r1/039.mp3",
+    "qatami_039": "https://cdn.mp3quran.net/audio/nasser-qatami/r1/039.mp3",
+    "zahrani_039": "https://cdn.mp3quran.net/audio/abdulaziz-zahrani/r1/039.mp3"
+   }
+  }
+ ]
+}

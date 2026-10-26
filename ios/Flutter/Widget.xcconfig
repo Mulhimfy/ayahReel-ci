@@ -1,0 +1,9 @@
+// The widget extension's base configuration.
+//
+// Only Flutter's generated numbers (FLUTTER_BUILD_NAME, FLUTTER_BUILD_NUMBER),
+// so the extension's Info.plist carries the same version and build as the
+// app — App Store Connect rejects an extension whose numbers differ from
+// the app that embeds it. Deliberately NOT Debug/Release.xcconfig: those
+// pull in the Pods xcconfig, whose OTHER_LDFLAGS would link every plugin
+// framework, and Flutter itself, into a process that must not have them.
+#include? "Generated.xcconfig"

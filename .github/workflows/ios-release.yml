@@ -1,0 +1,293 @@
+# iOS store builds on GitHub's macOS runners, straight to App Review:
+# Codemagic's ios-appstore (codemagic.yaml), moved here while the Codemagic
+# account's free build minutes are used up.
+#
+#   girelease-<version>[--N]   `shorebird release ios`, the IPA uploaded to
+#                              App Store Connect, then submitted for review
+#                              as App Store version <version>, released by
+#                              itself once Apple approves it (no phases),
+#                              with the notes in
+#                              docs/store/release-notes/<version>/app-store.json
+#
+# <version> must equal pubspec.yaml's. The build number comes from Apple:
+# one above the last build uploaded, as on Codemagic (LAUNCH.md, "Build
+# numbers"). Pushing the tag SHIPS: the Shorebird release is what later
+# patches target, and Apple puts the version on sale the moment it passes
+# review. It is the user's call (CLAUDE.md), and RELEASES.md gets the row.
+#
+# Xcode is the one ios-patch.yml is pinned to (sdkBuild 23F81a), so this
+# release is patched by the same job as 1.0.6 and 1.0.7.
+#
+# The IPA is kept as the run's artifact the moment it exists. If the upload
+# or the submission fails, `gh run rerun <id> --failed` repeats only that
+# job, with the same IPA. A failed build job leaves a Shorebird release
+# behind if it got that far; the next run passes over its number (Shorebird
+# makes one version+build once).
+name: iOS release
+
+on:
+  push:
+    tags: ['girelease-*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-release
+  cancel-in-progress: false
+
+env:
+  APP_STORE_APPLE_ID: '6794389870'
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 100
+    env:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.ASC_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.ASC_KEY_P8 }}
+      CERTIFICATE_PRIVATE_KEY: ${{ secrets.CERTIFICATE_PRIVATE_KEY }}
+      TAG: ${{ github.ref_name }}
+      XCODE_APP: /Applications/Xcode_26.6.app
+      EXPECTED_SDK_BUILD: 23F81a
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      build: ${{ steps.number.outputs.build }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check secrets
+        run: |
+          missing=""
+          for v in SHOREBIRD_TOKEN APP_STORE_CONNECT_KEY_IDENTIFIER \
+                   APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_PRIVATE_KEY \
+                   CERTIFICATE_PRIVATE_KEY; do
+            [ -n "${!v:-}" ] || missing="$missing $v"
+          done
+          if [ -n "$missing" ]; then
+            echo "Missing secrets:$missing (repo Settings > Secrets > Actions)." >&2
+            exit 1
+          fi
+      - name: Version
+        id: version
+        run: |
+          set -euo pipefail
+          WANT="${TAG#girelease-}"
+          WANT="${WANT%%--*}"
+          VERSION=$(sed -n 's/^version: *\([^+ ]*\).*/\1/p' pubspec.yaml | head -1)
+          if [ "$WANT" != "$VERSION" ]; then
+            echo "Tag says $WANT, pubspec.yaml says $VERSION." >&2
+            exit 1
+          fi
+          bash tool/sync-version.sh > /dev/null
+          if ! git diff --quiet -- lib/data/app_version.dart; then
+            echo "lib/data/app_version.dart doesn't say $VERSION; run tool/sync-version.sh and commit." >&2
+            exit 1
+          fi
+          test -f "docs/store/release-notes/$VERSION/app-store.json" ||
+            { echo "No docs/store/release-notes/$VERSION/app-store.json." >&2; exit 1; }
+          # The Flutter the previews and tests use (flutter_version.txt);
+          # nothing is built if any of them uses another.
+          FLUTTER_VERSION=$(bash tool/check_flutter_version.sh)
+          echo "FLUTTER_VERSION=$FLUTTER_VERSION" >> "$GITHUB_ENV"
+          echo "Flutter $FLUTTER_VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Select Xcode
+        run: |
+          set -euo pipefail
+          sudo xcode-select -s "$XCODE_APP"
+          xcodebuild -version
+          SDK=$(xcrun --sdk iphoneos --show-sdk-build-version)
+          echo "iOS SDK build $SDK, ios-patch.yml is pinned to $EXPECTED_SDK_BUILD"
+          if [ "$SDK" != "$EXPECTED_SDK_BUILD" ]; then
+            echo "Not the Xcode the patch job is pinned to; nothing built." >&2
+            exit 1
+          fi
+      - name: Install Shorebird
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 -sSf \
+            https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | bash
+          for d in "$HOME/.shorebird/bin" "$HOME/.config/shorebird/bin"; do
+            if [ -x "$d/shorebird" ]; then echo "$d" >> "$GITHUB_PATH"; fi
+          done
+      - name: Fetch signing certificate and provisioning profiles
+        run: |
+          set -euo pipefail
+          # The key was set from Windows: drop CRLF and a byte-order mark.
+          KEY_FILE="$RUNNER_TEMP/cert.key"
+          printf '%s\n' "$CERTIFICATE_PRIVATE_KEY" |
+            perl -pe 's/\r//g; s/^\xEF\xBB\xBF//' > "$KEY_FILE"
+          chmod 600 "$KEY_FILE"
+          openssl rsa -in "$KEY_FILE" -check -noout -passin pass:
+          CERTIFICATE_PRIVATE_KEY="$(cat "$KEY_FILE")"
+          export CERTIFICATE_PRIVATE_KEY
+          pipx install codemagic-cli-tools
+          keychain initialize
+          for id in com.ayahReel.app com.ayahReel.app.AyahWidget; do
+            app-store-connect fetch-signing-files "$id" \
+              --type IOS_APP_STORE \
+              --certificate-key=@env:CERTIFICATE_PRIVATE_KEY
+          done
+          keychain add-certificates
+          xcode-project use-profiles
+          test -f "$HOME/export_options.plist"
+      # Apple decides the number: one above the last build uploaded, in
+      # TestFlight or on the App Store (codemagic.yaml says why both). A
+      # number Shorebird already has a release for is passed over: a run
+      # that published its Shorebird release and failed before the upload
+      # leaves one behind (1.0.9+10), and Shorebird won't make it again.
+      - name: Build number
+        id: number
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          only_number() {
+            local v
+            v=$(printf '%s' "$1" | tr -d '[:space:]')
+            case "$v" in
+              '' | *[!0-9]*) printf '0' ;;
+              *) printf '%s' "$v" ;;
+            esac
+          }
+          TF=$(only_number "$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || true)")
+          AS=$(only_number "$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || true)")
+          LATEST=$(( TF > AS ? TF : AS ))
+          if [ "$LATEST" = 0 ]; then
+            echo "Apple named no earlier build (TestFlight $TF, App Store $AS); 1.0.7 was build 9." >&2
+            exit 1
+          fi
+          BUILD=$(( LATEST + 1 ))
+          APP_ID=$(sed -n 's/^app_id: *//p' shorebird.yaml | tr -d '[:space:]"')
+          TAKEN=$(curl -sSf -H "Authorization: Bearer $SHOREBIRD_TOKEN" \
+            "https://api.shorebird.dev/api/v1/apps/$APP_ID/releases" |
+            python3 -c 'import json, sys
+          d = json.load(sys.stdin)
+          print("\n".join(r["version"] for r in (d["releases"] if isinstance(d, dict) else d)))')
+          while grep -qxF "$VERSION+$BUILD" <<<"$TAKEN"; do
+            echo "Shorebird already has a release $VERSION+$BUILD; passing over it."
+            BUILD=$(( BUILD + 1 ))
+          done
+          echo "Latest build: TestFlight $TF, App Store $AS. This is build $BUILD."
+          echo "build=$BUILD" >> "$GITHUB_OUTPUT"
+      - name: Build IPA
+        env:
+          BUILD: ${{ steps.number.outputs.build }}
+          VERSION: ${{ steps.version.outputs.version }}
+          # Word timing's key (lib/data/words_host.dart). A Dart const:
+          # every patch of this release has to pass the same value.
+          WORDS_KEY: ${{ secrets.WORDS_KEY }}
+        run: |
+          set -euo pipefail
+          shorebird --version
+          echo "Shorebird release $VERSION+$BUILD"
+          shorebird release ios --flutter-version="$FLUTTER_VERSION" \
+            --export-options-plist="$HOME/export_options.plist" \
+            -- --build-number="$BUILD" --dart-define=WORDS_KEY="$WORDS_KEY" \
+            2>&1 | tee release.log
+          cp "$(ls build/ios/ipa/*.ipa | head -1)" "AyahReel-$VERSION-$BUILD.ipa"
+      # Kept before anything else can fail: the Shorebird release exists
+      # now, and only this IPA matches it.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ipa
+          path: AyahReel-*.ipa
+          retention-days: 30
+          if-no-files-found: error
+      - name: Check the IPA
+        env:
+          BUILD: ${{ steps.number.outputs.build }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          IPA="AyahReel-$VERSION-$BUILD.ipa"
+          ls -l "$IPA"
+          # The app's own plist, not an extension's or a framework's.
+          PLIST=$(unzip -Z1 "$IPA" | grep -E '^Payload/[^/]+\.app/Info\.plist$' | head -1)
+          unzip -p "$IPA" "$PLIST" > Info.plist
+          get() { plutil -extract "$1" raw -o - Info.plist; }
+          ID=$(get CFBundleIdentifier); V=$(get CFBundleShortVersionString)
+          B=$(get CFBundleVersion); SDK=$(get DTSDKBuild)
+          echo "$PLIST: $ID $V ($B), SDK build $SDK"
+          [ "$ID" = com.ayahReel.app ] && [ "$V" = "$VERSION" ] && [ "$B" = "$BUILD" ] &&
+            [ "$SDK" = "$EXPECTED_SDK_BUILD" ] ||
+            { echo "The IPA isn't com.ayahReel.app $VERSION ($BUILD) on SDK $EXPECTED_SDK_BUILD." >&2; exit 1; }
+          {
+            echo "### iOS $VERSION+$BUILD"
+            echo '```'
+            echo "$ID $V ($B), SDK build $SDK"
+            ls -l "$IPA" | awk '{print $5" bytes"}'
+            grep -iE 'Published Release|release .* created|Flutter version' release.log || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      # Artifacts of the public CI mirror are public, and GitHub masks
+      # secrets only in the job's own log, never in a file it wrote.
+      - name: Blank secrets out of the logs
+        if: always()
+        env:
+          WORDS_KEY: ${{ secrets.WORDS_KEY }}
+          REDACT_VARS: >-
+            SHOREBIRD_TOKEN APP_STORE_CONNECT_KEY_IDENTIFIER
+            APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_PRIVATE_KEY
+            CERTIFICATE_PRIVATE_KEY WORDS_KEY
+        run: python3 tool/redact_logs.py release.log Info.plist ios/Podfile.lock
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-release-logs
+          path: |
+            release.log
+            Info.plist
+            ios/Podfile.lock
+          if-no-files-found: ignore
+
+  # Its own job, so a failed upload is retried with the same IPA
+  # (`gh run rerun <id> --failed`) instead of a second release.
+  upload:
+    needs: build
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.ASC_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.ASC_KEY_P8 }}
+      XCODE_APP: /Applications/Xcode_26.6.app
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ipa
+      - name: Upload to App Store Connect
+        run: |
+          set -euo pipefail
+          sudo xcode-select -s "$XCODE_APP"
+          ls -l AyahReel-*.ipa
+          pipx install codemagic-cli-tools
+          app-store-connect publish --path AyahReel-*.ipa
+
+  # On Linux: waiting for Apple's processing costs a tenth of what it
+  # costs on a Mac.
+  submit:
+    needs: [build, upload]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.ASC_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.ASC_KEY_P8 }}
+      VERSION: ${{ needs.build.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: ipa
+      - name: Submit for review
+        run: |
+          set -euo pipefail
+          pipx install codemagic-cli-tools
+          app-store-connect publish --path AyahReel-*.ipa --skip-package-upload \
+            --app-store --version-string "$VERSION" \
+            --release-type AFTER_APPROVAL --no-phased-release --copyright "2026 AyahReel" \
+            --app-store-version-localizations "@file:docs/store/release-notes/$VERSION/app-store.json" \
+            --max-find-build-wait 60 --max-build-processing-wait 120

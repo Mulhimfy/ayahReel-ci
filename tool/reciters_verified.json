@@ -1,0 +1,4881 @@
+{
+ "abbad": {
+  "base": "https://everyayah.com/data/Fares_Abbad_64kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    48,
+    22050
+   ],
+   [
+    64,
+    22050
+   ]
+  ],
+  "kbps": 48,
+  "kind": "ayah",
+  "low_files": [
+   "6:142 at 48 kbps",
+   "7:132 at 48 kbps",
+   "9:6 at 48 kbps",
+   "10:32 at 48 kbps",
+   "11:78 at 48 kbps",
+   "12:110 at 48 kbps",
+   "16:115 at 48 kbps",
+   "19:76 at 48 kbps",
+   "20:133 at 48 kbps",
+   "22:41 at 48 kbps",
+   "23:118 at 48 kbps",
+   "26:14 at 48 kbps",
+   "26:169 at 48 kbps",
+   "28:4 at 48 kbps",
+   "33:33 at 48 kbps",
+   "43:16 at 48 kbps",
+   "53:22 at 48 kbps",
+   "71:7 at 48 kbps",
+   "75:30 at 48 kbps",
+   "91:3 at 48 kbps",
+   "107:4 at 48 kbps"
+  ],
+  "name": "Fares Abbad",
+  "pace": 1.014,
+  "problems": [],
+  "rate": 22050,
+  "source": "ayah https://everyayah.com/data/Fares_Abbad_64kbps",
+  "warnings": [
+   "quality: 48 kbps at 22050 Hz"
+  ]
+ },
+ "abdulbari_mohammad": {
+  "aligned_share": 0.947,
+  "base": "https://server12.mp3quran.net/bari",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    22050
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "2:2",
+   "2:6",
+   "7:2",
+   "12:1",
+   "12:2",
+   "12:8",
+   "18:2",
+   "19:2",
+   "36:2",
+   "36:7",
+   "36:18",
+   "67:4"
+  ],
+  "name": "Abdulbari Mohammad",
+  "pace": 1.576,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.732,
+  "source": "surah https://server12.mp3quran.net/bari SSS mp3quran 50",
+  "timing": [
+   "mp3quran",
+   50
+  ],
+  "warnings": [
+   "alignment: shifted tables score 73% — this audio has pauses everywhere, so its table cannot be checked — pauses so often that even a shifted table lands in them, so this check cannot tell; in place, nearly every boundary does"
+  ]
+ },
+ "abdulbasit": {
+  "base": "https://everyayah.com/data/Abdul_Basit_Murattal_192kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 192,
+  "kind": "ayah",
+  "name": "Abdul Basit",
+  "pace": 1.347,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Abdul_Basit_Murattal_192kbps"
+ },
+ "abdulbasit_mujawwad": {
+  "base": "https://everyayah.com/data/Abdul_Basit_Mujawwad_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Abdul Basit · Mujawwad",
+  "pace": 2.571,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Abdul_Basit_Mujawwad_128kbps"
+ },
+ "abdulhakam": {
+  "aligned_share": 0.929,
+  "base": "https://server12.mp3quran.net/hkm",
+  "basmala_in_verse1": 0,
+  "boundaries": 225,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    24000
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "3:200",
+   "7:2",
+   "12:7",
+   "18:8",
+   "18:10",
+   "36:2",
+   "55:13",
+   "55:17",
+   "78:10",
+   "78:11",
+   "89:11",
+   "89:12",
+   "89:13",
+   "112:2",
+   "112:3",
+   "112:4"
+  ],
+  "name": "Saber Abdulhakam",
+  "pace": 1.027,
+  "problems": [],
+  "rate": 24000,
+  "shifted_share": 0.12,
+  "source": "surah https://server12.mp3quran.net/hkm SSS mp3quran 39",
+  "timing": [
+   "mp3quran",
+   39
+  ]
+ },
+ "abdulkafi": {
+  "aligned_share": 0.917,
+  "base": "https://server11.mp3quran.net/kafi",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:3",
+   "7:2",
+   "12:5",
+   "12:9",
+   "18:4",
+   "19:2",
+   "36:2",
+   "55:9",
+   "55:11",
+   "55:15",
+   "55:18",
+   "55:20",
+   "67:8",
+   "67:13",
+   "89:12",
+   "112:2",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Khalid Abdulkafi",
+  "pace": 0.969,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.189,
+  "source": "surah https://server11.mp3quran.net/kafi SSS mp3quran 22",
+  "timing": [
+   "mp3quran",
+   22
+  ]
+ },
+ "abdulkareem": {
+  "base": "https://everyayah.com/data/Muhammad_AbdulKareem_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    32000
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Muhammad AbdulKareem",
+  "pace": 0.955,
+  "problems": [],
+  "rate": 32000,
+  "source": "ayah https://everyayah.com/data/Muhammad_AbdulKareem_128kbps"
+ },
+ "abkar": {
+  "aligned_share": 0.889,
+  "base": "https://server6.mp3quran.net/abkr",
+  "basmala_in_verse1": 1,
+  "boundaries": 225,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    44100
+   ],
+   [
+    128,
+    44100
+   ],
+   [
+    128,
+    48000
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "7:2",
+   "19:2",
+   "24:35",
+   "24:37",
+   "36:1",
+   "36:2",
+   "36:3",
+   "36:4",
+   "36:6",
+   "36:11",
+   "36:13",
+   "36:15",
+   "36:17",
+   "48:27",
+   "55:4",
+   "89:2",
+   "89:3",
+   "89:4",
+   "112:4",
+   "114:1",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Idrees Abkar",
+  "pace": 1.311,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.127,
+  "source": "surah https://server6.mp3quran.net/abkr SSS mp3quran 12",
+  "timing": [
+   "mp3quran",
+   12
+  ]
+ },
+ "ajmi": {
+  "base": "https://everyayah.com/data/ahmed_ibn_ali_al_ajamy_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Ahmed Al-Ajmi",
+  "pace": 1.137,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/ahmed_ibn_ali_al_ajamy_128kbps"
+ },
+ "akhdar": {
+  "aligned_share": 1.0,
+  "base": "https://server6.mp3quran.net/akdr",
+  "basmala_in_verse1": 0,
+  "boundaries": 227,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    48,
+    22050
+   ]
+  ],
+  "kbps": 48,
+  "kind": "surah",
+  "missed": [],
+  "name": "Ibrahim Al-Akhdar",
+  "pace": 1.456,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.33,
+  "source": "surah https://server6.mp3quran.net/akdr SSS mp3quran 1 missing 93",
+  "timing": [
+   "mp3quran",
+   1
+  ],
+  "warnings": [
+   "quality: 48 kbps at 22050 Hz — sound quality below the bar; the user chose to have the voice"
+  ]
+ },
+ "alafasy": {
+  "base": "https://everyayah.com/data/Alafasy_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Mishary Alafasy",
+  "pace": 1.323,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Alafasy_128kbps"
+ },
+ "alafasy_2": {
+  "aligned_share": 0.965,
+  "base": "https://download.quranicaudio.com/quran/mishaari_california",
+  "basmala_in_verse1": 0,
+  "boundaries": 227,
+  "broken": [],
+  "checked": "2026-10-22",
+  "distinct": {
+   "alafasy": {
+    "dur_close": 0.179,
+    "dur_ratio": 0.962,
+    "dur_spread": 0.0837,
+    "env_corr": 0.173,
+    "failed": 0,
+    "ok": true,
+    "source": "ayah https://everyayah.com/data/Alafasy_128kbps",
+    "surahs": 114,
+    "verses": 162,
+    "wave_doubt": 0,
+    "wave_max": 0.362,
+    "wave_median": 0.145,
+    "wave_p90": 0.253,
+    "wave_same": 0
+   }
+  },
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "2:253",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:12",
+   "112:2",
+   "112:3",
+   "112:4"
+  ],
+  "name": "Mishary Alafasy",
+  "pace": 1.271,
+  "problems": [],
+  "rate": 44100,
+  "recording_of": "alafasy",
+  "shifted_share": 0.141,
+  "source": "surah https://download.quranicaudio.com/quran/mishaari_california SSS qul 95",
+  "timing": [
+   "qul",
+   95
+  ]
+ },
+ "alaqimy": {
+  "base": "https://everyayah.com/data/Akram_AlAlaqimy_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Akram Al-Alaqimy",
+  "pace": 1.212,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Akram_AlAlaqimy_128kbps"
+ },
+ "albanna": {
+  "aligned_share": 1.0,
+  "base": "https://download.quranicaudio.com/quran/mahmood_ali_albana",
+  "basmala_in_verse1": 78,
+  "boundaries": 215,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [],
+  "name": "Mahmoud Ali Al-Banna",
+  "opening_found": 113,
+  "opening_ms_range": [
+   3290.0,
+   6250.0
+  ],
+  "pace": 1.143,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.313,
+  "source": "surah https://download.quranicaudio.com/quran/mahmood_ali_albana SSS qul 129 opening 3600",
+  "timing": [
+   "qul",
+   129
+  ]
+ },
+ "albanna_mujawwad": {
+  "aligned_share": 0.792,
+  "base": "https://server8.mp3quran.net/bna/Almusshaf-Al-Mojawwad",
+  "basmala_in_verse1": 1,
+  "boundaries": 226,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    22050
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "2:1",
+   "2:2",
+   "2:4",
+   "12:1",
+   "18:3",
+   "24:37",
+   "36:2",
+   "36:3",
+   "36:4",
+   "36:19",
+   "55:2",
+   "55:3",
+   "55:4",
+   "55:6",
+   "55:9",
+   "55:12",
+   "55:15",
+   "55:16",
+   "55:18",
+   "55:20",
+   "59:21",
+   "59:24",
+   "67:11",
+   "67:27",
+   "78:3",
+   "78:5",
+   "78:7",
+   "78:9",
+   "78:11",
+   "78:13",
+   "78:15",
+   "78:16",
+   "78:20",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:5",
+   "89:8",
+   "89:10",
+   "89:11",
+   "89:12",
+   "89:13",
+   "89:14",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:6"
+  ],
+  "name": "Al-Banna · Mujawwad",
+  "pace": 2.943,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.702,
+  "source": "surah https://server8.mp3quran.net/bna/Almusshaf-Al-Mojawwad SSS mp3quran 122",
+  "timing": [
+   "mp3quran",
+   122
+  ],
+  "warnings": [
+   "alignment: a breath at 79% of 226 boundaries — pauses so often that even a shifted table lands in them, so this check cannot tell; in place, nearly every boundary does; most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time",
+   "alignment: shifted tables score 70% — this audio has pauses everywhere, so its table cannot be checked — pauses so often that even a shifted table lands in them, so this check cannot tell; in place, nearly every boundary does; most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time"
+  ]
+ },
+ "alili": {
+  "base": "https://everyayah.com/data/aziz_alili_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Aziz Alili",
+  "pace": 1.11,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/aziz_alili_128kbps"
+ },
+ "alim_shah": {
+  "aligned_share": 0.921,
+  "base": "https://server12.mp3quran.net/shah",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:3",
+   "1:4",
+   "1:5",
+   "1:7",
+   "7:1",
+   "7:2",
+   "19:2",
+   "36:2",
+   "55:2",
+   "55:4",
+   "78:5",
+   "78:11",
+   "89:2",
+   "89:12",
+   "112:4",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Mohammad Saleh Alim Shah",
+  "pace": 0.969,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.137,
+  "source": "surah https://server12.mp3quran.net/shah SSS mp3quran 110",
+  "timing": [
+   "mp3quran",
+   110
+  ]
+ },
+ "aloosi": {
+  "aligned_share": 0.947,
+  "base": "https://server6.mp3quran.net/aloosi",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    256,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:4",
+   "1:7",
+   "7:2",
+   "12:1",
+   "19:2",
+   "36:2",
+   "97:1",
+   "97:3",
+   "112:1",
+   "112:2",
+   "112:3",
+   "112:4"
+  ],
+  "name": "Abdulrahman Al-Ossi",
+  "pace": 1.19,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.075,
+  "source": "surah https://server6.mp3quran.net/aloosi SSS mp3quran 225",
+  "timing": [
+   "mp3quran",
+   225
+  ]
+ },
+ "alzain": {
+  "aligned_share": 0.864,
+  "base": "https://server9.mp3quran.net/alzain",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    22050
+   ],
+   [
+    96,
+    44100
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "3:197",
+   "7:2",
+   "19:2",
+   "24:37",
+   "36:2",
+   "36:17",
+   "55:3",
+   "55:4",
+   "55:6",
+   "55:11",
+   "55:18",
+   "55:20",
+   "78:2",
+   "78:5",
+   "78:7",
+   "78:8",
+   "78:15",
+   "78:17",
+   "78:20",
+   "89:2",
+   "89:3",
+   "89:11",
+   "89:12",
+   "112:1",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:6"
+  ],
+  "name": "Alzain Mohammad Ahmad",
+  "pace": 1.006,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.154,
+  "source": "surah https://server9.mp3quran.net/alzain SSS mp3quran 13",
+  "timing": [
+   "mp3quran",
+   13
+  ]
+ },
+ "amer": {
+  "aligned_share": 0.978,
+  "base": "https://server10.mp3quran.net/Aamer",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    24000
+   ],
+   [
+    320,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "7:2",
+   "19:2",
+   "36:2",
+   "112:3",
+   "112:4"
+  ],
+  "name": "Ahmad Amer",
+  "pace": 1.22,
+  "problems": [],
+  "rate": 24000,
+  "shifted_share": 0.285,
+  "source": "surah https://server10.mp3quran.net/Aamer SSS mp3quran 203",
+  "timing": [
+   "mp3quran",
+   203
+  ]
+ },
+ "arkani": {
+  "aligned_share": 0.877,
+  "base": "https://server6.mp3quran.net/arkani",
+  "basmala_in_verse1": 0,
+  "boundaries": 227,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    22050
+   ],
+   [
+    96,
+    44100
+   ],
+   [
+    128,
+    44100
+   ],
+   [
+    128,
+    48000
+   ],
+   [
+    160,
+    44100
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "7:2",
+   "18:8",
+   "18:10",
+   "19:2",
+   "24:37",
+   "36:2",
+   "55:13",
+   "55:15",
+   "67:14",
+   "78:2",
+   "78:5",
+   "78:7",
+   "78:8",
+   "78:10",
+   "78:11",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:7",
+   "89:8",
+   "89:9",
+   "89:10",
+   "89:11",
+   "89:12",
+   "89:13",
+   "89:14",
+   "89:16",
+   "112:4"
+  ],
+  "name": "Abdulwali Al-Arkani",
+  "pace": 1.059,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.14,
+  "source": "surah https://server6.mp3quran.net/arkani SSS mp3quran 72",
+  "timing": [
+   "mp3quran",
+   72
+  ]
+ },
+ "asiri": {
+  "aligned_share": 0.798,
+  "base": "https://server6.mp3quran.net/3siri",
+  "basmala_in_verse1": 0,
+  "boundaries": 223,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    22050
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:5",
+   "1:7",
+   "2:255",
+   "3:191",
+   "3:192",
+   "3:193",
+   "3:194",
+   "3:196",
+   "3:197",
+   "3:198",
+   "3:199",
+   "3:200",
+   "7:2",
+   "7:8",
+   "7:12",
+   "12:4",
+   "18:107",
+   "18:108",
+   "18:109",
+   "18:110",
+   "19:2",
+   "36:2",
+   "36:17",
+   "36:18",
+   "48:28",
+   "55:4",
+   "55:13",
+   "55:17",
+   "67:25",
+   "78:2",
+   "78:11",
+   "78:14",
+   "78:15",
+   "78:16",
+   "78:17",
+   "78:18",
+   "78:19",
+   "78:20",
+   "89:2",
+   "89:7",
+   "89:10",
+   "89:15",
+   "112:2",
+   "112:3",
+   "112:4"
+  ],
+  "name": "Ibrahim Al-Asiri",
+  "pace": 1.291,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.232,
+  "source": "surah https://server6.mp3quran.net/3siri SSS mp3quran 3",
+  "timing": [
+   "mp3quran",
+   3
+  ],
+  "warnings": [
+   "alignment: a breath at 80% of 223 boundaries — most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time, with some nearby"
+  ]
+ },
+ "ayyub": {
+  "base": "https://everyayah.com/data/Muhammad_Ayyoub_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Muhammad Ayyub",
+  "pace": 1.386,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Muhammad_Ayyoub_128kbps"
+ },
+ "balilah": {
+  "aligned_share": 0.943,
+  "base": "https://server6.mp3quran.net/balilah",
+  "basmala_in_verse1": 0,
+  "boundaries": 227,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    128,
+    48000
+   ],
+   [
+    256,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:5",
+   "1:6",
+   "7:2",
+   "19:2",
+   "24:37",
+   "36:2",
+   "59:20",
+   "67:12",
+   "67:15",
+   "67:25",
+   "112:4",
+   "114:2",
+   "114:3"
+  ],
+  "name": "Bandar Balilah",
+  "pace": 1.144,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.162,
+  "source": "surah https://server6.mp3quran.net/balilah SSS mp3quran 217",
+  "timing": [
+   "mp3quran",
+   217
+  ]
+ },
+ "basfar": {
+  "base": "https://everyayah.com/data/Abdullah_Basfar_192kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 192,
+  "kind": "ayah",
+  "name": "Abdullah Basfar",
+  "pace": 1.318,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Abdullah_Basfar_192kbps"
+ },
+ "basfar_2": {
+  "aligned_share": 0.962,
+  "base": "https://cdn.mp3quran.net/audio/abdullah-basfar/r1",
+  "basmala_in_verse1": 0,
+  "boundaries": 234,
+  "broken": [],
+  "checked": "2026-10-23",
+  "distinct": {
+   "basfar": {
+    "dur_close": 0.13,
+    "dur_ratio": 0.848,
+    "dur_spread": 0.0979,
+    "env_corr": 0.155,
+    "failed": 0,
+    "ok": true,
+    "source": "ayah https://everyayah.com/data/Abdullah_Basfar_192kbps",
+    "surahs": 113,
+    "verses": 161,
+    "wave_doubt": 0,
+    "wave_max": 0.346,
+    "wave_median": 0.151,
+    "wave_p90": 0.225,
+    "wave_same": 0
+   }
+  },
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "36:4",
+   "55:4",
+   "78:2",
+   "78:5",
+   "78:16",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:12"
+  ],
+  "name": "Abdullah Basfar",
+  "pace": 1.101,
+  "problems": [],
+  "rate": 44100,
+  "recording_of": "basfar",
+  "shifted_share": 0.192,
+  "source": "surah https://cdn.mp3quran.net/audio/abdullah-basfar/r1 SSS mp3quran 60 missing 2",
+  "timing": [
+   "mp3quran",
+   60
+  ]
+ },
+ "buaijan": {
+  "aligned_share": 0.908,
+  "base": "https://server8.mp3quran.net/buajan",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    22050
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "7:2",
+   "7:11",
+   "19:2",
+   "19:3",
+   "19:5",
+   "24:38",
+   "36:2",
+   "36:11",
+   "55:6",
+   "55:7",
+   "55:10",
+   "55:12",
+   "55:13",
+   "55:18",
+   "55:20",
+   "78:2",
+   "78:3",
+   "78:7",
+   "112:2",
+   "112:3",
+   "112:4"
+  ],
+  "name": "Abdullah Al-Buaijan",
+  "pace": 0.933,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.136,
+  "source": "surah https://server8.mp3quran.net/buajan SSS mp3quran 58",
+  "timing": [
+   "mp3quran",
+   58
+  ]
+ },
+ "budair": {
+  "base": "https://everyayah.com/data/Salah_Al_Budair_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Salah Al-Budair",
+  "pace": 0.911,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Salah_Al_Budair_128kbps"
+ },
+ "bukhatir": {
+  "base": "https://everyayah.com/data/Salaah_AbdulRahman_Bukhatir_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Salah Bukhatir",
+  "pace": 0.998,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Salaah_AbdulRahman_Bukhatir_128kbps"
+ },
+ "bukheet": {
+  "aligned_share": 0.978,
+  "base": "https://server14.mp3quran.net/bukheet",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "7:1",
+   "7:2",
+   "19:2",
+   "36:2",
+   "55:4"
+  ],
+  "name": "Mohammad Al-Bukheet",
+  "pace": 1.292,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.592,
+  "source": "surah https://server14.mp3quran.net/bukheet SSS mp3quran 250",
+  "timing": [
+   "mp3quran",
+   250
+  ],
+  "warnings": [
+   "alignment: shifted tables score 59% — this audio has pauses everywhere, so its table cannot be checked — pauses so often that even a shifted table lands in them, so this check cannot tell; in place, nearly every boundary does"
+  ]
+ },
+ "burhaji": {
+  "aligned_share": 0.939,
+  "base": "https://server16.mp3quran.net/M_Burhaji/Rewayat-Hafs-A-n-Assem",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    320,
+    48000
+   ]
+  ],
+  "kbps": 320,
+  "kind": "surah",
+  "missed": [
+   "1:5",
+   "7:2",
+   "19:2",
+   "36:2",
+   "89:13",
+   "97:3",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Muhammad Burhaji",
+  "pace": 1.057,
+  "problems": [],
+  "rate": 48000,
+  "shifted_share": 0.189,
+  "source": "surah https://server16.mp3quran.net/M_Burhaji/Rewayat-Hafs-A-n-Assem SSS mp3quran 340",
+  "timing": [
+   "mp3quran",
+   340
+  ]
+ },
+ "daghistani": {
+  "aligned_share": 0.776,
+  "base": "https://server9.mp3quran.net/zaki",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    22050
+   ],
+   [
+    128,
+    24000
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:1",
+   "1:3",
+   "1:4",
+   "2:3",
+   "3:197",
+   "7:2",
+   "12:9",
+   "18:3",
+   "18:5",
+   "18:108",
+   "19:2",
+   "19:3",
+   "19:6",
+   "19:13",
+   "24:37",
+   "24:38",
+   "33:42",
+   "36:2",
+   "36:3",
+   "36:4",
+   "36:6",
+   "36:17",
+   "55:2",
+   "55:3",
+   "55:4",
+   "55:8",
+   "55:9",
+   "55:11",
+   "55:15",
+   "55:20",
+   "78:2",
+   "78:3",
+   "78:5",
+   "78:7",
+   "78:11",
+   "78:13",
+   "78:15",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:5",
+   "89:7",
+   "89:11",
+   "89:12",
+   "97:2",
+   "97:5",
+   "112:4",
+   "114:2",
+   "114:3",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Zaki Daghistani",
+  "pace": 1.544,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.447,
+  "source": "surah https://server9.mp3quran.net/zaki SSS mp3quran 33",
+  "timing": [
+   "mp3quran",
+   33
+  ],
+  "warnings": [
+   "alignment: a breath at 78% of 228 boundaries — most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time"
+  ]
+ },
+ "daghriri": {
+  "aligned_share": 0.943,
+  "base": "https://server16.mp3quran.net/H-Aldaghriri/Rewayat-Hafs-A-n-Assem",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    128,
+    48000
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "7:2",
+   "19:2",
+   "36:2",
+   "55:6",
+   "112:1",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:1",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Hassan Al-Daghriri",
+  "pace": 1.129,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.066,
+  "source": "surah https://server16.mp3quran.net/H-Aldaghriri/Rewayat-Hafs-A-n-Assem SSS mp3quran 10905",
+  "timing": [
+   "mp3quran",
+   10905
+  ]
+ },
+ "deban": {
+  "aligned_share": 0.899,
+  "base": "https://server16.mp3quran.net/deban/Rewayat-Hafs-A-n-Assem",
+  "basmala_in_verse1": 0,
+  "boundaries": 227,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    320,
+    48000
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "7:2",
+   "19:2",
+   "24:37",
+   "36:2",
+   "78:2",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:11",
+   "97:1",
+   "97:2",
+   "97:3",
+   "97:4",
+   "112:1",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:1",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Ahmad Deban",
+  "pace": 1.181,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.101,
+  "source": "surah https://server16.mp3quran.net/deban/Rewayat-Hafs-A-n-Assem SSS mp3quran 265",
+  "timing": [
+   "mp3quran",
+   265
+  ]
+ },
+ "dukhain": {
+  "aligned_share": 0.825,
+  "base": "https://server16.mp3quran.net/h_dukhain/Rewayat-Hafs-A-n-Assem",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    32000
+   ],
+   [
+    128,
+    44100
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:2",
+   "1:3",
+   "1:4",
+   "1:5",
+   "1:6",
+   "1:7",
+   "2:253",
+   "2:254",
+   "2:255",
+   "2:257",
+   "2:282",
+   "2:283",
+   "2:284",
+   "2:285",
+   "2:286",
+   "7:2",
+   "19:2",
+   "36:2",
+   "36:4",
+   "55:4",
+   "78:2",
+   "78:5",
+   "78:7",
+   "78:16",
+   "89:12",
+   "97:1",
+   "97:2",
+   "97:3",
+   "97:4",
+   "97:5",
+   "112:1",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:1",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Haitham Al-Dukhain",
+  "pace": 1.214,
+  "problems": [],
+  "rate": 32000,
+  "shifted_share": 0.11,
+  "source": "surah https://server16.mp3quran.net/h_dukhain/Rewayat-Hafs-A-n-Assem SSS mp3quran 273",
+  "timing": [
+   "mp3quran",
+   273
+  ],
+  "warnings": [
+   "alignment: a breath at 82% of 228 boundaries — most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time"
+  ]
+ },
+ "dussary": {
+  "base": "https://everyayah.com/data/Yasser_Ad-Dussary_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Yasser Ad-Dussary",
+  "pace": 1.152,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Yasser_Ad-Dussary_128kbps"
+ },
+ "emad_hafez": {
+  "aligned_share": 1.0,
+  "base": "https://server6.mp3quran.net/hafz",
+  "basmala_in_verse1": 0,
+  "boundaries": 227,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    48,
+    22050
+   ]
+  ],
+  "kbps": 48,
+  "kind": "surah",
+  "missed": [],
+  "name": "Emad Hafez",
+  "pace": 1.253,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.273,
+  "source": "surah https://server6.mp3quran.net/hafz SSS mp3quran 78",
+  "timing": [
+   "mp3quran",
+   78
+  ],
+  "warnings": [
+   "quality: 48 kbps at 22050 Hz — sound quality below the bar; the user chose to have the voice"
+  ]
+ },
+ "emadi": {
+  "aligned_share": 0.969,
+  "base": "https://server16.mp3quran.net/a_alemadi/Rewayat-Hafs-A-n-Assem",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "7:2",
+   "19:2",
+   "36:2",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5"
+  ],
+  "name": "Anas Al-Emadi",
+  "pace": 1.112,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.141,
+  "source": "surah https://server16.mp3quran.net/a_alemadi/Rewayat-Hafs-A-n-Assem SSS mp3quran 314",
+  "timing": [
+   "mp3quran",
+   314
+  ]
+ },
+ "ghamdi": {
+  "aligned_share": 0.895,
+  "base": "https://server7.mp3quran.net/s_gmd",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    22050
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:4",
+   "7:2",
+   "19:2",
+   "36:2",
+   "36:4",
+   "78:5",
+   "78:7",
+   "78:8",
+   "78:10",
+   "78:11",
+   "78:16",
+   "78:19",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:8",
+   "89:10",
+   "89:11",
+   "89:13",
+   "97:2",
+   "112:2",
+   "112:4",
+   "114:2",
+   "114:3"
+  ],
+  "name": "Saad Al-Ghamdi",
+  "pace": 1.072,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.07,
+  "source": "surah https://server7.mp3quran.net/s_gmd SSS mp3quran 30",
+  "timing": [
+   "mp3quran",
+   30
+  ]
+ },
+ "habdan": {
+  "aligned_share": 0.903,
+  "base": "https://server6.mp3quran.net/habdan",
+  "basmala_in_verse1": 0,
+  "boundaries": 227,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 192,
+  "kind": "surah",
+  "missed": [
+   "1:5",
+   "3:195",
+   "7:2",
+   "18:107",
+   "18:109",
+   "18:110",
+   "19:2",
+   "24:37",
+   "36:2",
+   "55:9",
+   "78:18",
+   "89:2",
+   "89:14",
+   "97:3",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Saleh Al-Habdan",
+  "pace": 1.144,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.106,
+  "source": "surah https://server6.mp3quran.net/habdan SSS mp3quran 42",
+  "timing": [
+   "mp3quran",
+   42
+  ]
+ },
+ "hamza": {
+  "aligned_share": 0.934,
+  "base": "https://server9.mp3quran.net/hamza",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    24000
+   ],
+   [
+    96,
+    32000
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "7:2",
+   "7:7",
+   "12:7",
+   "19:2",
+   "33:42",
+   "36:2",
+   "36:3",
+   "36:4",
+   "78:5",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:5",
+   "89:7",
+   "89:8"
+  ],
+  "name": "Dawood Hamza",
+  "pace": 1.117,
+  "problems": [],
+  "rate": 24000,
+  "shifted_share": 0.325,
+  "source": "surah https://server9.mp3quran.net/hamza SSS mp3quran 25",
+  "timing": [
+   "mp3quran",
+   25
+  ]
+ },
+ "haneef": {
+  "aligned_share": 0.811,
+  "base": "https://server8.mp3quran.net/wdod",
+  "basmala_in_verse1": 0,
+  "boundaries": 227,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    22050
+   ],
+   [
+    96,
+    44100
+   ],
+   [
+    128,
+    44100
+   ],
+   [
+    320,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:4",
+   "1:5",
+   "1:7",
+   "3:196",
+   "3:197",
+   "7:2",
+   "12:9",
+   "19:2",
+   "24:37",
+   "33:42",
+   "36:2",
+   "36:3",
+   "36:4",
+   "36:17",
+   "55:2",
+   "55:3",
+   "55:4",
+   "55:9",
+   "55:12",
+   "55:15",
+   "55:18",
+   "55:20",
+   "78:2",
+   "78:3",
+   "78:5",
+   "78:7",
+   "78:8",
+   "78:11",
+   "89:2",
+   "89:8",
+   "89:10",
+   "89:11",
+   "89:12",
+   "97:2",
+   "97:4",
+   "97:5",
+   "112:2",
+   "112:4",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Abdulwadood Haneef",
+  "pace": 0.809,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.14,
+  "source": "surah https://server8.mp3quran.net/wdod SSS mp3quran 71",
+  "timing": [
+   "mp3quran",
+   71
+  ],
+  "warnings": [
+   "alignment: a breath at 81% of 227 boundaries — most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time, though more misses than most have a pause nearby"
+  ]
+ },
+ "harthi": {
+  "aligned_share": 0.886,
+  "base": "https://server6.mp3quran.net/mohsin_harthi",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    44100
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:3",
+   "1:5",
+   "1:7",
+   "7:2",
+   "19:2",
+   "24:37",
+   "36:1",
+   "55:3",
+   "55:4",
+   "55:9",
+   "55:20",
+   "59:20",
+   "59:22",
+   "67:25",
+   "78:3",
+   "78:5",
+   "78:9",
+   "78:10",
+   "89:2",
+   "89:4",
+   "89:11",
+   "112:3",
+   "112:4",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Abdulmohsin Al-Harthi",
+  "pace": 1.049,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.14,
+  "source": "surah https://server6.mp3quran.net/mohsin_harthi SSS mp3quran 66",
+  "timing": [
+   "mp3quran",
+   66
+  ]
+ },
+ "hasan_saleh": {
+  "aligned_share": 0.952,
+  "base": "https://server16.mp3quran.net/h_saleh/Rewayat-Hafs-A-n-Assem",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    192,
+    48000
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:3",
+   "7:2",
+   "18:109",
+   "19:2",
+   "36:2",
+   "78:2",
+   "89:11",
+   "89:12",
+   "89:14",
+   "112:4",
+   "114:6"
+  ],
+  "name": "Hasan Saleh",
+  "pace": 0.902,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.252,
+  "source": "surah https://server16.mp3quran.net/h_saleh/Rewayat-Hafs-A-n-Assem SSS mp3quran 299",
+  "timing": [
+   "mp3quran",
+   299
+  ]
+ },
+ "hashemi": {
+  "aligned_share": 0.917,
+  "base": "https://server16.mp3quran.net/s_hashemi/Rewayat-Hafs-A-n-Assem",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    24000
+   ],
+   [
+    96,
+    32000
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:4",
+   "1:6",
+   "1:7",
+   "7:2",
+   "12:1",
+   "19:2",
+   "36:2",
+   "97:2",
+   "97:3",
+   "97:4",
+   "97:5",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Sayed Ahmad Hashemi",
+  "pace": 1.231,
+  "problems": [],
+  "rate": 24000,
+  "shifted_share": 0.075,
+  "source": "surah https://server16.mp3quran.net/s_hashemi/Rewayat-Hafs-A-n-Assem SSS mp3quran 294",
+  "timing": [
+   "mp3quran",
+   294
+  ]
+ },
+ "hashim": {
+  "aligned_share": 0.917,
+  "base": "https://server12.mp3quran.net/salah_hashim_m",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    160,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "7:2",
+   "19:2",
+   "36:2",
+   "78:16",
+   "97:1",
+   "97:2",
+   "97:3",
+   "97:4",
+   "97:5",
+   "112:1",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:1",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Salah Al-Hashim",
+  "pace": 1.152,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.048,
+  "source": "surah https://server12.mp3quran.net/salah_hashim_m SSS mp3quran 44",
+  "timing": [
+   "mp3quran",
+   44
+  ]
+ },
+ "hassan": {
+  "aligned_share": 0.912,
+  "base": "https://server8.mp3quran.net/namh",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:3",
+   "1:4",
+   "1:5",
+   "1:6",
+   "1:7",
+   "2:283",
+   "2:284",
+   "2:285",
+   "2:286",
+   "7:2",
+   "18:109",
+   "19:2",
+   "36:2",
+   "48:29",
+   "67:2",
+   "67:19",
+   "78:9",
+   "78:11",
+   "89:12",
+   "89:13"
+  ],
+  "name": "Neamah Al-Hassan",
+  "pace": 1.323,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.272,
+  "source": "surah https://server8.mp3quran.net/namh SSS mp3quran 88",
+  "timing": [
+   "mp3quran",
+   88
+  ]
+ },
+ "hawashi": {
+  "aligned_share": 0.86,
+  "base": "https://server11.mp3quran.net/hawashi",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "2:3",
+   "3:190",
+   "3:191",
+   "3:192",
+   "3:197",
+   "3:199",
+   "3:200",
+   "7:1",
+   "7:2",
+   "12:1",
+   "18:1",
+   "18:5",
+   "19:2",
+   "19:14",
+   "33:44",
+   "48:29",
+   "55:9",
+   "55:20",
+   "67:12",
+   "67:21",
+   "78:1",
+   "78:2",
+   "78:5",
+   "89:2",
+   "89:4",
+   "89:5",
+   "89:6",
+   "89:7",
+   "89:8",
+   "89:13",
+   "97:5",
+   "114:1"
+  ],
+  "name": "Ahmad Al-Hawashi",
+  "pace": 0.985,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.24,
+  "source": "surah https://server11.mp3quran.net/hawashi SSS mp3quran 6",
+  "timing": [
+   "mp3quran",
+   6
+  ]
+ },
+ "hudhaify": {
+  "base": "https://everyayah.com/data/Hudhaify_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Ali Al-Hudhaify",
+  "pace": 1.292,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Hudhaify_128kbps"
+ },
+ "husary": {
+  "base": "https://everyayah.com/data/Husary_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Mahmoud Al-Husary",
+  "pace": 1.871,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Husary_128kbps"
+ },
+ "husary_mujawwad": {
+  "base": "https://everyayah.com/data/Husary_128kbps_Mujawwad",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    40,
+    24000
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "low_files": [
+   "16:115 at 40 kbps"
+  ],
+  "name": "Al-Husary · Mujawwad",
+  "pace": 2.705,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Husary_128kbps_Mujawwad"
+ },
+ "ibrahim_dosari": {
+  "aligned_share": 0.969,
+  "base": "https://server10.mp3quran.net/ibrahim_dosri/Rewayat-Hafs-A-n-Assem",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    44100
+   ],
+   [
+    128,
+    44100
+   ],
+   [
+    160,
+    44100
+   ],
+   [
+    256,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "2:1",
+   "7:2",
+   "19:2",
+   "36:2",
+   "112:2",
+   "112:3",
+   "112:4"
+  ],
+  "name": "Ibrahim Al-Dosari",
+  "pace": 1.403,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.338,
+  "source": "surah https://server10.mp3quran.net/ibrahim_dosri/Rewayat-Hafs-A-n-Assem SSS mp3quran 232",
+  "timing": [
+   "mp3quran",
+   232
+  ]
+ },
+ "jaber": {
+  "base": "https://everyayah.com/data/Ali_Jaber_64kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    64,
+    22050
+   ]
+  ],
+  "kbps": 64,
+  "kind": "ayah",
+  "name": "Ali Jaber",
+  "pace": 1.128,
+  "problems": [],
+  "rate": 22050,
+  "source": "ayah https://everyayah.com/data/Ali_Jaber_64kbps"
+ },
+ "jaleel": {
+  "aligned_share": 0.811,
+  "base": "https://server10.mp3quran.net/jleel",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    192,
+    44100
+   ],
+   [
+    192,
+    48000
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:3",
+   "1:4",
+   "1:5",
+   "1:6",
+   "2:4",
+   "2:286",
+   "7:2",
+   "19:2",
+   "19:15",
+   "36:2",
+   "36:4",
+   "36:16",
+   "55:3",
+   "55:4",
+   "55:18",
+   "59:20",
+   "59:22",
+   "59:24",
+   "67:8",
+   "67:14",
+   "67:21",
+   "67:28",
+   "78:2",
+   "78:5",
+   "78:8",
+   "78:16",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:11",
+   "89:15",
+   "97:2",
+   "97:3",
+   "97:4",
+   "97:5",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Khalid Al-Jaleel",
+  "pace": 0.992,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.232,
+  "source": "surah https://server10.mp3quran.net/jleel SSS mp3quran 20",
+  "timing": [
+   "mp3quran",
+   20
+  ],
+  "warnings": [
+   "alignment: a breath at 81% of 228 boundaries; taken below the gate: most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time; mp3quran's table and Quran.com's word-level one agree to a median 50-170 ms in 11 of 14 sampled surahs"
+  ]
+ },
+ "jibreel": {
+  "base": "https://everyayah.com/data/Muhammad_Jibreel_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Muhammad Jibreel",
+  "pace": 1.176,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Muhammad_Jibreel_128kbps"
+ },
+ "kanakri": {
+  "aligned_share": 0.987,
+  "base": "https://server6.mp3quran.net/kanakeri",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "7:2",
+   "19:2",
+   "36:2"
+  ],
+  "name": "Abdulhadi Kanakri",
+  "pace": 1.206,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.145,
+  "source": "surah https://server6.mp3quran.net/kanakeri SSS mp3quran 70",
+  "timing": [
+   "mp3quran",
+   70
+  ]
+ },
+ "khalaf": {
+  "aligned_share": 0.86,
+  "base": "https://server14.mp3quran.net/khalf",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    192,
+    44100
+   ],
+   [
+    192,
+    48000
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:3",
+   "1:4",
+   "1:5",
+   "1:6",
+   "1:7",
+   "7:2",
+   "18:107",
+   "18:108",
+   "18:109",
+   "19:2",
+   "24:37",
+   "36:2",
+   "36:11",
+   "36:17",
+   "55:4",
+   "78:11",
+   "89:2",
+   "89:4",
+   "89:11",
+   "89:13",
+   "97:2",
+   "97:3",
+   "97:4",
+   "97:5",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Abdullah Al-Khalaf",
+  "pace": 0.968,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.136,
+  "source": "surah https://server14.mp3quran.net/khalf SSS mp3quran 244",
+  "timing": [
+   "mp3quran",
+   244
+  ]
+ },
+ "khayyat": {
+  "aligned_share": 0.775,
+  "base": "https://server12.mp3quran.net/kyat",
+  "basmala_in_verse1": 0,
+  "boundaries": 227,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    22050
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "2:1",
+   "2:2",
+   "7:1",
+   "7:2",
+   "12:9",
+   "12:10",
+   "18:2",
+   "18:3",
+   "18:5",
+   "19:2",
+   "19:3",
+   "24:35",
+   "24:37",
+   "36:1",
+   "36:2",
+   "36:4",
+   "36:6",
+   "36:17",
+   "55:2",
+   "55:4",
+   "55:6",
+   "55:8",
+   "55:15",
+   "55:20",
+   "67:1",
+   "78:3",
+   "78:5",
+   "78:7",
+   "78:9",
+   "78:11",
+   "78:13",
+   "78:16",
+   "78:18",
+   "78:20",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:5",
+   "89:7",
+   "89:10",
+   "89:11",
+   "89:13",
+   "89:14",
+   "97:2",
+   "97:4",
+   "97:5",
+   "112:4",
+   "114:2",
+   "114:3",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Abdullah Khayyat",
+  "pace": 0.852,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.289,
+  "source": "surah https://server12.mp3quran.net/kyat SSS mp3quran 61",
+  "timing": [
+   "mp3quran",
+   61
+  ],
+  "warnings": [
+   "alignment: a breath at 78% of 227 boundaries; taken below the gate: a clean recording (41 dB from silence to speech); 36 of 51 misses have no pause within 2 s — verses joined in one breath"
+  ]
+ },
+ "luhaidan": {
+  "aligned_share": 0.904,
+  "base": "https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "broken": [],
+  "checked": "2026-10-24",
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:3",
+   "1:4",
+   "1:5",
+   "1:6",
+   "1:7",
+   "18:109",
+   "24:37",
+   "55:20",
+   "97:2",
+   "97:3",
+   "97:4",
+   "97:5",
+   "112:1",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:1",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Mohammed Al-Luhaidan",
+  "pace": 1.098,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.07,
+  "source": "surah https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1 SSS own luhaidan afdef534ccfe",
+  "timing": [
+   "own",
+   "luhaidan"
+  ]
+ },
+ "majed": {
+  "aligned_share": 0.912,
+  "base": "https://server10.mp3quran.net/a_majed",
+  "basmala_in_verse1": 1,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:3",
+   "1:4",
+   "1:7",
+   "7:2",
+   "19:2",
+   "24:37",
+   "33:42",
+   "36:2",
+   "89:8",
+   "97:3",
+   "112:1",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:1",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Abdulrahman Al-Majed",
+  "pace": 1.031,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.107,
+  "source": "surah https://server10.mp3quran.net/a_majed SSS mp3quran 236",
+  "timing": [
+   "mp3quran",
+   236
+  ]
+ },
+ "masrawi": {
+  "aligned_share": 0.982,
+  "base": "https://server16.mp3quran.net/a_maasaraawi/Rewayat-Hafs-A-n-Assem",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    22050
+   ],
+   [
+    128,
+    44100
+   ],
+   [
+    128,
+    48000
+   ],
+   [
+    160,
+    48000
+   ],
+   [
+    256,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "7:2",
+   "19:2",
+   "36:2",
+   "48:28"
+  ],
+  "name": "Ahmad Issa Al-Masrawi",
+  "pace": 1.182,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.101,
+  "source": "surah https://server16.mp3quran.net/a_maasaraawi/Rewayat-Hafs-A-n-Assem SSS mp3quran 289",
+  "timing": [
+   "mp3quran",
+   289
+  ]
+ },
+ "matrood": {
+  "base": "https://everyayah.com/data/Abdullah_Matroud_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    22050
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Abdullah Al-Matrood",
+  "pace": 1.219,
+  "problems": [],
+  "rate": 22050,
+  "source": "ayah https://everyayah.com/data/Abdullah_Matroud_128kbps"
+ },
+ "minshawi": {
+  "base": "https://everyayah.com/data/Minshawy_Murattal_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Al-Minshawi",
+  "pace": 1.272,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Minshawy_Murattal_128kbps"
+ },
+ "minshawi_mujawwad": {
+  "base": "https://everyayah.com/data/Minshawy_Mujawwad_192kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Al-Minshawi · Mujawwad",
+  "pace": 2.485,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Minshawy_Mujawwad_192kbps"
+ },
+ "mohammadi": {
+  "aligned_share": 0.939,
+  "base": "https://server16.mp3quran.net/kh_mohammadi/Rewayat-Hafs-A-n-Assem",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    24000
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:3",
+   "1:4",
+   "1:6",
+   "1:7",
+   "19:2",
+   "36:2",
+   "36:6",
+   "55:4",
+   "89:2",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:2",
+   "114:6"
+  ],
+  "name": "Khalid Mohammadi",
+  "pace": 1.17,
+  "problems": [],
+  "rate": 24000,
+  "shifted_share": 0.07,
+  "source": "surah https://server16.mp3quran.net/kh_mohammadi/Rewayat-Hafs-A-n-Assem SSS mp3quran 295",
+  "timing": [
+   "mp3quran",
+   295
+  ]
+ },
+ "mohana": {
+  "aligned_share": 0.925,
+  "base": "https://server11.mp3quran.net/mohna",
+  "basmala_in_verse1": 0,
+  "boundaries": 227,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    48,
+    22050
+   ]
+  ],
+  "kbps": 48,
+  "kind": "surah",
+  "missed": [
+   "2:285",
+   "2:286",
+   "36:20",
+   "67:17",
+   "67:18",
+   "67:19",
+   "67:20",
+   "67:21",
+   "67:22",
+   "67:23",
+   "67:24",
+   "67:25",
+   "67:26",
+   "67:27",
+   "67:28",
+   "67:29",
+   "67:30"
+  ],
+  "name": "Khalid Al-Mohana",
+  "pace": 1.292,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.228,
+  "source": "surah https://server11.mp3quran.net/mohna SSS mp3quran 159",
+  "timing": [
+   "mp3quran",
+   159
+  ],
+  "warnings": [
+   "quality: 48 kbps at 22050 Hz — sound quality below the bar; the user chose to have the voice"
+  ]
+ },
+ "mousa": {
+  "aligned_share": 0.884,
+  "base": "https://server14.mp3quran.net/mousa/Rewayat-Hafs-A-n-Assem",
+  "basmala_folded": [
+   3,
+   7,
+   13,
+   19,
+   24,
+   26,
+   28,
+   30,
+   60
+  ],
+  "basmala_in_verse1": 9,
+  "boundaries": 225,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    22050
+   ],
+   [
+    96,
+    44100
+   ],
+   [
+    96,
+    48000
+   ],
+   [
+    128,
+    44100
+   ],
+   [
+    128,
+    48000
+   ],
+   [
+    160,
+    44100
+   ],
+   [
+    192,
+    44100
+   ],
+   [
+    256,
+    44100
+   ],
+   [
+    256,
+    48000
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:1",
+   "1:7",
+   "2:253",
+   "2:256",
+   "2:282",
+   "3:199",
+   "7:2",
+   "18:4",
+   "18:108",
+   "19:2",
+   "24:36",
+   "33:43",
+   "36:2",
+   "78:18",
+   "78:20",
+   "89:9",
+   "89:10",
+   "89:13",
+   "89:14",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:2",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Abdullah Al-Mousa",
+  "pace": 1.125,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.157,
+  "source": "surah https://server14.mp3quran.net/mousa/Rewayat-Hafs-A-n-Assem SSS mp3quran 243",
+  "timing": [
+   "mp3quran",
+   243
+  ],
+  "warnings": [
+   "basmala: folded into verse 1 in 9 surahs, e.g. [3, 7, 13, 19, 24, 26] — a verse-1 reel there may open with the basmala"
+  ]
+ },
+ "muaiqly": {
+  "base": "https://everyayah.com/data/MaherAlMuaiqly128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    203,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Maher Al-Muaiqly",
+  "pace": 0.88,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/MaherAlMuaiqly128kbps"
+ },
+ "muaiqly_mujawwad": {
+  "aligned_share": 0.987,
+  "base": "https://server12.mp3quran.net/maher/Almusshaf-Al-Mojawwad",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "7:2",
+   "19:2",
+   "36:2"
+  ],
+  "name": "Al-Muaiqly · Mujawwad",
+  "pace": 1.407,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.868,
+  "source": "surah https://server12.mp3quran.net/maher/Almusshaf-Al-Mojawwad SSS mp3quran 133",
+  "timing": [
+   "mp3quran",
+   133
+  ],
+  "warnings": [
+   "alignment: shifted tables score 87% — this audio has pauses everywhere, so its table cannot be checked — pauses so often that even a shifted table lands in them, so this check cannot tell; in place, nearly every boundary does"
+  ]
+ },
+ "mustafa_ismail": {
+  "base": "https://quran.ksu.edu.sa/ayat/mp3/Mostafa_Ismail_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 6236,
+  "formats": [
+   [
+    128,
+    22050
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Mustafa Ismail",
+  "pace": 1.243,
+  "problems": [],
+  "rate": 22050,
+  "source": "ayah https://quran.ksu.edu.sa/ayat/mp3/Mostafa_Ismail_128kbps"
+ },
+ "mustafa_ismail_mujawwad": {
+  "aligned_share": 0.785,
+  "base": "https://server8.mp3quran.net/mustafa/Almusshaf-Al-Mojawwad",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    16000
+   ],
+   [
+    96,
+    22050
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:3",
+   "1:4",
+   "2:1",
+   "2:282",
+   "3:197",
+   "7:1",
+   "7:2",
+   "7:7",
+   "12:1",
+   "12:9",
+   "18:4",
+   "19:10",
+   "33:44",
+   "36:4",
+   "36:5",
+   "36:14",
+   "48:29",
+   "55:2",
+   "55:13",
+   "55:18",
+   "67:9",
+   "67:16",
+   "67:29",
+   "78:2",
+   "78:3",
+   "78:5",
+   "78:7",
+   "78:8",
+   "78:10",
+   "78:11",
+   "78:14",
+   "78:16",
+   "78:18",
+   "78:20",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:5",
+   "89:8",
+   "89:10",
+   "89:11",
+   "89:13",
+   "89:14",
+   "97:1",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:1",
+   "114:6"
+  ],
+  "name": "Mustafa Ismail · Mujawwad",
+  "pace": 3.367,
+  "problems": [],
+  "rate": 16000,
+  "shifted_share": 0.781,
+  "source": "surah https://server8.mp3quran.net/mustafa/Almusshaf-Al-Mojawwad SSS mp3quran 288",
+  "timing": [
+   "mp3quran",
+   288
+  ],
+  "warnings": [
+   "quality: 96 kbps at 16000 Hz — pauses so often that even a shifted table lands in them, so this check cannot tell; in place, nearly every boundary does; most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time; sound quality below the bar; the user chose to have the voice",
+   "alignment: a breath at 78% of 228 boundaries — pauses so often that even a shifted table lands in them, so this check cannot tell; in place, nearly every boundary does; most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time; sound quality below the bar; the user chose to have the voice",
+   "alignment: shifted tables score 78% — this audio has pauses everywhere, so its table cannot be checked — pauses so often that even a shifted table lands in them, so this check cannot tell; in place, nearly every boundary does; most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time; sound quality below the bar; the user chose to have the voice"
+  ]
+ },
+ "nabil_rifai": {
+  "aligned_share": 0.868,
+  "base": "https://server9.mp3quran.net/nabil",
+  "basmala_in_verse1": 0,
+  "boundaries": 227,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    160,
+    44100
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 160,
+  "kind": "surah",
+  "missed": [
+   "1:3",
+   "1:4",
+   "1:7",
+   "2:2",
+   "2:253",
+   "7:2",
+   "18:4",
+   "19:2",
+   "36:2",
+   "36:4",
+   "36:6",
+   "55:2",
+   "55:3",
+   "55:4",
+   "55:11",
+   "55:20",
+   "78:3",
+   "78:5",
+   "78:7",
+   "78:9",
+   "78:11",
+   "78:16",
+   "89:2",
+   "89:3",
+   "89:11",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Nabil Ar-Rifai",
+  "pace": 1.06,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.119,
+  "source": "surah https://server9.mp3quran.net/nabil SSS mp3quran 87 missing 27",
+  "timing": [
+   "mp3quran",
+   87
+  ]
+ },
+ "neana": {
+  "base": "https://everyayah.com/data/Ahmed_Neana_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Ahmed Neana",
+  "pace": 1.359,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Ahmed_Neana_128kbps"
+ },
+ "noah": {
+  "aligned_share": 0.803,
+  "base": "https://server8.mp3quran.net/noah",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    44100
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:3",
+   "1:4",
+   "2:255",
+   "2:283",
+   "2:284",
+   "3:190",
+   "3:191",
+   "3:192",
+   "3:193",
+   "3:194",
+   "3:195",
+   "3:196",
+   "3:197",
+   "3:198",
+   "3:199",
+   "3:200",
+   "7:2",
+   "18:4",
+   "18:6",
+   "18:107",
+   "18:110",
+   "19:2",
+   "33:42",
+   "33:44",
+   "36:2",
+   "36:4",
+   "55:2",
+   "55:3",
+   "55:4",
+   "55:6",
+   "55:8",
+   "55:13",
+   "55:18",
+   "55:20",
+   "78:7",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:8",
+   "89:12",
+   "112:2",
+   "112:3",
+   "114:2",
+   "114:3",
+   "114:5"
+  ],
+  "name": "Yousef Bin Noah Ahmad",
+  "pace": 0.958,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.096,
+  "source": "surah https://server8.mp3quran.net/noah SSS mp3quran 193",
+  "timing": [
+   "mp3quran",
+   193
+  ],
+  "warnings": [
+   "alignment: a breath at 80% of 228 boundaries — most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time, with some nearby"
+  ]
+ },
+ "nufais": {
+  "base": "https://audio-cdn.tarteel.ai/quran/alnufais",
+  "checked": "2026-09-29",
+  "files_checked": 6236,
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Ahmad Al-Nufais",
+  "pace": 1.408,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://audio-cdn.tarteel.ai/quran/alnufais"
+ },
+ "obaikan": {
+  "aligned_share": 0.784,
+  "base": "https://server12.mp3quran.net/obk",
+  "basmala_in_verse1": 1,
+  "boundaries": 227,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:5",
+   "1:7",
+   "3:197",
+   "7:2",
+   "18:4",
+   "19:2",
+   "33:40",
+   "33:42",
+   "36:4",
+   "55:2",
+   "55:3",
+   "55:4",
+   "55:6",
+   "55:8",
+   "55:10",
+   "55:12",
+   "55:13",
+   "55:15",
+   "55:17",
+   "55:18",
+   "55:20",
+   "78:3",
+   "78:5",
+   "78:7",
+   "78:8",
+   "78:11",
+   "78:14",
+   "78:16",
+   "78:18",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:5",
+   "89:8",
+   "89:10",
+   "89:11",
+   "89:14",
+   "97:2",
+   "97:3",
+   "97:4",
+   "97:5",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Abdulmohsin Al-Obaikan",
+  "pace": 0.83,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.132,
+  "source": "surah https://server12.mp3quran.net/obk SSS mp3quran 69",
+  "timing": [
+   "mp3quran",
+   69
+  ],
+  "warnings": [
+   "alignment: a breath at 78% of 227 boundaries — most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time"
+  ]
+ },
+ "osaimi": {
+  "aligned_share": 0.864,
+  "base": "https://server6.mp3quran.net/jaman",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    22050
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:6",
+   "7:2",
+   "12:1",
+   "18:107",
+   "18:110",
+   "19:2",
+   "24:37",
+   "36:2",
+   "48:27",
+   "59:24",
+   "78:2",
+   "78:5",
+   "78:11",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:8",
+   "89:11",
+   "97:1",
+   "97:2",
+   "97:3",
+   "97:4",
+   "97:5",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Jamaan Al-Osaimi",
+  "pace": 1.025,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.14,
+  "source": "surah https://server6.mp3quran.net/jaman SSS mp3quran 181",
+  "timing": [
+   "mp3quran",
+   181
+  ]
+ },
+ "peshawa": {
+  "aligned_share": 0.894,
+  "base": "https://server16.mp3quran.net/peshawa/Rewayat-Hafs-A-n-Assem",
+  "basmala_in_verse1": 0,
+  "boundaries": 227,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    192,
+    44100
+   ],
+   [
+    256,
+    48000
+   ],
+   [
+    320,
+    48000
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:4",
+   "1:7",
+   "2:1",
+   "3:196",
+   "7:2",
+   "12:1",
+   "12:7",
+   "19:2",
+   "19:6",
+   "36:2",
+   "36:4",
+   "36:7",
+   "55:4",
+   "59:24",
+   "78:2",
+   "78:11",
+   "78:18",
+   "89:2",
+   "89:3",
+   "89:4",
+   "97:2",
+   "97:3",
+   "97:4",
+   "97:5"
+  ],
+  "name": "Peshawa Qadr Al-Kurdi",
+  "pace": 1.081,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.093,
+  "source": "surah https://server16.mp3quran.net/peshawa/Rewayat-Hafs-A-n-Assem SSS mp3quran 268 missing 63",
+  "timing": [
+   "mp3quran",
+   268
+  ]
+ },
+ "qahtani": {
+  "base": "https://everyayah.com/data/Khaalid_Abdullaah_al-Qahtaanee_192kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Khalid Al-Qahtani",
+  "pace": 1.195,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Khaalid_Abdullaah_al-Qahtaanee_192kbps"
+ },
+ "qari": {
+  "aligned_share": 0.802,
+  "base": "https://server8.mp3quran.net/m_qari",
+  "basmala_in_verse1": 1,
+  "boundaries": 227,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    128,
+    48000
+   ],
+   [
+    160,
+    44100
+   ],
+   [
+    160,
+    48000
+   ],
+   [
+    192,
+    44100
+   ],
+   [
+    192,
+    48000
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:4",
+   "1:5",
+   "2:1",
+   "2:2",
+   "2:3",
+   "2:253",
+   "2:257",
+   "3:193",
+   "3:195",
+   "3:199",
+   "7:2",
+   "18:4",
+   "19:2",
+   "19:15",
+   "24:37",
+   "33:42",
+   "36:2",
+   "36:3",
+   "36:4",
+   "36:5",
+   "36:16",
+   "55:4",
+   "55:6",
+   "55:9",
+   "55:18",
+   "55:20",
+   "67:6",
+   "78:1",
+   "78:5",
+   "78:7",
+   "89:5",
+   "89:7",
+   "89:8",
+   "89:9",
+   "89:11",
+   "89:12",
+   "89:14",
+   "97:3",
+   "97:4",
+   "97:5",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:2",
+   "114:4"
+  ],
+  "name": "Mohammad Khalil Al-Qari",
+  "pace": 1.064,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.175,
+  "source": "surah https://server8.mp3quran.net/m_qari SSS mp3quran 229",
+  "timing": [
+   "mp3quran",
+   229
+  ],
+  "warnings": [
+   "alignment: a breath at 80% of 227 boundaries — most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time, with some nearby"
+  ]
+ },
+ "qasim": {
+  "base": "https://everyayah.com/data/Muhsin_Al_Qasim_192kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    32,
+    11025
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 192,
+  "kind": "ayah",
+  "low_files": [
+   "10:32 at 32 kbps"
+  ],
+  "name": "Muhsin Al-Qasim",
+  "pace": 0.896,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Muhsin_Al_Qasim_192kbps"
+ },
+ "qatami": {
+  "base": "https://everyayah.com/data/Nasser_Alqatami_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    96,
+    44100
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "ayah",
+  "name": "Nasser Al-Qatami",
+  "pace": 1.191,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Nasser_Alqatami_128kbps"
+ },
+ "raad_kurdi": {
+  "aligned_share": 0.833,
+  "base": "https://server6.mp3quran.net/kurdi",
+  "basmala_in_verse1": 3,
+  "boundaries": 227,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    44100
+   ],
+   [
+    128,
+    44100
+   ],
+   [
+    128,
+    48000
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:4",
+   "1:5",
+   "1:7",
+   "2:1",
+   "7:1",
+   "7:2",
+   "12:1",
+   "19:2",
+   "36:4",
+   "36:17",
+   "55:2",
+   "55:3",
+   "55:4",
+   "55:5",
+   "55:7",
+   "55:11",
+   "55:13",
+   "55:18",
+   "55:20",
+   "78:3",
+   "78:5",
+   "78:7",
+   "78:9",
+   "78:11",
+   "78:16",
+   "78:19",
+   "89:2",
+   "89:3",
+   "89:5",
+   "89:11",
+   "97:2",
+   "97:5",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:2",
+   "114:3",
+   "114:6"
+  ],
+  "name": "Raad Al-Kurdi",
+  "pace": 1.398,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.083,
+  "source": "surah https://server6.mp3quran.net/kurdi SSS mp3quran 221 missing 23",
+  "timing": [
+   "mp3quran",
+   221
+  ],
+  "warnings": [
+   "alignment: a breath at 83% of 227 boundaries — most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time"
+  ]
+ },
+ "rashad": {
+  "aligned_share": 0.86,
+  "base": "https://server10.mp3quran.net/rashad",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "2:1",
+   "7:1",
+   "7:2",
+   "12:1",
+   "18:3",
+   "19:1",
+   "19:2",
+   "19:3",
+   "19:7",
+   "33:42",
+   "36:2",
+   "36:3",
+   "36:4",
+   "36:17",
+   "55:2",
+   "55:3",
+   "55:4",
+   "55:6",
+   "55:9",
+   "55:15",
+   "55:18",
+   "55:20",
+   "78:11",
+   "78:15",
+   "78:16",
+   "78:20",
+   "89:11",
+   "97:1",
+   "112:1",
+   "114:2",
+   "114:3",
+   "114:5"
+  ],
+  "name": "Mohammad Rashad Al-Sharif",
+  "pace": 1.302,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.658,
+  "source": "surah https://server10.mp3quran.net/rashad SSS mp3quran 198",
+  "timing": [
+   "mp3quran",
+   198
+  ],
+  "warnings": [
+   "alignment: shifted tables score 66% — this audio has pauses everywhere, so its table cannot be checked — pauses so often that even a shifted table lands in them, so this check cannot tell; in place, nearly every boundary does; most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time"
+  ]
+ },
+ "rayan": {
+  "aligned_share": 0.846,
+  "base": "https://server8.mp3quran.net/ryan",
+  "basmala_in_verse1": 1,
+  "boundaries": 227,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    22050
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:4",
+   "2:256",
+   "3:194",
+   "3:197",
+   "3:199",
+   "7:2",
+   "19:2",
+   "24:37",
+   "33:42",
+   "36:2",
+   "55:4",
+   "55:13",
+   "55:20",
+   "78:3",
+   "78:5",
+   "78:7",
+   "78:8",
+   "78:10",
+   "78:11",
+   "78:15",
+   "78:16",
+   "89:2",
+   "89:3",
+   "89:7",
+   "89:8",
+   "89:10",
+   "89:11",
+   "89:12",
+   "89:14",
+   "97:1",
+   "97:3",
+   "97:5",
+   "112:3",
+   "112:4",
+   "114:3"
+  ],
+  "name": "Adel Rayan",
+  "pace": 1.088,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.135,
+  "source": "surah https://server8.mp3quran.net/ryan SSS mp3quran 48",
+  "timing": [
+   "mp3quran",
+   48
+  ],
+  "warnings": [
+   "alignment: a breath at 85% of 227 boundaries — most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time"
+  ]
+ },
+ "rifai": {
+  "base": "https://everyayah.com/data/Hani_Rifai_192kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    64,
+    44100
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 64,
+  "kind": "ayah",
+  "name": "Hani Ar-Rifai",
+  "pace": 1.107,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Hani_Rifai_192kbps"
+ },
+ "saber": {
+  "aligned_share": 0.873,
+  "base": "https://server8.mp3quran.net/saber",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    64,
+    11025
+   ],
+   [
+    128,
+    44100
+   ],
+   [
+    160,
+    48000
+   ]
+  ],
+  "kbps": 64,
+  "kind": "surah",
+  "missed": [
+   "1:5",
+   "1:6",
+   "7:2",
+   "18:4",
+   "18:110",
+   "19:2",
+   "19:12",
+   "19:13",
+   "19:15",
+   "36:2",
+   "36:10",
+   "55:3",
+   "55:9",
+   "55:11",
+   "55:16",
+   "55:18",
+   "55:20",
+   "78:2",
+   "78:3",
+   "78:5",
+   "78:7",
+   "78:8",
+   "78:10",
+   "78:11",
+   "78:13",
+   "78:15",
+   "78:17",
+   "112:4",
+   "114:6"
+  ],
+  "name": "Ahmad Saber",
+  "pace": 1.137,
+  "problems": [],
+  "rate": 11025,
+  "shifted_share": 0.145,
+  "source": "surah https://server8.mp3quran.net/saber SSS mp3quran 8",
+  "timing": [
+   "mp3quran",
+   8
+  ],
+  "warnings": [
+   "quality: 64 kbps at 11025 Hz — sound quality below the bar; the user chose to have the voice"
+  ]
+ },
+ "sahl_yassin": {
+  "base": "https://everyayah.com/data/Sahl_Yassin_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Sahl Yassin",
+  "pace": 1.113,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Sahl_Yassin_128kbps"
+ },
+ "sahood": {
+  "aligned_share": 0.969,
+  "base": "https://server8.mp3quran.net/sahood",
+  "basmala_in_verse1": 1,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:3",
+   "19:2",
+   "36:2",
+   "89:2",
+   "89:3",
+   "89:4",
+   "114:3"
+  ],
+  "name": "Saleh Al-Sahood",
+  "pace": 1.165,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.189,
+  "source": "surah https://server8.mp3quran.net/sahood SSS mp3quran 40",
+  "timing": [
+   "mp3quran",
+   40
+  ]
+ },
+ "salamah": {
+  "base": "https://everyayah.com/data/Yaser_Salamah_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    128,
+    48000
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Yaser Salamah",
+  "pace": 1.179,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Yaser_Salamah_128kbps"
+ },
+ "salimi": {
+  "aligned_share": 0.904,
+  "base": "https://server14.mp3quran.net/mansor",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    256,
+    44100
+   ]
+  ],
+  "kbps": 256,
+  "kind": "surah",
+  "missed": [
+   "1:2",
+   "1:3",
+   "1:4",
+   "1:5",
+   "1:6",
+   "1:7",
+   "7:2",
+   "19:2",
+   "55:4",
+   "78:5",
+   "97:2",
+   "97:3",
+   "97:4",
+   "97:5",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:1",
+   "114:2",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Mansour Al-Salimi",
+  "pace": 1.265,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.066,
+  "source": "surah https://server14.mp3quran.net/mansor SSS mp3quran 245",
+  "timing": [
+   "mp3quran",
+   245
+  ]
+ },
+ "sanankoua": {
+  "aligned_share": 0.838,
+  "base": "https://server16.mp3quran.net/i_sanankoua/Rewayat-Hafs-A-n-Assem",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    44100
+   ],
+   [
+    128,
+    44100
+   ],
+   [
+    128,
+    48000
+   ],
+   [
+    160,
+    44100
+   ],
+   [
+    192,
+    44100
+   ],
+   [
+    320,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:2",
+   "1:4",
+   "1:5",
+   "1:6",
+   "1:7",
+   "3:197",
+   "7:2",
+   "18:109",
+   "19:2",
+   "33:44",
+   "33:45",
+   "36:2",
+   "36:4",
+   "55:4",
+   "55:20",
+   "59:23",
+   "67:5",
+   "67:6",
+   "67:11",
+   "67:14",
+   "67:19",
+   "67:22",
+   "67:24",
+   "67:25",
+   "67:28",
+   "78:3",
+   "78:5",
+   "78:6",
+   "78:8",
+   "78:10",
+   "78:15",
+   "78:16",
+   "112:2",
+   "112:3",
+   "114:2",
+   "114:3",
+   "114:5"
+  ],
+  "name": "Issa Omar Sanankoua",
+  "pace": 1.127,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.145,
+  "source": "surah https://server16.mp3quran.net/i_sanankoua/Rewayat-Hafs-A-n-Assem SSS mp3quran 303",
+  "timing": [
+   "mp3quran",
+   303
+  ],
+  "warnings": [
+   "alignment: a breath at 84% of 228 boundaries — most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time"
+  ]
+ },
+ "sayegh": {
+  "aligned_share": 0.816,
+  "base": "https://server6.mp3quran.net/twfeeq",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    44100
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "1:3",
+   "1:4",
+   "1:5",
+   "3:191",
+   "7:2",
+   "18:5",
+   "19:2",
+   "19:6",
+   "19:7",
+   "19:10",
+   "19:12",
+   "19:14",
+   "24:37",
+   "33:44",
+   "36:2",
+   "36:4",
+   "36:17",
+   "55:4",
+   "55:6",
+   "55:7",
+   "55:9",
+   "55:20",
+   "78:4",
+   "78:5",
+   "78:9",
+   "78:11",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:5",
+   "89:9",
+   "89:11",
+   "89:12",
+   "89:13",
+   "97:3",
+   "112:2",
+   "112:3",
+   "112:4",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Tawfeeq As-Sayegh",
+  "pace": 1.107,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.166,
+  "source": "surah https://server6.mp3quran.net/twfeeq SSS mp3quran 17",
+  "timing": [
+   "mp3quran",
+   17
+  ],
+  "warnings": [
+   "alignment: a breath at 82% of 228 boundaries — most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time"
+  ]
+ },
+ "shaheen": {
+  "aligned_share": 0.961,
+  "base": "https://server16.mp3quran.net/shaheen/Rewayat-Hafs-A-n-Assem",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "2:2",
+   "7:2",
+   "19:2",
+   "36:2",
+   "112:4",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Ahmad Shaheen",
+  "pace": 1.249,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.316,
+  "source": "surah https://server16.mp3quran.net/shaheen/Rewayat-Hafs-A-n-Assem SSS mp3quran 256",
+  "timing": [
+   "mp3quran",
+   256
+  ]
+ },
+ "shamrani": {
+  "aligned_share": 0.943,
+  "base": "https://server16.mp3quran.net/shamrani/Rewayat-Hafs-A-n-Assem",
+  "basmala_in_verse1": 0,
+  "boundaries": 227,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    22050
+   ],
+   [
+    96,
+    44100
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "7:2",
+   "12:1",
+   "12:8",
+   "19:2",
+   "24:37",
+   "36:2",
+   "36:4",
+   "55:4",
+   "55:15",
+   "55:20",
+   "78:1",
+   "89:5",
+   "89:8"
+  ],
+  "name": "Saleh Al-Shamrani",
+  "pace": 0.996,
+  "problems": [],
+  "rate": 22050,
+  "shifted_share": 0.145,
+  "source": "surah https://server16.mp3quran.net/shamrani/Rewayat-Hafs-A-n-Assem SSS mp3quran 300",
+  "timing": [
+   "mp3quran",
+   300
+  ]
+ },
+ "shatri": {
+  "base": "https://everyayah.com/data/Abu_Bakr_Ash-Shaatree_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    24,
+    11025
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "low_files": [
+   "10:32 at 24 kbps"
+  ],
+  "name": "Abu Bakr Ash-Shatri",
+  "pace": 1.194,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Abu_Bakr_Ash-Shaatree_128kbps"
+ },
+ "shuraym": {
+  "base": "https://everyayah.com/data/Saood_ash-Shuraym_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Saud Ash-Shuraym",
+  "pace": 0.796,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Saood_ash-Shuraym_128kbps"
+ },
+ "soufi": {
+  "aligned_share": 0.987,
+  "base": "https://server16.mp3quran.net/soufi/Rewayat-Hafs-A-n-Assem",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "7:2",
+   "19:2",
+   "36:2"
+  ],
+  "name": "Abdulrasheed Soufi",
+  "pace": 1.059,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.127,
+  "source": "surah https://server16.mp3quran.net/soufi/Rewayat-Hafs-A-n-Assem SSS mp3quran 258",
+  "timing": [
+   "mp3quran",
+   258
+  ]
+ },
+ "sowaid": {
+  "base": "https://everyayah.com/data/Ayman_Sowaid_64kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    64,
+    24000
+   ]
+  ],
+  "kbps": 64,
+  "kind": "ayah",
+  "name": "Ayman Sowaid",
+  "pace": 1.834,
+  "problems": [],
+  "rate": 24000,
+  "source": "ayah https://everyayah.com/data/Ayman_Sowaid_64kbps"
+ },
+ "sudais": {
+  "base": "https://everyayah.com/data/Abdurrahmaan_As-Sudais_192kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Abdur-Rahman As-Sudais",
+  "pace": 0.938,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Abdurrahmaan_As-Sudais_192kbps"
+ },
+ "suesy": {
+  "base": "https://everyayah.com/data/Ali_Hajjaj_AlSuesy_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    32,
+    11025
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "low_files": [
+   "67:30 at 32 kbps"
+  ],
+  "name": "Ali Hajjaj Al-Suesy",
+  "pace": 1.417,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Ali_Hajjaj_AlSuesy_128kbps"
+ },
+ "tablawi": {
+  "base": "https://everyayah.com/data/Mohammad_al_Tablaway_128kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "ayah",
+  "name": "Mohammad Al-Tablawi",
+  "pace": 1.293,
+  "problems": [],
+  "rate": 44100,
+  "source": "ayah https://everyayah.com/data/Mohammad_al_Tablaway_128kbps"
+ },
+ "taher": {
+  "aligned_share": 0.917,
+  "base": "https://server12.mp3quran.net/taher",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:3",
+   "1:5",
+   "3:199",
+   "7:2",
+   "19:2",
+   "24:37",
+   "36:2",
+   "55:2",
+   "55:4",
+   "55:13",
+   "67:6",
+   "78:2",
+   "78:3",
+   "78:5",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:8",
+   "89:11"
+  ],
+  "name": "Shirzad Taher",
+  "pace": 1.257,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.114,
+  "source": "surah https://server12.mp3quran.net/taher SSS mp3quran 38",
+  "timing": [
+   "mp3quran",
+   38
+  ]
+ },
+ "thubaiti": {
+  "aligned_share": 0.921,
+  "base": "https://server6.mp3quran.net/thubti",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "7:2",
+   "19:2",
+   "36:2",
+   "55:4",
+   "55:11",
+   "55:20",
+   "89:2",
+   "89:3",
+   "89:4",
+   "89:7",
+   "89:12",
+   "97:3",
+   "97:4",
+   "97:5",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6"
+  ],
+  "name": "Abdulbari Al-Thubaiti",
+  "pace": 0.857,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.145,
+  "source": "surah https://server6.mp3quran.net/thubti SSS mp3quran 49",
+  "timing": [
+   "mp3quran",
+   49
+  ]
+ },
+ "toure": {
+  "aligned_share": 0.93,
+  "base": "https://download.quranicaudio.com/qdc/hadi_toure/mp3",
+  "basmala_folded": [
+   2,
+   3,
+   4,
+   7,
+   13,
+   15,
+   19,
+   26,
+   28,
+   29,
+   30,
+   31,
+   32,
+   35,
+   60,
+   63,
+   65
+  ],
+  "basmala_in_verse1": 17,
+  "boundaries": 214,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    96,
+    48000
+   ]
+  ],
+  "kbps": 96,
+  "kind": "surah",
+  "missed": [
+   "12:9",
+   "18:107",
+   "19:8",
+   "36:4",
+   "36:12",
+   "78:2",
+   "78:3",
+   "78:5",
+   "78:7",
+   "78:8",
+   "78:10",
+   "78:11",
+   "78:13",
+   "78:15",
+   "78:20"
+  ],
+  "name": "Hady Toure",
+  "pace": 1.49,
+  "problems": [],
+  "rate": 48000,
+  "shifted_share": 0.715,
+  "source": "surah https://download.quranicaudio.com/qdc/hadi_toure/mp3 S qul 172",
+  "timing": [
+   "qul",
+   172
+  ],
+  "warnings": [
+   "basmala: folded into verse 1 in 17 surahs, e.g. [2, 3, 4, 7, 13, 15] — a verse-1 reel there may open with the basmala",
+   "alignment: shifted tables score 72% — this audio has pauses everywhere, so its table cannot be checked — pauses so often that even a shifted table lands in them, so this check cannot tell; in place, nearly every boundary does; most misses have no pause within 2 s at all: verses joined in one breath, where the app keeps the table's time"
+  ]
+ },
+ "trabulsi": {
+  "aligned_share": 0.987,
+  "base": "https://server10.mp3quran.net/trabulsi",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    256,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "7:2",
+   "19:2",
+   "112:4"
+  ],
+  "name": "Ahmad Al-Trabulsi",
+  "pace": 1.255,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.11,
+  "source": "surah https://server10.mp3quran.net/trabulsi SSS mp3quran 201",
+  "timing": [
+   "mp3quran",
+   201
+  ]
+ },
+ "tunaiji": {
+  "base": "https://everyayah.com/data/khalefa_al_tunaiji_64kbps",
+  "checked": "2026-09-29",
+  "files_checked": 63,
+  "formats": [
+   [
+    64,
+    22050
+   ],
+   [
+    64,
+    44100
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 64,
+  "kind": "ayah",
+  "name": "Khalifa Al-Tunaiji",
+  "pace": 1.196,
+  "problems": [],
+  "rate": 22050,
+  "source": "ayah https://everyayah.com/data/khalefa_al_tunaiji_64kbps"
+ },
+ "turki": {
+  "aligned_share": 0.943,
+  "base": "https://server16.mp3quran.net/a_turki/Rewayat-Hafs-A-n-Assem",
+  "basmala_in_verse1": 1,
+  "boundaries": 227,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    128,
+    48000
+   ],
+   [
+    192,
+    44100
+   ],
+   [
+    256,
+    48000
+   ],
+   [
+    320,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:2",
+   "1:5",
+   "7:2",
+   "19:2",
+   "36:2",
+   "55:19",
+   "55:20",
+   "59:23",
+   "67:15",
+   "67:24",
+   "67:25",
+   "67:26",
+   "78:3"
+  ],
+  "name": "Abdulaziz Al-Turki",
+  "pace": 1.118,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.147,
+  "source": "surah https://server16.mp3quran.net/a_turki/Rewayat-Hafs-A-n-Assem SSS mp3quran 282",
+  "timing": [
+   "mp3quran",
+   282
+  ]
+ },
+ "yamani": {
+  "aligned_share": 0.947,
+  "base": "https://server6.mp3quran.net/wdee3",
+  "basmala_in_verse1": 0,
+  "boundaries": 227,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    32000
+   ],
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:4",
+   "7:2",
+   "18:4",
+   "19:2",
+   "36:2",
+   "36:3",
+   "55:4",
+   "78:5",
+   "89:2",
+   "112:2",
+   "112:3",
+   "114:6"
+  ],
+  "name": "Wadee Al-Yamani",
+  "pace": 1.266,
+  "problems": [],
+  "rate": 32000,
+  "shifted_share": 0.126,
+  "source": "surah https://server6.mp3quran.net/wdee3 SSS mp3quran 219",
+  "timing": [
+   "mp3quran",
+   219
+  ]
+ },
+ "zahrani": {
+  "aligned_share": 0.943,
+  "base": "https://server9.mp3quran.net/zahrani",
+  "basmala_in_verse1": 0,
+  "boundaries": 228,
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "3:200",
+   "7:2",
+   "12:1",
+   "19:2",
+   "36:2",
+   "55:13",
+   "55:20",
+   "78:19",
+   "89:2",
+   "89:3",
+   "89:5",
+   "89:11",
+   "114:1"
+  ],
+  "name": "Abdulaziz Al-Zahrani",
+  "pace": 1.388,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.107,
+  "source": "surah https://server9.mp3quran.net/zahrani SSS mp3quran 56",
+  "timing": [
+   "mp3quran",
+   56
+  ]
+ },
+ "zamil": {
+  "aligned_share": 0.916,
+  "base": "https://server9.mp3quran.net/zaml",
+  "basmala_in_verse1": 0,
+  "boundaries": 239,
+  "broken": [],
+  "checked": "2026-09-29",
+  "formats": [
+   [
+    128,
+    44100
+   ],
+   [
+    192,
+    44100
+   ]
+  ],
+  "kbps": 128,
+  "kind": "surah",
+  "missed": [
+   "1:4",
+   "7:2",
+   "19:2",
+   "24:37",
+   "36:2",
+   "36:4",
+   "55:2",
+   "55:3",
+   "55:4",
+   "55:6",
+   "89:2",
+   "89:3",
+   "89:4",
+   "114:2",
+   "114:3",
+   "114:4",
+   "114:5",
+   "114:6",
+   "15:13",
+   "15:15"
+  ],
+  "name": "Majed Al-Zamil",
+  "pace": 1.023,
+  "problems": [],
+  "rate": 44100,
+  "shifted_share": 0.112,
+  "source": "surah https://server9.mp3quran.net/zaml SSS mp3quran 139 missing 3,31",
+  "timing": [
+   "mp3quran",
+   139
+  ]
+ }
+}

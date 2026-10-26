@@ -1,0 +1,236 @@
+# iOS Shorebird patches, built on GitHub's macOS runners: Codemagic's
+# ios-patch job (codemagic.yaml), moved here while the Codemagic
+# account's free build minutes are used up (2026-10-09: "You have run
+# out of build minutes on your personal account"; they reset monthly).
+# Own prefix, so Codemagic's `patch-*` and this never both publish:
+#
+#   gipatch-dry-<release>[--N]   build and check only
+#   gipatch-<release>[--N]       check, then publish if the check is clean
+#
+# <release> is Shorebird's iOS release string, `1.0.7+9`, never the
+# Android one. A tag name can't be reused: a later patch of the same
+# release takes a suffix, `gipatch-1.0.7+9--2`. At most three tags per
+# `git push`. GitHub runs the workflow file of the tagged commit, so a
+# patch branch must carry this file.
+#
+# Xcode must be the release's: the job stops unless the iOS SDK build is
+# EXPECTED_SDK_BUILD (RELEASES.md, "Xcode for iOS patches").
+#
+# Secrets: SHOREBIRD_TOKEN; ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 (an App
+# Store Connect API key); CERTIFICATE_PRIVATE_KEY, the private key of the
+# distribution certificate the releases were signed with (Codemagic's
+# `ios_signing` group; replaced on 2026-10-14, the readable copy is the
+# VPS's /root/keys/ayahreel-ios-cert-key).
+# Signing files are fetched, never created: a missing one fails the job.
+#
+# Each secret reaches only the steps that use it, and the logs are
+# uploaded only after tool/redact_logs.py has blanked them: artifacts of
+# the public CI mirror are public, and `shorebird --verbose` writes the
+# whole environment into dry-run.log.
+name: iOS patch
+
+on:
+  push:
+    tags: ['gipatch-*']
+
+permissions:
+  contents: read
+
+jobs:
+  patch:
+    runs-on: macos-26
+    timeout-minutes: 75
+    env:
+      TAG: ${{ github.ref_name }}
+      XCODE_APP: /Applications/Xcode_26.6.app
+      EXPECTED_SDK_BUILD: 23F81a
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check secrets
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.ASC_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.ASC_KEY_P8 }}
+          CERTIFICATE_PRIVATE_KEY: ${{ secrets.CERTIFICATE_PRIVATE_KEY }}
+        run: |
+          missing=""
+          for v in SHOREBIRD_TOKEN APP_STORE_CONNECT_KEY_IDENTIFIER \
+                   APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_PRIVATE_KEY \
+                   CERTIFICATE_PRIVATE_KEY; do
+            [ -n "${!v:-}" ] || missing="$missing $v"
+          done
+          if [ -n "$missing" ]; then
+            echo "Missing secrets:$missing (repo Settings > Secrets > Actions)." >&2
+            exit 1
+          fi
+      - name: Select Xcode
+        run: |
+          set -euo pipefail
+          sudo xcode-select -s "$XCODE_APP"
+          xcodebuild -version
+          SDK=$(xcrun --sdk iphoneos --show-sdk-build-version)
+          echo "iOS SDK build $SDK, release needs $EXPECTED_SDK_BUILD"
+          if [ "$SDK" != "$EXPECTED_SDK_BUILD" ]; then
+            echo "Wrong Xcode for this release; nothing built." >&2
+            exit 1
+          fi
+      - name: Install Shorebird
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 -sSf \
+            https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | bash
+          for d in "$HOME/.shorebird/bin" "$HOME/.config/shorebird/bin"; do
+            if [ -x "$d/shorebird" ]; then echo "$d" >> "$GITHUB_PATH"; fi
+          done
+      - name: Fetch signing certificate and provisioning profiles
+        env:
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.ASC_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.ASC_KEY_P8 }}
+          CERTIFICATE_PRIVATE_KEY: ${{ secrets.CERTIFICATE_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          # The key was set from Windows: drop CRLF and a byte-order mark
+          # (gipatch-1.0.7+9 died "Provided value ... is not valid").
+          KEY_FILE="$RUNNER_TEMP/cert.key"
+          printf '%s\n' "$CERTIFICATE_PRIVATE_KEY" |
+            perl -pe 's/\r//g; s/^\xEF\xBB\xBF//' > "$KEY_FILE"
+          chmod 600 "$KEY_FILE"
+          printf 'crlf=%s bom=%s lines=%s\n' \
+            "$(printf '%s' "$CERTIFICATE_PRIVATE_KEY" | grep -c $'\r' || true)" \
+            "$(printf '%s' "$CERTIFICATE_PRIVATE_KEY" | head -c3 | xxd -p)" \
+            "$(wc -l < "$KEY_FILE" | tr -d ' ')"
+          openssl rsa -in "$KEY_FILE" -check -noout -passin pass:
+          CERTIFICATE_PRIVATE_KEY="$(cat "$KEY_FILE")"
+          export CERTIFICATE_PRIVATE_KEY
+          pipx install codemagic-cli-tools
+          keychain initialize
+          for id in com.ayahReel.app com.ayahReel.app.AyahWidget; do
+            app-store-connect fetch-signing-files "$id" \
+              --type IOS_APP_STORE \
+              --certificate-key=@env:CERTIFICATE_PRIVATE_KEY
+          done
+          keychain add-certificates
+          xcode-project use-profiles
+      - name: Patch
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+          # Word timing's key (lib/data/words_host.dart), a Dart const:
+          # the value the release was built with, or the patch changes
+          # it. Releases before 1.0.10 don't read it, so it changes
+          # nothing there.
+          WORDS_KEY: ${{ secrets.WORDS_KEY }}
+        run: |
+          set -euo pipefail
+          TAG_REST="${TAG#gipatch-}"
+          DRY=0
+          case "$TAG_REST" in
+            dry-*) DRY=1; TAG_REST="${TAG_REST#dry-}" ;;
+          esac
+          RELEASE_VERSION="${TAG_REST%%--*}"
+          if [ -z "$RELEASE_VERSION" ]; then
+            echo "Tag '$TAG' names no release version." >&2
+            exit 1
+          fi
+          echo "Release $RELEASE_VERSION, $([ $DRY = 1 ] && echo 'check only' || echo 'check, then publish')"
+          echo "Setting kAppVersion to $(bash tool/sync-version.sh "$RELEASE_VERSION")"
+          OPTS=()
+          if [ -f "$HOME/export_options.plist" ]; then
+            OPTS=(--export-options-plist="$HOME/export_options.plist")
+          fi
+          dry_run() {
+            set +e
+            shorebird --verbose patch ios --release-version="$RELEASE_VERSION" \
+              ${OPTS[@]+"${OPTS[@]}"} --dry-run \
+              -- --dart-define=WORDS_KEY="$WORDS_KEY" > dry-run.log 2>&1
+            STATUS=$?
+            set -e
+            tail -n 80 dry-run.log
+          }
+          dry_run
+          # Podfile.lock isn't committed, and its last line names the
+          # CocoaPods that wrote it: the runner's newer one fails Shorebird's
+          # lock check though the pods are the same (gipatch-1.0.7+9--2).
+          # Use the version that makes this lock byte-identical to the
+          # release's; if none does, the pods really differ and this stops.
+          if grep -q 'Podfile.lock is different' dry-run.log && [ -f ios/Podfile.lock ]; then
+            cp ios/Podfile.lock podfile-lock-runner.txt
+            if POD_VERSION=$(python3 tool/podfile_lock_match.py "$RELEASE_VERSION" ios/Podfile.lock); then
+              echo "== The release's Podfile.lock was written by CocoaPods $POD_VERSION"
+              gem install cocoapods -v "$POD_VERSION" --no-document ||
+                sudo gem install cocoapods -v "$POD_VERSION" --no-document
+              REAL_POD=$(command -v pod)
+              mkdir -p "$RUNNER_TEMP/podbin"
+              printf '#!/bin/bash\nexec "%s" _%s_ "$@"\n' "$REAL_POD" "$POD_VERSION" \
+                > "$RUNNER_TEMP/podbin/pod"
+              chmod +x "$RUNNER_TEMP/podbin/pod"
+              export PATH="$RUNNER_TEMP/podbin:$PATH"
+              echo "pod --version: $(pod --version)"
+              rm -rf ios/Pods ios/Podfile.lock
+              mv dry-run.log dry-run-1.log
+              echo "== Checking again with CocoaPods $POD_VERSION"
+              dry_run
+            fi
+          fi
+          has() { grep -qiE "$1" dry-run.log && echo 1 || echo 0; }
+          CLEAN=0
+          if [ "$STATUS" = 0 ] && [ "$(has 'No issues detected')" = 1 ] &&
+             [ "$(has 'native code changes|native changes|asset changes')" = 0 ]; then
+            CLEAN=1
+          fi
+          {
+            echo "release=$RELEASE_VERSION status=$STATUS clean=$CLEAN"
+            echo "noissues=$(has 'No issues detected')"
+            echo "native=$(has 'native code changes|native changes')"
+            echo "asset=$(has 'asset changes')"
+            echo "norelease=$(has 'release .*not found|No release found|could not find release')"
+          } | tee verdict.txt
+          if [ "$DRY" = 1 ]; then
+            echo "Check only; nothing published."
+            exit 0
+          fi
+          if [ "$CLEAN" != 1 ]; then
+            echo "The check was not clean (dry-run.log); nothing published." >&2
+            exit 1
+          fi
+          shorebird patch ios --release-version="$RELEASE_VERSION" \
+            ${OPTS[@]+"${OPTS[@]}"} -- --dart-define=WORDS_KEY="$WORDS_KEY" \
+            2>&1 | tee publish.log
+          echo "published=1" >> verdict.txt
+      - name: Verdict
+        if: always()
+        run: |
+          {
+            echo "### $TAG"
+            echo '```'
+            cat verdict.txt 2>/dev/null || echo "no verdict (an earlier step failed)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Blank secrets out of the logs
+        if: always()
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.ASC_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.ASC_KEY_P8 }}
+          CERTIFICATE_PRIVATE_KEY: ${{ secrets.CERTIFICATE_PRIVATE_KEY }}
+          WORDS_KEY: ${{ secrets.WORDS_KEY }}
+          REDACT_VARS: >-
+            SHOREBIRD_TOKEN APP_STORE_CONNECT_KEY_IDENTIFIER
+            APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_PRIVATE_KEY
+            CERTIFICATE_PRIVATE_KEY WORDS_KEY
+        run: >-
+          python3 tool/redact_logs.py dry-run.log dry-run-1.log
+          podfile-lock-runner.txt publish.log verdict.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: logs-${{ github.ref_name }}
+          path: |
+            dry-run.log
+            dry-run-1.log
+            podfile-lock-runner.txt
+            publish.log
+            verdict.txt
+          if-no-files-found: ignore
