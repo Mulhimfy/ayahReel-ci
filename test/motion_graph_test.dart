@@ -168,14 +168,14 @@ void main() {
   });
 
   test('a line the reciter comes back to lights again', () {
-    final back = [
+    const back = [
       MotionRow(
         left: 140,
         right: 940,
         top: 60,
         bottom: 150,
         threadY: 132,
-        progress: const RowProgress(
+        progress: RowProgress(
           [(300, 0), (900, 300), (1499, 300), (1500, 100), (2600, 800)],
           800,
           [(300, 900), (1500, 2600)],
@@ -194,7 +194,7 @@ void main() {
             unitStartMs: 500,
             unitEndMs: 3500),
       ],
-      units: [
+      units: const [
         MotionUnit(
             startMs: 500,
             endMs: 3500,

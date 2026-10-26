@@ -47,15 +47,23 @@ The first two are frozen for good — nothing below can undo them.
       in all 175 countries, screenshots and description. The 1024 icon for the
       listing is `docs/store/icon_master_1024.png`, and Play's 512 is
       `docs/store/play_store_512.png`.
-- [x] App icon — gold rub-el-hizb star over midnight navy, on both platforms.
-      Android has the legacy launcher, the round variant (declared as
-      `android:roundIcon`, which API 24–25 launchers need), and an adaptive
-      icon whose background is the flat `#0F172A` from
-      `values/ic_launcher_background.xml` — plus a monochrome layer, so
-      Android 13+ themed icons don't fall back to a grey blob. iOS has all
-      15 sizes, every one flattened to RGB: an alpha channel anywhere in the
-      set is an automatic App Store rejection. Masters for the store
-      listings live in `docs/store/`.
+- [x] App icon — the Verse Prism (owner's pick, 2026-10-26: `ayah_icons_v5`,
+      `04_verse_prism_gold`): a beam through a glass prism, fanning out as
+      the lines of Al-Fatiha, on a gold field. On both platforms, and on the
+      story cards (the Tanafus result, the invite, the verses): those draw
+      `docs/store/invite/app_icon_384.png`, baked into
+      `lib/render/invite_story_images.dart` by `tool/invite_story_images.py`,
+      so a patch can carry it. Android has the legacy launcher, the round
+      variant (declared as `android:roundIcon`, which API 24–25 launchers
+      need), and an adaptive icon (the gold field as its background layer,
+      the prism and its lines as the foreground) — plus a monochrome layer
+      (the prism's outline, the beam, three lines), so Android 13+ themed
+      icons don't fall back to a grey blob. iOS has all 15 sizes, every one
+      flattened to RGB: an alpha channel anywhere in the set is an automatic
+      App Store rejection. Masters for the store listings live in
+      `docs/store/`: `icon_master_1024.png`, `play_store_512.png`,
+      `feature_graphic_1024x500.png`. The launcher icons are native files:
+      they change with each platform's next store build, never by a patch.
 - [x] Play listing: privacy policy URL, data-safety form, content rating,
       screenshots, feature graphic — all filled, or the app would not have
       reached closed testing. The policy is hosted on Notion and linked from
@@ -97,6 +105,14 @@ The first two are frozen for good — nothing below can undo them.
         declares Product Interaction (with Email Address, Customer Support,
         Other Diagnostic Data — "linked to you", App Functionality only);
         *Analytics* is not ticked as a purpose.
+- [ ] **Play listing: the new icon and feature graphic, once Play's public
+      rollout is out** (owner's ask, 2026-10-26). Play is still in closed
+      testing. After the production rollout, upload
+      `docs/store/play_store_512.png` as the app icon and
+      `docs/store/feature_graphic_1024x500.png` as the feature graphic, on
+      the main store listing, and send the change for review. The App Store listing takes its icon from the build
+      (`Icon-App-1024x1024@1x.png`), so it changes with the next iOS store
+      build on its own.
 
 ## Preview APKs
 
