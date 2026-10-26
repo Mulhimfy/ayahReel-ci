@@ -739,15 +739,29 @@ def verse_rows(surah, verses, env, fm, v1_at=None, heard_at=None):
     return rows, fixes
 
 
-def final_url(url):
+def final_url(url, tries=6):
     """Where [url]'s bytes come from, after any redirect: a host may send
     a surah it lacks to another of the reciter's recordings (see 5. in
-    verify_reciters.py), and the table would then be that one's."""
+    verify_reciters.py), and the table would then be that one's. Asked
+    again with a backoff, as the file itself is: archive.org answers 500
+    now and then (Islam Sobhi's An-Nur, 2026-10-26)."""
+    import urllib.error  # noqa: PLC0415
     import urllib.request  # noqa: PLC0415
-    req = urllib.request.Request(url, headers={
-        'User-Agent': 'ayahreel-verify', 'Range': 'bytes=0-0'})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return r.geturl()
+    last = None
+    for i in range(tries):
+        try:
+            req = urllib.request.Request(url, headers={
+                'User-Agent': 'ayahreel-verify', 'Range': 'bytes=0-0'})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return r.geturl()
+        except urllib.error.HTTPError as e:
+            if e.code in (403, 404, 410):
+                raise
+            last = e
+        except Exception as e:  # noqa: BLE001 - network, asked again
+            last = e
+        time.sleep(min(60, 2 * 2 ** i))
+    raise RuntimeError(f'{url}: {last}')
 
 
 def make(args):
