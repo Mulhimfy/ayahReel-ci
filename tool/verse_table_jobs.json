@@ -1291,5 +1291,54 @@
     "111": "https://archive.org/download/002_20221103_202211/111.mp3"
    }
   }
+ ],
+ "sobhi_more": [
+  {
+   "id": "sobhi",
+   "base": "https://cdn.mp3quran.net/audio/islam-sobhi/r1",
+   "surahs": "45,65",
+   "summary": false,
+   "urls": {
+    "45": "https://archive.org/download/mp-3-160-k_20260716/%D8%AA%D9%84%D8%A7%D9%88%D8%A9%20%D8%AC%D8%AF%D9%8A%D8%AF%D8%A9%20%D9%84%D8%B3%D9%88%D8%B1%D8%A9%20%D8%A7%D9%84%D8%AC%D8%A7%D8%AB%D9%8A%D8%A9%20%D9%83%D8%A7%D9%85%D9%84%D8%A9%20%D8%A7%D9%84%D9%82%D8%A7%D8%B1%D8%A6%20%D8%A7%D8%B3%D9%84%D8%A7%D9%85%20%D8%B5%D8%A8%D8%AD%D9%8A%20_%20%D8%AA%D9%84%D8%A7%D9%88%D8%A9%20%D9%85%D8%A8%D8%A7%D8%B1%D9%83%D8%A9%28MP3_160K%29.mp3",
+    "65": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/065.mp3"
+   }
+  },
+  {
+   "id": "sobhi_voice4",
+   "speaker": true,
+   "refs": {
+    "mq_012": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/012.mp3",
+    "mq_018": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/018.mp3",
+    "mq_019": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/019.mp3",
+    "mq_036": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/036.mp3",
+    "mq_055": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/055.mp3",
+    "mq_056": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/056.mp3",
+    "mq_067": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/067.mp3",
+    "mq_078": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/078.mp3"
+   },
+   "others": {
+    "luhaidan_039": "https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1/039.mp3",
+    "abkar_039": "https://cdn.mp3quran.net/audio/idrees-abkar/r1/039.mp3",
+    "alafasy_039": "https://cdn.mp3quran.net/audio/mishary-alafasy/r1/039.mp3",
+    "kurdi_039": "https://cdn.mp3quran.net/audio/raad-kurdi/r1/039.mp3",
+    "mousa_039": "https://cdn.mp3quran.net/audio/abdullah-mousa/r1/039.mp3",
+    "salimi_039": "https://cdn.mp3quran.net/audio/mansour-salimi/r1/039.mp3",
+    "qatami_039": "https://cdn.mp3quran.net/audio/nasser-qatami/r1/039.mp3",
+    "zahrani_039": "https://cdn.mp3quran.net/audio/abdulaziz-zahrani/r1/039.mp3",
+    "khedr_w2q_037": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/037.mp3",
+    "khedr_w2q_039": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/039.mp3"
+   },
+   "cands": {
+    "ia_045_160k": "https://archive.org/download/mp-3-160-k_20260716/%D8%AA%D9%84%D8%A7%D9%88%D8%A9%20%D8%AC%D8%AF%D9%8A%D8%AF%D8%A9%20%D9%84%D8%B3%D9%88%D8%B1%D8%A9%20%D8%A7%D9%84%D8%AC%D8%A7%D8%AB%D9%8A%D8%A9%20%D9%83%D8%A7%D9%85%D9%84%D8%A9%20%D8%A7%D9%84%D9%82%D8%A7%D8%B1%D8%A6%20%D8%A7%D8%B3%D9%84%D8%A7%D9%85%20%D8%B5%D8%A8%D8%AD%D9%8A%20_%20%D8%AA%D9%84%D8%A7%D9%88%D8%A9%20%D9%85%D8%A8%D8%A7%D8%B1%D9%83%D8%A9%28MP3_160K%29.mp3",
+    "ia_065_320k": "https://archive.org/download/islam-sobhi_202404/065%20At-Talaq.mp3",
+    "w2q_065": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/065.mp3",
+    "control_khedr_w2q_045_not": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/045.mp3",
+    "control_ia_052_his": "https://archive.org/download/002_20221103_202211/052.mp3"
+   },
+   "peers": {
+    "ia_040_160k": "https://archive.org/download/stream-and-lyrics-by-islam-sobhi-surah-ghafir-mp-3-160-k/%D8%B3%D9%88%D8%B1%D8%A9%20%D8%BA%D8%A7%D9%81%D8%B1%20%28%D9%83%D8%A7%D9%85%D9%84%D8%A9%29%20_%D8%A7%D9%84%D9%82%D8%A7%D8%B1%D8%A6%20%D8%A7%D8%B3%D9%84%D8%A7%D9%85%20%D8%B5%D8%A8%D8%AD%D9%8A%20Stream%20and%20lyrics%20by%20islam%20sobhi%20_%20Surah%20Ghafir%28MP3_160K%29.mp3",
+    "w2q_009": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/009.mp3"
+   }
+  }
  ]
 }
