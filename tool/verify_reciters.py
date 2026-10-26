@@ -1021,7 +1021,11 @@ def elsewhere_check(r, s):
     moved = os.path.dirname(hdr.get('x-final-url') or base_url(r, s)) != \
         os.path.dirname(base_url(r, s))
     if st not in (200, 206) or not b or moved:
-        heard = SPEAKER_CHECKED.get(r['id'], {})
+        # A source checked by --check before the voice is in the app has
+        # its source for an id; a table of our own is named for the voice.
+        own = r.get('timing') and r['timing'][0] == 'own'
+        heard = SPEAKER_CHECKED.get(r['id']) or \
+            (SPEAKER_CHECKED.get(r['timing'][1]) if own else None) or {}
         lack = f"sent to {hdr.get('x-final-url')}" if moved else f'HTTP {st}'
         if s in heard.get('surahs', ()):
             return dict(out, ok=True, base=lack, speaker=heard['how'])
