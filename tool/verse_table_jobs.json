@@ -868,5 +868,41 @@
     "zahrani_039": "https://cdn.mp3quran.net/audio/abdulaziz-zahrani/r1/039.mp3"
    }
   }
+ ],
+ "sobhi_voice2": [
+  {
+   "id": "sobhi_voice2",
+   "speaker": true,
+   "refs": {
+    "mq_012": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/012.mp3",
+    "mq_018": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/018.mp3",
+    "mq_019": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/019.mp3",
+    "mq_036": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/036.mp3",
+    "mq_055": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/055.mp3",
+    "mq_056": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/056.mp3",
+    "mq_067": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/067.mp3",
+    "mq_078": "https://cdn.mp3quran.net/audio/islam-sobhi/r1/078.mp3"
+   },
+   "others": {
+    "luhaidan_039": "https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1/039.mp3",
+    "abkar_039": "https://cdn.mp3quran.net/audio/idrees-abkar/r1/039.mp3",
+    "alafasy_039": "https://cdn.mp3quran.net/audio/mishary-alafasy/r1/039.mp3",
+    "kurdi_039": "https://cdn.mp3quran.net/audio/raad-kurdi/r1/039.mp3",
+    "mousa_039": "https://cdn.mp3quran.net/audio/abdullah-mousa/r1/039.mp3",
+    "salimi_039": "https://cdn.mp3quran.net/audio/mansour-salimi/r1/039.mp3",
+    "qatami_039": "https://cdn.mp3quran.net/audio/nasser-qatami/r1/039.mp3",
+    "zahrani_039": "https://cdn.mp3quran.net/audio/abdulaziz-zahrani/r1/039.mp3"
+   },
+   "cands": {
+    "w2q_045": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/045.mp3",
+    "w2q_065": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/065.mp3",
+    "w2q_037_001": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/037-001.mp3",
+    "w2q_037": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/037.mp3",
+    "control_ia_052_his": "https://archive.org/download/002_20221103_202211/052.mp3"
+   },
+   "peers": {
+    "w2q_009": "https://media.way2quran.com/islam-sobhi/hafs-an-asim/009.mp3"
+   }
+  }
  ]
 }

@@ -938,7 +938,7 @@ def speaker(args):
         return m / np.linalg.norm(m), len(segs)
 
     emb = {}
-    for group in ('refs', 'cands', 'others'):
+    for group in ('refs', 'cands', 'others', 'peers'):
         for name, url in (job.get(group) or {}).items():
             emb[(group, name)], k = embed(url)
             print(f'{group} {name}: {k} stretches', flush=True)
@@ -963,10 +963,24 @@ def speaker(args):
                    'not his' if parted and sim < hi_other + SPEAKER_MARGIN
                    else 'cannot tell')
         cands[k[1]] = dict(sim=round(sim, 3), verdict=verdict)
+    # A peer: one file of his from where the candidates come from (the
+    # same host, the same encoding), so that what a host's processing
+    # does to a voice is in both sides of a comparison with it. Each
+    # candidate is put beside how near his own files and the other
+    # reciters' come to the peer.
+    peers = {}
+    for kp in [k for k in emb if k[0] == 'peers']:
+        p = emb[kp]
+        own_p = [float(p @ emb[k]) for k in refs]
+        oth_p = [float(p @ emb[k]) for k in emb if k[0] == 'others']
+        peers[kp[1]] = dict(
+            own=[round(x, 3) for x in own_p], others=[round(x, 3) for x in oth_p],
+            cands={k[1]: round(float(p @ emb[k]), 3) for k in emb
+                   if k[0] == 'cands'})
     res = dict(model=SPEAKER_MODEL, own={k: round(v, 3) for k, v in own.items()},
                others={k: round(v, 3) for k, v in other.items()},
                lo_own=round(lo_own, 3), hi_other=round(hi_other, 3),
-               parted=parted, cands=cands)
+               parted=parted, cands=cands, peers=peers)
     print(json.dumps(res, indent=1))
     if args.json:
         json.dump(res, open(args.json, 'w'), indent=1)
