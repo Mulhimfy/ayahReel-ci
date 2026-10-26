@@ -238,10 +238,11 @@ class _PlusPainter extends CustomPainter {
 /// out of [from], the Create button's place on screen. Null when it was
 /// closed without a choice.
 ///
-/// Three small pills rise out of the button one after another and stand
-/// over it, the reel nearest and largest, the quiz and the card a step
-/// smaller above it, each as wide as its own name: a stack that tapers,
-/// not three equal bars. The page stays where it is behind them, only a
+/// Three small pills drop out of the button one after another and stand
+/// under it (over it only where the screen has no room below), the reel
+/// nearest and largest, the quiz and the card a step smaller after it,
+/// each as wide as its own name: a stack that tapers, not three equal
+/// bars. The page stays where it is behind them, only a
 /// shade dimmer — nothing frosts or fades away — and the button itself
 /// turns into the cross that closes them. A tap anywhere else closes it
 /// too.
@@ -347,9 +348,11 @@ class _ChooserState extends State<_Chooser>
     for (final k in CreateKind.values) {
       block += k.pillHeight + _gap;
     }
-    // Over the button when there is room, under it when there is not
-    // (the page scrolled the button up under the status bar).
-    final above = from.top - 12 - block >= pad.top + 8;
+    // Under the button when there is room (the owner's call, 2026-10-26:
+    // it drops down from Create, as a menu does), over it only when the
+    // stack would run off the bottom of the screen.
+    final below = from.bottom + 12 + block <= size.height - pad.bottom - 8;
+    final above = !below && from.top - 12 - block >= pad.top + 8;
     // Nearest the button first: the reel, then the quiz, then the card.
     final order = above
         ? CreateKind.values.reversed.toList()

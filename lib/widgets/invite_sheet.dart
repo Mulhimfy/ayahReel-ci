@@ -25,6 +25,10 @@ import 'night_sky.dart';
 /// they will go on to do, credited again to whoever pointed the way.
 /// That is worth a screen of its own; a share sheet that opens with no
 /// explanation is just a favour being asked.
+///
+/// It closes only by its own buttons — sharing, or Not now and its one
+/// question — never by a tap beside it or a swipe down (the owner's call,
+/// 2026-10-26); Back asks the same question Not now does.
 Future<void> showInviteSheet(BuildContext context) {
   HapticFeedback.selectionClick();
   return showModalBottomSheet<void>(
@@ -32,6 +36,8 @@ Future<void> showInviteSheet(BuildContext context) {
     backgroundColor: Colors.transparent,
     barrierColor: Colors.black.withValues(alpha: 0.6),
     isScrollControlled: true,
+    isDismissible: false,
+    enableDrag: false,
     builder: (_) => const _InviteSheet(),
   );
 }
@@ -158,6 +164,17 @@ class _InviteSheetState extends State<_InviteSheet>
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
     final l = L10n.of(context);
+    // Back is Not now: the same question, not a silent close.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _confirmLeave(context);
+      },
+      child: _sheet(context, t, l),
+    );
+  }
+
+  Widget _sheet(BuildContext context, TextTheme t, L10n l) {
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       child: DecoratedBox(

@@ -333,9 +333,7 @@ class _MyReelsScreenState extends State<MyReelsScreen> {
                           onEdit: reels[i].canEdit
                               ? () => ReelReopener.open(context, reels[i])
                               : null,
-                          onShareWhatsApp: Platform.isAndroid &&
-                                  SettingsService
-                                      .state.value.whatsappDirectShare
+                          onShareWhatsApp: Platform.isAndroid
                               ? (origin) =>
                                   _shareWhatsApp(reels[i], origin)
                               : null,

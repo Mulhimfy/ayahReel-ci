@@ -20,22 +20,6 @@ class AppSettings {
   final int personalHour; // 0–23
   final int personalMinute; // 0–59
 
-  /// Adds a "Send to WhatsApp" action next to the normal share, which
-  /// hands the reel straight to WhatsApp instead of the share sheet.
-  /// On by default — WhatsApp is where these reels go — and only off if
-  /// the user turns it off. Android only; the toggle is hidden
-  /// elsewhere. Costs nothing when WhatsApp is absent: the button falls
-  /// back to the share sheet.
-  final bool whatsappDirectShare;
-
-  /// Adds a "Make an Instagram Reel" action next to the normal share,
-  /// which opens Instagram's reel composer with the finished reel
-  /// already loaded — the editor a reel is published from, not Stories.
-  /// On by default, for the same reason [whatsappDirectShare] is.
-  /// The button only appears where the handoff can actually work; see
-  /// InstagramShare.supported, which wants a Meta App ID compiled in.
-  final bool instagramDirectShare;
-
   /// False until the user has been through onboarding once. Kept here
   /// rather than in its own file so a single read at launch decides
   /// which screen the app opens on.
@@ -208,8 +192,6 @@ class AppSettings {
     required this.personalReminderOn,
     required this.personalHour,
     required this.personalMinute,
-    required this.whatsappDirectShare,
-    required this.instagramDirectShare,
     required this.onboardingDone,
     required this.lang,
     required this.translation,
@@ -248,8 +230,6 @@ class AppSettings {
     personalReminderOn: false,
     personalHour: 20,
     personalMinute: 0,
-    whatsappDirectShare: true,
-    instagramDirectShare: true,
     onboardingDone: false,
     lang: AppLang.en,
     translation: VerseTranslation.english,
@@ -263,8 +243,6 @@ class AppSettings {
     bool? personalReminderOn,
     int? personalHour,
     int? personalMinute,
-    bool? whatsappDirectShare,
-    bool? instagramDirectShare,
     bool? onboardingDone,
     AppLang? lang,
     VerseTranslation? translation,
@@ -302,9 +280,6 @@ class AppSettings {
       personalReminderOn: personalReminderOn ?? this.personalReminderOn,
       personalHour: personalHour ?? this.personalHour,
       personalMinute: personalMinute ?? this.personalMinute,
-      whatsappDirectShare: whatsappDirectShare ?? this.whatsappDirectShare,
-      instagramDirectShare:
-          instagramDirectShare ?? this.instagramDirectShare,
       onboardingDone: onboardingDone ?? this.onboardingDone,
       lang: lang ?? this.lang,
       translation: translation ?? this.translation,
@@ -345,8 +320,6 @@ class AppSettings {
         'personalReminderOn': personalReminderOn,
         'personalHour': personalHour,
         'personalMinute': personalMinute,
-        'whatsappDirectShare': whatsappDirectShare,
-        'instagramDirectShare': instagramDirectShare,
         'onboardingDone': onboardingDone,
         'lang': lang.code,
         'translation': translation.code,
@@ -384,7 +357,10 @@ class AppSettings {
         // October wrote it on every save with that week's default, off.
         // No store build ever wrote any of the three.
         'linesAtOnce': verseLines,
-        'scenesFollowLines': scenesFollowLines,
+        // Not 'scenesFollowLines': phones that turned it off once (the
+        // owner's, testing) kept that through every build since, and the
+        // scenery per line is to be everyone's start (2026-10-26).
+        'sceneEveryLine': scenesFollowLines,
         'basmala': basmala,
         'showSurahName': surahTitle,
       };
@@ -394,9 +370,6 @@ class AppSettings {
         personalReminderOn: j['personalReminderOn'] as bool? ?? false,
         personalHour: j['personalHour'] as int? ?? 20,
         personalMinute: j['personalMinute'] as int? ?? 0,
-        // Absent key = never touched it = on. An explicit false persists.
-        whatsappDirectShare: j['whatsappDirectShare'] as bool? ?? true,
-        instagramDirectShare: j['instagramDirectShare'] as bool? ?? true,
         // Absent on an install that predates onboarding: those users
         // have already seen the app, so don't send them through it.
         onboardingDone: j['onboardingDone'] as bool? ?? true,
@@ -461,7 +434,7 @@ class AppSettings {
         // One line at a time, and the surah's name, until chosen; see
         // [toJson] for why these keys are new ones.
         verseLines: ((j['linesAtOnce'] as num?)?.toInt() ?? 1).clamp(0, 3),
-        scenesFollowLines: j['scenesFollowLines'] as bool? ?? true,
+        scenesFollowLines: j['sceneEveryLine'] as bool? ?? true,
         // Absent on every install that predates it: on.
         basmala: j['basmala'] as bool? ?? true,
         surahTitle: j['showSurahName'] as bool? ?? true,

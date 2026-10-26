@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ayah_reels/data/instagram_share.dart';
-import 'package:ayah_reels/data/settings_service.dart';
 import 'package:ayah_reels/l10n/l10n.dart';
 
 /// The straight-to-Instagram-Reels hand-off.
@@ -115,17 +114,6 @@ void main() {
     expect(await InstagramShare.shareStoryVideo(video), isFalse);
   });
 
-  test('the toggle is on for anyone who has never seen it', () {
-    // A settings file written before this release has no such key.
-    final old = AppSettings.fromJson({'whatsappDirectShare': false});
-    expect(old.instagramDirectShare, isTrue);
-    expect(old.whatsappDirectShare, isFalse);
-
-    // And an explicit no survives the round trip.
-    final off = AppSettings.defaults.copyWith(instagramDirectShare: false);
-    expect(AppSettings.fromJson(off.toJson()).instagramDirectShare, isFalse);
-  });
-
   test('both languages name the destination', () {
     const en = L10n(AppLang.en);
     const ar = L10n(AppLang.ar);
@@ -137,9 +125,6 @@ void main() {
     // somebody had not finished typing.
     expect(en.sendToInstagram, contains('Instagram'));
     expect(ar.sendToInstagram, contains('إنستغرام'));
-    expect(ar.straightToInstagram, isNot(en.straightToInstagram));
-    expect(ar.straightToInstagramSubtitle,
-        isNot(en.straightToInstagramSubtitle));
     expect(ar.instagramUnavailable, isNot(en.instagramUnavailable));
   });
 }

@@ -18,6 +18,14 @@ void main() {
       expect(s.surahTitle, isTrue);
     }
     expect(VerseLines.preferred, 1);
+    // A file from before 2026-10-26 that had the scenery per verse starts
+    // per line again; a choice made since survives the round trip.
+    expect(
+        AppSettings.fromJson(const {'scenesFollowLines': false})
+            .scenesFollowLines,
+        isTrue);
+    final perVerse = AppSettings.defaults.copyWith(scenesFollowLines: false);
+    expect(AppSettings.fromJson(perVerse.toJson()).scenesFollowLines, isFalse);
     expect(CreationState().motion, VerseMotion.standard);
     expect(MotionPreset.of(VerseMotion.standard), MotionPreset.light);
     // The light needs no word timing: every voice has it.

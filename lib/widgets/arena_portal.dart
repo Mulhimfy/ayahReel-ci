@@ -18,7 +18,7 @@ import 'night_sky.dart';
 ///
 /// A pane of the arena's own weather — the mesh moving under dark
 /// glass, a few stars, a faint lattice — with the crown leaning at its
-/// head, a rim of light going round it, and a glint now and then: the
+/// head, a still gold rim, and a glint now and then: the
 /// most alive thing on the tab, because it is the thing the tab most
 /// wants tapped. All of it stands still under reduced motion.
 class ArenaPortal extends StatefulWidget {
@@ -38,12 +38,6 @@ class _ArenaPortalState extends State<ArenaPortal>
     duration: const Duration(seconds: 6),
   )..repeat();
 
-  /// The rim's own, slower clock: the two lights take a lap three
-  /// times as long as the crown's turn, so they drift rather than race.
-  late final AnimationController _rim = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 18),
-  )..repeat();
   final _glint = GlintController();
   bool _still = false;
 
@@ -53,15 +47,12 @@ class _ArenaPortalState extends State<ArenaPortal>
     final still = reducedMotion(context);
     if (still == _still) return;
     _still = still;
-    for (final c in [_turn, _rim]) {
-      still ? c.stop() : c.repeat();
-    }
+    still ? _turn.stop() : _turn.repeat();
   }
 
   @override
   void dispose() {
     _turn.dispose();
-    _rim.dispose();
     _glint.dispose();
     super.dispose();
   }
@@ -209,9 +200,10 @@ class _ArenaPortalState extends State<ArenaPortal>
                           ),
                         ),
                       ),
-                      // The rim, and the light going round it.
-                      IgnorePointer(
-                        child: CustomPaint(painter: _RimPainter(_rim, r)),
+                      // The rim: a still gold line (its two chasing
+                      // lights went, 2026-10-26, the owner's call).
+                      const IgnorePointer(
+                        child: CustomPaint(painter: _RimPainter(r)),
                       ),
                     ],
                   ),
@@ -243,11 +235,10 @@ class _LatticePainter extends CustomPainter {
   bool shouldRepaint(covariant _LatticePainter old) => false;
 }
 
-/// The pane's gold rim, with two lights chasing each other round it.
+/// The pane's gold rim.
 class _RimPainter extends CustomPainter {
-  final Animation<double> turn;
   final double radius;
-  _RimPainter(this.turn, this.radius) : super(repaint: turn);
+  const _RimPainter(this.radius);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -260,39 +251,8 @@ class _RimPainter extends CustomPainter {
         ..strokeWidth = 1
         ..color = AppColors.gold.withValues(alpha: 0.42),
     );
-    final path = Path()..addRRect(rrect);
-    for (final metric in path.computeMetrics()) {
-      final len = metric.length;
-      for (final offset in [0.0, 0.5]) {
-        final start = ((turn.value + offset) % 1) * len;
-        final span = len * 0.11;
-        final pieces = start + span <= len
-            ? [(start, start + span)]
-            : [(start, len), (0.0, start + span - len)];
-        for (final (a, b) in pieces) {
-          final piece = metric.extractPath(a, b);
-          canvas.drawPath(
-            piece,
-            Paint()
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 4
-              ..strokeCap = StrokeCap.round
-              ..color = AppColors.goldBright.withValues(alpha: 0.30)
-              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
-          );
-          canvas.drawPath(
-            piece,
-            Paint()
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 1.3
-              ..strokeCap = StrokeCap.round
-              ..color = const Color(0xFFFFF6DC).withValues(alpha: 0.75),
-          );
-        }
-      }
-    }
   }
 
   @override
-  bool shouldRepaint(covariant _RimPainter old) => false;
+  bool shouldRepaint(covariant _RimPainter old) => old.radius != radius;
 }

@@ -1399,8 +1399,11 @@ class _TypePanel extends StatelessWidget {
               ],
               const SizedBox(width: 14),
               // The verse's number, beside how it is set: one small chip,
-              // its four choices behind it.
-              const _VerseEndChip(),
+              // its four choices behind it. Handed the value it shows, so
+              // it is rebuilt when it changes (a const chip was not, and
+              // kept its old gold and tick while the reel changed).
+              _VerseEndChip(
+                  numbering: SettingsService.state.value.verseNumbering),
             ],
           ),
           ),
@@ -1415,12 +1418,14 @@ class _TypePanel extends StatelessWidget {
 /// last row: the mark itself, gold while a number shows, its choices in
 /// a popover. The same setting as Customize's, for every reel.
 class _VerseEndChip extends StatelessWidget {
-  const _VerseEndChip();
+  const _VerseEndChip({required this.numbering});
+
+  final VerseNumbering numbering;
 
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
-    final v = SettingsService.state.value.verseNumbering;
+    final v = numbering;
     final on = v != VerseNumbering.off;
     return Builder(
       builder: (anchor) => A11yTap(
@@ -1542,10 +1547,11 @@ class _VerseEndChip extends StatelessWidget {
         ),
       ),
     );
-    if (picked == null || picked == now) return;
+    // Against the setting as it is now, not as the chip last showed it.
+    final current = SettingsService.state.value;
+    if (picked == null || picked == current.verseNumbering) return;
     HapticFeedback.selectionClick();
-    await SettingsService.update(
-        SettingsService.state.value.copyWith(verseNumbering: picked));
+    await SettingsService.update(current.copyWith(verseNumbering: picked));
   }
 }
 
@@ -1750,18 +1756,23 @@ class _ColourPanel extends StatelessWidget {
     const flat = versePalette;
     final custom = s.verseInk.isNone &&
         !flat.any((c) => (c & 0xFFFFFF) == (s.textArgb & 0xFFFFFF));
+    final at = s.verseInk.isNone ? flat.indexOf(s.textArgb) : -1;
     return [
-      // The luminous inks, every one in view: two rows of squares as
-      // wide as the panel allows, over the palette, nothing to scroll.
-      InkGrid(
+      // Two lines, each one row that scrolls, each named: the luminous
+      // inks, then the flat colours and the mixer (the owner's call,
+      // 2026-10-26: two rows a segment read as a wall of swatches).
+      _MiniHeading(l.styleLuminous),
+      InkStrip(
         inks: inks,
         selected: s.verseInk.isNone ? null : s.verseInk,
         onPick: s.setVerseInk,
         labelOf: (ink) => '$section${l.comma} ${l.a11yInkSwatch(ink)}',
+        size: 26,
       ),
-      const _Divider(),
-      _Grid(
-        rows: 2,
+      const SizedBox(height: 8),
+      _MiniHeading(l.styleSolid),
+      _Strip(
+        chosen: custom ? flat.length : (at >= 0 ? at : null),
         children: [
           for (final c in flat)
             _Cell(
@@ -1909,6 +1920,70 @@ class _Grid extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// [_Cell]s in one line that scrolls, as [InkStrip] lays the inks: the
+/// chosen one ([chosen], an index) scrolled into view when it first
+/// shows, and the ends faded so a finger knows there is more.
+class _Strip extends StatefulWidget {
+  final List<_Cell> children;
+  final int? chosen;
+  final double size;
+
+  const _Strip({required this.children, this.chosen, this.size = 26});
+
+  @override
+  State<_Strip> createState() => _StripState();
+}
+
+class _StripState extends State<_Strip> {
+  final _chosen = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final c = _chosen.currentContext;
+      if (!mounted || c == null) return;
+      Scrollable.ensureVisible(c, alignment: 0.5);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cell = widget.size + 11;
+    return SizedBox(
+      height: cell,
+      child: ShaderMask(
+        blendMode: BlendMode.dstIn,
+        shaderCallback: (r) {
+          final f = r.width <= 0 ? 0.0 : (10 / r.width).clamp(0.0, 0.2);
+          return LinearGradient(
+            colors: const [
+              Color(0x00FFFFFF),
+              Color(0xFFFFFFFF),
+              Color(0xFFFFFFFF),
+              Color(0x00FFFFFF),
+            ],
+            stops: [0, f, 1 - f, 1],
+          ).createShader(r);
+        },
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          children: [
+            for (var i = 0; i < widget.children.length; i++)
+              SizedBox(
+                key: i == widget.chosen ? _chosen : null,
+                width: cell,
+                height: cell,
+                child: Center(child: widget.children[i].child(widget.size)),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

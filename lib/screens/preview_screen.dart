@@ -2780,13 +2780,11 @@ class _PreviewScreenState extends State<PreviewScreen>
     // A clip that cannot cover its own turn has no export: the reel
     // would have to freeze or loop it to finish, and it must not.
     final blocked = _shortScenes.isNotEmpty;
-    // The straight-to-an-app shortcuts, each only where its hand-off
-    // can actually land.
+    // The straight-to-an-app shortcuts, each wherever its hand-off can
+    // actually land (no longer a setting: always offered).
     final grain = ReelFinish.grain(_effects);
-    final igOn = InstagramShare.supported &&
-        SettingsService.state.value.instagramDirectShare;
-    final waOn =
-        Platform.isAndroid && SettingsService.state.value.whatsappDirectShare;
+    final igOn = InstagramShare.supported;
+    final waOn = Platform.isAndroid;
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(color: AppColors.textSecondary),
@@ -3249,6 +3247,32 @@ class _PreviewScreenState extends State<PreviewScreen>
                     onPressed: !ready || _busy || blocked
                         ? null
                         : () => _export(shareAfter: false),
+                  ),
+                  // While the video is made, under the buttons: it is the
+                  // reel as it stood when Share or Save was tapped, so a
+                  // change now is not in it, and leaving stops it.
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOut,
+                    alignment: Alignment.topCenter,
+                    child: _rendering
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Text(
+                              l.renderHoldStill,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall!
+                                  .copyWith(
+                                    fontSize: 12,
+                                    height: 1.4,
+                                    color: AppColors.goldBright
+                                        .withValues(alpha: 0.85),
+                                  ),
+                            ),
+                          )
+                        : const SizedBox(width: double.infinity),
                   ),
                 ],
               ),

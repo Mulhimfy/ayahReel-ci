@@ -1752,11 +1752,16 @@
   {
    "id": "sobhi",
    "base": "https://cdn.mp3quran.net/audio/islam-sobhi/r1",
-   "surahs": "24,52",
+   "surahs": "24,30,52,57,98,105,109",
    "summary": false,
    "urls": {
     "24": "https://archive.org/download/002_20221103_202211/024.mp3",
-    "52": "https://archive.org/download/002_20221103_202211/052.mp3"
+    "30": "https://archive.org/download/002_20221103_202211/030.mp3",
+    "52": "https://archive.org/download/002_20221103_202211/052.mp3",
+    "57": "https://archive.org/download/002_20221103_202211/057.mp3",
+    "98": "https://archive.org/download/002_20221103_202211/098.mp3",
+    "105": "https://archive.org/download/002_20221103_202211/105%E2%80%8B.mp3",
+    "109": "https://archive.org/download/002_20221103_202211/109.mp3"
    }
   }
  ]

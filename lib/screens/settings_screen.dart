@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../data/debug_log.dart';
 import '../data/home_widget_service.dart';
-import '../data/instagram_share.dart';
 import '../data/reminder_service.dart';
 import '../data/rewards_service.dart';
 import '../data/settings_service.dart';
@@ -284,33 +283,6 @@ class _SettingsScreenState extends State<SettingsScreen>
                     : null,
                 hint: s.personalReminderOn ? l.a11yChangesReminderTime : null,
               ),
-              // WhatsApp's direct hand-off is an Android intent, so
-              // its row stays Android-only; Instagram's works on both.
-              // Either row alone is reason enough to show the section.
-              if (Platform.isAndroid || InstagramShare.supported) ...[
-                if (InstagramShare.supported)
-                  _SwitchRow(
-                    icon: Icons.movie_creation_outlined,
-                    title: l.straightToInstagram,
-                    value: s.instagramDirectShare,
-                    onChanged: (on) {
-                      HapticFeedback.selectionClick();
-                      SettingsService.update(
-                          s.copyWith(instagramDirectShare: on));
-                    },
-                  ),
-                if (Platform.isAndroid)
-                  _SwitchRow(
-                    icon: Icons.send_rounded,
-                    title: l.straightToWhatsApp,
-                    value: s.whatsappDirectShare,
-                    onChanged: (on) {
-                      HapticFeedback.selectionClick();
-                      SettingsService.update(
-                          s.copyWith(whatsappDirectShare: on));
-                    },
-                  ),
-              ],
               // Last in the card of switches: set-it-once choices about
               // the reels themselves, on a page of their own with a reel
               // playing them (see CustomizeScreen). The line after the

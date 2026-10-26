@@ -1203,6 +1203,9 @@ class L10n {
   /// and the flat colours.
   String get styleLuminous =>
       _t('Luminous', 'ألوان متوهجة', 'چمکدار رنگ', 'Bercahaya', 'Leuchtend');
+  /// The flat colours' line in the verse's colours, beside [styleLuminous].
+  String get styleSolid =>
+      _t('Solid', 'ألوان ثابتة', 'سادہ رنگ', 'Polos', 'Uni');
   String get styleLook => _t('Look', 'المظهر', 'لُک', 'Tampilan', 'Look');
   String get effectWarmth =>
       _t('Warmth', 'الدفء', 'گرماہٹ', 'Kehangatan', 'Wärme');
@@ -1425,6 +1428,14 @@ class L10n {
       'لمبی ریل برآمد ہونے میں چند منٹ لیتی ہے — ایپ کھلی رکھیں۔',
       'Reel panjang butuh beberapa menit untuk diekspor — biarkan aplikasi terbuka.',
       'Ein langes Reel braucht ein paar Minuten zum Export — lass die App offen.');
+  /// Under the share buttons while a video is made: it is the reel as
+  /// it stood when Share or Save was tapped, and leaving stops it.
+  String get renderHoldStill => _t(
+      'Please stay here and change nothing until your video is ready.',
+      'رجاءً ابقَ هنا ولا تغيّر شيئًا حتى يجهز الفيديو.',
+      'براہِ کرم یہیں رہیں اور ویڈیو تیار ہونے تک کچھ نہ بدلیں۔',
+      'Tetap di sini dan jangan ubah apa pun sampai videomu siap.',
+      'Bitte bleib hier und ändere nichts, bis dein Video fertig ist.');
   String exportFailed(Object e) => _t('Export failed: $e', 'فشل التصدير: $e',
       'برآمد ناکام: $e', 'Ekspor gagal: $e', 'Export fehlgeschlagen: $e');
 
@@ -1859,32 +1870,6 @@ class L10n {
           'ein paar Minuten nach der eingestellten Zeit ankommen.');
   String get sectionSharing =>
       _t('SHARING', 'المشاركة', 'شیئرنگ', 'BERBAGI', 'TEILEN');
-  String get straightToWhatsApp => _t('Straight to WhatsApp',
-      'مباشرة إلى واتساب', 'سیدھا واٹس ایپ پر', 'Langsung ke WhatsApp',
-      'Direkt zu WhatsApp');
-  String get straightToWhatsAppSubtitle => _t(
-      'Adds a button that sends your reel directly '
-          'to WhatsApp, no share sheet.',
-      'يضيف زرًا يرسل مقطعك مباشرة إلى واتساب دون نافذة المشاركة.',
-      'ایک بٹن شامل کرتا ہے جو آپ کی ریل سیدھی واٹس ایپ پر بھیجتا ہے، '
-          'بغیر شیئر شیٹ کے۔',
-      'Menambahkan tombol yang mengirim reel Anda langsung ke WhatsApp, '
-          'tanpa lembar berbagi.',
-      'Fügt eine Schaltfläche hinzu, die dein Reel direkt zu WhatsApp '
-          'schickt, ohne Teilen-Menü.');
-  String get straightToInstagram => _t('Straight to Instagram Reels',
-      'مباشرة إلى ريلز إنستغرام', 'سیدھا انسٹاگرام ریلز پر',
-      'Langsung ke Instagram Reels', 'Direkt zu Instagram Reels');
-  String get straightToInstagramSubtitle => _t(
-      'Adds a button that opens the Instagram reel editor '
-          'with your reel already in it.',
-      'يضيف زرًا يفتح محرر الريلز في إنستغرام ومقطعك بداخله جاهز للنشر.',
-      'ایک بٹن شامل کرتا ہے جو انسٹاگرام کا ریل ایڈیٹر کھولتا ہے اور '
-          'آپ کی ریل پہلے ہی اس میں ہوتی ہے۔',
-      'Menambahkan tombol yang membuka editor reel Instagram '
-          'dengan reel Anda sudah di dalamnya.',
-      'Fügt eine Schaltfläche hinzu, die den Instagram-Reel-Editor '
-          'mit deinem Reel darin öffnet.');
   String get sectionStorage =>
       _t('STORAGE', 'التخزين', 'سٹوریج', 'PENYIMPANAN', 'SPEICHER');
   String get manageStorageSubtitle => _t(

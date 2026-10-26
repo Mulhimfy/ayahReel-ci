@@ -670,17 +670,15 @@ class _CardStudioScreenState extends State<CardStudioScreen> {
   // ---- export ------------------------------------------------------
 
   /// The apps Share to offers for a card. YouTube takes videos only, so
-  /// it is not among them; Instagram's two doors follow the reel's
-  /// setting for them, and WhatsApp's hand-off is Android's alone.
+  /// it is not among them; Instagram's two doors are offered wherever
+  /// its hand-off works, and WhatsApp's hand-off is Android's alone.
   List<ShareTarget> get _shareTargets {
-    final s = SettingsService.state.value;
-    final ig = InstagramShare.supported && s.instagramDirectShare;
+    final ig = InstagramShare.supported;
     return [
       if (ig) ...[ShareTarget.instagramPost, ShareTarget.instagramStory],
       ShareTarget.tiktok,
       ShareTarget.facebook,
-      if (defaultTargetPlatform == TargetPlatform.android &&
-          s.whatsappDirectShare)
+      if (defaultTargetPlatform == TargetPlatform.android)
         ShareTarget.whatsapp,
     ];
   }
