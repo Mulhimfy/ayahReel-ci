@@ -376,6 +376,35 @@ def letters(arabic):
     return n
 
 
+# The muqatta'at (الٓمٓ, حمٓ, طه: the words written with no vowel marks)
+# are recited as the letters' names, each as long as this many letters of
+# an ordinary word (ayahreel-words' text._SPOKEN): the six counts of
+# نقص عسلكم, the two of حي طهر.
+SPOKEN = {'ا': 3, 'ح': 3, 'ي': 3, 'ط': 3, 'ه': 3, 'ر': 3,
+          'ن': 8, 'ق': 8, 'ص': 8, 'ع': 8, 'س': 8, 'ل': 8, 'ك': 8, 'م': 8}
+_MARKS = set('\u064b\u064c\u064d\u064e\u064f\u0650\u0651\u0652')
+_TEXT = {}
+
+
+def verse_text(s, a):
+    if not _TEXT:
+        _TEXT.update(json.load(open(os.path.join(
+            ROOT, 'assets/quran_search.json'), encoding='utf8')))
+    return _TEXT[str(s)][a - 1]
+
+
+def spoken_extra(arabic):
+    """How many more letters [arabic] lasts as recited than letters()
+    counts it: its muqatta'at, by the letters' names."""
+    extra = 0
+    for w in arabic.split():
+        if set(w) & _MARKS:
+            continue
+        ls = [c for c in w if '\u0621' <= c <= '\u064a']
+        extra += sum(SPOKEN.get(c, 3) for c in ls) - len(ls)
+    return extra
+
+
 def model_ms():
     """ReelDuration's estimate for every verse, pace 1.0."""
     text = json.load(open(os.path.join(ROOT, 'assets/quran_search.json'),
@@ -932,14 +961,18 @@ def check_surah_voice(r, model, log):
     # Verse 1 has to start after the basmala, as the per-ayah files do:
     # the app shows verse 1 without it, so a table that folds it into
     # verse 1 would play it under the wrong text. Its sign is a verse 1
-    # that runs far longer than its letters allow.
+    # that runs far longer than its letters allow — its letters as
+    # recited: a verse 1 that opens with the muqatta'at (الٓمٓ, حمٓ) runs
+    # seconds past ReelDuration's count of them (Islam Sobhi's files of
+    # six such surahs open on verse 1 itself, and were taken for folded).
     folded = []
     for s_ in ok:
         if s_ in (1, 9):
             continue
         d = tables[s_][0]['end_time'] - tables[s_][0]['start_time']
-        if d - res['pace'] * model[(s_, 1)] > 4000 and \
-                tables[s_][0]['start_time'] < 1500:
+        want = res['pace'] * (model[(s_, 1)] +
+                              230 * spoken_extra(verse_text(s_, 1)))
+        if d - want > 4000 and tables[s_][0]['start_time'] < 1500:
             folded.append(s_)
     res['basmala_in_verse1'] = len(folded)
     if r.get('opening'):
