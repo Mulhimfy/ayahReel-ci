@@ -1,0 +1,235 @@
+# Android store builds on GitHub's Linux runners, straight to Google Play:
+# Codemagic's android-release (codemagic.yaml) and the Play upload
+# (play-upload.yml) in one run, while the Codemagic account's free build
+# minutes are used up.
+#
+#   garelease-<build>   `shorebird release android --build-number=<build>`,
+#                       then Play production for everyone, with the notes
+#                       in docs/store/release-notes/<version>/play.json
+#
+# <build> must equal the build number in pubspec.yaml. Pushing the tag
+# SHIPS: the Shorebird release is what later patches target, and Play
+# reviews the bundle and then gives it to every user. It is the user's
+# call (CLAUDE.md), and RELEASES.md gets the row.
+#
+# A release built here is patched from android-patch.yml with no asset
+# exception: same machine type, same line endings.
+#
+# If only the Play job fails, `gh run rerun <id> --failed` uploads the
+# same bundle again; a second build of the same number is refused by
+# Shorebird, and Play has spent the number once it took the upload.
+name: Android release
+
+on:
+  push:
+    tags: ['garelease-*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    env:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      TAG: ${{ github.ref_name }}
+    outputs:
+      build: ${{ steps.version.outputs.build }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Free disk space
+        run: |
+          df -h / | tail -1
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup \
+            /usr/local/share/boost /opt/hostedtoolcache/CodeQL /usr/share/swift \
+            /usr/local/share/powershell /usr/local/share/chromium \
+            /usr/local/lib/node_modules || true
+          df -h / | tail -1
+      - name: Version
+        id: version
+        run: |
+          set -euo pipefail
+          BUILD="${TAG#garelease-}"
+          VERSION=$(sed -n 's/^version: *\([^+ ]*\).*/\1/p' pubspec.yaml | head -1)
+          WANT=$(sed -n 's/^version: .*+//p' pubspec.yaml | head -1)
+          if [ "$BUILD" != "$WANT" ]; then
+            echo "Tag says build $BUILD, pubspec.yaml says $WANT." >&2
+            exit 1
+          fi
+          # kAppVersion must already say this version: the update prompt
+          # compares against it (tool/sync-version.sh).
+          bash tool/sync-version.sh > /dev/null
+          if ! git diff --quiet -- lib/data/app_version.dart; then
+            echo "lib/data/app_version.dart doesn't say $VERSION; run tool/sync-version.sh and commit." >&2
+            exit 1
+          fi
+          test -f "docs/store/release-notes/$VERSION/play.json" ||
+            { echo "No docs/store/release-notes/$VERSION/play.json." >&2; exit 1; }
+          # The Flutter the previews and tests use (flutter_version.txt);
+          # nothing is built if any of them uses another.
+          FLUTTER_VERSION=$(bash tool/check_flutter_version.sh)
+          echo "FLUTTER_VERSION=$FLUTTER_VERSION" >> "$GITHUB_ENV"
+          echo "Flutter $FLUTTER_VERSION"
+          echo "Android $VERSION+$BUILD"
+          echo "build=$BUILD" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Install Shorebird
+        run: |
+          set -euo pipefail
+          if [ -z "${SHOREBIRD_TOKEN:-}" ]; then
+            echo "SHOREBIRD_TOKEN is not set (repo Settings > Secrets > Actions)." >&2
+            exit 1
+          fi
+          curl --proto '=https' --tlsv1.2 -sSf \
+            https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | bash
+          for d in "$HOME/.config/shorebird/bin" "$HOME/.shorebird/bin"; do
+            if [ -x "$d/shorebird" ]; then echo "$d" >> "$GITHUB_PATH"; fi
+          done
+      # build.gradle.kts signs with whatever android/key.properties names
+      # and falls back to the debug key without it, which Play refuses: so
+      # no keystore, or one the secrets don't open, stops the build here.
+      - name: Signing
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          if [ -z "${KEYSTORE_B64:-}" ]; then
+            echo "No ANDROID_KEYSTORE_B64 secret." >&2
+            exit 1
+          fi
+          # Secrets set from PowerShell arrive with a BOM and CRLFs.
+          printf '%s' "$KEYSTORE_B64" | perl -pe 's/^\xEF\xBB\xBF//; s/[\r\n ]//g' \
+            | base64 -d > "$RUNNER_TEMP/upload.jks"
+          STORE_PASSWORD="${STORE_PASSWORD%$'\r'}"
+          KEY_PASSWORD="${KEY_PASSWORD%$'\r'}"
+          KEY_ALIAS="${KEY_ALIAS%$'\r'}"
+          # The upload key Play knows: SHA-1 C2:C9:DA:6D… (RELEASES.md).
+          SHA1=$(keytool -list -v -keystore "$RUNNER_TEMP/upload.jks" \
+            -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" | sed -n 's/^.*SHA1: *//p' | head -1)
+          echo "upload key SHA-1 ${SHA1:0:11}…"
+          case "$SHA1" in
+            C2:C9:DA:6D:*) ;;
+            *) echo "That is not the upload key Play knows." >&2; exit 1 ;;
+          esac
+          {
+            echo "storeFile=$RUNNER_TEMP/upload.jks"
+            echo "storePassword=$STORE_PASSWORD"
+            echo "keyPassword=$KEY_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+          } > android/key.properties
+          echo "UPLOAD_SHA1=$SHA1" >> "$GITHUB_ENV"
+      - name: Build AAB
+        env:
+          BUILD: ${{ steps.version.outputs.build }}
+          # Word timing's key (lib/data/words_host.dart). A Dart const:
+          # every patch of this release has to pass the same value.
+          WORDS_KEY: ${{ secrets.WORDS_KEY }}
+        run: |
+          set -euo pipefail
+          # JVM flags only: the runner has 16 GB, gradle.properties asks 8.
+          sed -i 's/-Xmx8G/-Xmx4G/' android/gradle.properties
+          shorebird --version
+          shorebird release android --flutter-version="$FLUTTER_VERSION" \
+            --build-number="$BUILD" -- --dart-define=WORDS_KEY="$WORDS_KEY" \
+            2>&1 | tee release.log
+          grep -q 'AyahReel version: ' release.log && grep 'AyahReel version: ' release.log | tail -1 || true
+      # Kept before anything else can fail: the Shorebird release exists
+      # now, and only this bundle matches it.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+          if-no-files-found: error
+      - name: Check the bundle
+        env:
+          BUILD: ${{ steps.version.outputs.build }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          ls -l "$AAB"
+          curl -sSfL -o "$RUNNER_TEMP/bundletool.jar" \
+            https://github.com/google/bundletool/releases/download/1.17.2/bundletool-all-1.17.2.jar
+          dump() { java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle "$AAB" --xpath "$1"; }
+          CODE=$(dump /manifest/@android:versionCode)
+          NAME=$(dump /manifest/@android:versionName)
+          PKG=$(dump /manifest/@package)
+          echo "package $PKG, versionCode $CODE, versionName $NAME"
+          [ "$PKG" = com.ayahreel.app ] && [ "$CODE" = "$BUILD" ] && [ "$NAME" = "$VERSION" ] ||
+            { echo "The bundle isn't com.ayahreel.app $VERSION ($BUILD)." >&2; exit 1; }
+          SIGNED=$(keytool -printcert -jarfile "$AAB" | sed -n 's/^.*SHA1: *//p' | head -1)
+          echo "signed by ${SIGNED:0:11}…"
+          [ "$SIGNED" = "$UPLOAD_SHA1" ] || { echo "Not signed with the upload key." >&2; exit 1; }
+          sha256sum "$AAB"
+          {
+            echo "### Android $VERSION+$BUILD"
+            echo '```'
+            echo "package $PKG, versionCode $CODE, versionName $NAME, upload key ${SIGNED:0:11}…"
+            ls -l "$AAB" | awk '{print $5" bytes"}'
+            grep -iE 'Published Release|release .* created|Flutter version|AyahReel version' release.log || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      # Artifacts of the public CI mirror are public, and GitHub masks
+      # secrets only in the job's own log, never in a file it wrote.
+      - name: Blank secrets out of the logs
+        if: always()
+        env:
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          WORDS_KEY: ${{ secrets.WORDS_KEY }}
+          REDACT_VARS: SHOREBIRD_TOKEN STORE_PASSWORD KEY_PASSWORD KEYSTORE_B64 WORDS_KEY
+        run: python3 tool/redact_logs.py release.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-release-logs
+          path: release.log
+          if-no-files-found: ignore
+
+  play:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: aab
+          path: ${{ runner.temp }}/aab
+      - uses: google-github-actions/auth@v2
+        id: gcp
+        with:
+          workload_identity_provider: projects/897971838089/locations/global/workloadIdentityPools/github/providers/freed
+          service_account: play-api@project-c649043d-4bc1-42f8-9b8.iam.gserviceaccount.com
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/androidpublisher
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Google Play production
+        env:
+          PLAY_TOKEN: ${{ steps.gcp.outputs.access_token }}
+          PLAY_AAB: ${{ runner.temp }}/aab/app-release.aab
+          PLAY_NOTES: docs/store/release-notes/${{ needs.build.outputs.version }}/play.json
+          PLAY_VERSION_CODE: ${{ needs.build.outputs.build }}
+        run: |
+          set -o pipefail
+          node tool/play_upload.mjs release 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
