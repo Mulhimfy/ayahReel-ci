@@ -194,10 +194,11 @@ the above, as a voice of its own, and then:
      hosts offer under his name for them, Way2Quran's As-Saffat,
      Az-Zumar, Ghafir and Al-Jathiya are another reciter's (0.30-0.54
      against his files), as are the same four in archive.org's
-     002_20261005_202610 (24 kbps m4a besides); At-Talaq can't be told
-     (0.69 and 0.75 against his files, 0.58 and 0.48 against his At-Tawbah
-     on Way2Quran); archive.org's Ghafir at 160 kbps is his
-     (SPEAKER_CHECKED). So he lacks 37, 39, 45 and 65.
+     002_20261005_202610 (24 kbps m4a besides): Ahmed Khedr's, by those
+     files' own tags; At-Talaq can't be told (0.64-0.75 against his files,
+     at 128 and 320 kbps; 0.48-0.64 against his At-Tawbah on Way2Quran);
+     archive.org's Ghafir and Al-Jathiya at 160 kbps, from his own
+     YouTube channel, are his (SPEAKER_CHECKED). So he lacks 37, 39 and 65.
 
 Results go to tool/reciters_verified.json; test/reciter_sources_test.dart
 refuses a build where a reciter in the app has no passing entry there,
@@ -304,12 +305,16 @@ USER_ACCEPTED = {
 # tool/verse_table.py speaker heard his voice in each: {voice: {surahs,
 # how}}.
 SPEAKER_CHECKED = {
-    'sobhi': dict(surahs=[40], how=(
-        'tool/verse_table.py speaker, ayahreel-words-ci tables run '
-        '40314478734 (2026-10-26): 0.742 against his own files (they come '
-        'to 0.75-0.93 of one another, eight other reciters to 0.27-0.64), '
-        "0.757 against Way2Quran's At-Tawbah of his (his files 0.49-0.76 "
-        "there, the others' 0.23-0.59)")),
+    'sobhi': dict(surahs=[40, 45], how=(
+        'tool/verse_table.py speaker, ayahreel-words-ci tables runs '
+        '40314478734 and 40349035948 (2026-10-26). Ghafir: 0.742 against '
+        'his own files (they come to 0.75-0.93 of one another, eight other '
+        "reciters to 0.27-0.64), 0.757 against Way2Quran's At-Tawbah of "
+        "his (his files 0.49-0.76 there, the others' 0.23-0.59). "
+        'Al-Jathiya: 0.865 against his own files (0.75-0.93; ten others, '
+        "Ahmed Khedr's two among them, to 0.27-0.64), 0.812 against the "
+        'Ghafir of the same uploader (his files 0.55-0.73 there, the '
+        "others' 0.17-0.56)")),
 }
 
 
