@@ -1707,7 +1707,7 @@
    }
   }
  ],
- "sobhi_all_24": [
+ "sobhi_all_fix": [
   {
    "id": "sobhi",
    "base": "https://cdn.mp3quran.net/audio/islam-sobhi/r1",
@@ -1752,10 +1752,11 @@
   {
    "id": "sobhi",
    "base": "https://cdn.mp3quran.net/audio/islam-sobhi/r1",
-   "surahs": "24",
+   "surahs": "24,52",
    "summary": false,
    "urls": {
-    "24": "https://archive.org/download/002_20221103_202211/024.mp3"
+    "24": "https://archive.org/download/002_20221103_202211/024.mp3",
+    "52": "https://archive.org/download/002_20221103_202211/052.mp3"
    }
   }
  ]
