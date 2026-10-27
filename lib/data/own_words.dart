@@ -162,8 +162,18 @@ abstract final class OwnWords {
   /// Sobhi came in a build the evening his timing was published, and a
   /// phone that had asked that morning played him with no word timing
   /// until the next day (2026-10-26).
+  ///
+  /// It opens with [timingEpoch], so a build made for a publish that
+  /// changed what the timing says asks again at once too.
   static String get voicesKey =>
-      ([for (final r in reciters) r.id]..sort()).join(',');
+      '$timingEpoch:${([for (final r in reciters) r.id]..sort()).join(',')}';
+
+  /// Bumped with a publish whose timing a build should not wait up to
+  /// [refreshEvery] for. 3: gate v3 (2026-10-27) took out every verse the
+  /// two models put seconds apart, which had run the lines and the light
+  /// ahead of Khalid Al-Jaleel and others.
+  @visibleForTesting
+  static const timingEpoch = 3;
 
   /// Whether the kept index will do: asked for less than [refreshEvery]
   /// ago, by a build with this one's voices.

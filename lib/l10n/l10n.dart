@@ -1276,14 +1276,16 @@ class L10n {
   String get wordLightShort => _t('Highlight word', 'إبراز الكلمة',
       'لفظ نمایاں', 'Sorot kata', 'Wort hervorheben');
 
-  /// Above the reel's frame while a verse no word timing reaches plays:
-  /// it goes without the per-word shading (the owner's ask, 2026-10-26).
-  String get noWordTimingHere => _t(
-      'This verse has no word timing · no per-word shading',
-      'لا توقيت لكلمات هذه الآية · بلا تظليل كلمة بكلمة',
-      'اس آیت کے الفاظ کی ٹائمنگ نہیں · لفظ بہ لفظ روشنی نہیں',
-      'Ayat ini tanpa waktu per kata · tanpa sorotan per kata',
-      'Dieser Vers hat keine Wort-Zeiten · keine Hervorhebung pro Wort');
+  /// Above the reel's frame while a verse no word timing reaches plays,
+  /// and under it in the verse picker: it goes without the per-word
+  /// highlight (the owner's ask, 2026-10-26). Said in what people see,
+  /// never "timing" (the owner, 2026-10-27: nobody knows the word).
+  String get noPerWordHere => _t(
+      'No per-word highlight on this verse',
+      'لا تمييز لكل كلمة في هذه الآية',
+      'اس آیت میں لفظ بہ لفظ نمایاں نہیں',
+      'Tanpa sorot per kata di ayat ini',
+      'Keine Wort-für-Wort-Hervorhebung in diesem Vers');
   String get dragToMoveVerse => _t('Drag to move the verse',
       'اسحب لتحريك الآية', 'آیت کھسکانے کے لیے کھینچیں',
       'Seret untuk memindahkan ayat', 'Zum Verschieben des Verses ziehen');

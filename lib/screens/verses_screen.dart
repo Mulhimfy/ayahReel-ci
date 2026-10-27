@@ -1451,7 +1451,7 @@ class _VerseTile extends StatelessWidget {
                       }),
                       if (untimed) ...[
                         const SizedBox(height: 6),
-                        _NoTimingLine(text: l.noWordTimingHere),
+                        _NoTimingLine(text: l.noPerWordHere),
                       ],
                     ],
                   ),

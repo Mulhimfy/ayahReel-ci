@@ -867,11 +867,14 @@ class _PreviewScreenState extends State<PreviewScreen>
         startAyah: _startAyah,
         endAyah: _endAyah,
         look: _look,
-        words: near == null ? sure : {...near, ...?sure},
-        // Asked for only when a verse that needs cutting has no word
-        // timing — every verse of a voice without it, and the few a
-        // voice timed by QUL has none for.
-        loudness: () => RecitationService.loudness(rec.audioPath),
+        // An app voice's always, if empty: a verse its timing doesn't
+        // reach is shown whole rather than cut on guessed breaths.
+        words: _reciter.isUserAudio ? null : {...?near, ...?sure},
+        // The user's own recording has no word timing, and its breaths
+        // are all there is to cut its long verses on.
+        loudness: _reciter.isUserAudio
+            ? () => RecitationService.loudness(rec.audioPath)
+            : null,
         keepGoing: () => mounted && gen == _planGen,
       );
     } catch (e, st) {
@@ -2882,7 +2885,7 @@ class _PreviewScreenState extends State<PreviewScreen>
                 child: AnimatedOpacity(
                   opacity: _untimedNow ? 1 : 0,
                   duration: const Duration(milliseconds: 250),
-                  child: _NoTimingNote(text: l.noWordTimingHere),
+                  child: _NoTimingNote(text: l.noPerWordHere),
                 ),
               ),
             Expanded(

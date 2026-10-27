@@ -159,26 +159,38 @@ void main() {
     }
   });
 
-  testWidgets('a voice timed elsewhere keeps a verse whole rather than '
-      'guess where its lines change', (t) async {
-    late VerseLinePlan plan;
-    await t.runAsync(() async {
-      plan = await VersePlanner.plan(
-        lines: 2,
-        ayahs: ayahs,
-        recitation: rec,
-        startAyah: 255,
-        endAyah: 256,
-        look: look,
-        // Word timing for another verse, none for this one, and a
-        // recording with no pauses to cut it on.
-        words: {256: alignment()[256] ?? const []},
-        loudness: () async =>
-            List<double>.generate(2700, (i) => i.isEven ? 50 : 70),
-      );
-    });
-    expect(plan.partsOf(255), isNull);
-    expect(plan.whole, greaterThanOrEqualTo(1));
+  testWidgets('an app voice\'s verse its timing doesn\'t reach stays whole, '
+      'breaths or none: a breath at every cut can be the wrong one',
+      (t) async {
+    for (final words in [
+      // Word timing for another verse, none for this one.
+      {256: alignment()[256] ?? const <WordSpan>[]},
+      // Timing that reaches none of the reel's verses.
+      <int, List<WordSpan>>{},
+    ]) {
+      var asked = false;
+      late VerseLinePlan plan;
+      await t.runAsync(() async {
+        plan = await VersePlanner.plan(
+          lines: 2,
+          ayahs: ayahs,
+          recitation: rec,
+          startAyah: 255,
+          endAyah: 256,
+          look: look,
+          words: words,
+          // A breath every 1.2 s: plenty to cut on, were it asked.
+          loudness: () async {
+            asked = true;
+            return List<double>.generate(
+                2700, (i) => i % 120 < 40 ? 20 : 70);
+          },
+        );
+      });
+      expect(plan.partsOf(255), isNull);
+      expect(plan.whole, greaterThanOrEqualTo(1));
+      expect(asked, isFalse, reason: 'no breath is looked for');
+    }
   });
 
   testWidgets('with no recording to time it by, a verse stays whole, and '

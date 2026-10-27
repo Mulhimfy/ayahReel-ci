@@ -69,11 +69,14 @@ abstract final class VersePlanner {
     required int endAyah,
     required VerseLook look,
 
-    /// The voice's word timing, by verse; null when it has none.
+    /// The voice's word timing, by verse: empty for an app voice whose
+    /// timing reaches none of these verses, null only for a recording
+    /// with none at all (the user's own).
     Map<int, List<WordSpan>>? words,
 
     /// The recording's loudness, asked for only when a verse needs
-    /// cutting and the voice has no word timing.
+    /// cutting and [words] is null: its breaths are the only clock a
+    /// recording with no word timing has.
     Future<List<double>?> Function()? loudness,
     bool Function()? keepGoing,
   }) async {
@@ -120,7 +123,12 @@ abstract final class VersePlanner {
           verseStartMs: t.startMs,
           verseEndMs: t.endMs,
         );
-      } else if (loudness != null) {
+      } else if (loudness != null && words == null) {
+        // Only a recording with no word timing at all is cut on its
+        // breaths. An app voice's verse its timing doesn't reach stays
+        // whole: a breath found at every cut can still be the wrong
+        // breath, and the lines then changed seconds ahead of the voice
+        // (Khalid Al-Jaleel's 5:2, the owner, 2026-10-27).
         if (!envAsked) {
           envAsked = true;
           env = await loudness();
@@ -167,15 +175,7 @@ abstract final class VersePlanner {
             voicedStartMs: p.voicedStart,
             voicedEndMs: p.voicedEnd,
           );
-          // A voice timed everywhere else (the rare verse neither of
-          // its tiers reaches) is cut only where every line change falls
-          // on a breath: a guessed one, placed by its letters alone, can
-          // put a line seconds off its words, and the verse is better
-          // whole (the owner, 2026-10-27). A recording with no timing at
-          // all, the user's own, is cut on its guesses as before.
-          bounds = placed == null || (words != null && placed.guessed > 0)
-              ? null
-              : placed.bounds;
+          bounds = placed?.bounds;
         }
       }
       // Neither timing could place the cuts: the verse is shown whole,

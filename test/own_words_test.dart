@@ -159,6 +159,17 @@ void main() {
             age: const Duration(hours: 1), askedFor: older.join(',')),
         isFalse);
     expect(OwnWords.keptIsCurrent(age: const Duration(hours: 1)), isFalse);
+    // An hour old, with every voice, but asked for before a publish this
+    // build was made for: asked again.
+    final ids = OwnWords.voicesKey.split(':').last;
+    expect(
+        OwnWords.keptIsCurrent(
+            age: const Duration(hours: 1),
+            askedFor: '${OwnWords.timingEpoch - 1}:$ids'),
+        isFalse);
+    expect(
+        OwnWords.keptIsCurrent(age: const Duration(hours: 1), askedFor: ids),
+        isFalse);
   });
 
   test('its words are placed on the voice\'s own per-ayah files as they '
