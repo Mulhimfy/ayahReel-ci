@@ -117,6 +117,28 @@ void main() {
     expect(OwnWords.sources.keys, [untimed.id]);
   });
 
+  test('the verses a voice\'s timing reaches are known before its audio',
+      () async {
+    OwnWords.debugSet(OwnWords.parseIndex({
+      'v': 1,
+      'voices': {untimed.id: entry(surahs: [112])},
+    }));
+    File('${dir.path}/o${untimed.id}_112.json')
+        .writeAsStringSync(jsonEncode(QulWords.encodeCompact({
+      1: const QulVerse(300, 2200, [(1, 300, 700), (2, 700, 1200),
+          (3, 1200, 1700), (4, 1700, 2200)]),
+      3: const QulVerse(0, 900, [(1, 0, 400), (2, 400, 900)]),
+    })));
+    // The picker marks verse 2 and 4 as having no word timing.
+    expect(await WordAlignService.timedVerses(untimed, 112), {1, 3});
+    // A surah the index doesn't name: not one of its verses.
+    expect(await WordAlignService.timedVerses(untimed, 113), isEmpty);
+  });
+
+  test('a voice nothing times has no timed verse', () async {
+    expect(await WordAlignService.timedVerses(untimed, 112), isEmpty);
+  });
+
   test('a kept index is asked for again when this build has other voices',
       () {
     // Asked for an hour ago by this very build: kept.

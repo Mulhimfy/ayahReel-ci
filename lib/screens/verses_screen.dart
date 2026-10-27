@@ -6,11 +6,13 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import '../data/live_recitation.dart';
 import '../data/models.dart';
+import '../data/own_words.dart';
 import '../data/settings_service.dart';
 import '../data/quran_repository.dart';
 import '../data/reel_duration.dart';
 import '../data/reel_limits.dart';
 import '../data/user_audio_service.dart';
+import '../data/word_align_service.dart';
 import '../l10n/l10n.dart';
 import '../state/creation_state.dart';
 import '../theme/app_theme.dart';
@@ -387,7 +389,27 @@ class _VersesScreenState extends State<VersesScreen>
     }
   }
 
+  /// The verses of the surah on screen that the voice's word timing
+  /// reaches. Every other verse says so on its tile, chosen or not (the
+  /// owner's ask, 2026-10-27). Null until known, offline, and for the
+  /// user's own recording.
+  Set<int>? _timed;
+
+  Future<void> _loadTimed() async {
+    final r = creationState.reciter;
+    final surah = _surah;
+    _timed = null;
+    if (r == null || r.isUserAudio) return;
+    // The index of the voices the app times itself may still be on its
+    // way at launch.
+    await OwnWords.init();
+    final timed = await WordAlignService.timedVerses(r, surah);
+    if (!mounted || _surah != surah) return;
+    setState(() => _timed = timed);
+  }
+
   Future<void> _loadAyahs() async {
+    unawaited(_loadTimed());
     setState(() {
       _ayahs = QuranRepository.ayahsIfCached(_surah);
       _loadError = null;
@@ -1004,11 +1026,13 @@ class _VersesScreenState extends State<VersesScreen>
           final isEdge = a.number == _start || a.number == _end;
           final reciting = a.number == lit;
           final here = reciting && _previewAyah == null;
+          final timed = _timed;
           final tile = _VerseTile(
             key: _keyFor(a.number),
             ayah: a,
             selected: selected,
             edge: isEdge,
+            untimed: timed != null && !timed.contains(a.number),
             reciting: reciting,
             // The light that moves with the voice is for the ayah the
             // voice is really on, not a pull's landing.
@@ -1291,6 +1315,10 @@ class _VerseTile extends StatelessWidget {
   final bool selected;
   final bool edge;
 
+  /// The voice's word timing doesn't reach this verse: said under its
+  /// meaning, whether it is chosen or not.
+  final bool untimed;
+
   /// The voice is on this ayah — or a pull of the line would land on it.
   final bool reciting;
 
@@ -1316,6 +1344,7 @@ class _VerseTile extends StatelessWidget {
     required this.ayah,
     required this.selected,
     required this.edge,
+    this.untimed = false,
     required this.reciting,
     required this.live,
     required this.sounding,
@@ -1420,6 +1449,10 @@ class _VerseTile extends StatelessWidget {
                           ).copyWith(fontStyle: FontStyle.normal),
                         );
                       }),
+                      if (untimed) ...[
+                        const SizedBox(height: 6),
+                        _NoTimingLine(text: l.noWordTimingHere),
+                      ],
                     ],
                   ),
                   ),
@@ -1916,6 +1949,34 @@ class _Fold extends StatelessWidget {
         ),
       ),
       child: child,
+    );
+  }
+}
+
+/// Under a verse the voice's word timing doesn't reach: one small line,
+/// there whether the verse is chosen or not.
+class _NoTimingLine extends StatelessWidget {
+  final String text;
+  const _NoTimingLine({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Icon(Icons.info_outline_rounded,
+            size: 12, color: AppColors.textSecondary),
+        const SizedBox(width: 5),
+        Flexible(
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 10.5,
+              height: 1.3,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

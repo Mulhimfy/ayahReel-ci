@@ -99,6 +99,28 @@ abstract final class WordAlignService {
   static bool supports(Reciter r) =>
       _alignFolderFor(r) != null || QulWords.supports(r);
 
+  /// The verses of [surah] that [r]'s word timing reaches, known before
+  /// any of its audio is had: the verse picker marks every other one
+  /// as having none (the owner's ask, 2026-10-27). Empty for a voice or
+  /// a surah nothing times; null when the timing can't be had just now
+  /// (offline), so nothing is said rather than something wrong.
+  static Future<Set<int>?> timedVerses(Reciter r, int surah) async {
+    if (r.isUserAudio) return null;
+    if (!supportsSurah(r, surah)) return const {};
+    final src = QulWords.sourceOf(r);
+    if (src != null) {
+      final verses = await QulWords.versesOf(src, surah);
+      return verses?.keys.toSet();
+    }
+    final spans = await load(r, surah);
+    return spans == null
+        ? null
+        : {
+            for (final e in spans.entries)
+              if (e.value.isNotEmpty) e.key,
+          };
+  }
+
   /// Whether [r] has word timing in [surah]: what a reel of that surah
   /// can follow word by word. A voice timed only in part has it in some
   /// surahs and not others — the app's own timing publishes only the
