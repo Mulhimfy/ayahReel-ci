@@ -23,6 +23,7 @@ import '../data/gallery_saver.dart';
 import '../data/instagram_share.dart';
 import '../data/media_aspect.dart';
 import '../data/models.dart';
+import '../data/own_words.dart';
 import '../data/quran_repository.dart';
 import '../data/recitation_service.dart';
 import '../data/trouble.dart';
@@ -456,17 +457,25 @@ class _PreviewScreenState extends State<PreviewScreen>
 
   late int _ayahIndex = _startAyah - 1;
 
+  /// Whether the voice's word timing is settled: in, or known not to be
+  /// had (a voice nothing times, or a fetch that brought none).
+  bool _timingKnown = false;
+
   /// The reel's verses the voice's word timing does not reach: no
-  /// per-word shading there (said under the highlight switch). Empty
-  /// until the timing is in, and for a voice with none at all.
+  /// per-word shading there. Every verse of a voice with none; nothing
+  /// until the timing has settled, and nothing for the user's own
+  /// recording, which says how its light goes in a note of its own.
   List<int> get _untimedVerses {
+    if (!_timingKnown || _reciter.isUserAudio) return const [];
     final spans = _spans;
-    if (spans == null || _hlPlan == null) return const [];
     return [
       for (var a = _startAyah; a <= _endAyah; a++)
-        if (spans[a] == null || spans[a]!.isEmpty) a,
+        if (spans?[a] == null || spans![a]!.isEmpty) a,
     ];
   }
+
+  /// The verse playing is one of [_untimedVerses].
+  bool get _untimedNow => _untimedVerses.contains(_ayahIndex + 1);
 
   /// Word-highlight windows for the selection (null: no data for this
   /// voice, still fetching, or selection too long — card stays whole).
@@ -1793,9 +1802,10 @@ class _PreviewScreenState extends State<PreviewScreen>
   /// the light (see [_nearTimes]). Best-effort: without it those verses
   /// are crossed at an even pace, as they always were.
   Future<void> _loadNear() async {
+    await _ownIndex();
     final rec = _recitation;
     final ayahs = _ayahs;
-    if (rec == null || ayahs == null) return;
+    if (rec == null || ayahs == null || !mounted) return;
     final near = await WordAlignService.loadNear(_reciter,
         recitation: rec, ayahs: ayahs);
     if (!mounted || near == null || !identical(rec, _recitation)) return;
@@ -1865,21 +1875,35 @@ class _PreviewScreenState extends State<PreviewScreen>
     _restyled();
   }
 
+  /// The index of the voices the app times itself, asked for at launch:
+  /// waited for (a few seconds at most) before a voice is taken to have
+  /// no word timing, or a reel opened right after launch, or after an
+  /// update that brought a voice, plays it untimed.
+  Future<void> _ownIndex() => OwnWords.init()
+      .timeout(const Duration(seconds: 8), onTimeout: () {});
+
   /// Fetches word-timing data for this voice (one-time download shared
   /// by all reciters, cached forever) and derives the highlight plan.
   /// Best-effort: any failure just leaves the whole-ayah card.
   Future<void> _loadHighlight() async {
-    if (!WordAlignService.supports(_reciter)) return;
+    await _ownIndex();
+    if (!mounted) return;
+    if (!WordAlignService.supports(_reciter)) {
+      setState(() => _timingKnown = true);
+      return;
+    }
     final spans = await WordAlignService.load(_reciter, _surah,
         recitation: _recitation, ayahs: _ayahs);
     if (!mounted || _recitation == null) return;
     if (spans == null) {
       // No word timing after all: long verses are cut on the pauses.
       _spansFailed = true;
+      setState(() => _timingKnown = true);
       unawaited(_replanLines());
       return;
     }
     setState(() {
+      _timingKnown = true;
       _spans = spans;
       _trueTimes =
           VersePlanner.wordTimes(_ayahs!, spans, _startAyah, _endAyah);
@@ -2812,6 +2836,20 @@ class _PreviewScreenState extends State<PreviewScreen>
             // top, until put away (OwnAudioNote).
             if (_reciter.isUserAudio)
               const OwnAudioNote(padding: EdgeInsets.fromLTRB(16, 0, 16, 8)),
+            // A verse no word timing reaches plays without per-word
+            // shading: said just above the frame while it plays (the
+            // owner, 2026-10-26). Its line keeps its room for the whole
+            // reel once a verse of it is known to need it, so the frame
+            // doesn't jump from verse to verse.
+            if (_untimedVerses.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 6),
+                child: AnimatedOpacity(
+                  opacity: _untimedNow ? 1 : 0,
+                  duration: const Duration(milliseconds: 250),
+                  child: _NoTimingNote(text: l.noWordTimingHere),
+                ),
+              ),
             Expanded(
               child: Center(
                 child: ClipRRect(
@@ -3140,23 +3178,6 @@ class _PreviewScreenState extends State<PreviewScreen>
                       ],
                       ),
                     ),
-                    // The verses no word timing reaches play without the
-                    // per-word shading: said under the switch, by number.
-                    if (_untimedVerses.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 2),
-                        child: Text(
-                          l.noWordTimingFor(_untimedVerses),
-                          textAlign: TextAlign.center,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    fontSize: 10.5,
-                                    height: 1.35,
-                                    color: AppColors.textSecondary
-                                        .withValues(alpha: 0.85),
-                                  ),
-                        ),
-                      ),
                   ],
                   const SizedBox(height: 8),
                   if (_rendering) ...[
@@ -4311,6 +4332,33 @@ class _DedicatePill extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// One small line: the verse playing has no word timing.
+class _NoTimingNote extends StatelessWidget {
+  final String text;
+  const _NoTimingNote({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final style = Theme.of(context).textTheme.bodySmall?.copyWith(
+          fontSize: 11,
+          height: 1.3,
+          color: AppColors.textSecondary,
+        );
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.info_outline_rounded,
+            size: 13, color: AppColors.textSecondary),
+        const SizedBox(width: 5),
+        Flexible(
+          child: Text(text,
+              textAlign: TextAlign.center, maxLines: 2, style: style),
+        ),
+      ],
     );
   }
 }

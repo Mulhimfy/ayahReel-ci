@@ -20,6 +20,7 @@ import '../widgets/ambient_motion.dart';
 import '../widgets/illumination.dart';
 import '../widgets/discover_sheet.dart';
 import '../widgets/feedback_sheet.dart';
+import '../widgets/light_sweep_text.dart';
 import '../widgets/name_dialog.dart';
 import '../widgets/nudge_dot.dart';
 import '../widgets/rate_sheet.dart';
@@ -232,6 +233,7 @@ class _SettingsScreenState extends State<SettingsScreen>
                 icon: Icons.send_rounded,
                 title: l.joinTelegramTitle,
                 dot: !s.telegramNudgeSeen,
+                sweep: true,
                 onTap: () {
                   _seen(telegramNudge: true);
                   _openUrl(context, _telegramChannelUrl);
@@ -602,17 +604,28 @@ class _RowLine extends StatelessWidget {
   final bool dot;
   final List<Widget> trailing;
 
+  /// A band of light passes through the title every few seconds.
+  final bool sweep;
+
   const _RowLine({
     required this.icon,
     required this.iconColor,
     required this.title,
     required this.dot,
     required this.trailing,
+    this.sweep = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
+    final style = t.bodyMedium?.copyWith(
+          fontSize: 13.5,
+          height: 1.2,
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.w500,
+        ) ??
+        const TextStyle(fontSize: 13.5, color: AppColors.textPrimary);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 9, 16, 9),
       child: Row(
@@ -623,17 +636,19 @@ class _RowLine extends StatelessWidget {
             child: Row(
               children: [
                 Flexible(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: t.bodyMedium?.copyWith(
-                      fontSize: 13.5,
-                      height: 1.2,
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  child: sweep
+                      ? LightSweepText(
+                          text: title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: style,
+                        )
+                      : Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: style,
+                        ),
                 ),
                 const SizedBox(width: 7),
                 NudgeDot(on: dot, size: 6.5),
@@ -762,6 +777,10 @@ class _NavRow extends StatelessWidget {
   /// say that tapping it offers the others.
   final String? hint;
 
+  /// A band of light passes through the title every few seconds: the
+  /// one row the owner wants the eye drawn to (Telegram, 2026-10-27).
+  final bool sweep;
+
   const _NavRow({
     required this.icon,
     required this.title,
@@ -770,6 +789,7 @@ class _NavRow extends StatelessWidget {
     this.trailing,
     this.trailingIcon,
     this.hint,
+    this.sweep = false,
   });
 
   @override
@@ -787,6 +807,7 @@ class _NavRow extends StatelessWidget {
         iconColor: AppColors.gold,
         title: title,
         dot: dot,
+        sweep: sweep,
         trailing: [
           if (trailing != null && trailing!.isNotEmpty)
             Flexible(child: _Trailing(trailing!)),

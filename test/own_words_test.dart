@@ -117,6 +117,28 @@ void main() {
     expect(OwnWords.sources.keys, [untimed.id]);
   });
 
+  test('a kept index is asked for again when this build has other voices',
+      () {
+    // Asked for an hour ago by this very build: kept.
+    expect(
+        OwnWords.keptIsCurrent(
+            age: const Duration(hours: 1), askedFor: OwnWords.voicesKey),
+        isTrue);
+    // A day old: asked again.
+    expect(
+        OwnWords.keptIsCurrent(
+            age: const Duration(hours: 21), askedFor: OwnWords.voicesKey),
+        isFalse);
+    // An hour old, but asked for by a build without the newest voice, or
+    // by one from before the voices were kept beside it: asked again.
+    final older = OwnWords.voicesKey.split(',')..removeLast();
+    expect(
+        OwnWords.keptIsCurrent(
+            age: const Duration(hours: 1), askedFor: older.join(',')),
+        isFalse);
+    expect(OwnWords.keptIsCurrent(age: const Duration(hours: 1)), isFalse);
+  });
+
   test('its words are placed on the voice\'s own per-ayah files as they '
       'are', () async {
     OwnWords.debugSet(OwnWords.parseIndex({

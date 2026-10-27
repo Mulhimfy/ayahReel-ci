@@ -1272,28 +1272,18 @@ class L10n {
       'تلاوت شدہ لفظ نمایاں کریں',
       'Sorot kata yang dibaca',
       'Rezitiertes Wort hervorheben');
-  /// Under that switch: the reel's verses no word timing reaches, which
-  /// play without the per-word shading (the owner's ask, 2026-10-26).
-  String noWordTimingFor(List<int> verses) {
-    final shown = verses.length > 8
-        ? '${verses.take(8).join('$comma ')}$comma …'
-        : verses.join('$comma ');
-    final one = verses.length == 1;
-    return one
-        ? _t('No word timing for verse $shown: it plays without per-word shading.',
-            'لا توقيت للكلمات في الآية $shown: تُعرض دون تظليل كلمة بكلمة.',
-            'آیت $shown کے الفاظ کی ٹائمنگ نہیں: یہ لفظ بہ لفظ روشنی کے بغیر چلے گی۔',
-            'Ayat $shown tanpa waktu per kata: tampil tanpa sorotan per kata.',
-            'Keine Wort-Zeiten für Vers $shown: er läuft ohne Hervorhebung Wort für Wort.')
-        : _t('No word timing for verses $shown: they play without per-word shading.',
-            'لا توقيت للكلمات في الآيات $shown: تُعرض دون تظليل كلمة بكلمة.',
-            'آیات $shown کے الفاظ کی ٹائمنگ نہیں: یہ لفظ بہ لفظ روشنی کے بغیر چلیں گی۔',
-            'Ayat $shown tanpa waktu per kata: tampil tanpa sorotan per kata.',
-            'Keine Wort-Zeiten für die Verse $shown: sie laufen ohne Hervorhebung Wort für Wort.');
-  }
   /// The same, where a line has room for two words.
   String get wordLightShort => _t('Highlight word', 'إبراز الكلمة',
       'لفظ نمایاں', 'Sorot kata', 'Wort hervorheben');
+
+  /// Above the reel's frame while a verse no word timing reaches plays:
+  /// it goes without the per-word shading (the owner's ask, 2026-10-26).
+  String get noWordTimingHere => _t(
+      'This verse has no word timing · no per-word shading',
+      'لا توقيت لكلمات هذه الآية · بلا تظليل كلمة بكلمة',
+      'اس آیت کے الفاظ کی ٹائمنگ نہیں · لفظ بہ لفظ روشنی نہیں',
+      'Ayat ini tanpa waktu per kata · tanpa sorotan per kata',
+      'Dieser Vers hat keine Wort-Zeiten · keine Hervorhebung pro Wort');
   String get dragToMoveVerse => _t('Drag to move the verse',
       'اسحب لتحريك الآية', 'آیت کھسکانے کے لیے کھینچیں',
       'Seret untuk memindahkan ayat', 'Zum Verschieben des Verses ziehen');

@@ -62,9 +62,9 @@ abstract final class OwnWords {
       final f = await _file();
       if (f.existsSync()) {
         _sources = parseIndex(jsonDecode(await f.readAsString()));
-        if (DateTime.now().difference(f.lastModifiedSync()) < refreshEvery) {
-          return;
-        }
+        final asked = await _askedFor();
+        final age = DateTime.now().difference(f.lastModifiedSync());
+        if (keptIsCurrent(age: age, askedFor: asked)) return;
       }
     } catch (e) {
       rlog('own words: kept index unreadable ($e)');
@@ -83,6 +83,7 @@ abstract final class OwnWords {
       final parsed = parseIndex(jsonDecode(res.body));
       _sources = parsed;
       await writeWhole(await _file(), res.body);
+      await writeWhole(await _askedFile(), voicesKey);
       rlog('own words: ${parsed.length} voice(s) timed');
     } catch (e) {
       rlog('own words: index not fetched ($e)');
@@ -155,9 +156,38 @@ abstract final class OwnWords {
   /// What a revision may look like: it becomes part of a file name.
   static final _rev = RegExp(r'^[0-9a-f]{1,40}$');
 
+  /// The voices this build has, as one line: kept beside the index it
+  /// asked for. A build with a voice the kept index was not asked for
+  /// asks again at once, rather than up to [refreshEvery] later: Islam
+  /// Sobhi came in a build the evening his timing was published, and a
+  /// phone that had asked that morning played him with no word timing
+  /// until the next day (2026-10-26).
+  static String get voicesKey =>
+      ([for (final r in reciters) r.id]..sort()).join(',');
+
+  /// Whether the kept index will do: asked for less than [refreshEvery]
+  /// ago, by a build with this one's voices.
+  @visibleForTesting
+  static bool keptIsCurrent({required Duration age, String? askedFor}) =>
+      age < refreshEvery && askedFor == voicesKey;
+
+  static Future<String?> _askedFor() async {
+    try {
+      final f = await _askedFile();
+      return f.existsSync() ? (await f.readAsString()).trim() : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   static Future<File> _file() async {
     final dir = debugDir ?? await getApplicationSupportDirectory();
     return File('${dir.path}/own_words_index.json');
+  }
+
+  static Future<File> _askedFile() async {
+    final dir = debugDir ?? await getApplicationSupportDirectory();
+    return File('${dir.path}/own_words_index.voices');
   }
 
   @visibleForTesting
