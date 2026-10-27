@@ -171,9 +171,12 @@ abstract final class OwnWords {
   /// Bumped with a publish whose timing a build should not wait up to
   /// [refreshEvery] for. 3: gate v3 (2026-10-27) took out every verse the
   /// two models put seconds apart, which had run the lines and the light
-  /// ahead of Khalid Al-Jaleel and others.
+  /// ahead of Khalid Al-Jaleel and others. 4: gate v4 (the same day) asks
+  /// a third model about the verses v3 left out or unvouched: measured,
+  /// half as many verses run ahead of the voice, and more of them are lit
+  /// word by word.
   @visibleForTesting
-  static const timingEpoch = 3;
+  static const timingEpoch = 4;
 
   /// Whether the kept index will do: asked for less than [refreshEvery]
   /// ago, by a build with this one's voices.
