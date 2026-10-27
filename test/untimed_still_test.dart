@@ -79,6 +79,9 @@ void main() {
     await t.pumpWidget(stage(clock, even: false));
     expect(find.byType(VerseFlourish), findsOneWidget, reason: 'timed');
     clock.value = 4000;
+    // The verse before fades out over 450 ms, its light with it.
+    await t.pump();
+    await t.pump(const Duration(milliseconds: 600));
     await t.pump();
     expect(find.byType(VerseFlourish), findsNothing, reason: 'untimed');
   });
