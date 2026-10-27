@@ -43,6 +43,14 @@ class VerseStage extends StatefulWidget {
   /// Each verse's tokens' recited windows, for the thread and the light.
   final Map<int, List<(int, int)?>>? wordTimes;
 
+  /// Whether a verse [wordTimes] has nothing for is crossed at an even
+  /// pace by the thread and the light, or left still. An app voice
+  /// leaves it still: a light guessed across a verse its timing doesn't
+  /// reach ran seconds ahead of the voice (Khalid Al-Jaleel's 5:2, the
+  /// owner's report of 2026-10-27). The user's own recording, with no
+  /// timing at all, keeps the even pace.
+  final bool evenWithoutTimes;
+
   final double width;
   final Color textColor;
   final Color accent;
@@ -77,6 +85,7 @@ class VerseStage extends StatefulWidget {
     required this.words,
     required this.highlight,
     required this.wordTimes,
+    this.evenWithoutTimes = true,
     required this.width,
     required this.textColor,
     required this.accent,
@@ -209,7 +218,8 @@ class _VerseStageState extends State<VerseStage> {
       highlightTokens: w.lit,
       dimFrom: w.dimFrom,
     );
-    if (m.thread || m.light) {
+    if ((m.thread || m.light) &&
+        (widget.evenWithoutTimes || u.ayah == 0 || _timesOf(i) != null)) {
       final fit = u.part?.fit ??
           AyahOverlay.fitFor(ayah, showTranslation: widget.showTranslation);
       card = VerseFlourish(

@@ -1482,6 +1482,7 @@ class _PreviewScreenState extends State<PreviewScreen>
         highlight: _wordHl ? _hlPlan : null,
         words: _hlPlan,
         wordTimes: _wordTimes,
+        evenWithoutTimes: _reciter.isUserAudio,
         lines: _linePlan,
         motion: _motion,
         surahTitle: _titleOn,
@@ -1859,6 +1860,10 @@ class _PreviewScreenState extends State<PreviewScreen>
     final ayahs = _ayahs;
     if (rec == null || ayahs == null) return;
     if (!_motion.thread && !_motion.light) return;
+    // An app voice's verse that neither tier reaches stays still (see
+    // VerseStage.evenWithoutTimes): its pauses are for the user's own
+    // recording alone.
+    if (!_reciter.isUserAudio) return;
     if (WordAlignService.supports(_reciter) &&
         _spans == null &&
         !_spansFailed) {
@@ -2802,6 +2807,7 @@ class _PreviewScreenState extends State<PreviewScreen>
         words: _hlPlan,
         highlight: _wordHl,
         wordTimes: _wordTimes,
+        evenWithoutTimes: _reciter.isUserAudio,
         width: box.maxWidth,
         translation: _edition,
         numbering: _numbering,

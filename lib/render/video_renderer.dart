@@ -871,6 +871,10 @@ abstract final class VideoRenderer {
     /// and they cross each line at an even pace instead.
     Map<int, List<(int, int)?>>? wordTimes,
 
+    /// Whether a verse [wordTimes] has nothing for is crossed at an even
+    /// pace, or left still: see VerseStage.evenWithoutTimes.
+    bool evenWithoutTimes = true,
+
     /// Long verses cut into lines; null or empty shows every verse
     /// whole, on exactly the path it always took.
     VerseLinePlan? lines,
@@ -988,7 +992,7 @@ abstract final class VideoRenderer {
         // Only when a verse is cut, or the verse moves, for the same
         // reason again.
         '${lines == null || lines.isEmpty ? '' : '_L${lines.fingerprint}'}'
-        '${motion.isNone ? '' : '_M${motion.key}${_wordTimesFingerprint(wordTimes)}'}'
+        '${motion.isNone ? '' : '_M${motion.key}${_wordTimesFingerprint(wordTimes)}${evenWithoutTimes ? '' : '_s'}'}'
         // The light takes the accent's colour since 2026-10-21; a glint
         // cached in gold under another accent is drawn again.
         '${motion.light && !AyahOverlay.isHouseGold(AyahOverlay.lightTintOf(Color(accentArgb), accentInk)) ? '_gc' : ''}'
@@ -1385,6 +1389,7 @@ abstract final class VideoRenderer {
         highlight: highlight,
         words: words,
         wordTimes: wordTimes,
+        evenWithoutTimes: evenWithoutTimes,
         basmala: opening,
         keepGoing: () => gen == _generation,
         onUnit: showPrep && onProgress != null
@@ -2595,6 +2600,7 @@ abstract final class VideoRenderer {
     required Map<int, List<HighlightSpan>>? highlight,
     required Map<int, List<HighlightSpan>>? words,
     required Map<int, List<(int, int)?>>? wordTimes,
+    bool evenWithoutTimes = true,
     required Future<({File file, double height, List<VerseRow> rows})>
             Function(Ayah ayah, VersePart? part, String name,
                 {({int start, int end})? lit,
@@ -2655,22 +2661,29 @@ abstract final class VideoRenderer {
         clips.add(_OverlayClip(c.file, w.startMs, w.endMs, c.height,
             unitStartMs: u.startMs, unitEndMs: u.endMs));
       }
+      final times = u.timesIn(wordTimes?[u.ayah], verseStart);
+      // A verse an app voice's timing doesn't reach: no thread and no
+      // light over it, rather than ones guessed seconds off its words.
+      // The basmala's card (unit 0) keeps its even pace: four short
+      // words, which no timing reaches anyway.
+      final still = times == null && !evenWithoutTimes && u.ayah != 0;
       File? glint;
-      if (motion.light && rows.isNotEmpty) {
+      if (motion.light && rows.isNotEmpty && !still) {
         glint =
             (await draw(ayah, u.part, 'glint', glint: true, bare: bare)).file;
       }
-      final times = u.timesIn(wordTimes?[u.ayah], verseStart);
       final voiced = VerseRows.voicedIn(u.durationMs);
       final progress = rows.isEmpty
           ? const <RowProgress>[]
           : times != null
               ? [for (final r in rows) r.progressFromWords(times, 0)]
-              : VerseRows.even(
-                  rows,
-                  VerseUnitCard.textOf(ayah, u.part).arabic.split(' '),
-                  voiced.fromMs,
-                  voiced.toMs);
+              : still
+                  ? [for (final r in rows) RowProgress(const [], r.width)]
+                  : VerseRows.even(
+                      rows,
+                      VerseUnitCard.textOf(ayah, u.part).arabic.split(' '),
+                      voiced.fromMs,
+                      voiced.toMs);
       shows.add(_UnitShow(
         u.startMs,
         u.endMs,

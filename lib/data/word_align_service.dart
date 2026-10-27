@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:math' as math;
 
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
@@ -171,7 +172,8 @@ abstract final class WordAlignService {
         if (spans != null && spans.isNotEmpty) out[e.key] = spans;
       }
       rlog('align: ${reciter.id} near words on ${out.length} verse(s)');
-      return out.isEmpty ? null : out;
+      final kept = believable(out, limitsFor(reciter), near: true);
+      return kept.isEmpty ? null : kept;
     } catch (e) {
       rlog('align: near words for ${reciter.id} failed ($e)');
       return null;
@@ -203,7 +205,9 @@ abstract final class WordAlignService {
         }
         rlog('align: ${reciter.id} words placed on ${out.length} of '
             '${recitation.timings.length} verses');
-        return out.isEmpty ? null : out;
+        return out.isEmpty
+            ? null
+            : believable(out, limitsFor(reciter), near: false);
       } catch (e) {
         rlog('align: qul words for ${reciter.id} failed ($e)');
         return null;
@@ -236,7 +240,10 @@ abstract final class WordAlignService {
         _loadedFolder = folder;
         _loadedData = parsed;
       }
-      return _loadedData![surah];
+      final spans = _loadedData![surah];
+      return spans == null
+          ? null
+          : believable(spans, limitsFor(reciter), near: false);
     } catch (e) {
       rlog('align: load failed for $folder ($e)');
       return null;
@@ -389,7 +396,11 @@ abstract final class WordAlignService {
     try {
       final placed = await QulWords.forClip(reciter, surah, clip);
       if (placed == null) return null;
-      return fromMushafWords(ayahs[clip.ayah - 1].arabic, placed);
+      final spans = fromMushafWords(ayahs[clip.ayah - 1].arabic, placed);
+      return spans == null
+          ? null
+          : believable({clip.ayah: spans}, limitsFor(reciter),
+              near: false)[clip.ayah];
     } catch (e) {
       rlog('align: qul words for ${reciter.id} $surah:${clip.ayah} '
           'failed ($e)');
@@ -509,6 +520,55 @@ abstract final class WordAlignService {
     final start = letterAt[startWord];
     final end = endWord < letterAt.length ? letterAt[endWord] : tokens.length;
     return (start: start, end: end);
+  }
+
+  /// How long one word may last, and a pause between two, before a
+  /// verse's timing is not believed (see [believable]). Measured on the
+  /// published timing (2026-10-27): a vouched murattal word lasts 3.4 to
+  /// 6.2 s at its 99.9th percentile, a mujawwad one 4.7 to 9.2 s; past
+  /// twice that, a near-tier word has swallowed a pause, a cry or the
+  /// next verse, and where its start is early the light and the lines
+  /// go seconds ahead of the voice (the owner's reports of 2026-10-27).
+  static ({int word, int gap}) limitsFor(Reciter r) =>
+      r.style.startsWith('Mujawwad')
+          ? (word: 20000, gap: 15000)
+          : (word: 10000, gap: 8000);
+
+  /// [spans] as far as they can be believed. A near-tier verse with a
+  /// word or a pause past [limits] is dropped: it is then untimed, and
+  /// still, rather than followed seconds off (5% of murattal's near
+  /// verses, 9% of mujawwad's). A vouched verse keeps its words, a word
+  /// past the limit cut back to it: what was seen is a last word run on
+  /// into the next verse (Khalid Al-Jaleel's 5:1, 119 s) or a verse of
+  /// one word spanning the rest of the surah.
+  @visibleForTesting
+  static Map<int, List<WordSpan>> believable(
+      Map<int, List<WordSpan>> spans, ({int word, int gap}) limits,
+      {required bool near}) {
+    final out = <int, List<WordSpan>>{};
+    for (final e in spans.entries) {
+      final s = e.value;
+      if (s.isEmpty) continue;
+      int most(WordSpan w) =>
+          limits.word * math.max(1, w.endWord - w.startWord);
+      var bad = false;
+      for (var i = 0; i < s.length && !bad; i++) {
+        if (s[i].endMs - s[i].startMs > most(s[i])) bad = true;
+        if (i > 0 && s[i].startMs - s[i - 1].endMs > limits.gap) bad = true;
+      }
+      if (!bad) {
+        out[e.key] = s;
+      } else if (!near) {
+        out[e.key] = [
+          for (final w in s)
+            w.endMs - w.startMs > most(w)
+                ? WordSpan(w.startWord, w.endWord, w.startMs,
+                    w.startMs + most(w))
+                : w,
+        ];
+      }
+    }
+    return out;
   }
 
   /// Each display token's recited window in [arabic], in ms from the
