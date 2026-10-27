@@ -494,8 +494,8 @@ class _PreviewScreenState extends State<PreviewScreen>
   /// is word-timed, [_nearTimes] for the verses its timing published
   /// without vouching for them, and [_breathTimes] for the verses
   /// neither has; the truer one wins where several are in. Only the
-  /// motions read it: the lit word, the trail, the unveil and the lines'
-  /// cuts go by [_spans] alone.
+  /// motions read it: the lit word, the trail and the unveil go by
+  /// [_spans] alone, and the lines' cuts by [_spans] and [_nearSpans].
   Map<int, List<(int, int)?>>? _wordTimes;
 
   /// The windows from [_spans].
@@ -506,6 +506,17 @@ class _PreviewScreenState extends State<PreviewScreen>
   /// pace, a second and more off where the reciter breathes, followed
   /// instead as a model placed its words.
   Map<int, List<(int, int)?>>? _nearTimes;
+
+  /// The near tier's own word spans: what times the lines of a long
+  /// verse the vouched timing doesn't reach. Placed by a model, a word
+  /// is a few tenths of a second off at worst, where the breaths the
+  /// lines were timed by before could put a line seconds ahead of its
+  /// words (Al-Hudhaify's 5:2, the owner's report of 2026-10-27).
+  Map<int, List<WordSpan>>? _nearSpans;
+
+  /// Whether the near tier has been asked for and has answered,
+  /// whatever it said: the lines are planned once, after it.
+  bool _nearSettled = false;
 
   /// The windows the recording's own pauses give the verses nothing
   /// else times (see [BreathPace]): every verse of an upload, and the
@@ -840,9 +851,13 @@ class _PreviewScreenState extends State<PreviewScreen>
       _applyPlan(null);
       return;
     }
-    if (WordAlignService.supports(_reciter) && _spans == null && !_spansFailed) {
+    // A voice with word timing is planned once both tiers have
+    // answered: the near tier times the lines the vouched one doesn't.
+    if (WordAlignService.supports(_reciter) &&
+        ((_spans == null && !_spansFailed) || !_nearSettled)) {
       return;
     }
+    final sure = _spans, near = _nearSpans;
     VerseLinePlan plan;
     try {
       plan = await VersePlanner.plan(
@@ -852,7 +867,7 @@ class _PreviewScreenState extends State<PreviewScreen>
         startAyah: _startAyah,
         endAyah: _endAyah,
         look: _look,
-        words: _spans,
+        words: near == null ? sure : {...near, ...?sure},
         // Asked for only when a verse that needs cutting has no word
         // timing — every verse of a voice without it, and the few a
         // voice timed by QUL has none for.
@@ -1805,14 +1820,28 @@ class _PreviewScreenState extends State<PreviewScreen>
     await _ownIndex();
     final rec = _recitation;
     final ayahs = _ayahs;
-    if (rec == null || ayahs == null || !mounted) return;
+    if (!mounted) return;
+    if (rec == null || ayahs == null) {
+      // Nothing to place it on: the lines are not held up for it.
+      _nearSettled = true;
+      return;
+    }
     final near = await WordAlignService.loadNear(_reciter,
         recitation: rec, ayahs: ayahs);
-    if (!mounted || near == null || !identical(rec, _recitation)) return;
+    if (!mounted || !identical(rec, _recitation)) return;
+    if (near == null) {
+      _nearSettled = true;
+      unawaited(_replanLines());
+      return;
+    }
     setState(() {
+      _nearSpans = near;
+      _nearSettled = true;
       _nearTimes = VersePlanner.wordTimes(ayahs, near, _startAyah, _endAyah);
       _wordTimes = _mergedTimes;
     });
+    // Its long verses' lines are timed by its words now.
+    unawaited(_replanLines());
     // The eager render drew those verses at an even pace.
     if (_motion.thread || _motion.light) _restyled();
   }
