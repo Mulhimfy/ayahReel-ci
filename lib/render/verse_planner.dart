@@ -167,7 +167,15 @@ abstract final class VersePlanner {
             voicedStartMs: p.voicedStart,
             voicedEndMs: p.voicedEnd,
           );
-          bounds = placed?.bounds;
+          // A voice timed everywhere else (the rare verse neither of
+          // its tiers reaches) is cut only where every line change falls
+          // on a breath: a guessed one, placed by its letters alone, can
+          // put a line seconds off its words, and the verse is better
+          // whole (the owner, 2026-10-27). A recording with no timing at
+          // all, the user's own, is cut on its guesses as before.
+          bounds = placed == null || (words != null && placed.guessed > 0)
+              ? null
+              : placed.bounds;
         }
       }
       // Neither timing could place the cuts: the verse is shown whole,

@@ -159,6 +159,28 @@ void main() {
     }
   });
 
+  testWidgets('a voice timed elsewhere keeps a verse whole rather than '
+      'guess where its lines change', (t) async {
+    late VerseLinePlan plan;
+    await t.runAsync(() async {
+      plan = await VersePlanner.plan(
+        lines: 2,
+        ayahs: ayahs,
+        recitation: rec,
+        startAyah: 255,
+        endAyah: 256,
+        look: look,
+        // Word timing for another verse, none for this one, and a
+        // recording with no pauses to cut it on.
+        words: {256: alignment()[256] ?? const []},
+        loudness: () async =>
+            List<double>.generate(2700, (i) => i.isEven ? 50 : 70),
+      );
+    });
+    expect(plan.partsOf(255), isNull);
+    expect(plan.whole, greaterThanOrEqualTo(1));
+  });
+
   testWidgets('with no recording to time it by, a verse stays whole, and '
       'the plan says how many did', (t) async {
     late VerseLinePlan plan;
