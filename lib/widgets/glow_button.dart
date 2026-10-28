@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../l10n/l10n.dart';
 import '../theme/app_theme.dart';
+import 'ambient_pace.dart';
 
 /// The one glowing CTA per screen. Gold, breathing glow, full-width.
 /// Everything else on a screen must be visually quieter than this.
@@ -53,11 +54,11 @@ class GlowButton extends StatefulWidget {
 }
 
 class _GlowButtonState extends State<GlowButton>
-    with SingleTickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   static const _basePulseMs = 1800;
 
   late final AnimationController _pulse = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration:
         Duration(milliseconds: (_basePulseMs / widget.pulseSpeed).round()),
   )..repeat(reverse: true);

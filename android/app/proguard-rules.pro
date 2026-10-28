@@ -32,3 +32,7 @@
 # The plugin's own model classes are serialised by field name, so the
 # names have to survive. This is the rule the plugin's example app uses.
 -keep class com.dexterous.** { *; }
+
+# MainActivity.preloadFfmpeg loads this class by name on a thread of its
+# own while the engine starts. Kept by name only, so the lookup finds it.
+-keepnames class com.antonkarpenko.ffmpegkit.FFmpegKitConfig

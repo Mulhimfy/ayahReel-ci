@@ -21,6 +21,7 @@ import 'a11y.dart';
 import 'app_toast.dart';
 import 'illumination.dart';
 import 'make_sheet.dart';
+import 'ambient_pace.dart';
 
 /// Sets [v] up as the reel to make and goes to the voice first, then to
 /// the verses, already selected — so the user can hear the reel before
@@ -103,7 +104,7 @@ class DayVerseCard extends StatefulWidget {
 }
 
 class _DayVerseCardState extends State<DayVerseCard>
-    with WidgetsBindingObserver, TickerProviderStateMixin {
+    with WidgetsBindingObserver, AmbientTickerProviderStateMixin {
   Timer? _turn;
 
   /// The card's slow clock: the light drifting in its ground, the motes
@@ -111,7 +112,7 @@ class _DayVerseCardState extends State<DayVerseCard>
   /// fourteen seconds; everything on it goes round a whole number of
   /// times per turn, so nothing jumps when it wraps.
   late final AnimationController _clock = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(seconds: 14),
   )..repeat();
 
@@ -543,9 +544,9 @@ class _MinimalButton extends StatefulWidget {
 }
 
 class _MinimalButtonState extends State<_MinimalButton>
-    with SingleTickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(milliseconds: 2600),
   )..repeat(reverse: true);
 
@@ -719,9 +720,9 @@ class _Bloom extends StatefulWidget {
   State<_Bloom> createState() => _BloomState();
 }
 
-class _BloomState extends State<_Bloom> with SingleTickerProviderStateMixin {
+class _BloomState extends State<_Bloom> with AmbientTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(seconds: 9),
   )..repeat(reverse: true);
 
@@ -792,9 +793,9 @@ class _Lamp extends StatefulWidget {
   State<_Lamp> createState() => _LampState();
 }
 
-class _LampState extends State<_Lamp> with SingleTickerProviderStateMixin {
+class _LampState extends State<_Lamp> with AmbientTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(seconds: 40),
   )..repeat();
 

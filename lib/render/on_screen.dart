@@ -110,12 +110,17 @@ abstract final class OnScreen {
   static Future<void> settle(String why) async {
     if (now && _drawn) return;
     rlog('$why: the app is out of sight; drawing waits for it');
-    while (!now || !_drawn) {
-      await back();
-      await _drawFrame();
-    }
-    await WidgetsBinding.instance.endOfFrame;
-    await Future<void>.delayed(const Duration(milliseconds: 300));
+    do {
+      while (!now || !_drawn) {
+        await back();
+        await _drawFrame();
+      }
+      await WidgetsBinding.instance.endOfFrame;
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      // Gone again in that wait, and the picture would be drawn with
+      // no surface after all (Play, 1.0.9, 2026-10-24: one Oppo Reno4 F,
+      // the same crash in the background): wait for it again.
+    } while (!now || !_drawn);
     rlog('$why: back on screen');
   }
 

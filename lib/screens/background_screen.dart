@@ -30,6 +30,7 @@ import '../widgets/how_to_sheet.dart';
 import '../widgets/step_dots.dart';
 import 'style_screen.dart';
 import '../widgets/scene_poster_image.dart';
+import '../widgets/ambient_pace.dart';
 
 /// Screen 3 of 5. One decision: the scenery.
 /// A grid of bundled sceneries plus the user's own photo/video. The
@@ -1490,12 +1491,12 @@ class _MultiScenePill extends StatefulWidget {
 }
 
 class _MultiScenePillState extends State<_MultiScenePill>
-    with SingleTickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   /// One controller, two lives: off it drives the sheen's travel, on
   /// it drives the halo's breath. Slow either way — this control sits
   /// above a grid of moving scenery and must never compete with it.
   late final AnimationController _c = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(milliseconds: 4200),
   )..repeat();
 

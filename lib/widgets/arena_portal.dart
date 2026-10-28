@@ -11,6 +11,7 @@ import 'a11y.dart';
 import 'arena_fx.dart';
 import 'illumination.dart';
 import 'night_sky.dart';
+import 'ambient_pace.dart';
 
 /// The Cards tab's door into the arena: it opens the lobby, exactly as
 /// the roundel at the top of every tab does, where the round is chosen
@@ -32,9 +33,9 @@ class ArenaPortal extends StatefulWidget {
 }
 
 class _ArenaPortalState extends State<ArenaPortal>
-    with TickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   late final AnimationController _turn = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(seconds: 6),
   )..repeat();
 

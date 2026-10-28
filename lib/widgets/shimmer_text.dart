@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import 'ambient_pace.dart';
 
 /// Text whose words light up one after another in an endless, unhurried
 /// wave — the first word, then the second, then the third, and around
@@ -51,10 +52,10 @@ class ShimmerText extends StatefulWidget {
 }
 
 class _ShimmerTextState extends State<ShimmerText>
-    with SingleTickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   late List<String> _words = _split(widget.text);
   late final AnimationController _c =
-      AnimationController(vsync: this, duration: _cycle())..repeat();
+      AnimationController(vsync: ambient, duration: _cycle())..repeat();
 
   /// True when the platform asks for reduced motion: the line is then
   /// shown at rest, fully legible, and the ticker is parked.

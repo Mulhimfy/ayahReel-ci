@@ -106,6 +106,20 @@ void main() {
     expect(n['_honey'], '');
   });
 
+  test('Share to names the app the card went to', () {
+    final f = ArenaShareFacts(
+      door: ArenaShareDoor.shareTo,
+      via: 'WhatsApp',
+      result: result,
+      mode: ArenaMode.solo,
+      scope: 'Juz Amma',
+      rivalScore: null,
+      cardScore: true,
+      cardScope: true,
+    );
+    expect(note(f)['door'], 'Share to WhatsApp');
+  });
+
   test('an old user sharing again, through the card', () {
     final n = note(facts(door: ArenaShareDoor.shareCard),
         since: DateTime(2026, 8, 1), sharesDone: 4, tap: 6, tapsBefore: 5);

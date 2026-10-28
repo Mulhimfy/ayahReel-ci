@@ -17,6 +17,7 @@ import 'package:flutter/scheduler.dart';
 
 import '../theme/app_theme.dart';
 import 'illumination.dart';
+import 'ambient_pace.dart';
 
 /// The arena's colours: an aurora of deep hues that sits behind the
 /// app's night without ever competing with its gold, which stays the
@@ -77,8 +78,8 @@ class MeshBackdrop extends StatefulWidget {
 }
 
 class _MeshBackdropState extends State<MeshBackdrop>
-    with SingleTickerProviderStateMixin {
-  late final Ticker _ticker = createTicker(_tick);
+    with AmbientTickerProviderStateMixin {
+  late final Ticker _ticker = ambient.createTicker(_tick);
   final _time = ValueNotifier<double>(0);
   bool _still = false;
 
@@ -520,9 +521,9 @@ class GlareBlock extends StatefulWidget {
 }
 
 class _GlareBlockState extends State<GlareBlock>
-    with SingleTickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(milliseconds: 1500),
   )..repeat();
 

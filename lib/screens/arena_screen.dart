@@ -302,7 +302,10 @@ class _ArenaScreenState extends State<ArenaScreen> {
                 slivers: [
                   SliverToBoxAdapter(child: _TopBar(onHelp: _openGuide)),
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(18, 4, 18, 110),
+                    // The page ends at its last row, clear of the
+                    // phone's own bar, not in empty night after it.
+                    padding: EdgeInsets.fromLTRB(
+                        18, 4, 18, 24 + MediaQuery.paddingOf(context).bottom),
                     sliver: SliverList(
                       delegate: SliverChildListDelegate([
                         Rise(
@@ -979,6 +982,9 @@ class _Pill extends StatelessWidget {
   final IconData? trailing;
   final VoidCallback onTap;
 
+  /// A small word after the label: "Recommended".
+  final String? tag;
+
   const _Pill({
     required this.label,
     required this.on,
@@ -986,12 +992,13 @@ class _Pill extends StatelessWidget {
     this.dim = false,
     this.leading,
     this.trailing,
+    this.tag,
   });
 
   @override
   Widget build(BuildContext context) {
     return A11yTap(
-      label: label,
+      label: tag == null ? label : '$label, $tag',
       selected: on,
       enabled: !dim,
       onTap: onTap,
@@ -1048,6 +1055,32 @@ class _Pill extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (tag != null && !dim) ...[
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(6, 2, 6, 2),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: AppColors.gold
+                            .withValues(alpha: on ? 0.24 : 0.12),
+                        border: Border.all(
+                            color: AppColors.gold
+                                .withValues(alpha: on ? 0.6 : 0.35),
+                            width: 0.8),
+                      ),
+                      child: Text(
+                        tag!,
+                        maxLines: 1,
+                        style: const TextStyle(
+                          fontSize: 9.5,
+                          height: 1.2,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.2,
+                          color: AppColors.goldBright,
+                        ),
+                      ),
+                    ),
+                  ],
                   if (trailing != null) ...[
                     const SizedBox(width: 2),
                     Icon(trailing,
@@ -1094,6 +1127,9 @@ class _GameChips extends StatelessWidget {
             leading: _icons[g],
             on: games.contains(g) && feasible.contains(g),
             dim: !feasible.contains(g),
+            // The kind the lobby opens on (landingArenaSetup): the
+            // easiest, and the one a first round is best played with.
+            tag: g == ArenaSetup.easiestGame ? l.arenaRecommended : null,
             onTap: () => onToggle(g),
           ),
       ],

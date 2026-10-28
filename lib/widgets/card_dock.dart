@@ -11,6 +11,7 @@ import '../theme/app_theme.dart';
 import 'a11y.dart';
 import 'card_frames.dart';
 import 'colour_picker.dart';
+import 'ambient_pace.dart';
 
 /// The seven things a card is made of. One tool, one panel, one row of
 /// choices — nothing nested, nothing behind a second tap.
@@ -682,9 +683,9 @@ class _Glow extends StatefulWidget {
   State<_Glow> createState() => _GlowState();
 }
 
-class _GlowState extends State<_Glow> with SingleTickerProviderStateMixin {
+class _GlowState extends State<_Glow> with AmbientTickerProviderStateMixin {
   late final AnimationController _pulse = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(milliseconds: 1800),
   )..repeat(reverse: true);
 

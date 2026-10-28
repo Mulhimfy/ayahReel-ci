@@ -358,6 +358,17 @@ void main() {
       expect(lit(l.arenaGameName(g)), g == ArenaSetup.easiestGame,
           reason: '$g');
     }
+    // The easiest says it is the one to start with, and only it.
+    expect(find.text(l.arenaRecommended), findsOneWidget);
+    expect(
+        find.descendant(
+            of: find
+                .ancestor(
+                    of: find.text(l.arenaGameName(ArenaSetup.easiestGame)),
+                    matching: find.byType(A11yTap))
+                .first,
+            matching: find.text(l.arenaRecommended)),
+        findsOneWidget);
     expect(ArenaSetup.byEase.toSet(), ArenaGame.values.toSet());
     expect(ArenaSetup.byEase.first, ArenaSetup.easiestGame);
     // Juz' Amma, whatever was left: Al-Ikhlas is not kept.
@@ -491,7 +502,10 @@ void main() {
     expect(find.text(l.arenaStepCompare), findsOneWidget);
     await scrollTo(t, find.text(l.arenaShareCard));
     expect(find.text(l.arenaShareCard), findsOneWidget);
-    expect(find.text(l.sendToInstagramStory), findsOneWidget);
+    // Share to: every app the card can go straight into, the story
+    // among them.
+    expect(find.text(l.shareTo), findsOneWidget);
+    expect(find.text(l.sendToInstagramStory), findsNothing);
     // The review waits folded, then opens on every question.
     expect(find.text(l.arenaReview), findsNothing);
     await scrollTo(t, find.text(l.arenaShowReview));

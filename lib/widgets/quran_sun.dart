@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../data/surah_index.dart';
 import '../data/verse_light.dart';
 import '../theme/app_theme.dart';
+import 'ambient_pace.dart';
 import 'illumination.dart' show Khatam;
 
 /// The whole Quran as a sun: one ray for each of the 114 surahs,
@@ -56,14 +57,14 @@ class QuranSunView extends StatefulWidget {
 }
 
 class _QuranSunViewState extends State<QuranSunView>
-    with TickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   late final AnimationController _in = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 2600),
     value: widget.animate ? 0 : 1,
   );
   late final AnimationController _breath = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(milliseconds: 3800),
   );
 

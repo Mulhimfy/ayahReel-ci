@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import '../data/scene_catalog.dart';
 import '../theme/app_theme.dart';
 import 'ambient_motion.dart';
+import 'ambient_pace.dart';
 
 /// The full-bleed opening of the app: a real place, lit, breathing,
 /// with the greeting standing in it.
@@ -187,10 +188,10 @@ class CinematicHero extends StatefulWidget {
 }
 
 class _CinematicHeroState extends State<CinematicHero>
-    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+    with AmbientTickerProviderStateMixin, WidgetsBindingObserver {
   /// Long enough that no one ever sees it turn around.
   late final AnimationController _drift = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(seconds: 54),
   )..repeat(reverse: true);
 

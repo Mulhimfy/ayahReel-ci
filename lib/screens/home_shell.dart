@@ -68,6 +68,13 @@ class _HomeShellState extends State<HomeShell>
   /// there is one clock for the whole shell, whichever tab is up.
   final _motion = AmbientMotion();
 
+  /// One backdrop for the three panes of glass the shell keeps over
+  /// every tab: the Tanafus door, the lamp bar and the invitation. Each
+  /// backdrop blur makes Impeller stop, copy the screen drawn so far
+  /// and filter it, every frame; they never overlap, and nothing is
+  /// drawn under one after the first, so one copy serves all three.
+  final _glass = BackdropKey();
+
   late final AnimationController _arrive = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 460),
@@ -247,43 +254,50 @@ class _HomeShellState extends State<HomeShell>
   Widget build(BuildContext context) {
     return AmbientScope(
       motion: _motion,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        // Content scrolls underneath the translucent bar — each tab
-        // leaves enough bottom padding to clear it.
-        extendBody: true,
-        extendBodyBehindAppBar: true,
-        body: Stack(
-          children: [
-            Positioned.fill(
-              child: ExcludeSemantics(
-                child: IgnorePointer(child: LivingSky(motion: _motion)),
-              ),
-            ),
-            Positioned.fill(child: _arriving(_tabs())),
-            // The door to the arena, fixed at the top corner of every
-            // tab — the end corner, so it reads as a mark and not as a
-            // title, and the home header lays its first line out to it.
-            PositionedDirectional(
-              top: 0,
-              end: 0,
-              child: SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.only(top: 8, end: 16),
-                  child: TanafusButton(onTap: _openArena),
-                ),
-              ),
-            ),
-          ],
-        ),
-        // Present on every tab: the invitation should never be somewhere
-        // the user has to go looking for it. The arena keeps its door in
-        // the top corner. Scaffold floats this clear of the nav bar.
-        floatingActionButton: const InviteFab(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-        bottomNavigationBar: _LampBar(index: _index, onSelect: _select),
+      child: BackdropGroup(
+        backdropKey: _glass,
+        child: _scaffold(),
       ),
+    );
+  }
+
+  Widget _scaffold() {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      // Content scrolls underneath the translucent bar — each tab
+      // leaves enough bottom padding to clear it.
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: ExcludeSemantics(
+              child: IgnorePointer(child: LivingSky(motion: _motion)),
+            ),
+          ),
+          Positioned.fill(child: _arriving(_tabs())),
+          // The door to the arena, fixed at the top corner of every
+          // tab — the end corner, so it reads as a mark and not as a
+          // title, and the home header lays its first line out to it.
+          PositionedDirectional(
+            top: 0,
+            end: 0,
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsetsDirectional.only(top: 8, end: 16),
+                child: TanafusButton(onTap: _openArena),
+              ),
+            ),
+          ),
+        ],
+      ),
+      // Present on every tab: the invitation should never be somewhere
+      // the user has to go looking for it. The arena keeps its door in
+      // the top corner. Scaffold floats this clear of the nav bar.
+      floatingActionButton: const InviteFab(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      bottomNavigationBar: _LampBar(index: _index, onSelect: _select),
     );
   }
 
@@ -411,11 +425,13 @@ class _LampBarState extends State<_LampBar>
       (NavGlyph.seal, l.navSettings),
     ];
     return ClipRect(
-      child: BackdropFilter(
+      child: BackdropFilter.grouped(
         // Kept low on purpose: a backdrop blur re-reads and
         // re-filters everything behind it every frame, and what is
         // behind this one is a sky that never stops moving. The
-        // cost scales with the radius.
+        // cost scales with the radius. Grouped: the shell's
+        // BackdropGroup shares one copy of the screen with the
+        // Tanafus door and the invitation.
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: DecoratedBox(
           decoration: BoxDecoration(

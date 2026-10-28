@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
@@ -11,7 +12,9 @@ import '../data/arena_engine.dart';
 import '../data/arena_service.dart';
 import '../data/arena_share_report.dart';
 import '../data/debug_log.dart';
+import '../data/gallery_saver.dart';
 import '../data/instagram_share.dart';
+import '../data/platform_share.dart';
 import '../data/rewards_service.dart';
 import '../data/settings_service.dart';
 import '../data/share_origin.dart';
@@ -23,12 +26,12 @@ import '../widgets/a11y.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/arena_constellation.dart';
 import '../widgets/arena_fx.dart';
-import '../widgets/direct_share_button.dart';
 import '../widgets/glow_button.dart';
 import '../widgets/illumination.dart';
 import '../widgets/name_dialog.dart';
 import '../widgets/night_sky.dart';
 import '../widgets/popover.dart';
+import '../widgets/share_to.dart';
 import 'arena_play_screen.dart';
 import 'arena_screen.dart';
 
@@ -220,10 +223,11 @@ class _ArenaResultScreenState extends State<ArenaResultScreen> {
   /// shared (new or not, how many reels), the round, the card as it
   /// goes, and the shares before it. See [ArenaShareReport]. On the tap,
   /// behind it — never in the way of the share.
-  void _report(ArenaShareDoor door) {
+  void _report(ArenaShareDoor door, {String? via}) {
     final s = SettingsService.state.value;
     unawaited(ArenaShareReport.tapped(ArenaShareFacts(
       door: door,
+      via: via,
       result: _r,
       mode: widget.mode,
       scope: arenaScopeLabel(L10n.en, _r.setup.scope),
@@ -237,11 +241,12 @@ class _ArenaResultScreenState extends State<ArenaResultScreen> {
   }
 
   /// A challenge went out: the app's own share reward is earned the
-  /// way any invitation earns it.
-  Future<void> _sent() async {
+  /// way any invitation earns it. [say] is the line that tells the user
+  /// what happened; the challenge sent, unless it has more to say.
+  Future<void> _sent({String? say}) async {
     unawaited(ArenaService.sent());
     unawaited(RewardsService.recordAppShared());
-    _say(L10n.current.arenaChallengeSent, ToastTone.done);
+    _say(say ?? L10n.current.arenaChallengeSent, ToastTone.done);
   }
 
   Future<void> _toStory(BuildContext buttonContext) async {
@@ -254,12 +259,13 @@ class _ArenaResultScreenState extends State<ArenaResultScreen> {
     try {
       final card = await _card(l);
       // The picture carries no code — nobody can copy one off a story —
-      // so it goes to the clipboard, to be pasted on as a sticker. The
-      // button says so itself, and holds still a beat for it to be
-      // read, before Instagram opens over the screen.
+      // so it goes to the clipboard, to be pasted on as a sticker. A
+      // toast says so, and the screen holds still a beat for it to be
+      // read, before Instagram opens over it.
       await Clipboard.setData(ClipboardData(text: _code.code));
       if (!mounted) return;
       HapticFeedback.lightImpact();
+      _say(l.arenaYourCodeCopied, ToastTone.done);
       _copiedOff?.cancel();
       setState(() {
         _storyBusy = false;
@@ -309,6 +315,70 @@ class _ArenaResultScreenState extends State<ArenaResultScreen> {
       if (result.status != ShareResultStatus.dismissed) await _sent();
     } catch (e, s) {
       rlogError('arena share', e, s);
+      _say(l.shareFailed(e), ToastTone.problem);
+    } finally {
+      if (mounted) setState(() => _shareBusy = false);
+    }
+  }
+
+  /// The apps Share to offers for the round's card. It is a picture,
+  /// so not YouTube, which takes videos only; Instagram's two doors
+  /// wherever its hand-off works, WhatsApp's hand-off on Android.
+  /// WhatsApp first after Instagram: a challenge is sent to someone.
+  List<ShareTarget> get _shareTargets => [
+        if (InstagramShare.supported) ...[
+          ShareTarget.instagramStory,
+          ShareTarget.instagramPost,
+        ],
+        if (defaultTargetPlatform == TargetPlatform.android)
+          ShareTarget.whatsapp,
+        ShareTarget.tiktok,
+        ShareTarget.facebook,
+      ];
+
+  /// Straight into one app, from Share to, as a card goes from the card
+  /// studio: the picture handed to that app's composer, and the
+  /// challenge, code and link, on the clipboard and alongside it. The
+  /// story is the story door it always was ([_toStory]). On iOS the
+  /// card goes to the gallery and the app opens with it first in its
+  /// picker. Anything that stops the hand-off ends in the share sheet
+  /// rather than in nothing.
+  Future<void> _shareTo(BuildContext buttonContext, ShareTarget target) async {
+    if (target == ShareTarget.instagramStory) return _toStory(buttonContext);
+    if (_shareBusy) return;
+    final l = L10n.of(context);
+    final origin = shareOriginOf(buttonContext);
+    final app = target.app(l);
+    final ios = defaultTargetPlatform == TargetPlatform.iOS;
+    HapticFeedback.selectionClick();
+    _report(ArenaShareDoor.shareTo, via: target.app(L10n.en));
+    setState(() => _shareBusy = true);
+    try {
+      final card = await _card(l);
+      if (!mounted) return;
+      final text = _message(l);
+      await PlatformShare.copy(text);
+      var handed = false;
+      if (ios) {
+        final saved = await GallerySaver.saveImage(card);
+        handed = saved.ok && await PlatformShare.sendImages(target, [card]);
+      } else {
+        handed = await PlatformShare.sendImages(target, [card], text: text);
+      }
+      if (handed) {
+        await _sent(
+            say: ios ? l.arenaCardOpenHint(app) : l.arenaChallengeCopied);
+        return;
+      }
+      _say(l.shareAppMissing(app), ToastTone.problem);
+      final result = await SharePlus.instance.share(ShareParams(
+        files: [XFile(card.path, mimeType: 'image/png')],
+        text: text,
+        sharePositionOrigin: origin,
+      ));
+      if (result.status != ShareResultStatus.dismissed) await _sent();
+    } catch (e, s) {
+      rlogError('arena share to ${target.name}', e, s);
       _say(l.shareFailed(e), ToastTone.problem);
     } finally {
       if (mounted) setState(() => _shareBusy = false);
@@ -384,33 +454,42 @@ class _ArenaResultScreenState extends State<ArenaResultScreen> {
                 // margins for that. The small menu of what it carries
                 // sits in its faded foot, by the card's own edge.
                 SliverToBoxAdapter(
-                  child: Rise(
-                    child: Stack(
-                      children: [
-                        _CardPreview(
-                          key: _cardKey,
-                          width: cardWidth,
-                          fadeSides: cardWidth < screenWidth,
-                          nodes: _nodes,
-                          result: r,
-                          name: () => _name,
-                          rival: against == null ? null : _rivalName(l),
-                          rivalScore: against?.score,
-                        ),
-                        PositionedDirectional(
-                          end: (screenWidth - cardWidth) / 2 + 22,
-                          bottom: 2,
-                          child: _CardMenuChip(
-                            scope: r.setup.scope.kind,
+                  // Its own layer: a scroll moves the card rather than
+                  // drawing it again, ShaderMasks, words and all, on
+                  // every frame of the scroll.
+                  child: RepaintBoundary(
+                    child: Rise(
+                      child: Stack(
+                        children: [
+                          _CardPreview(
+                            key: _cardKey,
+                            width: cardWidth,
+                            fadeSides: cardWidth < screenWidth,
+                            nodes: _nodes,
+                            result: r,
                             name: () => _name,
+                            rival: against == null ? null : _rivalName(l),
+                            rivalScore: against?.score,
                           ),
-                        ),
-                      ],
+                          PositionedDirectional(
+                            end: (screenWidth - cardWidth) / 2 + 22,
+                            bottom: 2,
+                            child: _CardMenuChip(
+                              scope: r.setup.scope.kind,
+                              name: () => _name,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(22, 10, 22, 140),
+                  // The page ends at its last button, clear of the
+                  // phone's own bar, and not a screen's worth of empty
+                  // night after it.
+                  padding: EdgeInsets.fromLTRB(
+                      22, 10, 22, 24 + MediaQuery.paddingOf(context).bottom),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
                       Rise(
@@ -495,18 +574,16 @@ class _ArenaResultScreenState extends State<ArenaResultScreen> {
                             const SizedBox(height: 12),
                             const _Steps(),
                             const SizedBox(height: 16),
+                            // Every app a card can go straight into, the
+                            // story among them, as the card studio has it.
                             Builder(
-                              builder: (bc) => DirectShareButton(
-                                label: _storyCopied
-                                    ? l.arenaYourCodeCopied
-                                    : l.sendToInstagramStory,
-                                icon: _storyCopied
-                                    ? Icons.check_rounded
-                                    : Icons.auto_awesome_rounded,
-                                colors: instagramMesh,
+                              builder: (bc) => ShareToButton(
                                 height: 52,
-                                busy: _storyBusy,
-                                onPressed: () => _toStory(bc),
+                                targets: _shareTargets,
+                                note: l.arenaShareToNote,
+                                onPick: _storyBusy || _shareBusy
+                                    ? null
+                                    : (t) => _shareTo(bc, t),
                               ),
                             ),
                             const SizedBox(height: 10),

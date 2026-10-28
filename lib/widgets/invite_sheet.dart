@@ -17,6 +17,7 @@ import 'direct_share_button.dart';
 import 'glow_button.dart';
 import 'mesh_glass.dart';
 import 'night_sky.dart';
+import 'ambient_pace.dart';
 
 /// The reason to pass the app on, said once, before the share sheet
 /// opens.
@@ -87,7 +88,7 @@ class _InviteSheet extends StatefulWidget {
 }
 
 class _InviteSheetState extends State<_InviteSheet>
-    with TickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   /// The story card is drawn on the way out, and the button shows the
   /// wait rather than going dead for it.
   bool _storyBusy = false;
@@ -95,7 +96,7 @@ class _InviteSheetState extends State<_InviteSheet>
   /// The emblem's people going round, the ripples, and the light in the
   /// sheet's ground.
   late final AnimationController _clock = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(seconds: 9),
   )..repeat();
 
@@ -630,7 +631,9 @@ class InviteFab extends StatelessWidget {
         message: l.inviteSomeone,
         excludeFromSemantics: true,
         child: ClipOval(
-          child: BackdropFilter(
+          // Grouped with the shell's other glass (HomeShell's
+          // BackdropGroup): one copy of the screen for all of it.
+          child: BackdropFilter.grouped(
             filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
             child: Material(
               color: AppColors.surfaceRaised.withValues(alpha: 0.88),

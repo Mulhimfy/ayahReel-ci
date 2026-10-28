@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import '../theme/app_theme.dart';
 import 'ambient_motion.dart';
+import 'ambient_pace.dart';
 
 /// The sky the whole app sits inside.
 ///
@@ -69,7 +70,7 @@ class LivingSky extends StatefulWidget {
 }
 
 class _LivingSkyState extends State<LivingSky>
-    with SingleTickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   /// Only the sky that drives the clock gets a ticker at all. The
   /// panels riding the page's clock never create one.
   Ticker? _ticker;
@@ -85,7 +86,11 @@ class _LivingSkyState extends State<LivingSky>
   @override
   void initState() {
     super.initState();
-    if (widget.drivesClock) _ticker = createTicker(_onFrame)..start();
+    // At the ambient beat when the page is still, and on every frame
+    // while a scroll or anything else is drawing anyway: AmbientPace.
+    if (widget.drivesClock) {
+      _ticker = ambient.createTicker(_onFrame)..start();
+    }
   }
 
   @override

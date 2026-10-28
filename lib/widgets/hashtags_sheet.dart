@@ -8,6 +8,7 @@ import '../data/hashtag_sets.dart';
 import '../l10n/l10n.dart';
 import '../theme/app_theme.dart';
 import 'a11y.dart';
+import 'ambient_pace.dart';
 
 /// The last thing between a finished reel and a posted one.
 ///
@@ -71,9 +72,9 @@ class HashtagsButton extends StatefulWidget {
 }
 
 class _HashtagsButtonState extends State<HashtagsButton>
-    with SingleTickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   late final AnimationController _pulse = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(milliseconds: 1800),
   )..repeat(reverse: true);
 

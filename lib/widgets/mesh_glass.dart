@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'ambient_pace.dart';
 
 /// The colours of a [MeshGlass]: the glass's own tint, and the lights
 /// that drift under it.
@@ -312,9 +313,9 @@ class MeshButton extends StatefulWidget {
 }
 
 class _MeshButtonState extends State<MeshButton>
-    with SingleTickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   late final AnimationController _clock = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(seconds: 10),
   )..repeat();
 

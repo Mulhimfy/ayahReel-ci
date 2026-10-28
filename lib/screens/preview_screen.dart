@@ -77,6 +77,7 @@ import '../widgets/verse_stage.dart';
 import '../widgets/verses_milestone.dart';
 import '../widgets/own_audio_note.dart';
 import 'home_shell.dart';
+import '../widgets/ambient_pace.dart';
 
 /// An app Share can hand the finished reel to directly, skipping the
 /// OS share sheet. Null anywhere below means the sheet itself.
@@ -3643,9 +3644,9 @@ class _NudgeChevron extends StatefulWidget {
 }
 
 class _NudgeChevronState extends State<_NudgeChevron>
-    with SingleTickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(milliseconds: 1600),
   );
 

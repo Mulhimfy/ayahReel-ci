@@ -15,6 +15,7 @@ import '../widgets/living_sky.dart';
 import '../widgets/night_sky.dart';
 import '../widgets/reminder_time_picker.dart';
 import '../widgets/shimmer_text.dart';
+import '../widgets/ambient_pace.dart';
 
 /// First run, eight screens, one argument.
 ///
@@ -766,9 +767,9 @@ class _RippleEmblem extends StatefulWidget {
 }
 
 class _RippleEmblemState extends State<_RippleEmblem>
-    with SingleTickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(milliseconds: 4200),
   )..repeat();
 
@@ -1150,9 +1151,9 @@ class _CrownEmblem extends StatefulWidget {
 }
 
 class _CrownEmblemState extends State<_CrownEmblem>
-    with SingleTickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   late final AnimationController _turn = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(milliseconds: 5200),
   )..repeat();
 

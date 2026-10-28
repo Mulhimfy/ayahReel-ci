@@ -11,6 +11,7 @@ import 'a11y.dart';
 import 'arena_fx.dart';
 import 'illumination.dart';
 import 'nudge_dot.dart';
+import 'ambient_pace.dart';
 
 /// The two doors to Tanafus that stand on the shell: a small roundel at
 /// the top corner of every tab, and the floating button at the foot of
@@ -82,11 +83,11 @@ class _Roundel extends StatefulWidget {
 }
 
 class _RoundelState extends State<_Roundel>
-    with SingleTickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   /// One clock: the ring's light makes a turn in seven seconds, and so
   /// does the light on the crown's thread.
   late final AnimationController _turn = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(seconds: 7),
   )..repeat();
   final _glint = GlintController();
@@ -148,7 +149,10 @@ class _RoundelState extends State<_Roundel>
                   every: const Duration(milliseconds: 5200),
                   strength: 0.7,
                   child: ClipOval(
-                    child: BackdropFilter(
+                    // Grouped with the lamp bar's glass when the shell
+                    // holds both (HomeShell's BackdropGroup); on its
+                    // own anywhere else.
+                    child: BackdropFilter.grouped(
                       filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                       child: DecoratedBox(
                         decoration: BoxDecoration(

@@ -60,16 +60,19 @@ class AmbientMotion extends ChangeNotifier {
   /// a rate the moment we know how long the frame took.
   double _travelled = 0;
 
-  /// Frames stepped since the last repaint was asked for; see [settle].
-  int _held = 0;
+  /// Seconds stepped since the last repaint was asked for; see [settle].
+  double _held = 0;
 
   bool _disposed = false;
 
   /// Below this the surface is at rest: nothing is scrolling, and the
-  /// only movement left is the idle drift, which is slow enough that a
-  /// repaint every other frame is indistinguishable from one every
-  /// frame.
+  /// only movement left is the idle drift, which is slow enough that 30
+  /// repaints a second can't be told from one every frame.
   static const _restEnergy = 0.015;
+
+  /// The longest a resting surface holds a repaint back: just under the
+  /// ambient beat, so on a frame drawn at the beat it always repaints.
+  static const _restGap = 1 / 31;
 
   void pushVertical(double delta) {
     _depthTarget = (_depthTarget + delta).clamp(-_depthLimit, _depthLimit);
@@ -116,16 +119,19 @@ class AmbientMotion extends ChangeNotifier {
         : 1 - math.exp(-step * 2.4);
     _energy += (target - _energy) * k;
 
-    // At rest the sky and the hero's air repaint at half rate. Every
-    // listener is a full-surface painter — the veils, the stars, the
-    // rays, the haze — and while nothing is being scrolled they are
-    // drawing a drift measured in pixels a second. Halving the
-    // repaints there halves what the app costs sitting on Home, and
-    // the moment a finger moves the surface is back to every frame.
+    // At rest the sky and the hero's air repaint at most 30 times a
+    // second. Every listener is a full-surface painter — the veils, the
+    // stars, the rays, the haze — and while nothing is being scrolled
+    // they are drawing a drift measured in pixels a second. The clock
+    // keeps AmbientPace, so a still page draws 30 frames a second; on
+    // the faster frames something else is drawing (a spinner, a page
+    // sliding in), the sky holds its picture between beats, and the
+    // moment a finger moves the surface is back to every frame.
     final resting = _energy < _restEnergy &&
         (_depthTarget - _depth).abs() < 0.5 &&
         (_driftTarget - _drift).abs() < 0.5;
-    if (resting && ++_held < 2) return;
+    _held += step;
+    if (resting && _held < _restGap) return;
     _held = 0;
     notifyListeners();
   }

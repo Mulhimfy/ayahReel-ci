@@ -22,6 +22,9 @@ enum ArenaShareDoor {
 
   /// "Share the card": the system share sheet.
   shareCard,
+
+  /// "Share to": straight into one app, named in [ArenaShareFacts.via].
+  shareTo,
 }
 
 /// What the result screen knows about the round being shared, at the
@@ -52,6 +55,9 @@ class ArenaShareFacts {
   /// played.
   final DateTime? playedAt;
 
+  /// The app a [ArenaShareDoor.shareTo] tap went to, in English.
+  final String? via;
+
   const ArenaShareFacts({
     required this.door,
     required this.result,
@@ -63,6 +69,7 @@ class ArenaShareFacts {
     this.cardName = true,
     this.nameSet = true,
     this.playedAt,
+    this.via,
   });
 }
 
@@ -236,9 +243,11 @@ abstract final class ArenaShareReport {
     final right = r.correct;
     final asked = r.asked;
     final wrong = asked - right;
-    final door = facts.door == ArenaShareDoor.instagramStory
-        ? 'Instagram story'
-        : 'Share card';
+    final door = switch (facts.door) {
+      ArenaShareDoor.instagramStory => 'Instagram story',
+      ArenaShareDoor.shareCard => 'Share card',
+      ArenaShareDoor.shareTo => 'Share to ${facts.via ?? 'an app'}',
+    };
 
     String day(DateTime d) => d.toIso8601String().substring(0, 10);
     int daysTo(DateTime d) => now.difference(d).inDays;

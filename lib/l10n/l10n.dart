@@ -4906,6 +4906,35 @@ class L10n {
   /// it has put the code on the clipboard — just before Instagram opens.
   String get arenaYourCodeCopied => _t("Your code's copied", 'نُسخ رمزك',
       'آپ کا کوڈ کاپی ہو گیا', 'Kodemu sudah disalin', 'Dein Code ist kopiert');
+
+  /// The line over Share to's apps on a Tanafus result: the card goes
+  /// in as a picture, and the challenge with its code on the clipboard.
+  String get arenaShareToNote => _t(
+      'The card goes straight in, your challenge and its code copied',
+      'تُرسل البطاقة مباشرة، مع نسخ تحديك ورمزه',
+      'کارڈ سیدھا جاتا ہے، آپ کا چیلنج اور اس کا کوڈ کاپی ہو جاتے ہیں',
+      'Kartu langsung masuk, tantangan dan kodenya tersalin',
+      'Die Karte geht direkt hinein, deine Herausforderung samt Code ist kopiert');
+  String get arenaChallengeCopied => _t(
+      'Your challenge is copied: paste it in',
+      'نُسخ تحديك: الصقه هناك',
+      'آپ کا چیلنج کاپی ہو گیا: وہاں پیسٹ کریں',
+      'Tantanganmu tersalin: tempelkan di sana',
+      'Deine Herausforderung ist kopiert: füge sie dort ein');
+  String arenaCardOpenHint(String app) => _t(
+      'Saved to your gallery. In $app, tap + and pick the newest picture; '
+          'your challenge is copied.',
+      'حُفظت في معرضك. في $app اضغط + واختر أحدث صورة؛ تحديك منسوخ.',
+      'گیلری میں محفوظ ہو گیا۔ $app میں + دبائیں اور تازہ ترین تصویر چنیں؛ '
+          'آپ کا چیلنج کاپی ہو گیا ہے۔',
+      'Tersimpan di galeri. Di $app, ketuk + dan pilih gambar terbaru; '
+          'tantanganmu sudah tersalin.',
+      'In deiner Galerie gespeichert. Tippe in $app auf + und wähle das '
+          'neueste Bild; deine Herausforderung ist kopiert.');
+
+  /// The tag on the question kind a first round is best started with.
+  String get arenaRecommended => _t('Recommended', 'مُوصى به', 'تجویز کردہ',
+      'Disarankan', 'Empfohlen');
   String get a11yArenaCardPreview => _t(
       'Your card, as it will be shared',
       'بطاقتك كما ستُشارَك',

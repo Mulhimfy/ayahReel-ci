@@ -16,6 +16,7 @@ import '../widgets/glow_button.dart';
 import '../widgets/illumination.dart';
 import '../widgets/night_sky.dart';
 import 'arena_result_screen.dart';
+import '../widgets/ambient_pace.dart';
 
 /// A round, being played.
 ///
@@ -856,9 +857,9 @@ class _Blank extends StatefulWidget {
   State<_Blank> createState() => _BlankState();
 }
 
-class _BlankState extends State<_Blank> with SingleTickerProviderStateMixin {
+class _BlankState extends State<_Blank> with AmbientTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(milliseconds: 1400),
   )..repeat(reverse: true);
 

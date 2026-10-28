@@ -57,7 +57,51 @@ class MainActivity : FlutterActivity() {
         if (!askedSkia) RenderBackend.learn(this)
     }
 
+    /**
+     * FFmpeg's native libraries, loaded on a thread of their own while
+     * the engine starts.
+     *
+     * The FFmpeg plugin registers inside super.onCreate, on the main
+     * thread and before Flutter's first frame, and its registration
+     * touches FFmpegKitConfig, whose class initializer loads nine native
+     * libraries (avcodec with x264 among them). Every launch, warm ones
+     * too, held the launch screen for that. Started here, the load runs
+     * on another core beside the engine's own start, and the plugin finds
+     * the class ready, or waits only for what is left. Class
+     * initialization is the JVM's to make safe: whichever thread comes
+     * second waits for the first. Once per process.
+     */
+    private fun preloadFfmpeg() {
+        if (ffmpegPreloaded) return
+        ffmpegPreloaded = true
+        Thread({
+            try {
+                Class.forName("com.antonkarpenko.ffmpegkit.FFmpegKitConfig")
+            } catch (t: Throwable) {
+                Log.w("AyahReel", "FFmpeg not preloaded", t)
+            }
+        }, "ffmpeg-preload").start()
+    }
+
+    /**
+     * Back on the app's first screen sends the app behind, as Home does,
+     * instead of finishing the activity.
+     *
+     * Flutter's default finishes it (FlutterActivity is no
+     * OnBackPressedDispatcherOwner, so PlatformPlugin calls finish()),
+     * and with it goes the engine: the next launch starts Dart, every
+     * plugin and the first frame again in a process that is still
+     * running. Play counts that as a warm start; 16.75% of them were
+     * slow (over 2 s, P90 2.6 s; 28 days to 2026-10-28), against 11%
+     * for similar apps. Android 12 and later already treat Back on a
+     * launcher's root activity this way for apps that leave it to the
+     * system. Only as the task's root: opened inside another app's
+     * task, Back still returns to that app.
+     */
+    override fun popSystemNavigator(): Boolean = isTaskRoot && moveTaskToBack(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        preloadFfmpeg()
         super.onCreate(savedInstanceState)
         // Only a fresh launch carries a link. A recreated activity, or one
         // reopened from Recents, gets the intent it first launched with
@@ -579,6 +623,10 @@ class MainActivity : FlutterActivity() {
     }
 
     private companion object {
+        /** See preloadFfmpeg: once per process, whatever recreates the activity. */
+        @Volatile
+        var ffmpegPreloaded = false
+
         /** Request code for pickAudio; clear of every plugin's own. */
         const val PICK_AUDIO = 7301
 

@@ -7,6 +7,7 @@ import '../l10n/l10n.dart';
 import 'a11y.dart';
 import 'illumination.dart';
 import 'mesh_glass.dart';
+import 'ambient_pace.dart';
 
 /// What Home's Create opens onto.
 enum CreateKind { reel, quiz, card }
@@ -64,9 +65,9 @@ class CreateButton extends StatefulWidget {
 }
 
 class _CreateButtonState extends State<CreateButton>
-    with SingleTickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   late final AnimationController _clock = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(seconds: 11),
   )..repeat();
 
@@ -292,10 +293,10 @@ class _Chooser extends StatefulWidget {
 }
 
 class _ChooserState extends State<_Chooser>
-    with SingleTickerProviderStateMixin {
+    with AmbientTickerProviderStateMixin {
   /// The lights under every pill, painted on their own clock.
   late final AnimationController _clock = AnimationController(
-    vsync: this,
+    vsync: ambient,
     duration: const Duration(seconds: 11),
   )..repeat();
 

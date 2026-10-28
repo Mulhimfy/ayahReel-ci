@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import '../theme/app_theme.dart';
+import 'ambient_pace.dart';
 
 /// The app's ornamental vocabulary, drawn rather than assembled.
 ///
@@ -442,9 +443,9 @@ class Sheen extends StatefulWidget {
   State<Sheen> createState() => _SheenState();
 }
 
-class _SheenState extends State<Sheen> with SingleTickerProviderStateMixin {
+class _SheenState extends State<Sheen> with AmbientTickerProviderStateMixin {
   late final AnimationController _c =
-      AnimationController(vsync: this, duration: widget.period)
+      AnimationController(vsync: ambient, duration: widget.period)
         ..value = widget.phase
         ..repeat();
 
