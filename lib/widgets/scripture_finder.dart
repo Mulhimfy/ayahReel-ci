@@ -163,6 +163,9 @@ class _ScriptureFinderState extends State<ScriptureFinder> {
     // on their surah rather than on Al-Fatiha.
     final st = SettingsService.state.value;
     _surah = st.lastSurah >= 1 && st.lastSurah <= 114 ? st.lastSurah : 1;
+    // Read the Quran's index now, so the first letters typed are
+    // answered as they are typed.
+    unawaited(QuranSearch.warmUp());
     if (_hadith) {
       _ensureLibrary();
       return;
@@ -279,6 +282,22 @@ class _ScriptureFinderState extends State<ScriptureFinder> {
 
   void _onTyped(String q) {
     _debounce?.cancel();
+    // Arabic is answered from memory, in the frame the letter was typed
+    // in: no wait, and no spinner standing in for the verses between
+    // one letter and the next.
+    final typed = q.trim();
+    if (!_hadith && typed.isNotEmpty && RegExp('[؀-ۿ]').hasMatch(typed)) {
+      final now = QuranSearch.searchNow(typed);
+      if (now != null) {
+        ++_searchGeneration;
+        setState(() {
+          _verseHits = now;
+          _hitsFor = typed;
+          _searching = false;
+        });
+        return;
+      }
+    }
     _debounce = Timer(const Duration(milliseconds: 180), () => _search(q));
   }
 
@@ -586,8 +605,15 @@ class _ScriptureFinderState extends State<ScriptureFinder> {
     if (!_hadith) {
       final typed = _controller.text.trim();
       if (typed.isEmpty) return _verseList(l);
-      if (_searching) return _Note(text: l.findOpening, spinner: true, style: t);
-      final hits = _hitsFor == typed ? _verseHits : const <VerseHit>[];
+      // While the next answer is on its way, the last one stays up: a
+      // list that empties on every keystroke and refills reads as
+      // results that come and go.
+      final pending = _searching || (_debounce?.isActive ?? false);
+      final hits =
+          _hitsFor == typed || pending ? _verseHits : const <VerseHit>[];
+      if (pending && hits.isEmpty) {
+        return _Note(text: l.findOpening, spinner: true, style: t);
+      }
       if (hits.isEmpty) {
         return _Note(
           text: typed.length < 3 ? l.findTypeMore : l.findNothing,

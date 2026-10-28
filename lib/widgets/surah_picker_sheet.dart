@@ -233,6 +233,7 @@ class _SurahSearchResultsState extends State<SurahSearchResults> {
   @override
   void initState() {
     super.initState();
+    unawaited(QuranSearch.warmUp());
     _onQuery(widget.query);
   }
 
@@ -263,6 +264,17 @@ class _SurahSearchResultsState extends State<SurahSearchResults> {
         _clearHits(v);
         return;
       }
+      // In memory already, the verses come with the letter that found
+      // them: called before the build this keystroke draws, so that
+      // build shows them, with no empty frame in between.
+      final now = QuranSearch.searchNow(v);
+      if (now != null) {
+        _hitsFor = v;
+        _hits = now;
+        _searching = false;
+        return;
+      }
+      _searching = true;
       QuranSearch.search(v).then((hits) => _show(v, hits));
       return;
     }
@@ -302,7 +314,10 @@ class _SurahSearchResultsState extends State<SurahSearchResults> {
     final query = widget.query;
     final pq = SurahPickerSheet.parse(query);
     final results = SurahPickerSheet.surahsMatching(pq);
-    final hits = _hitsFor == query ? _hits : const <VerseHit>[];
+    // The last answer stays up while the next is on its way, rather
+    // than the list emptying on every keystroke.
+    final hits =
+        _hitsFor == query || _searching ? _hits : const <VerseHit>[];
     return Column(
       children: [
         if (_searching)

@@ -43,7 +43,19 @@ abstract final class QuranSearch {
   /// The same, normalized once for matching.
   static List<List<String>>? _keys;
 
+  /// The same again, spelled [loose]: what a search falls back to when
+  /// the typed words don't meet the verse letter for letter.
+  static List<List<String>>? _loose;
+
   static Future<void>? _loading;
+
+  /// Starts reading the index, so the first letters typed into a field
+  /// that searches are answered at once. Safe to call any number of
+  /// times.
+  static Future<void> warmUp() => _ensureLoaded();
+
+  /// Whether the index is in memory, so [searchNow] can answer.
+  static bool get isLoaded => _keys != null;
 
   /// Reads the index if it has not been read yet. Tests feed
   /// [loadFrom] the file instead.
@@ -61,24 +73,32 @@ abstract final class QuranSearch {
   @visibleForTesting
   static void loadFrom(String json) => _install(_parse(json));
 
-  /// The verses and their normalized keys, out of the index's JSON.
-  static (List<List<String>>, List<List<String>>) _parse(String json) {
+  /// The verses, their normalized keys and their loose keys, out of the
+  /// index's JSON.
+  static (List<List<String>>, List<List<String>>, List<List<String>>) _parse(
+      String json) {
     final j = jsonDecode(json) as Map<String, dynamic>;
     final text = List<List<String>>.generate(114, (_) => const []);
     for (final e in j.entries) {
       text[int.parse(e.key) - 1] = (e.value as List).cast<String>();
     }
+    final keys = [
+      for (final s in text) [for (final v in s) normalize(v)],
+    ];
     return (
       text,
+      keys,
       [
-        for (final s in text) [for (final v in s) normalize(v)],
+        for (final s in keys) [for (final k in s) loose(k)],
       ],
     );
   }
 
-  static void _install((List<List<String>>, List<List<String>>) index) {
+  static void _install(
+      (List<List<String>>, List<List<String>>, List<List<String>>) index) {
     _text = index.$1;
     _keys = index.$2;
+    _loose = index.$3;
     _loading = Future.value();
   }
 
@@ -167,25 +187,261 @@ abstract final class QuranSearch {
   }
 
   /// Arabic letters in [s], after [normalize].
-  static int letterCount(String s) =>
-      RegExp('[ء-ي]').allMatches(normalize(s)).length;
+  static int letterCount(String s) => _letters(normalize(s));
 
-  /// Verses whose letters contain [query]'s, in mushaf order, at most
-  /// [limit] of them. Nothing for fewer than two letters: every verse
-  /// has an alef.
-  static Future<List<VerseHit>> search(String query, {int limit = 40}) async {
-    final q = normalize(query);
-    if (letterCount(q) < 2) return const [];
-    await _ensureLoaded();
-    final keys = _keys!, text = _text!;
-    final hits = <VerseHit>[];
-    for (var s = 0; s < keys.length && hits.length < limit; s++) {
-      final ks = keys[s];
-      for (var a = 0; a < ks.length && hits.length < limit; a++) {
-        if (ks[a].contains(q)) hits.add(VerseHit(s + 1, a + 1, text[s][a]));
+  static int _letters(String normalized) =>
+      RegExp('[ء-ي]').allMatches(normalized).length;
+
+  /// A [normalize]d string with no spaces, no alef and no hamza at all,
+  /// and ة read as ه.
+  ///
+  /// The mushaf joins what people type apart — يَٰٓأَيُّهَا is يا أيها,
+  /// يَٰقَوْمِ is يا قوم, يَٰبُنَىَّ is يا بني — and writes or leaves out
+  /// an alef where a typist does the opposite; people end a word in ه
+  /// for ة, write شئ for شيء, and seat a hamza wherever their keyboard
+  /// put it. None of that is what they meant, so none of it is matched
+  /// on. It also means every letter typed on the way to a phrase finds
+  /// the verses the phrase does: results narrow as the words are typed,
+  /// they never blink out halfway and come back.
+  static String loose(String normalized) {
+    final b = StringBuffer();
+    for (final c in normalized.codeUnits) {
+      if (c < 0x0621 || c > 0x064A) continue; // spaces, digits, marks
+      if (c == 0x0627 || c == 0x0621) continue; // ا ء
+      b.writeCharCode(c == 0x0629 ? 0x0647 : c); // ة → ه
+    }
+    return b.toString();
+  }
+
+  /// Letters people swap for one another because they sound alike, or
+  /// alike enough in their own dialect: ض and ظ, ذ and ز, س ص and ث,
+  /// ت and ط, ه and ح. Folded only in the forgiving pass of [searchNow],
+  /// never in what the strict passes match.
+  static final List<int> _fold = () {
+    final t = List<int>.generate(0x100, (i) => 0x0600 + i);
+    void same(String letters) {
+      final cs = letters.codeUnits;
+      for (final c in cs) {
+        t[c - 0x0600] = cs.first;
       }
     }
+
+    same('ضظ');
+    same('زذ');
+    same('سصث');
+    same('تط');
+    same('هح');
+    return t;
+  }();
+
+  static int _folded(int c) =>
+      c >= 0x0600 && c < 0x0700 ? _fold[c - 0x0600] : c;
+
+  /// How many letters a query of [letters] loose letters may get wrong
+  /// and still find its verse: none up to four (a short word with one
+  /// letter changed is another word), then one, two, three.
+  static int _typos(int letters) => letters <= 4
+      ? 0
+      : letters <= 8
+          ? 1
+          : letters <= 14
+              ? 2
+              : 3;
+
+  /// Below this many verses found as typed, the forgiving pass runs
+  /// too: a query that already finds plenty is spelled right.
+  static const _fewHits = 20;
+
+  /// Verses whose letters contain [query]'s, at most [limit] of them.
+  /// Nothing for fewer than two letters: every verse has an alef.
+  static Future<List<VerseHit>> search(String query, {int limit = 100}) async {
+    if (letterCount(query) < 2) return const [];
+    await _ensureLoaded();
+    return searchNow(query, limit: limit)!;
+  }
+
+  /// [search], answered on the spot — or null while the index is still
+  /// being read. A field that searches as it is typed into shows each
+  /// keystroke's verses in the frame that keystroke draws, instead of a
+  /// frame of nothing between one answer and the next.
+  ///
+  /// Every verse is tried three ways, and the order is how sure the
+  /// match is:
+  ///
+  ///  1. the words as typed, after [normalize];
+  ///  2. the words [loose]: the spaces, alefs and hamzas the mushaf and
+  ///     a keyboard never agree on;
+  ///  3. when those found fewer than twenty: the loose letters again,
+  ///     sound-alike letters as one and a few letters wrong, missing or
+  ///     extra — the closest first.
+  ///
+  /// Within 1 and 2, a match that starts where a word starts comes
+  /// before one in the middle of a word: يا بني is يَٰبَنِىٓ before it
+  /// is إِلَىٰ بَنِىٓ, and يا ايها is يَٰٓأَيُّهَا before it is the
+  /// middle of سَيِّئَةً. Otherwise mushaf order.
+  static List<VerseHit>? searchNow(String query, {int limit = 100}) {
+    final keys = _keys, looseKeys = _loose, text = _text;
+    if (keys == null || looseKeys == null || text == null) return null;
+    final q = normalize(query);
+    if (_letters(q) < 2) return const [];
+    final lq = loose(q);
+    // ان or اء is two letters typed and one loose: too short to match
+    // loosely without matching nearly every verse.
+    final useLoose = lq.length >= 2;
+    // exact at a word's start, loose at a word's start, exact inside a
+    // word, loose inside a word.
+    final tiers = List.generate(4, (_) => <VerseHit>[]);
+    final found = <int>{};
+    for (var s = 0; s < keys.length; s++) {
+      final ks = keys[s], ls = looseKeys[s];
+      for (var a = 0; a < ks.length; a++) {
+        final int tier;
+        if (ks[a].contains(q)) {
+          final atStart = useLoose
+              ? _looseAtWordStart(ks[a], ls[a], lq)
+              : ks[a].startsWith(q) || ks[a].contains(' $q');
+          tier = atStart ? 0 : 2;
+        } else if (useLoose && ls[a].contains(lq)) {
+          tier = _looseAtWordStart(ks[a], ls[a], lq) ? 1 : 3;
+        } else {
+          continue;
+        }
+        found.add(s * 1000 + a);
+        if (tiers[tier].length < limit) {
+          tiers[tier].add(VerseHit(s + 1, a + 1, text[s][a]));
+        }
+      }
+    }
+    final hits = [for (final t in tiers) ...t];
+    if (hits.length >= limit) return hits.sublist(0, limit);
+    if (found.length >= _fewHits || lq.length < 3) return hits;
+    // A phrase typed on from the end of one verse into the next —
+    // والعصر ان الانسان لفي خسر, قل هو الله احد الله الصمد — is found
+    // at the verse it starts in.
+    if (lq.length >= 4) {
+      for (var s = 0; s < looseKeys.length && hits.length < limit; s++) {
+        final ls = looseKeys[s];
+        for (var a = 0; a + 1 < ls.length && hits.length < limit; a++) {
+          if (found.contains(s * 1000 + a)) continue;
+          final head = ls[a];
+          final joined = StringBuffer(head);
+          for (var n = a + 1;
+              n < ls.length && joined.length < head.length + lq.length;
+              n++) {
+            joined.write(ls[n]);
+          }
+          // Starting inside this verse and running past its end: one
+          // that fits inside it was found above.
+          final from = head.length - lq.length + 1;
+          final i = joined.toString().indexOf(lq, from < 0 ? 0 : from);
+          if (i < 0 || i >= head.length) continue;
+          found.add(s * 1000 + a);
+          hits.add(VerseHit(s + 1, a + 1, text[s][a]));
+        }
+      }
+    }
+    final pattern = lq.length > 62 ? lq.substring(0, 62) : lq;
+    final k = _typos(pattern.length);
+    final peq = _letterMasks(pattern);
+    final close = <(int, int, int)>[]; // (typos, surah index, ayah index)
+    for (var s = 0; s < looseKeys.length; s++) {
+      final ls = looseKeys[s];
+      for (var a = 0; a < ls.length; a++) {
+        if (found.contains(s * 1000 + a)) continue;
+        final d = _closest(peq, pattern.length, ls[a], k);
+        if (d <= k) close.add((d, s, a));
+      }
+    }
+    close.sort((x, y) => x.$1 != y.$1
+        ? x.$1 - y.$1
+        : x.$2 != y.$2
+            ? x.$2 - y.$2
+            : x.$3 - y.$3);
+    for (final (_, s, a) in close) {
+      if (hits.length >= limit) break;
+      hits.add(VerseHit(s + 1, a + 1, text[s][a]));
+    }
     return hits;
+  }
+
+  /// Whether [lq] turns up in the loose key [ls] where one of the words
+  /// of the normalized key [key] starts. Run only on verses that
+  /// matched, so the word starts are counted then rather than stored.
+  ///
+  /// A word also starts after the و or ف fixed to its front, and after
+  /// its ال: اقيموا الصلاة is the start of وَأَقِيمُوا۟ ٱلصَّلَوٰةَ, and
+  /// صلاة the start of ٱلصَّلَوٰةَ.
+  static bool _looseAtWordStart(String key, String ls, String lq) {
+    final starts = <int>{};
+    var pos = 0;
+    for (final word in key.split(' ')) {
+      final kept = loose(word);
+      if (kept.isEmpty) continue;
+      starts.add(pos);
+      // Only a word long enough to carry them: إلى is not ال + ى.
+      final c0 = kept.codeUnitAt(0);
+      final conj = c0 == 0x0648 || c0 == 0x0641; // و ف
+      if (kept.length >= 3 && (conj || word.startsWith('ال'))) {
+        starts.add(pos + 1);
+      }
+      // و or ف, then the ل of an ال the normalizer left no alef in.
+      if (kept.length >= 4 && conj && kept.codeUnitAt(1) == 0x0644) {
+        starts.add(pos + 2);
+      }
+      pos += kept.length;
+    }
+    for (var i = ls.indexOf(lq); i >= 0; i = ls.indexOf(lq, i + 1)) {
+      if (starts.contains(i)) return true;
+    }
+    return false;
+  }
+
+  /// Per Arabic letter (index: code unit − U+0600), the positions of
+  /// [pattern] it may stand in for, sound-alikes folded together.
+  static List<int> _letterMasks(String pattern) {
+    final peq = List<int>.filled(0x100, 0);
+    for (var i = 0; i < pattern.length; i++) {
+      final c = _folded(pattern.codeUnitAt(i));
+      if (c < 0x0600 || c >= 0x0700) continue;
+      for (var x = 0; x < 0x100; x++) {
+        if (_fold[x] == c) peq[x] |= 1 << i;
+      }
+    }
+    return peq;
+  }
+
+  /// The fewest letters the [m]-letter pattern behind [peq] (see
+  /// [_letterMasks]; m at most 62) gets wrong against any stretch of
+  /// [verse]; anything over [k] comes back as k + 1. Myers' bit-parallel
+  /// edit distance, one machine word per column, so the whole Quran
+  /// takes milliseconds.
+  static int _closest(List<int> peq, int m, String verse, int k) {
+    final high = 1 << (m - 1);
+    final mask = (1 << m) - 1;
+    var pv = mask, mv = 0, score = m, best = m;
+    for (var j = 0; j < verse.length; j++) {
+      final c = verse.codeUnitAt(j);
+      final eq = c >= 0x0600 && c < 0x0700 ? peq[c - 0x0600] : 0;
+      final xv = eq | mv;
+      final xh = ((((eq & pv) + pv) & mask) ^ pv) | eq;
+      var ph = mv | (~(xh | pv) & mask);
+      var mh = pv & xh;
+      if ((ph & high) != 0) {
+        score++;
+      } else if ((mh & high) != 0) {
+        score--;
+      }
+      // A match may start anywhere in the verse: nothing shifts in.
+      ph = (ph << 1) & mask;
+      mh = (mh << 1) & mask;
+      pv = mh | (~(xv | ph) & mask);
+      mv = ph & xv;
+      if (score < best) {
+        best = score;
+        if (best == 0) return 0;
+      }
+    }
+    return best > k ? k + 1 : best;
   }
 
   /// The one verse at [surah]:[ayah], or nothing if there is no such
@@ -333,6 +589,7 @@ abstract final class QuranSearch {
   static void resetForTest() {
     _text = null;
     _keys = null;
+    _loose = null;
     _loading = null;
     _translationHits.clear();
   }

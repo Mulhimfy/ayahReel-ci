@@ -227,6 +227,25 @@ is not for a 1.0.9 patch. Play's Crashes and ANRs (28 days to
 2026-10-21) had nothing new on 1.0.9: the Reno2 Z Impeller GLES crash
 and the background and PowerVR ANRs, all answered by `d220473` above.
 
+**Also for the 1.0.10 store build (native), 2026-10-28:** `2de49f7` on
+`voices/sobhi` (= `feat/live-recitation`, mirror `6d72a73` with
+`dc021e8`), from Play's vitals (28 days to 2026-10-28: slow cold starts
+7.50%, P90 4.3 s, P99 9–10 s, high on 3–4 GB phones; slow warm starts
+16.75% against a peer median of 10.97%, P90 2.6 s). `MainActivity`'s
+`popSystemNavigator` sends the app behind on Back from its first screen
+(`moveTaskToBack`, as the task's root only) instead of letting Flutter
+finish the activity and the engine with it; `preloadFfmpeg` loads
+FFmpegKitConfig, and with it FFmpeg's nine native libraries, on a
+thread of its own at the top of `onCreate`, beside the engine's start,
+rather than on the main thread inside the plugin's registration
+(`proguard-rules.pro` keeps the class name). The same commit's Dart half
+(ambient motion at a 30 fps beat, one backdrop for the shell's three
+blurs, `OnScreen.settle` waiting again) is patchable but not patched.
+Play's Crashes and ANRs (28 days to 2026-10-28): nothing new on 1.0.9
+beyond one more background `CreateSnapshotSurface` crash (Oppo Reno4 F,
+Android 12, 2026-10-24), which `d220473`'s Skia rule covers (MediaTek,
+vendor API 31).
+
 **2026-10-14, from the VPS via the public mirror: saves reclaimed in
 the background, and the Telegram invitation. Dart only.** At the user's
 word ("fix it and comm push all", then "... then ota push it"). From a
