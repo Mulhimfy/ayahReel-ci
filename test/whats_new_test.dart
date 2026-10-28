@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:ayah_reels/data/app_version.dart';
 import 'package:ayah_reels/data/fatiha_data.dart';
 import 'package:ayah_reels/l10n/l10n.dart';
 import 'package:ayah_reels/theme/app_theme.dart';
@@ -29,6 +30,15 @@ void main() {
     test('once: shown is the end of it', () {
       expect(pending('1.0.10', true, true), isTrue);
       expect(pending('1.0.10', false, true), isFalse);
+    });
+
+    test('removed before the next version', () {
+      // 1.0.10's alone: a version past it means deleting the note (see
+      // the REMOVE BEFORE 1.0.11 list in lib/widgets/whats_new.dart).
+      expect(compareVersions(kAppVersion, WhatsNew.forVersion),
+          lessThanOrEqualTo(0),
+          reason: 'kAppVersion is $kAppVersion: remove WhatsNew, '
+              'its call sites, its strings and this test');
     });
 
     test('never in another version', () {

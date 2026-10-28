@@ -23,6 +23,11 @@ import '../theme/app_theme.dart';
 /// launch, so finishing onboarding later changes nothing. Shown on Home
 /// with nothing over it, once; marked as shown before it is answered,
 /// so an app closed with it open never brings it back.
+///
+/// REMOVE BEFORE 1.0.11: this file, its start in main.dart, its check in
+/// telegram_invite.dart, the whatsNew* strings in l10n.dart and
+/// test/whats_new_test.dart. That test fails once pubspec.yaml's version
+/// passes [forVersion], as a reminder.
 abstract final class WhatsNew {
   /// The one version this note is about. Any other version never reads
   /// or writes the record.
