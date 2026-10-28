@@ -148,10 +148,21 @@ jobs:
           grep -q 'AyahReel version: ' release.log && grep 'AyahReel version: ' release.log | tail -1 || true
       # Kept before anything else can fail: the Shorebird release exists
       # now, and only this bundle matches it.
+      # The CI mirror's artifacts are public, so the build goes up sealed
+      # (AES-256, the AR_ARTIFACT_KEY secret): only a job holding the key,
+      # or the VPS (/root/keys/ayahreel-artifact.key), can open it.
+      - name: Seal the bundle
+        env:
+          K: ${{ secrets.AR_ARTIFACT_KEY }}
+        run: |
+          set -euo pipefail
+          [ -n "$K" ] || { echo "No AR_ARTIFACT_KEY secret: the bundle can't be kept." >&2; exit 1; }
+          openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -pass env:K \
+            -in build/app/outputs/bundle/release/app-release.aab -out app-release.aab.sealed
       - uses: actions/upload-artifact@v4
         with:
           name: aab
-          path: build/app/outputs/bundle/release/app-release.aab
+          path: app-release.aab.sealed
           retention-days: 30
           if-no-files-found: error
       - name: Check the bundle
@@ -201,8 +212,12 @@ jobs:
           path: release.log
           if-no-files-found: ignore
 
+  # Only from the private repo: Play's workload identity trusts its OIDC
+  # token and refuses the public mirror's. A release built on the mirror
+  # goes to Play by hand (Play Console), from the sealed artifact.
   play:
     needs: build
+    if: github.repository == 'Mulhimfy/ayahReel'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -214,6 +229,13 @@ jobs:
         with:
           name: aab
           path: ${{ runner.temp }}/aab
+      - name: Open the bundle
+        env:
+          K: ${{ secrets.AR_ARTIFACT_KEY }}
+        run: |
+          set -euo pipefail
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass env:K \
+            -in "$RUNNER_TEMP/aab/app-release.aab.sealed" -out "$RUNNER_TEMP/aab/app-release.aab"
       - uses: google-github-actions/auth@v2
         id: gcp
         with:

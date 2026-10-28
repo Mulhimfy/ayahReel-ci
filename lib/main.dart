@@ -23,6 +23,7 @@ import 'screens/onboarding_screen.dart';
 import 'state/creation_state.dart';
 import 'theme/app_theme.dart';
 import 'widgets/telegram_invite.dart';
+import 'widgets/whats_new.dart';
 import 'widgets/cinematic_hero.dart';
 
 /// The app's one navigator, for the places that open a screen without
@@ -211,6 +212,9 @@ class _RootState extends State<_Root> {
     // frame; neither gates what the user sees, and neither prompts.
     RewardsService.init();
     unawaited(TelegramInvite.start(appNavigatorKey));
+    // What this version brought, once, for those who had the app
+    // before it; decided from the onboarding flag as read above.
+    unawaited(WhatsNew.start(appNavigatorKey));
     // Laying a reminder window down is a platform call per day, on the
     // main thread — the thread the first frame also needs. Started
     // here, it held the launch screen for as long as it ran; a few

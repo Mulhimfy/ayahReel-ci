@@ -1938,6 +1938,44 @@ class L10n {
   String get joinTelegramTitle => _t('Join Telegram', 'انضم إلى تيليجرام',
       'ٹیلیگرام جوائن کریں', 'Gabung Telegram', 'Telegram beitreten');
 
+  /// What 1.0.10 brought, said once to the people who had the app
+  /// before it (WhatsNew).
+  String get whatsNewTitle => _t("What's new in AyahReel",
+      'الجديد في AyahReel', 'AyahReel میں نیا کیا ہے', 'Yang baru di AyahReel',
+      'Neu in AyahReel');
+  String whatsNewReciters(String a, String b) => _t(
+      'New reciters: $a and $b.',
+      'قرّاء جدد: $a و$b.',
+      'نئے قاری: $a اور $b۔',
+      'Qari baru: $a dan $b.',
+      'Neue Rezitatoren: $a und $b.');
+  String get whatsNewMotion => _t(
+      'New motion: the light follows each word as it is recited, now with many more reciters, and the scenery changes with every line.',
+      'حركة جديدة: يتبع الضوء كل كلمة وهي تُتلى، الآن مع قرّاء أكثر بكثير، وتتغيّر الخلفية مع كل سطر.',
+      'نئی حرکت: روشنی ہر لفظ کے ساتھ چلتی ہے جیسے ہی وہ پڑھا جائے، اب بہت سے مزید قاریوں کے ساتھ، اور منظر ہر سطر کے ساتھ بدلتا ہے۔',
+      'Gerak baru: cahaya mengikuti setiap kata saat dibacakan, kini untuk jauh lebih banyak qari, dan pemandangan berganti di setiap baris.',
+      'Neue Bewegung: Das Licht folgt jedem Wort, während es rezitiert wird, jetzt bei viel mehr Rezitatoren, und die Szenerie wechselt mit jeder Zeile.');
+  String get whatsNewShare => _t(
+      'Share straight to TikTok, YouTube, Instagram, Facebook and WhatsApp.',
+      'شارك مباشرة إلى تيك توك ويوتيوب وإنستغرام وفيسبوك وواتساب.',
+      'ٹک ٹاک، یوٹیوب، انسٹاگرام، فیس بک اور واٹس ایپ پر سیدھا شیئر کریں۔',
+      'Bagikan langsung ke TikTok, YouTube, Instagram, Facebook, dan WhatsApp.',
+      'Teile direkt auf TikTok, YouTube, Instagram, Facebook und WhatsApp.');
+  String get whatsNewBismillahSearch => _t(
+      'Bismillah before verse 1, and a verse search that understands how you type.',
+      'البسملة قبل الآية الأولى، وبحث عن الآيات يفهم طريقة كتابتك.',
+      'پہلی آیت سے پہلے بسم اللہ، اور آیات کی تلاش جو آپ کے لکھنے کا انداز سمجھتی ہے۔',
+      'Basmalah sebelum ayat pertama, dan pencarian ayat yang memahami cara Anda mengetik.',
+      'Die Basmala vor dem ersten Vers und eine Verssuche, die versteht, wie du tippst.');
+  String get whatsNewFaster => _t(
+      'Faster and smoother all round.',
+      'أسرع وأكثر سلاسة في كل شيء.',
+      'ہر جگہ زیادہ تیز اور زیادہ رواں۔',
+      'Lebih cepat dan lebih lancar di mana-mana.',
+      'Überall schneller und flüssiger.');
+  String get whatsNewDone =>
+      _t('Got it', 'حسنًا', 'ٹھیک ہے', 'Mengerti', 'Verstanden');
+
   /// The Telegram invitation that follows a good moment
   /// (TelegramInvite).
   String get telegramInviteTitle => _t(

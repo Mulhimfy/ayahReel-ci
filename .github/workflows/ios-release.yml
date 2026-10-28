@@ -18,7 +18,7 @@
 # Xcode is the one ios-patch.yml is pinned to (sdkBuild 23F81a), so this
 # release is patched by the same job as 1.0.6 and 1.0.7.
 #
-# The IPA is kept as the run's artifact the moment it exists. If the upload
+# The IPA is kept as the run's artifact the moment it exists, sealed. If the upload
 # or the submission fails, `gh run rerun <id> --failed` repeats only that
 # job, with the same IPA. A failed build job leaves a Shorebird release
 # behind if it got that far; the next run passes over its number (Shorebird
@@ -190,10 +190,24 @@ jobs:
           cp "$(ls build/ios/ipa/*.ipa | head -1)" "AyahReel-$VERSION-$BUILD.ipa"
       # Kept before anything else can fail: the Shorebird release exists
       # now, and only this IPA matches it.
+      # The CI mirror's artifacts are public, so the build goes up sealed
+      # (AES-256, the AR_ARTIFACT_KEY secret): only a job holding the key,
+      # or the VPS (/root/keys/ayahreel-artifact.key), can open it.
+      - name: Seal the IPA
+        env:
+          K: ${{ secrets.AR_ARTIFACT_KEY }}
+          BUILD: ${{ steps.number.outputs.build }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          [ -n "$K" ] || { echo "No AR_ARTIFACT_KEY secret: the IPA can't be kept." >&2; exit 1; }
+          mkdir -p sealed
+          openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -pass env:K \
+            -in "AyahReel-$VERSION-$BUILD.ipa" -out "sealed/AyahReel-$VERSION-$BUILD.ipa.sealed"
       - uses: actions/upload-artifact@v4
         with:
           name: ipa
-          path: AyahReel-*.ipa
+          path: sealed/AyahReel-*.ipa.sealed
           retention-days: 30
           if-no-files-found: error
       - name: Check the IPA
@@ -258,6 +272,15 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: ipa
+      - name: Open the IPA
+        env:
+          K: ${{ secrets.AR_ARTIFACT_KEY }}
+        run: |
+          set -euo pipefail
+          for f in AyahReel-*.ipa.sealed; do
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass env:K -in "$f" -out "${f%.sealed}"
+            rm "$f"
+          done
       - name: Upload to App Store Connect
         run: |
           set -euo pipefail
@@ -282,6 +305,15 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: ipa
+      - name: Open the IPA
+        env:
+          K: ${{ secrets.AR_ARTIFACT_KEY }}
+        run: |
+          set -euo pipefail
+          for f in AyahReel-*.ipa.sealed; do
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass env:K -in "$f" -out "${f%.sealed}"
+            rm "$f"
+          done
       - name: Submit for review
         run: |
           set -euo pipefail

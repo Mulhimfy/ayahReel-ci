@@ -18,7 +18,7 @@
 /// The build number is not part of it. The stores show, and users
 /// think in, the marketing version; a build number that jumps for a
 /// re-upload would otherwise read as a new version to every phone.
-const kAppVersion = '1.0.9';
+const kAppVersion = '1.0.10';
 
 /// Compares two dotted versions â€” `1.0.10` is above `1.0.9`, not below
 /// it, which is what a string compare would say.

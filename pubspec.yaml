@@ -26,7 +26,7 @@ publish_to: "none"
 #
 # iOS build numbers come from Apple at build time (see codemagic.yaml), so
 # this line is the only version knob left to turn.
-version: 1.0.9+23
+version: 1.0.10+24
 
 environment:
   sdk: ">=3.4.0 <4.0.0"

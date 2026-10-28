@@ -248,6 +248,80 @@ const reciters = <Reciter>[
     style: 'Murattal · rich, emotive',
     source: AyahFiles.everyAyah('Yasser_Ad-Dussary_128kbps'),
   ),
+  // His one complete recording (the King Fahd Complex's of 2019, on
+  // mp3quran) comes with no verse table, so it reads one of our own,
+  // made from the recording itself and checked against it like any
+  // other, served only to the app (OwnTiming: VerseTables in
+  // lib/data/verse_tables.dart, tool/verse_table.py).
+  Reciter(
+    id: 'luhaidan',
+    name: 'Mohammed Al-Luhaidan',
+    arabicName: 'محمد اللحيدان',
+    style: 'Murattal · steady pace',
+    source: SurahFiles(
+      'https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1',
+      timing: OwnTiming('luhaidan'),
+    ),
+    pace: 1.098,
+  ),
+  // His one complete recording, mp3quran's, comes with no verse table,
+  // lacks five surahs (mp3quran sends them to Al-Minshawi's files), has
+  // 29 only at a variable bitrate, which can't be sliced, and Al-Qamar
+  // with a second take after the first. So it reads a table of our own,
+  // as Al-Luhaidan does, made from these very files, and takes 32 of them
+  // from elsewhere: the same takes at a constant bitrate on archive.org,
+  // and Al-Jinn's on Way2Quran (from tvQuran), each found to be the very
+  // audio of his file here; and Ghafir and Al-Jathiya from archive.org
+  // (from his own channel), his voice as a speaker-verification model
+  // hears it (tool/verify_reciters.py, 10.). The As-Saffat, Az-Zumar and
+  // At-Talaq hosts offer under his name are another reciter's (Ahmed
+  // Khedr's), or can't be told to be his, and are left out.
+  Reciter(
+    id: 'sobhi',
+    name: 'Islam Sobhi',
+    arabicName: 'إسلام صبحي',
+    style: 'Murattal · devout, moving',
+    source: SurahFiles(
+      'https://cdn.mp3quran.net/audio/islam-sobhi/r1',
+      timing: OwnTiming('sobhi'),
+      missing: {37, 39, 65},
+      elsewhere: {
+        17: 'https://archive.org/download/002_20221103_202211/017.mp3',
+        21: 'https://archive.org/download/002_20221103_202211/021.mp3',
+        23: 'https://archive.org/download/002_20221103_202211/023.mp3',
+        24: 'https://archive.org/download/002_20221103_202211/024.mp3',
+        25: 'https://archive.org/download/002_20221103_202211/025.mp3',
+        29: 'https://archive.org/download/002_20221103_202211/029.mp3',
+        30: 'https://archive.org/download/002_20221103_202211/030.mp3',
+        38: 'https://archive.org/download/002_20221103_202211/038.mp3',
+        40: 'https://archive.org/download/stream-and-lyrics-by-islam-sobhi-surah-ghafir-mp-3-160-k/%D8%B3%D9%88%D8%B1%D8%A9%20%D8%BA%D8%A7%D9%81%D8%B1%20%28%D9%83%D8%A7%D9%85%D9%84%D8%A9%29%20_%D8%A7%D9%84%D9%82%D8%A7%D8%B1%D8%A6%20%D8%A7%D8%B3%D9%84%D8%A7%D9%85%20%D8%B5%D8%A8%D8%AD%D9%8A%20Stream%20and%20lyrics%20by%20islam%20sobhi%20_%20Surah%20Ghafir%28MP3_160K%29.mp3',
+        45: 'https://archive.org/download/mp-3-160-k_20260716/%D8%AA%D9%84%D8%A7%D9%88%D8%A9%20%D8%AC%D8%AF%D9%8A%D8%AF%D8%A9%20%D9%84%D8%B3%D9%88%D8%B1%D8%A9%20%D8%A7%D9%84%D8%AC%D8%A7%D8%AB%D9%8A%D8%A9%20%D9%83%D8%A7%D9%85%D9%84%D8%A9%20%D8%A7%D9%84%D9%82%D8%A7%D8%B1%D8%A6%20%D8%A7%D8%B3%D9%84%D8%A7%D9%85%20%D8%B5%D8%A8%D8%AD%D9%8A%20_%20%D8%AA%D9%84%D8%A7%D9%88%D8%A9%20%D9%85%D8%A8%D8%A7%D8%B1%D9%83%D8%A9%28MP3_160K%29.mp3',
+        47: 'https://archive.org/download/002_20221103_202211/047.mp3',
+        48: 'https://archive.org/download/002_20221103_202211/048.mp3',
+        49: 'https://archive.org/download/002_20221103_202211/049.mp3',
+        52: 'https://archive.org/download/002_20221103_202211/052.mp3',
+        54: 'https://archive.org/download/002_20221103_202211/054.mp3',
+        57: 'https://archive.org/download/002_20221103_202211/057.mp3',
+        62: 'https://archive.org/download/002_20221103_202211/062.mp3',
+        72: 'https://media.way2quran.com/islam-sobhi/hafs-an-asim/072.mp3',
+        74: 'https://archive.org/download/002_20221103_202211/074.mp3',
+        95: 'https://archive.org/download/002_20221103_202211/095.mp3',
+        98: 'https://archive.org/download/002_20221103_202211/098.mp3',
+        99: 'https://archive.org/download/002_20221103_202211/099.mp3',
+        100: 'https://archive.org/download/002_20221103_202211/100.mp3',
+        101: 'https://archive.org/download/002_20221103_202211/101.mp3',
+        104: 'https://archive.org/download/002_20221103_202211/104.mp3',
+        105: 'https://archive.org/download/002_20221103_202211/105%E2%80%8B.mp3',
+        106: 'https://archive.org/download/002_20221103_202211/106.mp3',
+        107: 'https://archive.org/download/002_20221103_202211/107.mp3',
+        108: 'https://archive.org/download/002_20221103_202211/108.mp3',
+        109: 'https://archive.org/download/002_20221103_202211/109.mp3',
+        110: 'https://archive.org/download/002_20221103_202211/110.mp3',
+        111: 'https://archive.org/download/002_20221103_202211/111.mp3',
+      },
+    ),
+    pace: 1.167,
+  ),
   Reciter(
     id: 'shatri',
     name: 'Abu Bakr Ash-Shatri',
@@ -1205,80 +1279,6 @@ const reciters = <Reciter>[
       timing: Mp3QuranTiming(33),
     ),
     pace: 1.544,
-  ),
-  // His one complete recording (the King Fahd Complex's of 2019, on
-  // mp3quran) comes with no verse table, so it reads one of our own,
-  // made from the recording itself and checked against it like any
-  // other, served only to the app (OwnTiming: VerseTables in
-  // lib/data/verse_tables.dart, tool/verse_table.py).
-  Reciter(
-    id: 'luhaidan',
-    name: 'Mohammed Al-Luhaidan',
-    arabicName: 'محمد اللحيدان',
-    style: 'Murattal · steady pace',
-    source: SurahFiles(
-      'https://cdn.mp3quran.net/audio/muhammad-luhaidan/r1',
-      timing: OwnTiming('luhaidan'),
-    ),
-    pace: 1.098,
-  ),
-  // His one complete recording, mp3quran's, comes with no verse table,
-  // lacks five surahs (mp3quran sends them to Al-Minshawi's files), has
-  // 29 only at a variable bitrate, which can't be sliced, and Al-Qamar
-  // with a second take after the first. So it reads a table of our own,
-  // as Al-Luhaidan does, made from these very files, and takes 32 of them
-  // from elsewhere: the same takes at a constant bitrate on archive.org,
-  // and Al-Jinn's on Way2Quran (from tvQuran), each found to be the very
-  // audio of his file here; and Ghafir and Al-Jathiya from archive.org
-  // (from his own channel), his voice as a speaker-verification model
-  // hears it (tool/verify_reciters.py, 10.). The As-Saffat, Az-Zumar and
-  // At-Talaq hosts offer under his name are another reciter's (Ahmed
-  // Khedr's), or can't be told to be his, and are left out.
-  Reciter(
-    id: 'sobhi',
-    name: 'Islam Sobhi',
-    arabicName: 'إسلام صبحي',
-    style: 'Murattal · devout, moving',
-    source: SurahFiles(
-      'https://cdn.mp3quran.net/audio/islam-sobhi/r1',
-      timing: OwnTiming('sobhi'),
-      missing: {37, 39, 65},
-      elsewhere: {
-        17: 'https://archive.org/download/002_20221103_202211/017.mp3',
-        21: 'https://archive.org/download/002_20221103_202211/021.mp3',
-        23: 'https://archive.org/download/002_20221103_202211/023.mp3',
-        24: 'https://archive.org/download/002_20221103_202211/024.mp3',
-        25: 'https://archive.org/download/002_20221103_202211/025.mp3',
-        29: 'https://archive.org/download/002_20221103_202211/029.mp3',
-        30: 'https://archive.org/download/002_20221103_202211/030.mp3',
-        38: 'https://archive.org/download/002_20221103_202211/038.mp3',
-        40: 'https://archive.org/download/stream-and-lyrics-by-islam-sobhi-surah-ghafir-mp-3-160-k/%D8%B3%D9%88%D8%B1%D8%A9%20%D8%BA%D8%A7%D9%81%D8%B1%20%28%D9%83%D8%A7%D9%85%D9%84%D8%A9%29%20_%D8%A7%D9%84%D9%82%D8%A7%D8%B1%D8%A6%20%D8%A7%D8%B3%D9%84%D8%A7%D9%85%20%D8%B5%D8%A8%D8%AD%D9%8A%20Stream%20and%20lyrics%20by%20islam%20sobhi%20_%20Surah%20Ghafir%28MP3_160K%29.mp3',
-        45: 'https://archive.org/download/mp-3-160-k_20260716/%D8%AA%D9%84%D8%A7%D9%88%D8%A9%20%D8%AC%D8%AF%D9%8A%D8%AF%D8%A9%20%D9%84%D8%B3%D9%88%D8%B1%D8%A9%20%D8%A7%D9%84%D8%AC%D8%A7%D8%AB%D9%8A%D8%A9%20%D9%83%D8%A7%D9%85%D9%84%D8%A9%20%D8%A7%D9%84%D9%82%D8%A7%D8%B1%D8%A6%20%D8%A7%D8%B3%D9%84%D8%A7%D9%85%20%D8%B5%D8%A8%D8%AD%D9%8A%20_%20%D8%AA%D9%84%D8%A7%D9%88%D8%A9%20%D9%85%D8%A8%D8%A7%D8%B1%D9%83%D8%A9%28MP3_160K%29.mp3',
-        47: 'https://archive.org/download/002_20221103_202211/047.mp3',
-        48: 'https://archive.org/download/002_20221103_202211/048.mp3',
-        49: 'https://archive.org/download/002_20221103_202211/049.mp3',
-        52: 'https://archive.org/download/002_20221103_202211/052.mp3',
-        54: 'https://archive.org/download/002_20221103_202211/054.mp3',
-        57: 'https://archive.org/download/002_20221103_202211/057.mp3',
-        62: 'https://archive.org/download/002_20221103_202211/062.mp3',
-        72: 'https://media.way2quran.com/islam-sobhi/hafs-an-asim/072.mp3',
-        74: 'https://archive.org/download/002_20221103_202211/074.mp3',
-        95: 'https://archive.org/download/002_20221103_202211/095.mp3',
-        98: 'https://archive.org/download/002_20221103_202211/098.mp3',
-        99: 'https://archive.org/download/002_20221103_202211/099.mp3',
-        100: 'https://archive.org/download/002_20221103_202211/100.mp3',
-        101: 'https://archive.org/download/002_20221103_202211/101.mp3',
-        104: 'https://archive.org/download/002_20221103_202211/104.mp3',
-        105: 'https://archive.org/download/002_20221103_202211/105%E2%80%8B.mp3',
-        106: 'https://archive.org/download/002_20221103_202211/106.mp3',
-        107: 'https://archive.org/download/002_20221103_202211/107.mp3',
-        108: 'https://archive.org/download/002_20221103_202211/108.mp3',
-        109: 'https://archive.org/download/002_20221103_202211/109.mp3',
-        110: 'https://archive.org/download/002_20221103_202211/110.mp3',
-        111: 'https://archive.org/download/002_20221103_202211/111.mp3',
-      },
-    ),
-    pace: 1.167,
   ),
   // ── Mujawwad ─────────────────────────────────────────────────────
   // The ornate, slow style of the great Egyptian masters — kept as

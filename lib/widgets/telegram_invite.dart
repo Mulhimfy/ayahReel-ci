@@ -11,6 +11,7 @@ import '../data/rewards_service.dart';
 import '../data/settings_service.dart';
 import '../l10n/l10n.dart';
 import '../render/on_screen.dart';
+import 'whats_new.dart';
 
 /// A good moment the Telegram invitation may follow, and how long
 /// after: long enough for the moment's own word (a badge, a result, a
@@ -267,6 +268,8 @@ abstract final class TelegramInvite {
     final context = _navigator?.currentContext;
     if (nav == null || context == null || !OnScreen.now) return;
     if (atRest && nav.canPop()) return;
+    // The note of what's new came up in this launch: one ask a launch.
+    if (WhatsNew.shownThisLaunch) return;
     // Something already asks for the user's attention: the rating ask,
     // a reminder invitation, a sheet they opened. Not over it.
     Route<dynamic>? top;
