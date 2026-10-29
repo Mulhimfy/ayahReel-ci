@@ -1,0 +1,385 @@
+name: ayah_reels
+description: "Create beautiful Quran recitation reels in under a minute."
+publish_to: "none"
+# versionName+versionCode. Shorebird identifies a release by this exact string,
+# so `shorebird patch android --release-version 0.1.1+1` must match what was
+# built. Bump the +N on every store upload; Play rejects a reused versionCode.
+#
+# The versionName half must ALSO climb once Apple has approved a version, or
+# the upload is rejected before it ever reaches TestFlight:
+#
+#   90062: CFBundleShortVersionString [0.1.0] must contain a higher version
+#          than that of the previously approved version [0.1.0]
+#
+# and a version that has actually been RELEASED is worse than spent — its
+# TestFlight train shuts, so even a build numbered above the last one is
+# turned away at upload, after the IPA has been built and signed:
+#
+#   90186: Invalid Pre-Release Train. The train version '0.1.1' is closed
+#          for new build submissions
+#
+# 0.1.0, 0.1.1 and 1.0 are all gone that way: 0.1.1 and 1.0 are both
+# READY_FOR_SALE in App Store Connect, so 1.0 is what the public has and
+# nothing at or below it can be uploaded again. Check with
+# tool/asc-versions.py before choosing this line, rather than after a
+# 20-minute build spends itself finding out.
+#
+# iOS build numbers come from Apple at build time (see codemagic.yaml), so
+# this line is the only version knob left to turn.
+version: 1.0.11+25
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  google_fonts: ^6.2.1
+  audioplayers: ^6.1.0
+  video_player: ^2.9.2
+  # The min-GPL build, not the full one. It carries x264 — the
+  # reference encoder every render falls back to — and drops the
+  # ~27 external libraries this app never asks for, which is most
+  # of the download. The one thing that goes with them is LAME:
+  # see RecitationService._join, which encodes AAC instead.
+  ffmpeg_kit_flutter_new_min_gpl: ^2.6.2
+  path_provider: ^2.1.4
+  share_plus: ^13.3.0
+  gal: ^2.3.1
+  http: ^1.2.2
+  url_launcher: ^6.3.1
+  archive: ^3.6.1
+  crypto: ^3.0.5
+  image_picker: ^1.1.2
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.10.1
+  flutter_timezone: ^5.1.0
+  # Only so the "notifications are off" banner can hand the user
+  # straight to the OS screen that fixes it. Once a permission is
+  # permanently denied, re-requesting it is a silent no-op — system
+  # settings is the only route back.
+  app_settings: ^7.0.0
+  # The store-owned rating prompt on both platforms: StoreKit's
+  # requestReview on iOS, Play's launchReviewFlow on Android. Neither
+  # OS tells the app whether the sheet actually appeared, and both
+  # silently swallow the call once the user's quota is spent — which
+  # is why ReviewPrompt keeps its own budget and why Settings carries
+  # a manual route to the listing that can never be swallowed.
+  in_app_review: ^2.0.12
+  # The "audio file" door. Flutter's own document picker: a plain
+  # UIDocumentPicker on iOS and ACTION_OPEN_DOCUMENT on Android, with
+  # no image code on either side. It replaced file_picker, whose Android
+  # half carries an image compressor that decodes with BitmapFactory
+  # and no inSampleSize — never reached by this app, which only ever
+  # picked audio through it, but enough for Play's static scan to flag
+  # release 14 for it. The "video" door already went through
+  # image_picker, whose resizer downsamples properly.
+  file_selector: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  # Lets the reel-library tests point the documents directory at a
+  # temp dir instead of a real device path.
+  path_provider_platform_interface: ^2.1.2
+  plugin_platform_interface: ^2.1.8
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/audio/
+    - assets/backgrounds/
+    # A poster for every scenery in the catalog, not just the bundled
+    # ones (~4 MB for all of them). This is what lets the picker draw
+    # the whole library instantly and offline, with only the file behind
+    # a chosen scene ever needing to be fetched.
+    - assets/scene_thumbs/
+    - assets/catalog.json
+    # The whole Quran, cleaned as the reels render it, for searching a
+    # verse by its words offline — see tool/quran_search_index.py.
+    - assets/quran_search.json
+    # The hadith the card composer searches: six thousand short ones
+    # from the two Sahihs, the four Sunan, the Muwatta and the two
+    # classical forties, nothing graded weak. One gzipped file per
+    # language, of which a phone ever reads two — see
+    # tool/fetch_hadith.py for what is in it and why, and
+    # lib/data/hadith_library.dart for when it is read.
+    - assets/hadith/
+    - assets/fonts/
+    # One face, under the name google_fonts looks for.
+    #
+    # The AyahReel mark is set in Inter Medium through google_fonts,
+    # which resolves over the network and falls back silently when it
+    # cannot — and the mark is burned into every exported reel and
+    # every exported card. On a phone with no connection that fallback
+    # is baked into a file the user cannot take back. google_fonts
+    # checks the asset manifest before it checks the network, and uses
+    # any bundled asset whose name ends in `<Family>-<Variant>.ttf`, so
+    # this one file makes the mark resolve offline, synchronously, at
+    # the weight it was drawn at. See tool/fetch_fonts.py (MARK_FACES).
+    - assets/google_fonts/
+    - shorebird.yaml
+  # The faces a reel is typeset in, bundled rather than fetched — see
+  # the header of lib/data/verse_font.dart for why, and
+  # assets/fonts/README.md for where each one came from and under
+  # which licence. tool/fetch_fonts.py reproduces this set;
+  # tool/verify_fonts.py proves each face can set every verse and
+  # every translation it is offered for.
+  fonts:
+    # ---- the verse ------------------------------------------------
+    - family: HafsUthmani
+      fonts:
+        - asset: assets/fonts/UthmanicHafs.ttf
+    - family: AmiriQuran
+      fonts:
+        - asset: assets/fonts/AmiriQuran.ttf
+    - family: ScheherazadeNew
+      fonts:
+        - asset: assets/fonts/ScheherazadeNew.ttf
+    - family: NotoNaskhArabic
+      fonts:
+        - asset: assets/fonts/NotoNaskhArabic.ttf
+    - family: Lateef
+      fonts:
+        - asset: assets/fonts/Lateef.ttf
+    - family: Amiri
+      fonts:
+        - asset: assets/fonts/Amiri.ttf
+    - family: NotoKufiArabic
+      fonts:
+        - asset: assets/fonts/NotoKufiArabic.ttf
+    - family: Mada
+      fonts:
+        - asset: assets/fonts/Mada.ttf
+    - family: NotoSansArabic
+      fonts:
+        - asset: assets/fonts/NotoSansArabic.ttf
+    - family: Harmattan
+      fonts:
+        - asset: assets/fonts/Harmattan.ttf
+    # Weights and cuts of the faces above, each its own static file
+    # under its own family name — a different weight is a different
+    # file, checked against the Quran on its own (tool/verify_fonts.py)
+    # — and the faces that joined the verse list with them.
+    # IBM Plex Sans Arabic sets the verse too, off its declaration
+    # below.
+    - family: AmiriBold
+      fonts:
+        - asset: assets/fonts/AmiriBold.ttf
+    - family: NotoNaskhArabicBold
+      fonts:
+        - asset: assets/fonts/NotoNaskhArabicBold.ttf
+    - family: LateefBold
+      fonts:
+        - asset: assets/fonts/LateefBold.ttf
+    - family: HarmattanBold
+      fonts:
+        - asset: assets/fonts/HarmattanBold.ttf
+    - family: NotoKufiArabicThin
+      fonts:
+        - asset: assets/fonts/NotoKufiArabicThin.ttf
+    - family: NotoKufiArabicBold
+      fonts:
+        - asset: assets/fonts/NotoKufiArabicBold.ttf
+    - family: NotoSansArabicExtraLight
+      fonts:
+        - asset: assets/fonts/NotoSansArabicExtraLight.ttf
+    - family: NotoSansArabicBlack
+      fonts:
+        - asset: assets/fonts/NotoSansArabicBlack.ttf
+    - family: NotoSansArabicExtraCondensed
+      fonts:
+        - asset: assets/fonts/NotoSansArabicExtraCondensed.ttf
+    - family: NotoSansArabicExtraCondensedBold
+      fonts:
+        - asset: assets/fonts/NotoSansArabicExtraCondensedBold.ttf
+    - family: MadaLight
+      fonts:
+        - asset: assets/fonts/MadaLight.ttf
+    - family: IBMPlexSansArabicBold
+      fonts:
+        - asset: assets/fonts/IBMPlexSansArabicBold.ttf
+    - family: Estedad
+      fonts:
+        - asset: assets/fonts/Estedad.ttf
+    - family: EstedadBlack
+      fonts:
+        - asset: assets/fonts/EstedadBlack.ttf
+    - family: Jomhuria
+      fonts:
+        - asset: assets/fonts/Jomhuria.ttf
+    # ---- the translation, Arabic script ---------------------------
+    - family: IBMPlexSansArabic
+      fonts:
+        - asset: assets/fonts/IBMPlexSansArabic.ttf
+    - family: NotoNastaliqUrdu
+      fonts:
+        - asset: assets/fonts/NotoNastaliqUrdu.ttf
+    - family: MarkaziText
+      fonts:
+        - asset: assets/fonts/MarkaziText.ttf
+    - family: Cairo
+      fonts:
+        - asset: assets/fonts/Cairo.ttf
+    - family: Almarai
+      fonts:
+        - asset: assets/fonts/Almarai.ttf
+    - family: Changa
+      fonts:
+        - asset: assets/fonts/Changa.ttf
+    - family: ElMessiri
+      fonts:
+        - asset: assets/fonts/ElMessiri.ttf
+    - family: ReemKufi
+      fonts:
+        - asset: assets/fonts/ReemKufi.ttf
+    - family: ArefRuqaa
+      fonts:
+        - asset: assets/fonts/ArefRuqaa.ttf
+    - family: Qahiri
+      fonts:
+        - asset: assets/fonts/Qahiri.ttf
+    - family: Katibeh
+      fonts:
+        - asset: assets/fonts/Katibeh.ttf
+    - family: Mirza
+      fonts:
+        - asset: assets/fonts/Mirza.ttf
+    - family: Vazirmatn
+      fonts:
+        - asset: assets/fonts/Vazirmatn.ttf
+    # ---- the translation, Latin script ----------------------------
+    # Inter carries its own italic because that is the style the app
+    # has always set a translation in; the serif faces are upright,
+    # so one file each.
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter.ttf
+        - asset: assets/fonts/InterItalic.ttf
+          style: italic
+    - family: SourceSerif4
+      fonts:
+        - asset: assets/fonts/SourceSerif4.ttf
+    - family: Spectral
+      fonts:
+        - asset: assets/fonts/Spectral.ttf
+    - family: CormorantGaramond
+      fonts:
+        - asset: assets/fonts/CormorantGaramond.ttf
+    - family: Literata
+      fonts:
+        - asset: assets/fonts/Literata.ttf
+    - family: EBGaramond
+      fonts:
+        - asset: assets/fonts/EBGaramond.ttf
+    - family: LibreBaskerville
+      fonts:
+        - asset: assets/fonts/LibreBaskerville.ttf
+    - family: CrimsonPro
+      fonts:
+        - asset: assets/fonts/CrimsonPro.ttf
+    - family: CrimsonText
+      fonts:
+        - asset: assets/fonts/CrimsonText.ttf
+    - family: Cardo
+      fonts:
+        - asset: assets/fonts/Cardo.ttf
+    - family: Vollkorn
+      fonts:
+        - asset: assets/fonts/Vollkorn.ttf
+    - family: Alegreya
+      fonts:
+        - asset: assets/fonts/Alegreya.ttf
+    - family: Bitter
+      fonts:
+        - asset: assets/fonts/Bitter.ttf
+    - family: Rokkitt
+      fonts:
+        - asset: assets/fonts/Rokkitt.ttf
+    - family: Cormorant
+      fonts:
+        - asset: assets/fonts/Cormorant.ttf
+    - family: Rasa
+      fonts:
+        - asset: assets/fonts/Rasa.ttf
+    - family: Yrsa
+      fonts:
+        - asset: assets/fonts/Yrsa.ttf
+    - family: WorkSans
+      fonts:
+        - asset: assets/fonts/WorkSans.ttf
+    - family: SpaceGrotesk
+      fonts:
+        - asset: assets/fonts/SpaceGrotesk.ttf
+    - family: Mulish
+      fonts:
+        - asset: assets/fonts/Mulish.ttf
+    - family: NunitoSans
+      fonts:
+        - asset: assets/fonts/NunitoSans.ttf
+    - family: Raleway
+      fonts:
+        - asset: assets/fonts/Raleway.ttf
+    - family: Quicksand
+      fonts:
+        - asset: assets/fonts/Quicksand.ttf
+    - family: Montserrat
+      fonts:
+        - asset: assets/fonts/Montserrat.ttf
+    - family: Urbanist
+      fonts:
+        - asset: assets/fonts/Urbanist.ttf
+    - family: PublicSans
+      fonts:
+        - asset: assets/fonts/PublicSans.ttf
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans.ttf
+    - family: Epilogue
+      fonts:
+        - asset: assets/fonts/Epilogue.ttf
+    - family: Domine
+      fonts:
+        - asset: assets/fonts/Domine.ttf
+    - family: Petrona
+      fonts:
+        - asset: assets/fonts/Petrona.ttf
+    - family: PlayfairDisplay
+      fonts:
+        - asset: assets/fonts/PlayfairDisplay.ttf
+    - family: Marcellus
+      fonts:
+        - asset: assets/fonts/Marcellus.ttf
+    - family: Cinzel
+      fonts:
+        - asset: assets/fonts/Cinzel.ttf
+    - family: GildaDisplay
+      fonts:
+        - asset: assets/fonts/GildaDisplay.ttf
+    - family: Italiana
+      fonts:
+        - asset: assets/fonts/Italiana.ttf
+    - family: TenorSans
+      fonts:
+        - asset: assets/fonts/TenorSans.ttf
+    - family: Prata
+      fonts:
+        - asset: assets/fonts/Prata.ttf
+    - family: BodoniModa
+      fonts:
+        - asset: assets/fonts/BodoniModa.ttf
+    - family: DMSerifDisplay
+      fonts:
+        - asset: assets/fonts/DMSerifDisplay.ttf
+    - family: JosefinSans
+      fonts:
+        - asset: assets/fonts/JosefinSans.ttf
+    - family: Jost
+      fonts:
+        - asset: assets/fonts/Jost.ttf
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/Outfit.ttf

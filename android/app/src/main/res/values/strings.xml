@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The verse widget. The same wording as lib/l10n/l10n.dart; the
+         widget is drawn by the launcher and cannot read the app's
+         strings, so they are repeated here in both languages. -->
+    <string name="widget_name">Verse from the Quran</string>
+    <string name="widget_description">A verse from the Quran, twice a day, on a new scenery. Tap it to open the app.</string>
+    <string name="widget_label">VERSE FROM THE QURAN</string>
+    <string name="widget_jumuah">IT’S JUMU’AH</string>
+    <!-- The app's name as the widget signs itself, in every language. -->
+    <string name="widget_brand" translatable="false">✦  AYAHREEL</string>
+    <!-- What the Android 12+ widget picker previews: the first verse
+         of the rotation, as the launcher would draw it. -->
+    <string name="widget_preview_ref" translatable="false">Al-Baqarah · 152</string>
+    <string name="widget_preview_arabic" translatable="false">فَٱذْكُرُونِىٓ أَذْكُرْكُمْ وَٱشْكُرُوا لِى وَلَا تَكْفُرُونِ</string>
+    <string name="widget_preview_translation" translatable="false">So remember Me; I will remember you. And be grateful to Me and do not deny Me.</string>
+</resources>

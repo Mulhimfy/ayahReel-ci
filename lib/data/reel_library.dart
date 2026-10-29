@@ -1,0 +1,340 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
+
+import '../l10n/l10n.dart';
+import 'dedication.dart';
+import 'reel_recipe.dart';
+import 'whole_file.dart';
+
+/// A reel the user has exported, kept inside the app so it survives
+/// restarts and shows up in "My Reels".
+class SavedReel {
+  final String id;
+
+  /// File name inside the library directory. Stored relative because
+  /// the documents path can change between installs (iOS).
+  final String fileName;
+
+  /// Identity of the render this reel came from: the styling key the
+  /// exporter caches by. Two exports with the same key are the same
+  /// reel byte for byte, so the library stores one entry and one file
+  /// for them instead of a copy per tap. Empty for entries written
+  /// before the field existed.
+  final String sourceKey;
+
+  /// Whether this reel has already been written to the device gallery.
+  /// The gallery has no overwrite — a second put of identical bytes
+  /// lands as "… (1).mp4" — so a repeat Save checks this instead.
+  final bool inGallery;
+  final String reciterName;
+  final String surahName;
+  final int startAyah;
+  final int endAyah;
+
+  /// Poster gradient of the background used, shown until (or instead
+  /// of) the frame grabbed from the video itself.
+  final List<int> gradientArgb;
+  final DateTime createdAt;
+
+  /// Everything that went into the render, so the reel can be opened
+  /// again and changed. Null for reels made before the recipe was
+  /// kept — those can still be played and shared, just not reopened.
+  final ReelRecipe? recipe;
+
+  const SavedReel({
+    required this.id,
+    required this.fileName,
+    this.sourceKey = '',
+    this.inGallery = false,
+    required this.reciterName,
+    required this.surahName,
+    required this.startAyah,
+    required this.endAyah,
+    required this.gradientArgb,
+    required this.createdAt,
+    this.recipe,
+  });
+
+  /// Whether this reel can be opened for editing.
+  bool get canEdit => recipe != null;
+
+  /// What goes with the file when this reel is shared.
+  ///
+  /// A dedicated reel is being handed to a person rather than posted
+  /// to a feed, so it goes with a message written to them — and that
+  /// message carries the store links, because a gift nobody can answer
+  /// with one of their own is a gift that stops where it lands. Every
+  /// other reel goes with its surah and its voice, as it always has.
+  ///
+  /// Here rather than on each screen that shares: three of them do,
+  /// and three copies of this rule is two too many.
+  String shareCaption(L10n l) {
+    final d = recipe?.dedication ?? Dedication.none;
+    if (d.isNotEmpty) return l.dedicationShareMessage(d.kind, d.name);
+    return l.reelShareCaption(surahName, reciterName);
+  }
+
+  SavedReel copyWith({bool? inGallery}) => SavedReel(
+        id: id,
+        fileName: fileName,
+        sourceKey: sourceKey,
+        inGallery: inGallery ?? this.inGallery,
+        reciterName: reciterName,
+        surahName: surahName,
+        startAyah: startAyah,
+        endAyah: endAyah,
+        gradientArgb: gradientArgb,
+        createdAt: createdAt,
+        recipe: recipe,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'fileName': fileName,
+        'sourceKey': sourceKey,
+        'inGallery': inGallery,
+        'reciterName': reciterName,
+        'surahName': surahName,
+        'startAyah': startAyah,
+        'endAyah': endAyah,
+        'gradientArgb': gradientArgb,
+        'createdAt': createdAt.toIso8601String(),
+        if (recipe != null) 'recipe': recipe!.toJson(),
+      };
+
+  factory SavedReel.fromJson(Map<String, dynamic> j) => SavedReel(
+        id: j['id'] as String,
+        fileName: j['fileName'] as String,
+        sourceKey: j['sourceKey'] as String? ?? '',
+        inGallery: j['inGallery'] as bool? ?? false,
+        reciterName: j['reciterName'] as String,
+        surahName: j['surahName'] as String,
+        startAyah: j['startAyah'] as int,
+        endAyah: j['endAyah'] as int,
+        gradientArgb: (j['gradientArgb'] as List).cast<int>(),
+        createdAt: DateTime.parse(j['createdAt'] as String),
+        recipe: j['recipe'] is Map
+            ? ReelRecipe.fromJson(
+                (j['recipe'] as Map).cast<String, dynamic>())
+            : null,
+      );
+}
+
+/// Stores exported reels in the app documents directory with a JSON
+/// index. No database: a handful of mp4s and one small file.
+abstract final class ReelLibrary {
+  /// Bumped whenever the library changes, so Home and My Reels can
+  /// refresh without polling.
+  static final ValueNotifier<int> revision = ValueNotifier(0);
+
+  static Future<Directory> _dir() async {
+    final docs = await getApplicationDocumentsDirectory();
+    final d = Directory('${docs.path}/reels');
+    if (!d.existsSync()) d.createSync(recursive: true);
+    return d;
+  }
+
+  static Future<File> _indexFile() async =>
+      File('${(await _dir()).path}/library.json');
+
+  /// Entries the last [load] could not read (a newer build's, say),
+  /// kept as they were: [_write] puts them back. Dropped from the index
+  /// by the next save, their reels were then taken for strays and
+  /// deleted by the sweep after it.
+  static List<Object?> _unread = const [];
+
+  /// Newest first. Entries whose video file has vanished are dropped.
+  static Future<List<SavedReel>> load() async {
+    try {
+      final index = await _indexFile();
+      if (!index.existsSync()) {
+        _unread = const [];
+        return [];
+      }
+      final dir = await _dir();
+      final raw = jsonDecode(await index.readAsString()) as List;
+      // One entry this build can't read costs only itself. Failing the
+      // whole load answered "no reels", and the next save wrote that
+      // back over every reel the user had.
+      final out = <SavedReel>[];
+      final unread = <Object?>[];
+      for (final e in raw) {
+        try {
+          final r = SavedReel.fromJson(e as Map<String, dynamic>);
+          if (File('${dir.path}/${r.fileName}').existsSync()) out.add(r);
+        } catch (_) {
+          unread.add(e);
+        }
+      }
+      _unread = unread;
+      return out;
+    } catch (_) {
+      _unread = const [];
+      // Corrupt as a whole: start fresh rather than crash, but keep the
+      // old index aside first, since the next save writes over it.
+      try {
+        final index = await _indexFile();
+        if (index.existsSync()) index.copySync('${index.path}.bad');
+      } catch (_) {}
+      return [];
+    }
+  }
+
+  static Future<File> videoFile(SavedReel reel) async =>
+      File('${(await _dir()).path}/${reel.fileName}');
+
+  /// Where the card thumbnail for [reel] lives. Written on first
+  /// display rather than at export, so reels saved by older builds get
+  /// one too. May not exist yet — see `ReelPoster.ensure`.
+  static Future<File> posterFile(SavedReel reel) async {
+    final base = reel.fileName.replaceAll(RegExp(r'\.mp4$'), '');
+    return File('${(await _dir()).path}/$base.jpg');
+  }
+
+  /// The library entry for [sourceKey], or null if this reel has never
+  /// been exported. Only entries whose video still exists count.
+  static Future<SavedReel?> findBySource(String sourceKey) async {
+    if (sourceKey.isEmpty) return null;
+    for (final r in await load()) {
+      if (r.sourceKey == sourceKey) return r;
+    }
+    return null;
+  }
+
+  /// Copies [video] into the library and records its metadata.
+  ///
+  /// Re-exporting a reel the user already has — same recitation, same
+  /// background, same styling, so the same [sourceKey] — returns the
+  /// existing entry untouched. Without that, Share-then-Save, or simply
+  /// tapping Save twice, wrote a second identical mp4 and the folder
+  /// grew a copy per tap.
+  static Future<SavedReel> add({
+    required File video,
+    required String sourceKey,
+    required String reciterName,
+    required String surahName,
+    required int startAyah,
+    required int endAyah,
+    required List<int> gradientArgb,
+    ReelRecipe? recipe,
+  }) async {
+    final existing = await findBySource(sourceKey);
+    if (existing != null) return existing;
+    await sweepStrays();
+    final dir = await _dir();
+    final id = DateTime.now().millisecondsSinceEpoch.toString();
+    final fileName = 'reel_$id.mp4';
+    // Copied beside its name and renamed once whole. A copy cut short
+    // (a phone out of room, the app killed) left a half reel under the
+    // final name with no entry for it, holding exactly the room that
+    // was missing, for good.
+    await copyWhole(video, File('${dir.path}/$fileName'));
+    final reel = SavedReel(
+      id: id,
+      fileName: fileName,
+      sourceKey: sourceKey,
+      reciterName: reciterName,
+      surahName: surahName,
+      startAyah: startAyah,
+      endAyah: endAyah,
+      gradientArgb: gradientArgb,
+      createdAt: DateTime.now(),
+      recipe: recipe,
+    );
+    await _write([reel, ...await load()]);
+    return reel;
+  }
+
+  /// Puts [video] in place of [reel]'s file: the same reel made again
+  /// because the kept one would not play (see
+  /// `VideoRenderer.tooHeavyToPlay`). The gallery's copy is the old
+  /// one, so the entry no longer counts as in the gallery, and the next
+  /// Save puts the playable one there.
+  static Future<SavedReel> replaceVideo(SavedReel reel, File video) async {
+    await copyWhole(video, await videoFile(reel));
+    final updated = reel.copyWith(inGallery: false);
+    final all = await load();
+    await _write([
+      for (final r in all) r.id == reel.id ? updated : r,
+    ]);
+    return updated;
+  }
+
+  /// Records that [reel] now exists in the device gallery, so a later
+  /// Save of the same reel can decline instead of writing a duplicate.
+  static Future<SavedReel> markInGallery(SavedReel reel) async {
+    final updated = reel.copyWith(inGallery: true);
+    final all = await load();
+    await _write([
+      for (final r in all) r.id == reel.id ? updated : r,
+    ]);
+    return updated;
+  }
+
+  static Future<void> remove(SavedReel reel) async {
+    final all = await load();
+    final file = await videoFile(reel);
+    if (file.existsSync()) await file.delete();
+    final poster = await posterFile(reel);
+    if (poster.existsSync()) await poster.delete();
+    await _write(all.where((r) => r.id != reel.id).toList());
+  }
+
+  /// Deletes the reels no entry names: copies cut short by older builds
+  /// (made under their final name) and by this one (`.tmp`, `.part`
+  /// before it), which nothing else would ever remove. Once per launch,
+  /// from the first [add], before its own copy starts: one save is
+  /// copied at a time, so no copy under way can be taken for a stray.
+  ///
+  /// A name in the index set aside as unreadable (`library.json.bad`)
+  /// counts too, even where that file no longer parses: those are the
+  /// reels the index lost, and the only ones left to find again.
+  @visibleForTesting
+  static Future<void> sweepStrays() => _swept ??= _sweep();
+  static Future<void>? _swept;
+
+  /// A new launch, as far as the library knows; tests only.
+  @visibleForTesting
+  static void debugReset() {
+    _swept = null;
+    _unread = const [];
+  }
+
+  static Future<void> _sweep() async {
+    try {
+      final dir = await _dir();
+      final index = await _indexFile();
+      // No index, or one this build can't read: nothing can be told
+      // from a stray, so nothing is touched.
+      if (!index.existsSync()) return;
+      final text = await index.readAsString();
+      if (jsonDecode(text) is! List) return;
+      final bad = File('${index.path}.bad');
+      final setAside = bad.existsSync() ? await bad.readAsString() : '';
+      bool named(String name) =>
+          text.contains('"$name"') || setAside.contains(name);
+      for (final f in dir.listSync().whereType<File>()) {
+        final name = f.uri.pathSegments.last;
+        final stray = name.endsWith('.mp4.tmp') ||
+            name.endsWith('.mp4.part') ||
+            (name.startsWith('reel_') &&
+                name.endsWith('.mp4') &&
+                !named(name));
+        if (!stray) continue;
+        try {
+          f.deleteSync();
+        } catch (_) {}
+      }
+    } catch (_) {}
+  }
+
+  static Future<void> _write(List<SavedReel> reels) async {
+    final index = await _indexFile();
+    await writeWhole(
+        index, jsonEncode([for (final r in reels) r.toJson(), ..._unread]));
+    revision.value++;
+  }
+}
