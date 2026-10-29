@@ -1,0 +1,104 @@
+# Verifies reciters with tool/verify_reciters.py on a runner.
+#
+# The machines these changes are written on reach GitHub and the package
+# registries only, never the hosts the audio lives on (mp3quran,
+# EveryAyah, Tarteel, quran.com…), so a voice is verified here. A push
+# whose head commit message carries [voices] runs it, with whatever
+# follows [voices] on that line passed to the tool:
+#
+#   [voices] --only luhaidan --only muaiqly_2
+#   [voices] --compare muaiqly "ayah https://audio-cdn.tarteel.ai/quran/maherAlMuaiqly"
+#
+# A dispatch takes the same as its `args` input (once the file is on
+# main). Nothing is published or uploaded: the log has the summary, and
+# then every entry the tool wrote for the voices it checked, gzip+base64
+# between BEGIN and END lines, with the sha256 of the whole
+# tool/reciters_verified.json it wrote. To take them, so that the file
+# committed is the tool's own:
+#
+#   base64 -d entries.b64 | gunzip > entries.json
+#   python3 -c 'import json; p = "tool/reciters_verified.json"
+#   d = json.load(open(p)); d.update(json.load(open("entries.json")))
+#   json.dump(d, open(p, "w", encoding="utf8"), ensure_ascii=False,
+#             indent=1, sort_keys=True)'
+#   sha256sum tool/reciters_verified.json   # the log's, or start again
+#
+# It needs python3 and ffmpeg, and numpy for another recording's
+# comparison (9. in the tool's docstring); no secrets.
+name: Voices
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+    inputs:
+      args:
+        description: 'tool/verify_reciters.py arguments, e.g. --only luhaidan'
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[voices]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      # Our own verse tables live in the private ayahreel-words since
+      # 2026-10-24; the verifier reads them from there (OWN_TABLES).
+      - uses: actions/checkout@v4
+        with:
+          repository: Mulhimfy/ayahreel-words
+          path: words
+          ssh-key: ${{ secrets.WORDS_DEPLOY_KEY }}
+          persist-credentials: false
+          sparse-checkout: data/own_tables.json
+          sparse-checkout-cone-mode: false
+      - name: Tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg python3-numpy >/dev/null
+          ffmpeg -version | head -1
+      - name: Verify
+        env:
+          MESSAGE: ${{ github.event.head_commit.message }}
+          INPUT: ${{ inputs.args }}
+          OWN_TABLES: words/data/own_tables.json
+        run: |
+          # The arguments: the dispatch's, or what follows [voices] on the
+          # commit message's line, split the way a shell splits them.
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            line="$INPUT"
+          else
+            line=$(printf '%s\n' "$MESSAGE" | sed -n 's/.*\[voices\]//p' | head -1)
+          fi
+          echo "arguments: $line"
+          cp tool/reciters_verified.json /tmp/before.json
+          status=0
+          LINE="$line" python3 -I -c 'import os, shlex, subprocess, sys
+          sys.exit(subprocess.call([sys.executable, "-I", "tool/verify_reciters.py",
+                                    *shlex.split(os.environ["LINE"])]))' || status=$?
+          python3 -I - <<'EOF'
+          import base64, gzip, hashlib, json
+          before = json.load(open('/tmp/before.json'))
+          path = 'tool/reciters_verified.json'
+          raw = open(path, 'rb').read()
+          after = json.loads(raw)
+          new = {k: v for k, v in after.items() if before.get(k) != v}
+          gone = sorted(set(before) - set(after))
+          print(f'{len(new)} entries new or changed: {sorted(new)}; removed: {gone}')
+          for k, v in sorted(new.items()):
+              print(f"  {k}: {'PASS' if not v.get('problems') else 'FAIL'} "
+                    f"{json.dumps({x: v.get(x) for x in ('source', 'kbps', 'pace', 'aligned_share', 'shifted_share', 'problems')}, ensure_ascii=False)}")
+              for o, d in (v.get('distinct') or {}).items():
+                  print(f'    against {o}: {json.dumps(d, ensure_ascii=False)}')
+          blob = base64.b64encode(gzip.compress(json.dumps(
+              new, ensure_ascii=False, indent=1, sort_keys=True).encode('utf8'), 9)).decode()
+          print(f'BEGIN entries sha256(tool/reciters_verified.json)={hashlib.sha256(raw).hexdigest()}')
+          for i in range(0, len(blob), 4000):
+              print(blob[i:i + 4000])
+          print('END entries')
+          EOF
+          exit $status
