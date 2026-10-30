@@ -174,9 +174,11 @@ abstract final class OwnWords {
   /// ahead of Khalid Al-Jaleel and others. 4: gate v4 (the same day) asks
   /// a third model about the verses v3 left out or unvouched: measured,
   /// half as many verses run ahead of the voice, and more of them are lit
-  /// word by word.
+  /// word by word. 5: gate v5 (2026-10-30) times nearly every verse of
+  /// every voice with two models trained on what reciters actually say,
+  /// repeats included: fewer verses off or ahead of the voice than v4.
   @visibleForTesting
-  static const timingEpoch = 4;
+  static const timingEpoch = 5;
 
   /// Whether the kept index will do: asked for less than [refreshEvery]
   /// ago, by a build with this one's voices.
