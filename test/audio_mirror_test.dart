@@ -17,6 +17,7 @@ import 'package:ayah_reels/data/recitation_service.dart';
 import 'package:ayah_reels/data/surah_index.dart';
 import 'package:ayah_reels/data/surah_slice.dart';
 import 'package:ayah_reels/data/verse_translation.dart';
+import 'package:ayah_reels/data/words_host.dart';
 
 /// A voice whose host is down still makes a reel: every file and table
 /// the app asks a host for is looked up in our mirror
@@ -306,6 +307,33 @@ void main() {
     expect(jsonDecode(res.body), kawtharArabic['108'],
         reason: 'the Arabic read as UTF-8, as quran.com sends it');
     expect(AudioMirrorClient.hostsDown, ['api.quran.com']);
+  });
+
+  test(
+      'our Worker, blocked at workers.dev: the same request at its '
+      'second address, key and all', () async {
+    final seen = <String, String?>{};
+    final net = MockClient((req) async {
+      seen[req.url.toString()] = req.headers['x-ayahreel-key'];
+      if (req.url.host.endsWith('workers.dev')) {
+        throw const SocketException('blocked');
+      }
+      return http.Response('{"table":"x"}', 200);
+    });
+    final c = AudioMirrorClient(net,
+        map: AudioMirror.map,
+        store: MirrorStore(base: base, client: net, dir: () async => dir));
+    const path = '/tables/sobhi-0123456789ab.json';
+    final res = await c.get(Uri.parse('${WordsHost.base}$path'),
+        headers: {'x-ayahreel-key': 'k'});
+    expect(res.statusCode, 200);
+    expect(res.body, '{"table":"x"}');
+    expect(seen, {
+      '${WordsHost.base}$path': 'k',
+      '${WordsHost.fallbackBase}$path': 'k',
+    });
+    expect(WordsHost.fallbackBase, startsWith('https://'));
+    expect(WordsHost.fallbackBase, isNot(contains('workers.dev')));
   });
 
   test(

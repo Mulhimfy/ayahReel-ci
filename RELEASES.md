@@ -184,6 +184,38 @@ Same workflow files, same secrets (copied from `/root/keys`).
 private commit (same tree and message, no history, noreply author) and
 tags it there; see `CLAUDE.md`. Record both commits.
 
+**2026-10-31 later, from the VPS via the public mirror: 1.0.10 Patch 2
+prepared, dry runs clean, NOT published yet (waiting on the owner's
+yes).** The owner: "mirror all reciters so we are fully [in]dependent
+even if they went down we still go, ensure everything", then the
+Motorola edge 2021's Play review in full ("when I download the Quranic
+video it says connection error, and my internet is strong"). From
+`voices/sobhi` = `feat/live-recitation` at `a44613b` (mirror `d533879`);
+`git log b7c513a..a44613b` is all Dart, tests, tools and docs (no
+`android/`, `ios/`, `assets/`, `pubspec.yaml`, no new `Icons.*`):
+
+- `f724c63`, `a7c0e34`: ledger only.
+- `b0026bd` the audio mirror: every file and published verse table a
+  voice's host fails to give is read from `Mulhimfy/ayahreel-audio`
+  (`lib/data/audio_mirror.dart`). The note gets a `mirror` field.
+- `f10fcd2` feedback code `2026-10-31b`; the live check
+  (`MIRROR_LIVE=1`).
+- `a44613b` the verse text from the mirror when quran.com fails.
+
+The mirror holds all 112 recordings, 245,394 files, 178 GiB, plus the
+text (runs 41211896504, 41212302431, 41213127286, 41214321008,
+41214471309 on the mirror repo; logs checked: no tokens, no artifacts).
+The live check passed 113/113 with every host shut out. Tests on
+`d533879` run 41217023980 (analyze clean, 1223 passed, 264 skipped).
+Dry runs: `gpatch-dry-1.0.10+24--2` run 41213019976 and
+`gipatch-dry-1.0.10+12--2` run 41213025923 on `995cf93` (= `f10fcd2`),
+then `gpatch-dry-1.0.10+24--3` run 41217046343 and
+`gipatch-dry-1.0.10+12--3` run 41217053735 on `d533879` (Xcode 26.6):
+"No issues detected", native 0, asset 0. Uploaded logs checked against
+97 values from `/root/keys`: only the widget's bundle id, which is
+public. Tags if published: `gpatch-1.0.10+24--2`,
+`gipatch-1.0.10+12--2`; next dry runs `--4`.
+
 **2026-10-31, from the VPS via the public mirror: 1.0.10 Patch 1,
 Android and iOS, published at the owner's word** ("fix all, commit,
 push and ota if ota able"). From that day's notes (EXPORT_MEMORY.md,

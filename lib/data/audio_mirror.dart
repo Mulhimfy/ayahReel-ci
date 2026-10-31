@@ -16,6 +16,7 @@ import 'surah_index.dart';
 import 'trouble.dart';
 import 'verse_translation.dart';
 import 'whole_file.dart';
+import 'words_host.dart';
 
 /// Our own copy of every voice's files, for when the site a voice comes
 /// from is down, refuses, or can't be reached from where the phone is.
@@ -37,7 +38,9 @@ import 'whole_file.dart';
 /// fetches from quran.com, the Arabic and every offered translation
 /// (release `text`). Our own timing — the verse tables and the word
 /// timing — is never in the mirror: it stays behind the key-gated
-/// Worker (`WordsHost`), which is ours already.
+/// Worker ([WordsHost]), which is ours already. A request to the Worker
+/// that fails is asked again at its second address,
+/// [WordsHost.fallbackBase], for networks that block `*.workers.dev`.
 abstract final class AudioMirror {
   /// Where each voice's release is: `<base>/voice-<id>/<asset>`.
   static const base =
@@ -266,10 +269,25 @@ class AudioMirrorClient extends http.BaseClient {
   final MirrorStore store;
   final Duration patience;
 
+  /// Other addresses of the same server: a request under a key's
+  /// prefix that fails is asked again under its value, headers and all.
+  final Map<String, String> alternates;
+
   AudioMirrorClient(this.inner,
       {required this.map,
       required this.store,
-      this.patience = const Duration(seconds: 8)});
+      this.patience = const Duration(seconds: 8),
+      this.alternates = const {WordsHost.base: WordsHost.fallbackBase}});
+
+  Uri? _alternateOf(Uri url) {
+    final s = url.toString();
+    for (final e in alternates.entries) {
+      if (s.startsWith('${e.key}/')) {
+        return Uri.parse(e.value + s.substring(e.key.length));
+      }
+    }
+    return null;
+  }
 
   static const downFor = Duration(minutes: 10);
   static final _hostDown = <String, DateTime>{};
@@ -311,10 +329,19 @@ class AudioMirrorClient extends http.BaseClient {
     if (request.method != 'GET') return inner.send(request);
     final file = map.fileOf(request.url);
     final doc = file == null ? map.docOf(request.url) : null;
-    if (file == null && doc == null) return inner.send(request);
+    final alt =
+        file == null && doc == null ? _alternateOf(request.url) : null;
+    if (file == null && doc == null && alt == null) {
+      return inner.send(request);
+    }
     final label = file != null
         ? '${file.voice} ${file.key}'
-        : '${doc!.release}/${doc.asset} ${doc.key}';
+        : doc != null
+            ? '${doc.release}/${doc.asset} ${doc.key}'
+            : '${alt!.host} ${alt.path}';
+    // The GitHub mirror being down is no reason not to ask a server's
+    // other address.
+    bool mirrorOff() => alt == null && _isDown(_mirrorDown);
     final host = request.url.host;
 
     final hostAbort = Completer<void>();
@@ -332,11 +359,14 @@ class AudioMirrorClient extends http.BaseClient {
         _settle(_fromHost(request, host, hostAbort.future));
     Future<_Outcome> fromMirror() => _settle(file != null
         ? _mirrorFile(file, request, mirrorAbort.future)
-        : _mirrorDoc(doc!, request));
+        : doc != null
+            ? _mirrorDoc(doc, request)
+            : inner.send(_get(alt!, request.headers, mirrorAbort.future,
+                like: request)));
 
     // The host has failed lately: the mirror first, the host if the
     // mirror can't.
-    if (_isDown(_hostDown[host]) && !_isDown(_mirrorDown)) {
+    if (_isDown(_hostDown[host]) && !mirrorOff()) {
       final m = await fromMirror();
       if (m.good) return _mirrored(m, label);
       m.drop();
@@ -349,7 +379,7 @@ class AudioMirrorClient extends http.BaseClient {
     if (early != null) {
       if (early.good) return early.give();
       if (early.hard) _markDown(host, early.why);
-      if (_isDown(_mirrorDown)) return early.give();
+      if (mirrorOff()) return early.give();
       final m = await fromMirror();
       if (m.good) return _mirrored(m, label);
       m.drop();
@@ -378,7 +408,7 @@ class AudioMirrorClient extends http.BaseClient {
     }
 
     hostTry.then((o) => take(o, true)).ignore();
-    if (_isDown(_mirrorDown)) {
+    if (mirrorOff()) {
       left = 1;
     } else {
       fromMirror().then((o) => take(o, false)).ignore();

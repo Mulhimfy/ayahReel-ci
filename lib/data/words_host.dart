@@ -15,6 +15,12 @@
 abstract final class WordsHost {
   static const base = 'https://ayahreel-words.mulhimfy.workers.dev/v1';
 
+  /// The same Worker at an address on our own domain, asked when [base]
+  /// fails (see `AudioMirrorClient`): some networks and DNS filters
+  /// block every `*.workers.dev` address, and Islam Sobhi's and
+  /// Al-Luhaidan's verse tables are only here. Same key, same answers.
+  static const fallbackBase = 'https://words.distillfy.com/v1';
+
   static const _key = String.fromEnvironment('WORDS_KEY');
 
   /// Whether this build can read the timing at all.

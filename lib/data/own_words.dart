@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
+import 'audio_mirror.dart';
 import 'debug_log.dart';
 import 'download.dart';
 import 'fatiha_data.dart' show reciters;
@@ -75,7 +76,8 @@ abstract final class OwnWords {
   }
 
   static Future<void> _refresh() async {
-    final client = http.Client();
+    // workers.dev first, the Worker's second address when it fails.
+    final client = AudioMirror.client();
     try {
       final res = await Download.get(client, Uri.parse(indexUrl),
           headers: WordsHost.headers);

@@ -705,7 +705,7 @@ abstract final class RecitationService {
         // Cut short, or unreadable: fetched again.
       }
     }
-    final client = http.Client();
+    final client = AudioMirror.client();
     try {
       final res = await Download.get(
           client, Uri.parse('${WordsHost.base}/vt_${own.id}/$surah.json'),

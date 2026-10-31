@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
+import 'audio_mirror.dart';
 import 'debug_log.dart';
 import 'download.dart';
 import 'models.dart';
@@ -116,7 +117,8 @@ abstract final class VerseTables {
     final url = Uri.parse(
         '${WordsHost.base}/tables/$table-${digest.substring(0, 12)}.json');
     Object? last;
-    final client = http.Client();
+    // workers.dev first, the Worker's second address when it fails.
+    final client = AudioMirror.client();
     try {
       for (var attempt = 1; attempt <= Download.attempts; attempt++) {
         try {
