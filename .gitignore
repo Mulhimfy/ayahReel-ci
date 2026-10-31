@@ -1,0 +1,84 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Signing secrets — never commit. See android/key.properties.example
+/android/key.properties
+*.jks
+*.keystore
+
+# Apple credentials. The App Store Connect API key (.p8) can be downloaded
+# exactly once; a leaked one lets anyone upload builds under this team.
+# Certificates and profiles are re-issuable but still not public artifacts.
+*.p8
+*.p12
+*.mobileprovision
+*.cer
+*.certSigningRequest
+
+# Environment files, in case any tooling starts using them
+.env
+.env.*
+
+# Shorebird: shorebird.yaml IS committed (it carries the app_id the installed
+# app uses to find patches). Only the local build state is ignored.
+.shorebird/
+
+# Scene-library working directories: the candidate pool (tens of GB of
+# stills and clips) and the flattened copy staged for release upload.
+# Both are rebuildable from tool/harvest_scenes.py; the delivered
+# library lives outside the repo and on the releases of
+# github.com/Mulhimfy/ayah-reels-scenes. Only the tooling is tracked.
+/videos/
+
+# Store bundles pulled out for inspection. GitHub refuses files over
+# 100 MB and these are 105 MB and 150 MB, so a blanket `git add -A`
+# stages them and every later push is rejected until the commit is
+# rewritten — which is exactly what happened on 2026-08-28. They are
+# rebuildable output, never source.
+/apkx/
+
+# AyahReel Listen engine, put here by CI (.github/actions/listen-engine)
+/packages/ayahreel_listen

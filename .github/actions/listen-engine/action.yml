@@ -1,0 +1,39 @@
+# AyahReel Listen's engine is private (Mulhimfy/ayahreel-listen). Its Dart
+# package is checked out at the commit listen_ref.txt pins, with a read-only
+# deploy key, into packages/ayahreel_listen (git-ignored), where pubspec.yaml
+# finds it. The source is never printed or uploaded: only the compiled app
+# carries it, as it carries the rest.
+name: Listen engine
+description: Puts the private ayahreel_listen package in packages/.
+inputs:
+  deploy-key:
+    description: The LISTEN_DEPLOY_KEY secret.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Pinned commit
+      id: ref
+      shell: bash
+      run: |
+        set -euo pipefail
+        ref=$(tr -d '[:space:]' < listen_ref.txt)
+        [[ "$ref" =~ ^[0-9a-f]{40}$ ]] || { echo "listen_ref.txt is not a full sha"; exit 1; }
+        echo "ref=$ref" >> "$GITHUB_OUTPUT"
+    - uses: actions/checkout@v4
+      with:
+        repository: Mulhimfy/ayahreel-listen
+        ref: ${{ steps.ref.outputs.ref }}
+        ssh-key: ${{ inputs.deploy-key }}
+        path: .listen-src
+        persist-credentials: false
+        sparse-checkout: dart/ayahreel_listen
+    - name: In place
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p packages
+        rm -rf packages/ayahreel_listen
+        mv .listen-src/dart/ayahreel_listen packages/ayahreel_listen
+        rm -rf .listen-src
+        test -f packages/ayahreel_listen/pubspec.yaml

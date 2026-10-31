@@ -1,0 +1,105 @@
+# Draws the screens in test/tools on a desk and uploads the pictures.
+#
+# The VPS these changes are written on has no Flutter and no phone, so
+# "does it look right" had no answer short of a preview APK. The tools
+# under test/tools already draw screens to PNG when pointed at a folder;
+# this points them, on a runner, and keeps what they draw as an artifact.
+# A push whose commit message carries [previews] runs it (a dispatch only
+# works once the file is on main):
+#
+#   gh run download <run id> -n desk-previews -D /tmp/previews
+#
+# It builds and publishes nothing, and runs only when asked.
+name: Desk previews
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+    inputs:
+      tools:
+        description: 'test/tools files to run, without _test.dart, space-separated'
+        default: 'batch_preview arena_preview card_preview notification_art_preview'
+      encode:
+        description: 'Encode the reels export_motion_tool writes, and measure them'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  previews:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[previews]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/listen-engine
+        with:
+          deploy-key: ${{ secrets.LISTEN_DEPLOY_KEY }}
+      # flutter_version.txt: the Flutter the store builds use. The check
+      # stops here if anything builds or tests on another one.
+      - name: Flutter version
+        id: flutter
+        run: |
+          v=$(bash tool/check_flutter_version.sh)
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.flutter.outputs.version }}
+          channel: stable
+          cache: true
+      - name: Get packages
+        run: flutter pub get
+      - name: Draw
+        env:
+          TOOLS: ${{ inputs.tools || 'batch_preview arena_preview card_preview notification_art_preview' }}
+        run: |
+          mkdir -p previews
+          for tool in $TOOLS; do
+            dir="$PWD/previews/$tool"
+            mkdir -p "$dir"
+            # Every tool reads its own variable; all of them point at
+            # this tool's folder, and only the one being run looks.
+            BATCH_PREVIEW_OUT="$dir" ARENA_PREVIEW_OUT="$dir" \
+            CARD_PREVIEW_OUT="$dir" STYLE_PREVIEW_OUT="$dir" \
+            NOTIF_PREVIEW_OUT="$dir" INVITE_STORY_OUT="$dir" \
+            LINES_PREVIEW_OUT="$dir" EXPORT_MOTION_OUT="$dir" \
+              flutter test "test/tools/${tool}_test.dart" \
+              || echo "::warning::$tool did not finish"
+          done
+          find previews -name '*.png' | wc -l
+      # The export tool's commands, run by a desktop FFmpeg on a machine
+      # with room: each reel's peak memory and time, and a frame of it.
+      # What a save costs is the cards it holds (EXPORT_MEMORY.md); this
+      # is the one-pass figure, every card at once.
+      - name: Encode the export tool's reels
+        if: ${{ inputs.encode }}
+        run: |
+          dir=previews/export_motion_tool
+          [ -d "$dir" ] || exit 0
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg >/dev/null
+          ffmpeg -version | head -1 | tee "$dir/encode_report.txt"
+          for c in "$dir"/cmd_*.txt; do
+            name=$(basename "$c" .txt); name=${name#cmd_}
+            inputs=$(grep -o ' -i ' "$c" | wc -l)
+            # shellcheck disable=SC2046
+            /usr/bin/time -v ffmpeg -hide_banner -v error -y \
+              $(sed 's/"//g' "$c") 2> "$dir/time_$name.txt" \
+              || echo "::warning::$name did not encode"
+            peak=$(awk '/Maximum resident/ {print int($6/1024)}' "$dir/time_$name.txt")
+            wall=$(awk -F': ' '/Elapsed \(wall clock\)/ {print $2}' "$dir/time_$name.txt")
+            echo "$name: $inputs inputs, ${peak} MB peak, $wall" | tee -a "$dir/encode_report.txt"
+            for at in 2 9 36; do
+              ffmpeg -v error -y -ss "$at" -i "$dir/reel_$name.mp4" -frames:v 1 \
+                "$dir/frame_${name}_${at}s.png" || true
+            done
+            rm -f "$dir/reel_$name.mp4"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desk-previews
+          path: previews
+          retention-days: 7

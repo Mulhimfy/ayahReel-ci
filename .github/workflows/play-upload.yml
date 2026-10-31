@@ -1,0 +1,70 @@
+# Puts the AAB from Codemagic's android-release build on Google Play as a
+# DRAFT production release. A draft reaches no one: it waits for "Send for
+# review" / rollout in Play Console, which stays the user's call.
+#
+# - Pushing `arelease-<n>` starts Codemagic's build and this run, which waits
+#   for that build, downloads its .aab and uploads it.
+# - Run by hand (Actions → Play upload): mode `check` prints every track and
+#   changes nothing; mode `upload` with a tag uploads that build's AAB again.
+#
+# Keyless: the run trades its GitHub OIDC token for a 1-hour Play token
+# (play-api service account, Workload Identity Federation). Codemagic is read
+# with the CODEMAGIC_TOKEN repository secret.
+name: Play upload
+
+on:
+  push:
+    tags: ['arelease-*']
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: check (read only) or upload
+        type: choice
+        options: [check, upload]
+        default: check
+      tag:
+        description: arelease-<n> whose Codemagic AAB to upload (upload only)
+        required: false
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: play-upload
+  cancel-in-progress: false
+
+jobs:
+  play:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      MODE: ${{ github.event_name == 'push' && 'upload' || inputs.mode }}
+      TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for Codemagic's AAB
+        if: env.MODE == 'upload'
+        env:
+          CODEMAGIC_TOKEN: ${{ secrets.CODEMAGIC_TOKEN }}
+        run: bash tool/codemagic_aab.sh "$TAG" "$RUNNER_TEMP/play.aab"
+
+      # After the wait, so the 1-hour token is fresh for the upload.
+      - uses: google-github-actions/auth@v2
+        id: gcp
+        with:
+          workload_identity_provider: projects/897971838089/locations/global/workloadIdentityPools/github/providers/freed
+          service_account: play-api@project-c649043d-4bc1-42f8-9b8.iam.gserviceaccount.com
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/androidpublisher
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Google Play (${{ env.MODE }})
+        env:
+          PLAY_TOKEN: ${{ steps.gcp.outputs.access_token }}
+          PLAY_AAB: ${{ runner.temp }}/play.aab
+        run: node tool/play_upload.mjs "$MODE"

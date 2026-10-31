@@ -1,0 +1,62 @@
+# Analyze and test on every push of app code.
+#
+# The VPS these fixes are written on has no Flutter, and Codemagic only
+# runs on tags (where a green run can also ship). This answers a pushed
+# branch in a few minutes, with a log anyone with repo access can read:
+# `gh run view --log-failed`. It builds and publishes nothing.
+#
+# Flutter is flutter_version.txt's, the one the store builds use, so
+# what passes here is what ships. tool/check_flutter_version.sh runs
+# first and fails the run if a workflow or codemagic.yaml pins another.
+name: Flutter tests
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'lib/**'
+      - 'test/**'
+      - 'assets/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - 'analysis_options.yaml'
+      - 'flutter_version.txt'
+      - 'codemagic.yaml'
+      - 'tool/check_flutter_version.sh'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+concurrency:
+  group: flutter-test-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/listen-engine
+        with:
+          deploy-key: ${{ secrets.LISTEN_DEPLOY_KEY }}
+      # flutter_version.txt: the Flutter the store builds use. The check
+      # stops here if anything builds or tests on another one.
+      - name: Flutter version
+        id: flutter
+        run: |
+          v=$(bash tool/check_flutter_version.sh)
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.flutter.outputs.version }}
+          channel: stable
+          cache: true
+      - name: Get packages
+        run: flutter pub get
+      - name: Analyze
+        run: flutter analyze
+      - name: Test
+        run: flutter test
