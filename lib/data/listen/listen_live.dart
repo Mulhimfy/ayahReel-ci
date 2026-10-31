@@ -32,6 +32,10 @@ class LiveView {
 
   /// The last word placed, as (ayah, position).
   final (int, int)? last;
+
+  /// The word being said now, as (ayah, position): provisional, from the
+  /// newest sound, confirmed a moment later.
+  final (int, int)? now;
   final int elapsedMs;
 
   /// Loudness of the microphone just now, 0..1.
@@ -41,6 +45,7 @@ class LiveView {
     this.place,
     this.heard = const {},
     this.last,
+    this.now,
     this.elapsedMs = 0,
     this.level = 0,
   });
@@ -86,6 +91,7 @@ class ListenLive {
   final _heard = <int, Set<int>>{};
   (int, int)? _last;
   (int, int)? _place;
+  (int, int)? _now;
 
   bool get running => _running;
 
@@ -163,20 +169,26 @@ class ListenLive {
       final frames = (r['frames'] as num).toInt();
       final lastOk = (end - (lookS * sr).round()) ~/ hop;
       final first = _committed;
-      final rows = <Float32List>[];
-      for (var f = first; f < lastOk; f++) {
+      final rows = <Float32List>[], tail = <Float32List>[];
+      for (var f = first; f < end ~/ hop; f++) {
         final k = f - lo ~/ hop;
         if (k < 0 || k >= frames) continue;
-        rows.add(Float32List.sublistView(lp, k * width, (k + 1) * width));
+        final row = Float32List.sublistView(lp, k * width, (k + 1) * width);
+        (f < lastOk ? rows : tail).add(row);
       }
-      if (rows.isNotEmpty) {
-        _committed = first + rows.length;
-        final flat = Float32List(rows.length * width);
-        for (var i = 0; i < rows.length; i++) {
-          flat.setRange(i * width, (i + 1) * width, rows[i]);
+      _committed = first + rows.length;
+      Float32List flat(List<Float32List> rs) {
+        final out = Float32List(rs.length * width);
+        for (var i = 0; i < rs.length; i++) {
+          out.setRange(i * width, (i + 1) * width, rs[i]);
         }
+        return out;
+      }
+
+      if (rows.isNotEmpty || tail.isNotEmpty) {
         _toWorker!.send({
-          'rows': TransferableTypedData.fromList([flat]),
+          'rows': TransferableTypedData.fromList([flat(rows)]),
+          'tail': TransferableTypedData.fromList([flat(tail)]),
           'width': width,
           'now': end * 1000 ~/ sr,
         });
@@ -207,6 +219,7 @@ class ListenLive {
       place: _place,
       heard: {for (final e in _heard.entries) e.key: Set.of(e.value)},
       last: _last,
+      now: _now,
       elapsedMs: _samples * 1000 ~/ sr,
       level: _level.clamp(0.0, 1.0),
     );
@@ -235,6 +248,16 @@ class ListenLive {
         }
         final pl = msg['place'];
         if (pl is List) _place = (pl[0] as int, pl[1] as int);
+        final nw = msg['now'];
+        if (nw is List) {
+          final s = nw[0] as int;
+          if (_surah != s && _place == null) _surah = s;
+          if (_surah == s) {
+            _now = (nw[1] as int, nw[2] as int);
+            // the verse being recited is the one shown
+            _place = (s, nw[1] as int);
+          }
+        }
         _publish();
       }
     });
@@ -332,17 +355,22 @@ void _liveWorker(SendPort out) {
           .materialize()
           .asFloat32List();
       final width = msg['width'] as int;
-      final rows = <Float32List>[
-        for (var i = 0; i + width <= flat.length; i += width)
-          Float32List.sublistView(flat, i, i + width),
-      ];
-      final words = t.commit(rows, msg['now'] as int);
-      final pl = t.place;
+      List<Float32List> split(Float32List f) => [
+            for (var i = 0; i + width <= f.length; i += width)
+              Float32List.sublistView(f, i, i + width),
+          ];
+      final tailFlat = (msg['tail'] as TransferableTypedData?)
+          ?.materialize()
+          .asFloat32List();
+      final words = t.commit(split(flat), msg['now'] as int,
+          tailFlat == null ? const [] : split(tailFlat));
+      final pl = t.place, nw = t.now;
       out.send({
         'words': [
           for (final w in words) [w.surah, w.ayah, w.position, w.startMs],
         ],
         'place': pl == null ? null : [pl.$1, pl.$2],
+        'now': nw == null ? null : [nw.$1, nw.$2, nw.$3],
       });
     } else if (msg == 'close') {
       inbox.close();

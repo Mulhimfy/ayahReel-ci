@@ -60,7 +60,12 @@ class ListenBridge(messenger: BinaryMessenger) : MethodChannel.MethodCallHandler
                             val options = OrtSession.SessionOptions().apply {
                                 setIntraOpNumThreads(threads)
                                 setInterOpNumThreads(1)
-                                setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT)
+                                // A reduced (minimal) build runs the ORT-format
+                                // model as converted, optimized already.
+                                try {
+                                    setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT)
+                                } catch (_: Throwable) {
+                                }
                             }
                             session = e.createSession(path, options)
                             loadedPath = path

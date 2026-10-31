@@ -9,6 +9,7 @@ import '../data/listen/listen_service.dart';
 import '../data/listen/listen_words.dart';
 import '../data/models.dart';
 import '../data/quran_repository.dart';
+import '../data/reel_limits.dart';
 import '../data/user_audio_service.dart';
 import '../l10n/l10n.dart';
 import '../state/creation_state.dart';
@@ -209,9 +210,19 @@ class _ListenScreenState extends State<ListenScreen> {
   }
 
   Future<void> _use({required bool review}) async {
-    final p = _passage, t = _timing, windows = _windows();
+    final p = _passage, t = _timing;
+    var windows = _windows();
     if (p == null || t == null || windows == null) return;
-    final (surah, first, last) = p;
+    final (surah, first, _) = p;
+    // The hard length cap the verse picker and the timing screen hold: an
+    // upload can be an hour and more of recitation.
+    var keep = windows.length - 1;
+    while (keep > 0 &&
+        windows[keep].endMs - windows.first.startMs > ReelLimits.maxReelMs) {
+      keep--;
+    }
+    windows = windows.sublist(0, keep + 1);
+    final last = windows.last.ayah;
     creationState.selectSurah(surah);
     creationState.selectRange(first, last);
     ListenWords.forget(widget.audio.id);

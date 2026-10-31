@@ -343,6 +343,9 @@ class _ReciteScreenState extends State<ReciteScreen> {
                           _VerseText(
                             text: _verse,
                             heard: v.heard[place.$2] ?? const {},
+                            now: v.now != null && v.now!.$1 == place.$2
+                                ? v.now!.$2
+                                : null,
                             size: 27,
                             dim: false,
                           ),
@@ -397,29 +400,50 @@ class _ReciteScreenState extends State<ReciteScreen> {
 class _VerseText extends StatelessWidget {
   final String text;
   final Set<int> heard;
+
+  /// The word being said now (provisional), lit brighter than the heard.
+  final int? now;
   final double size;
   final bool dim;
 
   const _VerseText(
       {required this.text,
       required this.heard,
+      this.now,
       required this.size,
       required this.dim});
 
   @override
   Widget build(BuildContext context) {
     final spans = <TextSpan>[];
+    // From the last confirmed word to the one being said (just that one
+    // until something in the verse is confirmed: a recitation can start
+    // mid-verse).
+    final from = heard.isEmpty
+        ? (now ?? 1) - 1
+        : heard.reduce((a, b) => a > b ? a : b);
     var p = 0;
     for (final tok in text.split(' ')) {
       final word = isWord(tok);
       if (word) p++;
+      // Heard (confirmed) words in gold; the word being said and the ones
+      // before it not yet confirmed, bright: the text keeps up with the
+      // voice, the gold follows a moment later.
       final lit = word && heard.contains(p);
+      final current = word && now != null && p > from && p <= now! && !lit;
       spans.add(TextSpan(
         text: '$tok ',
         style: TextStyle(
-          color: lit
-              ? (dim ? AppColors.goldDeep : AppColors.goldBright)
-              : (dim ? AppColors.textSecondary.withValues(alpha: 0.5) : AppColors.textSecondary),
+          color: current
+              ? AppColors.textPrimary
+              : lit
+                  ? (dim ? AppColors.goldDeep : AppColors.goldBright)
+                  : (dim
+                      ? AppColors.textSecondary.withValues(alpha: 0.5)
+                      : AppColors.textSecondary),
+          shadows: current
+              ? const [Shadow(color: AppColors.goldBright, blurRadius: 14)]
+              : null,
         ),
       ));
     }
