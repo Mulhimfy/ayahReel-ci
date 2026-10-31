@@ -103,9 +103,12 @@ dependencies {
     // itself. Same coordinates, so one copy in the APK. Keep it at the
     // plugin's version (ffmpeg_kit_flutter_new_min_gpl's android/build.gradle).
     implementation("com.antonkarpenko:ffmpeg-kit-min-gpl:2.2.2")
-    // AyahReel Listen's model runs on ONNX Runtime (ListenBridge.kt).
-    // 1.2x+ ships its .so aligned for 16 KB pages (Play, Android 15+).
-    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.31.1")
+    // AyahReel Listen's model runs on ONNX Runtime (ListenBridge.kt): a
+    // reduced build of 1.31.1 with only the operators our model uses (4.8 MB
+    // for arm64 instead of 34 MB), built by Mulhimfy/ayahreel-ort (release
+    // android-1.31.1-60f4176, sha256 14457ac5...ce2), NDK 29 (16 KB pages).
+    // A minimal build: it reads ORT-format models only (the served .ort).
+    implementation(files("libs/onnxruntime-android-1.31.1-listen.aar"))
 }
 
 flutter {

@@ -87,6 +87,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  # AyahReel Listen end to end on a device (integration_test/listen_test.dart)
+  integration_test:
+    sdk: flutter
   flutter_lints: ^4.0.0
   # Lets the reel-library tests point the documents directory at a
   # temp dir instead of a real device path.
