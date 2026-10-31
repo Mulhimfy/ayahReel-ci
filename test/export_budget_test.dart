@@ -68,18 +68,24 @@ void main() {
       expect(ios(null), ExportBudget.roomy);
     });
 
-    test('a 4 GB iPhone keeps roomy in passes of 16 cards', () {
+    test('an iPhone keeps roomy in passes of 16 cards, or 24 from 6 GB',
+        () {
       int? cards(double? gbs, {bool ios = true}) => PhoneBudget.passCardsFor(
           memKb: gbs == null ? null : (gbs * gb).round(), ios: ios);
-      // 2026-10-31: an iPhone reporting 3683 MB lost its first save in
-      // one pass of 54 cards.
+      // 2026-10-31: iPhones reporting 3683 and 5667 MB lost their first
+      // save in one pass of 54 and 84 cards.
       expect(cards(3.6), RenderPlan.clipsPerPassLowMemory);
       expect(cards(3.8), 16);
-      expect(cards(5.6), isNull, reason: '6 GB iPhones: the plan\'s own');
+      expect(cards(5.5), 24);
+      expect(cards(7.5), 24);
       expect(cards(null), isNull, reason: 'memory unknown: as before');
       expect(cards(3.6, ios: false), isNull,
           reason: 'a 4 GB Android phone is planned tight instead');
-      expect(PhoneBudget.roomyIosCards, RenderPlan.clipsPerPassLowMemory);
+      expect(cards(7.5, ios: false), isNull,
+          reason: 'Android encodes in a process of its own');
+      expect(PhoneBudget.smallIphoneCards, RenderPlan.clipsPerPassLowMemory);
+      expect(PhoneBudget.iphoneCards,
+          lessThan(RenderPlan.clipsPerPass), reason: 'held below 48');
     });
 
     test('a 32-bit build is told by the target in Platform.version', () {

@@ -600,7 +600,7 @@ Next black report: if its note says `x264 only` the hardware check
 fired; if the export line says `SceneryGone`, the pick was cleared
 before the user saved; with neither, ask what kind of scenery it was.
 
-## 2026-10-31 (later): a 4 GB iPhone's one big pass, and an Android death with no reason
+## 2026-10-31 (later): iPhones' one big pass, and an Android death with no reason
 
 Two notes, `version: 1.0.10`, `code: 2026-10-31`, source `exportTrouble`:
 
@@ -616,7 +616,7 @@ Two notes, `version: 1.0.10`, `code: 2026-10-31`, source `exportTrouble`:
   pass to 16 cards (`PhoneBudget.passCardsFor`, `roomyPassCards`, used
   by `VideoRenderer._clipsFor`), what a `tight` Android phone holds. Its
   summary says `roomy, 3683 MB, passes of 16`. After a loss it plans
-  `tight` as before.
+  `tight` as before. (Every iPhone since; see the third note below.)
 - **The Android phone** (`A665L`, Android 13 Go, 4 GB) was planned
   `tight` and died in a short reel's one x264 pass, with the app small,
   the phone 985 MB short of full and no render-process figure (the
@@ -630,7 +630,19 @@ Two notes, `version: 1.0.10`, `code: 2026-10-31`, source `exportTrouble`:
   in the save was (`2 cards in one pass, tight, 4 s in`). A mark written
   by the process still running (the engine made again, the app alive)
   is counted `closed`, not lost.
-- `FeedbackService.codeDate` is `2026-10-31c`.
+- `FeedbackService.codeDate` is `2026-10-31c` (1.0.10 Patch 3, both
+  platforms).
+
+A third note came while Patch 3 was being published, `code: 2026-10-31b`,
+iOS 26.2.1, 0 reels made:
+
+    tight, 5667 MB, 1 lost · lost: … (84 cards in one pass, roomy; app 1421 MB, 1459 MB at most), just now
+
+A 6 GB iPhone: the cap above didn't reach it. So every iPhone's roomy
+pass is held now (`passCardsFor`): 16 cards under 4.6 GB, 24 above
+(`smallIphoneCards`, `iphoneCards`). Android keeps the plan's own, its
+FFmpeg in the render process. `codeDate` `2026-10-31d`, iOS Patch 4
+only (nothing changes on Android).
 
 Next such Android note: read `Android:` first. `no record` with room
 means Android kept nothing (some vendors' task killers); `low memory`

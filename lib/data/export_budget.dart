@@ -251,7 +251,7 @@ abstract final class PhoneBudget {
   /// started roomy lost a save in its first seconds (2026-10-23), so it
   /// starts tightest: the same 1080x1920, in smaller passes on two
   /// threads. A 4 GB iPhone keeps roomy, and steps down after a loss
-  /// like any phone; its passes are held to [passCardsFor]'s count.
+  /// like any phone. Every iPhone's passes are held to [passCardsFor].
   @visibleForTesting
   static ExportBudget hardwareBudget(
       {int? memKb, bool is32Bit = false, bool ios = false}) {
@@ -267,19 +267,30 @@ abstract final class PhoneBudget {
   /// or null for the plan's own (a reel up to two minutes in one pass,
   /// up to 130 cards).
   ///
-  /// An iPhone under [tightBelowKb] (an 11, 12, 13, SE of 2022: iOS
-  /// reports 3.6–3.8 GB) gets 16, what a tight Android phone gets. It
-  /// keeps the rest of roomy, the render ahead of Save and every core.
-  /// Every iPhone encodes in the app, and iOS ends an app near 2 GB on
-  /// these: one lost its first save in a single pass of 54 cards, at
-  /// 429 MB at the last reading (2026-10-31). A pass costs about 350 MB
-  /// and 12–17 MB a card, so sixteen stay under a gigabyte.
+  /// Every iPhone encodes in the app, and iOS ends an app that grows
+  /// past its share long before the phone is full. Two iPhones lost
+  /// their first save in a single roomy pass on 2026-10-31: a 4 GB one
+  /// (iOS reports 3683 MB) at 54 cards, the app at 429 MB at the last
+  /// reading, and a 6 GB one (5667 MB) at 84 cards, the app at 1421 MB.
+  /// A pass costs about 350 MB and 12–17 MB a card, and the cards are
+  /// all decoded in its first seconds. So an iPhone under [tightBelowKb]
+  /// (an 11, 12, 13, SE of 2022) holds [smallIphoneCards], what a tight
+  /// Android phone holds, and a bigger one [iphoneCards]: both under a
+  /// gigabyte of graph, and under what each phone was seen to survive.
+  /// They keep the rest of roomy, the render ahead of Save and every
+  /// core. Android runs FFmpeg in a process of its own, and keeps the
+  /// plan's own.
   @visibleForTesting
-  static int? passCardsFor({int? memKb, bool ios = false}) =>
-      ios && memKb != null && memKb < tightBelowKb ? roomyIosCards : null;
+  static int? passCardsFor({int? memKb, bool ios = false}) {
+    if (!ios || memKb == null) return null;
+    return memKb < tightBelowKb ? smallIphoneCards : iphoneCards;
+  }
 
   /// See [passCardsFor]; `RenderPlan.clipsPerPassLowMemory`.
-  static const roomyIosCards = 16;
+  static const smallIphoneCards = 16;
+
+  /// See [passCardsFor].
+  static const iphoneCards = 24;
 
   /// [passCardsFor] for this phone.
   static int? get roomyPassCards {

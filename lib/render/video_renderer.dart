@@ -262,7 +262,7 @@ abstract final class VideoRenderer {
   /// [PhoneBudget.outOfMemory]) rather than failing its way there
   /// again — the same shape as [_hwOk], and for the same reason.
   ///
-  /// On roomy, the plan's own limits, except on a 4 GB iPhone
+  /// On roomy, the plan's own limits, except on an iPhone
   /// ([PhoneBudget.roomyPassCards]).
   static int? _clipsFor(ExportBudget budget) => switch (budget) {
         ExportBudget.roomy => PhoneBudget.roomyPassCards,

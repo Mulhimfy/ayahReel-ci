@@ -344,8 +344,9 @@ abstract final class FeedbackService {
   /// code it was written from. Move it forward in every patch that
   /// changes how a save works; a letter after it marks a second patch
   /// the same day (`b`: the audio mirror, 1.0.10 Patch 2; `c`: 4 GB
-  /// iPhones' passes of 16, and a lost save's Android answer).
-  static const codeDate = '2026-10-31c';
+  /// iPhones' passes of 16, and a lost save's Android answer, Patch 3;
+  /// `d`: every iPhone's passes held, iOS Patch 4).
+  static const codeDate = '2026-10-31d';
 
   static String? _exportTrouble;
   static DateTime? _exportAt;
