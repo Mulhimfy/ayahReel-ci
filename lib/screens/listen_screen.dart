@@ -46,6 +46,10 @@ class _ListenScreenState extends State<ListenScreen> {
   bool _alive = true;
   int _lastPaint = 0;
 
+  /// What the first windows of the recording already said, while the rest
+  /// is still being heard.
+  ListenFound? _soFar;
+
   ListenOutcome? _outcome;
 
   /// The passage the reel will be made of: one found, or an alternative
@@ -101,6 +105,9 @@ class _ListenScreenState extends State<ListenScreen> {
       final out = await ListenService.hearFile(
         widget.audio.audioPath,
         keepGoing: () => _alive,
+        onPartial: (f) {
+          if (mounted) setState(() => _soFar = f);
+        },
         onProgress: (stage, share) {
           if (!mounted) return;
           // A few times a second is plenty for a progress ring, and a
@@ -333,6 +340,15 @@ class _ListenScreenState extends State<ListenScreen> {
         ),
         const SizedBox(height: 22),
         A11yLive(child: Text(line, style: t.titleMedium, textAlign: TextAlign.center)),
+        if (_soFar != null && _stage == ListenStage.hear) ...[
+          const SizedBox(height: 10),
+          Text(
+            '${QuranRepository.surahInfo(_soFar!.surah).nameEnglish} · '
+            '${l.listenVerses(_soFar!.first, _soFar!.last)}…',
+            style: t.bodyMedium?.copyWith(color: AppColors.gold),
+            textAlign: TextAlign.center,
+          ),
+        ],
         const Spacer(),
         TextButton(onPressed: _chooseMyself, child: Text(l.listenChooseMyself)),
       ],

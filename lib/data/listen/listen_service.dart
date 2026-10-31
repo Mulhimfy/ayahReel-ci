@@ -127,6 +127,7 @@ abstract final class ListenService {
     String audioPath, {
     ListenProgress? onProgress,
     bool Function()? keepGoing,
+    void Function(ListenFound heardSoFar)? onPartial,
   }) async {
     bool going() => keepGoing == null || keepGoing();
     final sw = Stopwatch()..start();
@@ -152,9 +153,17 @@ abstract final class ListenService {
       final audioMs = samples * 1000 ~/ 16000;
       await _channel.invokeMethod('load', {'path': model.path, 'threads': _threads});
       final t0 = sw.elapsedMilliseconds;
+      final text0 = await _quran();
       final logp = await _logp(pcm, samples, m, (s) {
         onProgress?.call(ListenStage.hear, s);
-      }, going);
+      }, going, onPartial == null
+          ? null
+          : (Float32List soFar) async {
+              final r = await _hearApart(soFar, m.vocab.length + 1, m.frameMs,
+                  m.vocab, text0);
+              final i = r.$2;
+              if (i != null) onPartial(r.$1[i]);
+            });
       final modelMs = sw.elapsedMilliseconds - t0;
       unawaited(_channel.invokeMethod('unload').catchError((_) {}));
       if (!going()) throw const ListenUnavailable('cancelled');
@@ -256,7 +265,8 @@ abstract final class ListenService {
   /// overlapping [m.overlapS] either side, stitched at their middles
   /// (the engine's fc_server scheme), [m.hop] samples per frame.
   static Future<Float32List> _logp(File pcm, int samples, ListenManifest m,
-      void Function(double) progress, bool Function() going) async {
+      void Function(double) progress, bool Function() going,
+      [Future<void> Function(Float32List soFar)? partial]) async {
     const sr = 16000;
     final win = m.windowS * sr, ov = m.overlapS * sr, hop = m.hop;
     final width = m.vocab.length + 1;
@@ -286,6 +296,12 @@ abstract final class ListenService {
         }
         start += win;
         progress(start >= samples ? 1.0 : start / samples);
+        // What is heard so far, for the screen: from the first window on,
+        // over the first few minutes (later ones change little and cost).
+        if (partial != null && start < samples && filled * hop < 4 * 60 * sr) {
+          await partial(Float32List.fromList(
+              Float32List.sublistView(out, 0, filled * width)));
+        }
       } while (start < samples);
     } finally {
       await raf.close();
