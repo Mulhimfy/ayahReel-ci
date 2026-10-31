@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
-import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
 import 'audio_mirror.dart';
