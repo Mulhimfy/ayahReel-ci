@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../data/debug_log.dart';
 import '../data/fatiha_data.dart';
 import '../data/models.dart';
+import '../data/picked_media.dart';
 import '../data/quran_repository.dart';
 import '../data/reel_library.dart';
 import '../data/reel_recipe.dart';
@@ -172,7 +173,8 @@ abstract final class ReelReopener {
     for (var i = 0; i < recipe.scenes.length; i++) {
       final ref = recipe.scenes[i];
       if (ReelRecipe.isFileRef(ref)) {
-        final path = ReelRecipe.filePathOf(ref);
+        // Out of the cache folder, if it is still there: see [PickedMedia].
+        final path = await PickedMedia.keep(ReelRecipe.filePathOf(ref));
         if (!File(path).existsSync()) continue;
         out.add((
           i,

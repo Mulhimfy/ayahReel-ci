@@ -14,6 +14,7 @@ import 'reel_recipe.dart';
 import 'scene_catalog.dart';
 import 'verse_motion.dart';
 import 'whole_file.dart';
+import 'picked_media.dart';
 
 /// The choices the last reel was made with, kept from one launch to the
 /// next.
@@ -145,7 +146,9 @@ abstract final class LastChoices {
     final ref = r.scenes.first;
     ReelBackground? b;
     if (ReelRecipe.isFileRef(ref)) {
-      final path = ReelRecipe.filePathOf(ref);
+      // A pick made before picks were kept still sits in the cache
+      // folder: moved out now, while it is there. See [PickedMedia].
+      final path = await PickedMedia.keep(ReelRecipe.filePathOf(ref));
       if (File(path).existsSync()) {
         b = ReelBackground.deviceFile(
           id: 'custom_${path.hashCode.toRadixString(16)}',

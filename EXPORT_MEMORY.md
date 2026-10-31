@@ -557,6 +557,49 @@ only the small ones change). Notes from `code: 2026-10-24` carry the iPhone's
 memory in the budget line. A build from before it answers nothing, and
 the phone plans as it always did.
 
+## 2026-10-31: black reels, and a save that fails with no trace
+
+Two reports on `1.0.10`, `code: 2026-10-24`:
+
+- **"Why are some of my videos black"**: Galaxy A07 (`BP4A…A075F…`,
+  Android 16), `tight, 3611 MB`, 102 reels. Not memory. The renderer
+  stands a dark gradient in for any scenery whose file is missing: the
+  catalog's average colours for a library scenery, and `0xFF101418 →
+  0xFF2A313B` (near black) for a picked photo or video. Nothing said
+  so. The gallery picker's copy of a pick lives in the **cache folder**,
+  which Android empties when storage runs low (on this class of phone,
+  mid-session: see 2026-10-07's `.part` in the cache). The preview never
+  showed it: a decoded still and a video player holding the file open
+  keep showing a deleted file. So the reel came out black behind the
+  verse, with the mark on it.
+- **"I still can't save the video", "can't download the Quranic video,
+  my internet is strong"**: one Motorola edge 2021 (`T1RM33.1…`, 7.4 GB,
+  `roomy`), five notes and a Play review from 2026-10-30/31, `reels` 0
+  then 3. Every note was sent from Settings and none carried a failure:
+  `noteExportTrouble` was held in memory only, and the app had been
+  opened again since. Its "connection" wording points at a download
+  (scenery or recitation), which `0f58843`'s `net` line now names.
+
+Fixed in `1cdad17` (Dart only, `code: 2026-10-31`):
+
+- `PickedMedia.keep` moves each pick into `<support>/picked` (a rename;
+  newest 16 / 600 MB kept, the newest always).
+- `_sceneryOnPhone` in the preview checks every scenery file before a
+  render: a cleared library scenery is downloaded again, a pick that
+  has gone fails with `SceneryGone` ("pick it again"), never a black
+  render. The renderer logs `render: scenery file missing` if a gradient
+  stands in anyway.
+- A hardware encode whose frames at 1/3 and 2/3 are flat black (27x48
+  area-averaged luma, none above 20) is redone on x264 and MediaCodec
+  is retired for good (`PhoneBudget.hardwareBlack`, counted in `hwLost`,
+  so the summary says `x264 only`). x264 output is never judged dark.
+- The last failed save is kept in `feedback.json` with its age, like
+  `net`: `export: roomy, 7382 MB · render: … , 3 h ago`.
+
+Next black report: if its note says `x264 only` the hardware check
+fired; if the export line says `SceneryGone`, the pick was cleared
+before the user saved; with neither, ask what kind of scenery it was.
+
 ## What a note says since 2026-10-08
 
 While a foreground save runs, `PhoneBudget` writes its stage and the
