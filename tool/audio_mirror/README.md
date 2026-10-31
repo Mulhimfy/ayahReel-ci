@@ -1,11 +1,16 @@
 # Audio mirror
 
-Every voice's files and published verse tables are copied to the public
+Every voice's files and published verse tables, and the verse text, are copied to the public
 repository [Mulhimfy/ayahreel-audio](https://github.com/Mulhimfy/ayahreel-audio),
 one release per voice (`voice-<id>`). When a voice's host fails, the app
 reads the same bytes from there (`lib/data/audio_mirror.dart`). A file
 is read out of its pack with a Range request, so resuming and slicing
 work exactly as they do against the host.
+
+The verse text the app fetches from quran.com (the Arabic and each
+offered translation) is in the release `text`. It is copied with
+`-f voices=- -f mode=text`; run that again when an edition is added to
+`VerseTranslation`.
 
 Our own timing is never mirrored. That covers the OwnTiming verse tables
 (Sobhi, Al-Luhaidan) and the word timing; they stay behind the

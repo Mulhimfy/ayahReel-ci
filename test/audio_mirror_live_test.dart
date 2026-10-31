@@ -11,9 +11,11 @@ import 'package:http/http.dart' as http;
 import 'package:ayah_reels/data/audio_mirror.dart';
 import 'package:ayah_reels/data/fatiha_data.dart';
 import 'package:ayah_reels/data/models.dart';
+import 'package:ayah_reels/data/quran_text_service.dart';
 import 'package:ayah_reels/data/recitation_service.dart';
 import 'package:ayah_reels/data/surah_index.dart';
 import 'package:ayah_reels/data/surah_slice.dart';
+import 'package:ayah_reels/data/verse_translation.dart';
 
 /// Every voice, from the real mirror, with every host shut out: one file
 /// of each through the download the app makes, checked against the
@@ -27,6 +29,8 @@ void main() {
   /// Answers every host with a dropped connection; the mirror only.
   final shut = _HostsShut(http.Client());
 
+  _textTests(live, shut);
+
   for (final r in reciters) {
     final source = r.source;
     if (source is OwnAudio) continue;
@@ -36,7 +40,8 @@ void main() {
       AudioMirrorClient.debugReset();
       final store = MirrorStore(
           base: AudioMirror.base, client: http.Client(), dir: () async => dir);
-      final client = AudioMirrorClient(shut, map: AudioMirror.map, store: store);
+      final client =
+          AudioMirrorClient(shut, map: AudioMirror.map, store: store);
 
       // The smallest surah the voice has, Al-Kawthar where it can.
       final Uri url;
@@ -46,8 +51,8 @@ void main() {
           url = s.url(108, 1);
           key = '108001';
         case final SurahFiles s:
-          final n = [108, 103, 112, 110]
-              .firstWhere((n) => !s.missing.contains(n));
+          final n =
+              [108, 103, 112, 110].firstWhere((n) => !s.missing.contains(n));
           url = s.url(n);
           key = n.toString().padLeft(3, '0');
         case OwnAudio():
@@ -58,8 +63,9 @@ void main() {
       final got = f.readAsBytesSync();
       expect(AudioMirrorClient.served, 1, reason: 'from the mirror');
 
-      final sums = jsonDecode((await http.get(store.assetUrl(r.id, 'sums.json')))
-          .body) as Map<String, dynamic>;
+      final sums =
+          jsonDecode((await http.get(store.assetUrl('voice-${r.id}', 'sums.json'))).body)
+              as Map<String, dynamic>;
       expect(sha256.convert(got).toString(), sums[key],
           reason: 'as it came from the host when mirrored');
       final host = await http.get(url);
@@ -88,6 +94,40 @@ void main() {
       }
     }, skip: live ? false : 'MIRROR_LIVE=1 to read the real mirror');
   }
+}
+
+void _textTests(bool live, http.Client shut) {
+  test('the text: every surah, Arabic and every edition, from the mirror',
+      () async {
+    final dir = Directory.systemTemp.createTempSync('mirror_text');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    AudioMirrorClient.debugReset();
+    final client = AudioMirrorClient(shut,
+        map: AudioMirror.map,
+        store: MirrorStore(
+            base: AudioMirror.base,
+            client: http.Client(),
+            dir: () async => dir));
+    for (final info in surahIndex) {
+      final n = info.number;
+      final urls = [
+        QuranTextService.arabicUrl(n),
+        for (final t in VerseTranslation.values)
+          QuranTextService.translationUrl(n, t.resourceId),
+      ];
+      for (final u in urls) {
+        final res = await client.get(u);
+        expect(res.statusCode, 200, reason: '$u');
+        final j = jsonDecode(res.body) as Map<String, dynamic>;
+        final rows = (j['verses'] ?? j['translations']) as List;
+        expect(rows.length, info.ayahCount, reason: '$u');
+      }
+    }
+    // As quran.com sends it today, character for character.
+    final mirrored = await client.get(QuranTextService.arabicUrl(2));
+    final host = await http.get(QuranTextService.arabicUrl(2));
+    expect(jsonDecode(mirrored.body), jsonDecode(utf8.decode(host.bodyBytes)));
+  }, skip: live ? false : 'MIRROR_LIVE=1 to read the real mirror');
 }
 
 /// A network where every host but the mirror's is unreachable.

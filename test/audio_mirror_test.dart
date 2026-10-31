@@ -12,9 +12,11 @@ import 'package:ayah_reels/data/download.dart';
 import 'package:ayah_reels/data/fatiha_data.dart';
 import 'package:ayah_reels/data/feedback_service.dart';
 import 'package:ayah_reels/data/models.dart';
+import 'package:ayah_reels/data/quran_text_service.dart';
 import 'package:ayah_reels/data/recitation_service.dart';
 import 'package:ayah_reels/data/surah_index.dart';
 import 'package:ayah_reels/data/surah_slice.dart';
+import 'package:ayah_reels/data/verse_translation.dart';
 
 /// A voice whose host is down still makes a reel: every file and table
 /// the app asks a host for is looked up in our mirror
@@ -44,6 +46,15 @@ void main() {
     ],
   };
 
+  final kawtharArabic = {
+    '108': {
+      'verses': [
+        for (var a = 1; a <= 3; a++)
+          {'id': 6204 + a, 'verse_key': '108:$a', 'text_uthmani': 'آية $a'},
+      ],
+    },
+  };
+
   late Directory dir;
   late List<String> asked;
 
@@ -62,10 +73,8 @@ void main() {
 
   /// The mirror as GitHub serves it, and a host that does what [host]
   /// says (an answer, or a throw).
-  AudioMirrorClient client(
-      FutureOr<http.Response> Function(http.Request) host,
-      {Duration patience = const Duration(seconds: 1),
-      int indexStatus = 200}) {
+  AudioMirrorClient client(FutureOr<http.Response> Function(http.Request) host,
+      {Duration patience = const Duration(seconds: 1), int indexStatus = 200}) {
     final net = MockClient((req) async {
       final u = req.url.toString();
       final r = req.headers['Range'];
@@ -74,8 +83,13 @@ void main() {
       if (u.endsWith('/index.json')) {
         return http.Response(jsonEncode(index), indexStatus);
       }
-      if (u.endsWith('/timing.json')) {
+      if (u.endsWith('/voice-ghamdi/timing.json')) {
         return http.Response(jsonEncode(ghamdiTiming), 200);
+      }
+      if (u == '$base/text/uthmani.json') {
+        // As GitHub serves it: bytes, and no charset.
+        return http.Response.bytes(utf8.encode(jsonEncode(kawtharArabic)), 200,
+            headers: {'content-type': 'application/octet-stream'});
       }
       if (u == '$base/voice-alafasy/p1-abc.bin') {
         final m = RegExp(r'^bytes=(\d+)-(\d+)$').firstMatch(r ?? '')!;
@@ -91,17 +105,14 @@ void main() {
         map: AudioMirror.map, store: store, patience: patience);
   }
 
-  Future<http.Response> get(http.Client c, String url,
-          {String? range}) async =>
+  Future<http.Response> get(http.Client c, String url, {String? range}) async =>
       http.Response.fromStream(await c.send(http.Request('GET', Uri.parse(url))
         ..headers.addAll({if (range != null) 'Range': range})));
 
   group('every address the app asks for is in the map', () {
-    test('a verse file, a surah file, an unpadded one, one from elsewhere',
-        () {
+    test('a verse file, a surah file, an unpadded one, one from elsewhere', () {
       final m = AudioMirror.map;
-      expect(m.fileOf(Uri.parse(ayahUrl)),
-          (voice: 'alafasy', key: '002255'));
+      expect(m.fileOf(Uri.parse(ayahUrl)), (voice: 'alafasy', key: '002255'));
       expect(m.fileOf(Uri.parse('https://server7.mp3quran.net/s_gmd/002.mp3')),
           (voice: 'ghamdi', key: '002'));
       expect(
@@ -112,11 +123,16 @@ void main() {
           m.fileOf(Uri.parse(
               'https://media.way2quran.com/islam-sobhi/hafs-an-asim/072.mp3')),
           (voice: 'sobhi', key: '072'));
-      expect(m.fileOf(Uri.parse('https://everyayah.com/data/Nobody/002255.mp3')),
+      expect(
+          m.fileOf(Uri.parse('https://everyayah.com/data/Nobody/002255.mp3')),
           isNull);
-      expect(m.fileOf(Uri.parse('https://everyayah.com/data/Alafasy_128kbps/x.mp3')),
+      expect(
+          m.fileOf(
+              Uri.parse('https://everyayah.com/data/Alafasy_128kbps/x.mp3')),
           isNull);
-      expect(m.fileOf(Uri.parse('https://ayahreel-words.mulhimfy.workers.dev/v1/index.json')),
+      expect(
+          m.fileOf(Uri.parse(
+              'https://ayahreel-words.mulhimfy.workers.dev/v1/index.json')),
           isNull);
     });
 
@@ -143,8 +159,8 @@ void main() {
                   reason: '${r.id} $n');
               files++;
               if (s.timing is OwnTiming) continue;
-              expect(m.tableOf(s.timing.url(n, info.ayahCount)),
-                  (voice: r.id, key: key));
+              expect(m.docOf(s.timing.url(n, info.ayahCount)),
+                  (release: 'voice-${r.id}', asset: 'timing.json', key: key));
               tables++;
             }
           case OwnAudio():
@@ -155,12 +171,27 @@ void main() {
       expect(tables, greaterThan(8000));
     });
 
+    test('and the text of every surah, in Arabic and every edition', () {
+      final m = AudioMirror.map;
+      for (final info in surahIndex) {
+        final key = info.number.toString().padLeft(3, '0');
+        expect(m.docOf(QuranTextService.arabicUrl(info.number)),
+            (release: 'text', asset: 'uthmani.json', key: key));
+        for (final t in VerseTranslation.values) {
+          expect(
+              m.docOf(
+                  QuranTextService.translationUrl(info.number, t.resourceId)),
+              (release: 'text', asset: 'tr-${t.resourceId}.json', key: key));
+        }
+      }
+    });
+
     test('our own timing is never looked for there', () {
       final sobhi = reciters.firstWhere((r) => r.id == 'sobhi');
       expect((sobhi.source as SurahFiles).timing, isA<OwnTiming>());
       final m = AudioMirror.map;
       expect(
-          m.tableOf(Uri.parse('https://ayahreel-words.mulhimfy.workers.dev'
+          m.docOf(Uri.parse('https://ayahreel-words.mulhimfy.workers.dev'
               '/v1/vt_sobhi/2.json')),
           isNull);
     });
@@ -192,11 +223,11 @@ void main() {
 
     // Passed over now, and the index read from the phone.
     asked.clear();
-    final next = await get(
-        c, 'https://everyayah.com/data/Alafasy_128kbps/002256.mp3');
+    final next =
+        await get(c, 'https://everyayah.com/data/Alafasy_128kbps/002256.mp3');
     expect(next.bodyBytes, pack.sublist(2200, 3100));
     expect(asked, ['$base/voice-alafasy/p1-abc.bin bytes=2200-3099']);
-    expect(File('${dir.path}/alafasy.index.json').existsSync(), isTrue);
+    expect(File('${dir.path}/voice-alafasy.index.json').existsSync(), isTrue);
   });
 
   test('a resumed download gets the rest, in the file\'s own bytes', () async {
@@ -214,7 +245,8 @@ void main() {
     expect(past.statusCode, 416);
   });
 
-  test('a file the host has lost is had from the mirror; the host is '
+  test(
+      'a file the host has lost is had from the mirror; the host is '
       'still asked first next time', () async {
     final c = client((_) => http.Response('', 404));
     expect((await get(c, ayahUrl)).bodyBytes, verse);
@@ -226,15 +258,15 @@ void main() {
 
   test('neither has it: the host\'s own answer', () async {
     final c = client((_) => http.Response('', 404));
-    final res = await get(
-        c, 'https://everyayah.com/data/Alafasy_128kbps/002257.mp3');
+    final res =
+        await get(c, 'https://everyayah.com/data/Alafasy_128kbps/002257.mp3');
     expect(res.statusCode, 404);
   });
 
   test('both down: the host\'s failure, as before there was a mirror',
       () async {
-    final c = client((_) => throw const SocketException('down'),
-        indexStatus: 500);
+    final c =
+        client((_) => throw const SocketException('down'), indexStatus: 500);
     await expectLater(get(c, ayahUrl), throwsA(isA<SocketException>()));
     // The mirror is passed over too now, and the host asked alone.
     asked.clear();
@@ -242,7 +274,8 @@ void main() {
     expect(asked, [ayahUrl]);
   });
 
-  test('a host that doesn\'t answer: the mirror is asked beside it, and '
+  test(
+      'a host that doesn\'t answer: the mirror is asked beside it, and '
       'the first answer wins', () async {
     final c = client((_) async {
       await Future<void>.delayed(const Duration(seconds: 5));
@@ -266,7 +299,17 @@ void main() {
     expect(t.last.endMs, 7000);
   });
 
-  test('a host that breaks off mid-file: the resume comes from the mirror, '
+  test('the verse text, when quran.com is down', () async {
+    final c = client((_) => throw const SocketException('down'));
+    final res = await c.get(QuranTextService.arabicUrl(108));
+    expect(res.statusCode, 200);
+    expect(jsonDecode(res.body), kawtharArabic['108'],
+        reason: 'the Arabic read as UTF-8, as quran.com sends it');
+    expect(AudioMirrorClient.hostsDown, ['api.quran.com']);
+  });
+
+  test(
+      'a host that breaks off mid-file: the resume comes from the mirror, '
       'and the file is whole', () async {
     var tries = 0;
     final net = MockClient.streaming((req, _) async {
@@ -281,8 +324,7 @@ void main() {
         final m = RegExp(r'^bytes=(\d+)-(\d+)$').firstMatch(r!)!;
         final a = int.parse(m.group(1)!);
         final b = int.parse(m.group(2)!);
-        return http.StreamedResponse(
-            Stream.value(pack.sublist(a, b + 1)), 206,
+        return http.StreamedResponse(Stream.value(pack.sublist(a, b + 1)), 206,
             headers: {'content-range': 'bytes $a-$b/${pack.length}'});
       }
       tries++;
@@ -308,9 +350,9 @@ void main() {
         client: MockClient((_) async => http.Response(jsonEncode(index), 200)),
         dir: () async => dir);
     await store.index('alafasy');
-    expect(File('${dir.path}/alafasy.index.json').existsSync(), isTrue);
+    expect(File('${dir.path}/voice-alafasy.index.json').existsSync(), isTrue);
     await store.forget('alafasy');
-    expect(File('${dir.path}/alafasy.index.json').existsSync(), isFalse);
+    expect(File('${dir.path}/voice-alafasy.index.json').existsSync(), isFalse);
   });
 
   test('off under tests unless asked: the fake hosts stay the hosts', () {

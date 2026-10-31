@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Writes the audio mirror's voices.json from the app's own voice list.
+"""Writes the audio mirror's voices.json from the app's own voice list
+and the verse text it fetches.
 
 Every recording in `reciters` (lib/data/fatiha_data.dart) with the
 address of every file the app can ask its host for, and of every
@@ -119,6 +120,22 @@ want = len(re.findall(r'^  Reciter\(\n', body.group(1), flags=re.M))
 if len(voices) != want:
     sys.exit(f'{len(voices)} voices parsed of {want}')
 
-json.dump({'v': 1, 'counts': counts, 'voices': voices}, sys.stdout,
+# The verse text, as QuranTextService asks quran.com for it: the Arabic
+# and each offered translation, one surah a request.
+TEXT = (ROOT / 'lib/data/quran_text_service.dart').read_text(encoding='utf-8')
+EDITIONS = (ROOT / 'lib/data/verse_translation.dart').read_text(encoding='utf-8')
+arabic = re.search(r"arabicEndpoint =\s*'([^']+)'", TEXT).group(1)
+tr_base = re.search(r"translationBase =\s*'([^']+)'", TEXT).group(1)
+ids = sorted({int(x) for x in re.findall(r'resourceId: (\d+),', EDITIONS)})
+if not ids:
+    sys.exit('verse_translation.dart: no editions')
+text = {'uthmani.json': {f'{s:03d}': f'{arabic}?chapter_number={s}'
+                         for s in range(1, 115)}}
+for i in ids:
+    text[f'tr-{i}.json'] = {f'{s:03d}': f'{tr_base}/{i}?chapter_number={s}'
+                            for s in range(1, 115)}
+
+json.dump({'v': 1, 'counts': counts, 'voices': voices, 'text': text},
+          sys.stdout,
           ensure_ascii=False, indent=1)
 sys.stdout.write('\n')

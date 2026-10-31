@@ -80,10 +80,11 @@ needs that commit cherry-picked first.
 
 ## Audio mirror
 
-Every voice's files are mirrored to the public repository
-`Mulhimfy/ayahreel-audio`, and the app falls back to it when a host
-fails (`lib/data/audio_mirror.dart`, `tool/audio_mirror/README.md`).
-A new or changed voice must be copied there, or it has no fallback.
+Every voice's files and the quran.com verse text are mirrored to the
+public repository `Mulhimfy/ayahreel-audio`, and the app falls back to
+it when a host fails (`lib/data/audio_mirror.dart`,
+`tool/audio_mirror/README.md`). A new or changed voice or translation
+must be copied there, or it has no fallback.
 Never put our own timing there (OwnTiming tables, word timing).
 
 ## Saves on small phones

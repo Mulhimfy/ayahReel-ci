@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'audio_mirror.dart';
 import 'debug_log.dart';
 import 'download.dart';
 import 'fatiha_data.dart';
@@ -152,6 +153,14 @@ abstract final class QuranTextService {
     return ayahs;
   }
 
+  /// Where [surah]'s Arabic is asked for.
+  static Uri arabicUrl(int surah) =>
+      Uri.parse('$_arabicEndpoint?chapter_number=$surah');
+
+  /// Where [surah]'s translation by quran.com resource [id] is asked for.
+  static Uri translationUrl(int surah, int id) =>
+      Uri.parse('$_translationBase/$id?chapter_number=$surah');
+
   /// The Arabic and the translation of [surah], both answered 200.
   ///
   /// Tried [Download.attempts] times, [Download.backoff] apart. It was
@@ -163,12 +172,10 @@ abstract final class QuranTextService {
   /// that is not the network.
   static Future<List<http.Response>> _fetchBoth(
       int surah, VerseTranslation t) async {
-    final urls = [
-      Uri.parse('$_arabicEndpoint?chapter_number=$surah'),
-      Uri.parse('$_translationBase/${t.resourceId}?chapter_number=$surah'),
-    ];
+    final urls = [arabicUrl(surah), translationUrl(surah, t.resourceId)];
     Object? last;
-    final client = http.Client();
+    // quran.com first, our mirror when it fails (see AudioMirror).
+    final client = AudioMirror.client();
     try {
       for (var attempt = 1; attempt <= Download.attempts; attempt++) {
         try {

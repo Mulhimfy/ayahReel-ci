@@ -11,8 +11,10 @@ import 'debug_log.dart';
 import 'download.dart';
 import 'fatiha_data.dart';
 import 'models.dart';
+import 'quran_text_service.dart';
 import 'surah_index.dart';
 import 'trouble.dart';
+import 'verse_translation.dart';
 import 'whole_file.dart';
 
 /// Our own copy of every voice's files, for when the site a voice comes
@@ -31,9 +33,11 @@ import 'whole_file.dart';
 /// sent, and can't tell which of them answered.
 ///
 /// Verse tables a host publishes beside its surah files are mirrored
-/// too, verse starts and ends only. Our own timing — the verse tables
-/// and the word timing — is never in the mirror: it stays behind the
-/// key-gated Worker ([WordsHost]), which is ours already.
+/// too, verse starts and ends only, and so is the verse text the app
+/// fetches from quran.com, the Arabic and every offered translation
+/// (release `text`). Our own timing — the verse tables and the word
+/// timing — is never in the mirror: it stays behind the key-gated
+/// Worker (`WordsHost`), which is ours already.
 abstract final class AudioMirror {
   /// Where each voice's release is: `<base>/voice-<id>/<asset>`.
   static const base =
@@ -43,8 +47,9 @@ abstract final class AudioMirror {
   /// and must not be routed round; a test of the mirror turns it on.
   static bool enabled = !Platform.environment.containsKey('FLUTTER_TEST');
 
-  /// Every address of every voice the app can ask for.
-  static final MirrorMap map = MirrorMap.of(reciters);
+  /// Every address of every voice the app can ask for, and of the text.
+  static final MirrorMap map = MirrorMap.of(reciters,
+      translations: [for (final t in VerseTranslation.values) t.resourceId]);
 
   static MirrorStore? _store;
   static MirrorStore get store => _store ??= MirrorStore(
@@ -67,9 +72,14 @@ abstract final class AudioMirror {
   static void debugStore(MirrorStore? s) => _store = s;
 }
 
-/// A file or table's place in the mirror: its voice, and its key there
-/// — `SSSAAA` for a verse's file, `SSS` for a surah's file or table.
+/// A file's place in the mirror: its voice, and its key there —
+/// `SSSAAA` for a verse's file, `SSS` for a surah's.
 typedef MirrorSpot = ({String voice, String key});
+
+/// A host's JSON answer kept in the mirror: the release and asset that
+/// hold it, and its key there (`SSS`, the surah). A voice's verse
+/// tables are its release's `timing.json`; the text is release `text`.
+typedef MirrorDoc = ({String release, String asset, String key});
 
 /// The addresses the app asks the hosts for, and where each is in the
 /// mirror. Built from the voices themselves, so a voice added to the
@@ -77,14 +87,17 @@ typedef MirrorSpot = ({String voice, String key});
 class MirrorMap {
   final Map<String, String> _ayahBases;
   final Map<String, MirrorSpot> _files;
-  final Map<String, MirrorSpot> _tables;
+  final Map<String, MirrorDoc> _docs;
 
-  MirrorMap._(this._ayahBases, this._files, this._tables);
+  MirrorMap._(this._ayahBases, this._files, this._docs);
 
-  factory MirrorMap.of(Iterable<Reciter> voices) {
+  /// [voices]' files and tables, and the text of every surah in Arabic
+  /// and in each of [translations] (quran.com resource ids).
+  factory MirrorMap.of(Iterable<Reciter> voices,
+      {Iterable<int> translations = const []}) {
     final bases = <String, String>{};
     final files = <String, MirrorSpot>{};
-    final tables = <String, MirrorSpot>{};
+    final docs = <String, MirrorDoc>{};
     for (final r in voices) {
       switch (r.source) {
         case AyahFiles(:final host, :final folder):
@@ -93,17 +106,28 @@ class MirrorMap {
           for (final info in surahIndex) {
             final n = info.number;
             if (s.missing.contains(n)) continue;
-            final spot = (voice: r.id, key: n.toString().padLeft(3, '0'));
-            files[s.url(n).toString()] = spot;
+            final key = n.toString().padLeft(3, '0');
+            files[s.url(n).toString()] = (voice: r.id, key: key);
             if (s.timing is! OwnTiming) {
-              tables[s.timing.url(n, info.ayahCount).toString()] = spot;
+              docs[s.timing.url(n, info.ayahCount).toString()] =
+                  (release: 'voice-${r.id}', asset: 'timing.json', key: key);
             }
           }
         case OwnAudio():
           break;
       }
     }
-    return MirrorMap._(bases, files, tables);
+    for (final info in surahIndex) {
+      final n = info.number;
+      final key = n.toString().padLeft(3, '0');
+      docs[QuranTextService.arabicUrl(n).toString()] =
+          (release: 'text', asset: 'uthmani.json', key: key);
+      for (final id in translations) {
+        docs[QuranTextService.translationUrl(n, id).toString()] =
+            (release: 'text', asset: 'tr-$id.json', key: key);
+      }
+    }
+    return MirrorMap._(bases, files, docs);
   }
 
   static final _ayahName = RegExp(r'^(\d{6})\.mp3$');
@@ -122,8 +146,8 @@ class MirrorMap {
     return m == null ? null : (voice: voice, key: m.group(1)!);
   }
 
-  /// Where the verse table at [url] is in the mirror.
-  MirrorSpot? tableOf(Uri url) => _tables[url.toString()];
+  /// Where the verse table or the text at [url] is in the mirror.
+  MirrorDoc? docOf(Uri url) => _docs[url.toString()];
 }
 
 /// A voice's index in the mirror: its packs, and where each file is.
@@ -160,26 +184,27 @@ class MirrorStore {
   final Future<Directory> Function() dir;
 
   final _indexes = <String, Future<MirrorIndex>>{};
-  final _timings = <String, Future<Map<String, dynamic>>>{};
+  final _docs = <String, Future<Map<String, dynamic>>>{};
 
   MirrorStore({required this.base, required this.client, required this.dir});
 
-  Uri assetUrl(String voice, String name) =>
-      Uri.parse('$base/voice-$voice/$name');
+  Uri assetUrl(String release, String name) =>
+      Uri.parse('$base/$release/$name');
 
-  Future<MirrorIndex> index(String voice) =>
-      _once(_indexes, voice, () async =>
-          MirrorIndex.parse(await _load(voice, 'index.json')));
+  /// [voice]'s index: where each of its files is in its packs.
+  Future<MirrorIndex> index(String voice) => _once(_indexes, voice,
+      () async => MirrorIndex.parse(await _load('voice-$voice', 'index.json')));
 
-  Future<Map<String, dynamic>> timing(String voice) =>
-      _once(_timings, voice, () => _load(voice, 'timing.json'));
+  /// [asset] of [release], one of the JSON answers kept by surah.
+  Future<Map<String, dynamic>> doc(String release, String asset) =>
+      _once(_docs, '$release/$asset', () => _load(release, asset));
 
   /// Lets go of [voice]'s index, kept or held: one that names a pack
   /// the mirror no longer has (the voice copied again since).
   Future<void> forget(String voice) async {
     _indexes.remove(voice);
     try {
-      final f = File('${(await dir()).path}/$voice.index.json');
+      final f = File('${(await dir()).path}/voice-$voice.index.json');
       if (f.existsSync()) f.deleteSync();
     } catch (_) {}
   }
@@ -197,9 +222,9 @@ class MirrorStore {
     return f;
   }
 
-  Future<Map<String, dynamic>> _load(String voice, String name) async {
+  Future<Map<String, dynamic>> _load(String release, String name) async {
     final d = await dir();
-    final f = File('${d.path}/$voice.$name');
+    final f = File('${d.path}/$release.$name');
     if (f.existsSync()) {
       try {
         return jsonDecode(await f.readAsString()) as Map<String, dynamic>;
@@ -207,14 +232,18 @@ class MirrorStore {
         // Cut short or unreadable: fetched again.
       }
     }
-    final res = await Download.get(client, assetUrl(voice, name));
+    final res = await Download.get(client, assetUrl(release, name));
     if (res.statusCode != 200) {
-      throw BadStatus(res.statusCode, 'mirror $voice/$name');
+      throw BadStatus(res.statusCode, 'mirror $release/$name');
     }
-    final j = jsonDecode(res.body) as Map<String, dynamic>;
+    // UTF-8 whatever the headers say: GitHub serves a release's assets
+    // as application/octet-stream, which `body` would read as Latin-1,
+    // and the text is Arabic, Urdu.
+    final text = utf8.decode(res.bodyBytes);
+    final j = jsonDecode(text) as Map<String, dynamic>;
     try {
       if (!d.existsSync()) d.createSync(recursive: true);
-      await writeWhole(f, res.body);
+      await writeWhole(f, text);
     } catch (_) {
       // Kept in memory for the session all the same.
     }
@@ -271,7 +300,7 @@ class AudioMirrorClient extends http.BaseClient {
 
   static void _markDown(String host, Object why) {
     if (!_isDown(_hostDown[host])) {
-      rlog('mirror: $host failed ($why) — its voices come from the mirror '
+      rlog('mirror: $host failed ($why) — what it serves comes from the mirror '
           'for ${downFor.inMinutes} min');
     }
     _hostDown[host] = DateTime.now();
@@ -281,8 +310,11 @@ class AudioMirrorClient extends http.BaseClient {
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     if (request.method != 'GET') return inner.send(request);
     final file = map.fileOf(request.url);
-    final spot = file ?? map.tableOf(request.url);
-    if (spot == null) return inner.send(request);
+    final doc = file == null ? map.docOf(request.url) : null;
+    if (file == null && doc == null) return inner.send(request);
+    final label = file != null
+        ? '${file.voice} ${file.key}'
+        : '${doc!.release}/${doc.asset} ${doc.key}';
     final host = request.url.host;
 
     final hostAbort = Completer<void>();
@@ -299,14 +331,14 @@ class AudioMirrorClient extends http.BaseClient {
     Future<_Outcome> fromHost() =>
         _settle(_fromHost(request, host, hostAbort.future));
     Future<_Outcome> fromMirror() => _settle(file != null
-        ? _mirrorFile(spot, request, mirrorAbort.future)
-        : _mirrorTable(spot, request));
+        ? _mirrorFile(file, request, mirrorAbort.future)
+        : _mirrorDoc(doc!, request));
 
     // The host has failed lately: the mirror first, the host if the
     // mirror can't.
     if (_isDown(_hostDown[host]) && !_isDown(_mirrorDown)) {
       final m = await fromMirror();
-      if (m.good) return _mirrored(m, spot);
+      if (m.good) return _mirrored(m, label);
       m.drop();
       return (await fromHost()).give();
     }
@@ -319,7 +351,7 @@ class AudioMirrorClient extends http.BaseClient {
       if (early.hard) _markDown(host, early.why);
       if (_isDown(_mirrorDown)) return early.give();
       final m = await fromMirror();
-      if (m.good) return _mirrored(m, spot);
+      if (m.good) return _mirrored(m, label);
       m.drop();
       return early.give();
     }
@@ -359,13 +391,13 @@ class AudioMirrorClient extends http.BaseClient {
     }
     if (!hostAbort.isCompleted) hostAbort.complete();
     _markDown(host, 'no answer in ${patience.inMilliseconds} ms');
-    return _mirrored(won, spot);
+    return _mirrored(won, label);
   }
 
-  http.StreamedResponse _mirrored(_Outcome m, MirrorSpot spot) {
+  http.StreamedResponse _mirrored(_Outcome m, String label) {
     _served++;
-    if (_told.add(spot.voice)) {
-      rlog('mirror: ${spot.voice} ${spot.key} from the mirror');
+    if (_told.add(label.split(' ').first)) {
+      rlog('mirror: $label from the mirror');
     }
     return m.give();
   }
@@ -375,8 +407,8 @@ class AudioMirrorClient extends http.BaseClient {
   /// the mirror, which has the same bytes.
   Future<http.StreamedResponse> _fromHost(
       http.BaseRequest original, String host, Future<void> abort) async {
-    final res = await inner.send(_get(original.url, original.headers, abort,
-        like: original));
+    final res = await inner
+        .send(_get(original.url, original.headers, abort, like: original));
     return http.StreamedResponse(
       res.stream.transform(StreamTransformer.fromHandlers(
           handleError: (Object e, StackTrace s, EventSink<List<int>> sink) {
@@ -433,8 +465,10 @@ class AudioMirrorClient extends http.BaseClient {
     final hi = offset + to;
     final http.StreamedResponse res;
     try {
-      res = await inner.send(_get(store.assetUrl(spot.voice, idx.packs[pack]),
-          {'Range': 'bytes=$lo-$hi'}, abort));
+      res = await inner.send(_get(
+          store.assetUrl('voice-${spot.voice}', idx.packs[pack]),
+          {'Range': 'bytes=$lo-$hi'},
+          abort));
     } catch (e) {
       _mirrorFailed(e);
       rethrow;
@@ -466,17 +500,18 @@ class AudioMirrorClient extends http.BaseClient {
     );
   }
 
-  /// The host's verse table for [spot], as the host answers it.
-  Future<http.StreamedResponse> _mirrorTable(
-      MirrorSpot spot, http.BaseRequest original) async {
+  /// The host's answer kept at [d] — a verse table, a surah's text —
+  /// as the host gives it.
+  Future<http.StreamedResponse> _mirrorDoc(
+      MirrorDoc d, http.BaseRequest original) async {
     final Map<String, dynamic> t;
     try {
-      t = await store.timing(spot.voice);
+      t = await store.doc(d.release, d.asset);
     } catch (e) {
       _mirrorFailed(e);
       rethrow;
     }
-    final table = t[spot.key];
+    final table = t[d.key];
     if (table == null) {
       return http.StreamedResponse(const Stream.empty(), 404,
           request: original);
@@ -486,7 +521,7 @@ class AudioMirrorClient extends http.BaseClient {
         contentLength: bytes.length,
         request: original,
         headers: {
-          'content-type': 'application/json',
+          'content-type': 'application/json; charset=utf-8',
           'content-length': '${bytes.length}',
         });
   }
@@ -515,9 +550,9 @@ class AudioMirrorClient extends http.BaseClient {
     return r;
   }
 
-  static Future<_Outcome> _settle(Future<http.StreamedResponse> f) => f.then(
-      (r) => _Outcome(r, null, null),
-      onError: (Object e, StackTrace s) => _Outcome(null, e, s));
+  static Future<_Outcome> _settle(Future<http.StreamedResponse> f) =>
+      f.then((r) => _Outcome(r, null, null),
+          onError: (Object e, StackTrace s) => _Outcome(null, e, s));
 
   @override
   void close() => inner.close();
