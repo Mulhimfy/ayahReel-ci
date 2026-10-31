@@ -342,8 +342,9 @@ abstract final class FeedbackService {
   /// store build, because a patch keeps the version. Two notes on
   /// 2026-10-06 could have come from either, so a note now says which
   /// code it was written from. Move it forward in every patch that
-  /// changes how a save works.
-  static const codeDate = '2026-10-31';
+  /// changes how a save works; a letter after it marks a second patch
+  /// the same day (`b`: the audio mirror, 1.0.10 Patch 2).
+  static const codeDate = '2026-10-31b';
 
   static String? _exportTrouble;
   static DateTime? _exportAt;
