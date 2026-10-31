@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
 import 'app_version.dart';
+import 'audio_mirror.dart';
 import 'debug_log.dart';
 import 'export_budget.dart';
 import 'settings_service.dart';
@@ -306,7 +307,22 @@ abstract final class FeedbackService {
         if (_exportTrouble != null) '$_exportTrouble${_ago(_exportAt)}',
       ].join(' · '),
       if (_netTrouble != null) 'net': '$_netTrouble${_ago(_netAt)}',
+      if (mirrorLine() case final m?) 'mirror': m,
     };
+  }
+
+  /// What the audio mirror did this session ([AudioMirrorClient]): how
+  /// many files and tables it gave, and which hosts were failing; null
+  /// when every voice came from its own host.
+  @visibleForTesting
+  static String? mirrorLine() {
+    final served = AudioMirrorClient.served;
+    final down = AudioMirrorClient.hostsDown;
+    if (served == 0 && down.isEmpty) return null;
+    return [
+      '$served from the mirror',
+      if (down.isNotEmpty) 'failing: ${down.join(', ')}',
+    ].join(' · ');
   }
 
   /// ", 3 h ago": how long before the note the failure was.

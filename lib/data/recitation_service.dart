@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'audio_mirror.dart';
 import 'debug_log.dart';
 import 'download.dart';
 import 'local_range_client.dart';
@@ -434,7 +435,7 @@ abstract final class RecitationService {
     const lanes = 10;
     var next = 0;
     var failed = false;
-    final client = http.Client();
+    final client = AudioMirror.client();
     Future<void> lane() async {
       while (!failed && next < stop) {
         final a = ayahs[next++];
@@ -785,7 +786,7 @@ abstract final class RecitationService {
       }
     }
     Object? last;
-    final client = http.Client();
+    final client = AudioMirror.client();
     try {
       for (var attempt = 1; attempt <= Download.attempts; attempt++) {
         try {
@@ -1203,7 +1204,7 @@ abstract final class RecitationService {
     if (!dir.existsSync()) dir.createSync(recursive: true);
     final f = File('${dir.path}/${_ayahFileName(surah, ayah)}');
     if (f.existsSync() && f.lengthSync() > 0) return f;
-    final client = http.Client();
+    final client = AudioMirror.client();
     try {
       await _download(client, source.url(surah, ayah), f, 'sample');
     } finally {
@@ -1231,7 +1232,7 @@ abstract final class RecitationService {
   /// offline use when there is one, and the network when not.
   static http.Client _surahClient(
           Directory dir, SurahFiles source, int surah) =>
-      LocalRangeClient(http.Client(),
+      LocalRangeClient(AudioMirror.client(),
           url: source.url(surah), file: _wholeFile(dir, surah));
 
   /// Whether a reel of any of [surah] can be made with this voice and no
@@ -1296,7 +1297,7 @@ abstract final class RecitationService {
     final dir = await _reciterDir(reciter.id);
     final count = surahIndex[surah - 1].ayahCount;
     final source = reciter.source;
-    final client = http.Client();
+    final client = AudioMirror.client();
     try {
       if (source is SurahFiles) {
         await _surahTable(source, dir, surah, count,
@@ -1553,7 +1554,7 @@ abstract final class RecitationService {
         final (from, to) = await _liveTrim(reciter, dir, surah, ayah, f, known);
         return LiveClip(ayah, f.path, from, to, windowMs: 0);
       }
-      final client = http.Client();
+      final client = AudioMirror.client();
       try {
         await _download(client, source.url(surah, ayah), f, 'live');
       } finally {
