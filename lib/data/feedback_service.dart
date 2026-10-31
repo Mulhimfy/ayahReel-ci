@@ -343,8 +343,9 @@ abstract final class FeedbackService {
   /// 2026-10-06 could have come from either, so a note now says which
   /// code it was written from. Move it forward in every patch that
   /// changes how a save works; a letter after it marks a second patch
-  /// the same day (`b`: the audio mirror, 1.0.10 Patch 2).
-  static const codeDate = '2026-10-31b';
+  /// the same day (`b`: the audio mirror, 1.0.10 Patch 2; `c`: 4 GB
+  /// iPhones' passes of 16, and a lost save's Android answer).
+  static const codeDate = '2026-10-31c';
 
   static String? _exportTrouble;
   static DateTime? _exportAt;

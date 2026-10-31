@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -65,6 +66,20 @@ void main() {
       expect(ios(7.5), ExportBudget.roomy);
       // An older build's native side can't say: as it always was.
       expect(ios(null), ExportBudget.roomy);
+    });
+
+    test('a 4 GB iPhone keeps roomy in passes of 16 cards', () {
+      int? cards(double? gbs, {bool ios = true}) => PhoneBudget.passCardsFor(
+          memKb: gbs == null ? null : (gbs * gb).round(), ios: ios);
+      // 2026-10-31: an iPhone reporting 3683 MB lost its first save in
+      // one pass of 54 cards.
+      expect(cards(3.6), RenderPlan.clipsPerPassLowMemory);
+      expect(cards(3.8), 16);
+      expect(cards(5.6), isNull, reason: '6 GB iPhones: the plan\'s own');
+      expect(cards(null), isNull, reason: 'memory unknown: as before');
+      expect(cards(3.6, ios: false), isNull,
+          reason: 'a 4 GB Android phone is planned tight instead');
+      expect(PhoneBudget.roomyIosCards, RenderPlan.clipsPerPassLowMemory);
     });
 
     test('a 32-bit build is told by the target in Platform.version', () {
@@ -176,7 +191,7 @@ void main() {
       PhoneBudget.reset(); // the app dies here
       await PhoneBudget.load();
       expect(PhoneBudget.now, ExportBudget.smallest);
-      expect(PhoneBudget.lostDetail, ' (5 cards in one pass, tightest)');
+      expect(PhoneBudget.lostDetail, ' (5 cards in one pass, tightest, 0 s in)');
     });
 
     test('a save the app died in while drawing the cards is no lean loss',
@@ -258,7 +273,8 @@ void main() {
       expect(PhoneBudget.now, ExportBudget.tightest);
       // (No app or phone memory here: /proc is read on Android only.)
       expect(PhoneBudget.lostDetail,
-          ' (pass 2/9, 8 cards; Android: not responding, importance 100)');
+          ' (pass 2/9, 8 cards, 0 s in; '
+          'Android: not responding, importance 100)');
 
       // No record (before Android 11, or 1.0.9's native side): as before.
       await PhoneBudget.exportStarted();
@@ -268,6 +284,89 @@ void main() {
       await PhoneBudget.load();
       expect(PhoneBudget.takeLostExport(), isTrue);
       expect(PhoneBudget.summary, startsWith('tightest, 3788 MB, 2 lost'));
+    });
+
+    test('a lost save says what Android answered, or that it did not',
+        () async {
+      // 2026-10-31: an Android 13 Go phone's note had no Android reason
+      // at all. Asked at a slow cold start, the 3-second wait ran out.
+      PhoneBudget.debugMemKb = (3.8 * gb).round();
+      await PhoneBudget.exportStarted();
+      PhoneBudget.exportStage('2 cards in one pass');
+      await PhoneBudget.debugFlush();
+      PhoneBudget.reset();
+      PhoneBudget.debugMemKb = (3.8 * gb).round();
+      PhoneBudget.appExitWait = const Duration(milliseconds: 50);
+      addTearDown(() => PhoneBudget.appExitWait = const Duration(seconds: 20));
+      PhoneBudget.debugAppExit =
+          (p, since) => Completer<RenderExit?>().future; // never answers
+      await PhoneBudget.load();
+      expect(PhoneBudget.takeLostExport(), isTrue);
+      expect(PhoneBudget.lostDetail,
+          ' (2 cards in one pass, 0 s in; Android: no answer)');
+
+      // Asked, and nothing from after the save began.
+      await PhoneBudget.exportStarted();
+      PhoneBudget.exportStage('pass 1/3, 8 cards');
+      await PhoneBudget.debugFlush();
+      PhoneBudget.reset();
+      PhoneBudget.debugMemKb = (3.8 * gb).round();
+      PhoneBudget.debugAppExit = (p, since) async => null;
+      await PhoneBudget.load();
+      expect(PhoneBudget.lostDetail,
+          ' (pass 1/3, 8 cards, 0 s in; Android: no record)');
+
+      // Not Android, or before Android 11: never a record, nothing said.
+      await PhoneBudget.exportStarted();
+      PhoneBudget.exportStage('join');
+      await PhoneBudget.debugFlush();
+      PhoneBudget.reset();
+      PhoneBudget.debugMemKb = (3.8 * gb).round();
+      PhoneBudget.debugAppExit =
+          (p, since) async => throw UnsupportedError('Android 10');
+      await PhoneBudget.load();
+      expect(PhoneBudget.lostDetail, ' (join, 0 s in)');
+    });
+
+    test('a lost save says how long it had run', () {
+      expect(
+          PhoneBudget.describeLoss(const {
+            'stage': 'pass 4/9, 8 cards',
+            'budget': 'tight',
+            'since': 1000,
+            'at': 95400,
+            'rssMb': 215,
+          }),
+          ' (pass 4/9, 8 cards, tight, 94 s in; app 215 MB)');
+      // A clock set back between the two: no figure rather than a wrong one.
+      expect(
+          PhoneBudget.describeLoss(
+              const {'stage': 'join', 'since': 5000, 'at': 1000}),
+          ' (join)');
+    });
+
+    test('a save whose screen went while the app lived is not lost',
+        () async {
+      // The mark names this very process: only the engine was made
+      // again, so nothing died for want of memory.
+      PhoneBudget.debugMemKb = (3.8 * gb).round();
+      await PhoneBudget.exportStarted();
+      PhoneBudget.exportStage('2 cards in one pass');
+      await PhoneBudget.debugFlush();
+      PhoneBudget.reset();
+      PhoneBudget.debugMemKb = (3.8 * gb).round();
+      PhoneBudget.debugLivePid = pid;
+      var asked = false;
+      PhoneBudget.debugAppExit = (p, since) async {
+        asked = true;
+        return null;
+      };
+      await PhoneBudget.load();
+      expect(asked, isFalse, reason: 'a live process has no exit record');
+      expect(PhoneBudget.takeLostExport(), isFalse);
+      expect(PhoneBudget.now, ExportBudget.tight);
+      expect(PhoneBudget.summary, 'tight, 3891 MB, 1 closed');
+      expect(jsonDecode(history().readAsStringSync())['running'], isFalse);
     });
 
     test('an encode in the app says so in the stage, once', () async {
@@ -323,7 +422,7 @@ void main() {
       // The app is killed here. Next launch:
       PhoneBudget.reset();
       await PhoneBudget.load();
-      expect(PhoneBudget.lostDetail, ' (pass 3/7, 8 cards)');
+      expect(PhoneBudget.lostDetail, ' (pass 3/7, 8 cards, 0 s in)');
       expect(jsonDecode(history().readAsStringSync()),
           {'lost': 1, 'running': false});
     });

@@ -600,6 +600,43 @@ Next black report: if its note says `x264 only` the hardware check
 fired; if the export line says `SceneryGone`, the pick was cleared
 before the user saved; with neither, ask what kind of scenery it was.
 
+## 2026-10-31 (later): a 4 GB iPhone's one big pass, and an Android death with no reason
+
+Two notes, `version: 1.0.10`, `code: 2026-10-31`, source `exportTrouble`:
+
+    tight, 3683 MB, 1 lost · lost: … (54 cards in one pass, roomy; app 429 MB, 1310 MB at most), just now
+    tightest, 3862 MB, 1 lost · lost: … (2 cards in one pass, tight; app 215 MB, 378 MB at most; phone 985 MB free), just now
+
+- **The iPhone** (iOS 27.2, Arabic, 0 reels made) is a 4 GB one, which
+  kept `roomy` (2026-10-24): a reel under two minutes is one pass of up
+  to 130 cards. Every iPhone encodes in the app, and iOS ends an app
+  near 2 GB on these phones. 54 cards is about 350 + 54 × 12–17 MB of
+  graph on top of the app: past it. Fixed in Dart: an iPhone under 4.6
+  GB keeps `roomy` (the render ahead of Save, every core) but holds a
+  pass to 16 cards (`PhoneBudget.passCardsFor`, `roomyPassCards`, used
+  by `VideoRenderer._clipsFor`), what a `tight` Android phone holds. Its
+  summary says `roomy, 3683 MB, passes of 16`. After a loss it plans
+  `tight` as before.
+- **The Android phone** (`A665L`, Android 13 Go, 4 GB) was planned
+  `tight` and died in a short reel's one x264 pass, with the app small,
+  the phone 985 MB short of full and no render-process figure (the
+  encode had barely been handed to it). Not memory. The 1.0.10 native
+  side should have given Android's reason, and the note had none: the
+  question (`RenderProcess.appExit`) is asked from `main()`, answered on
+  the main thread a Go phone's cold start keeps busy, and waited for
+  3 s, after which it said nothing. Now it waits 20 s, and the note says
+  `Android: no answer` or `Android: no record` instead of nothing. The
+  mark carries `at` (the last reading's time), so the note says how far
+  in the save was (`2 cards in one pass, tight, 4 s in`). A mark written
+  by the process still running (the engine made again, the app alive)
+  is counted `closed`, not lost.
+- `FeedbackService.codeDate` is `2026-10-31c`.
+
+Next such Android note: read `Android:` first. `no record` with room
+means Android kept nothing (some vendors' task killers); `low memory`
+with room means the phone filled between readings; `not responding`
+means the save starved the main thread.
+
 ## What a note says since 2026-10-08
 
 While a foreground save runs, `PhoneBudget` writes its stage and the

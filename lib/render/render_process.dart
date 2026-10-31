@@ -479,20 +479,23 @@ abstract final class RenderProcess {
   /// What Android recorded about the death of this app's own process
   /// [pid], asked at the next launch about a save that process died in.
   /// [since] (ms since the epoch) is when that save began; an older
-  /// record is another process's that had the same pid. Null where it
-  /// can't say: before Android 11, and on store builds up to 1.0.9,
-  /// whose native side knows only the last two minutes.
+  /// record is another process's that had the same pid. Null where
+  /// Android has no record of it (and on store builds up to 1.0.9,
+  /// whose native side knows only the last two minutes). Throws
+  /// [UnsupportedError] where there is never one (not Android, or
+  /// before Android 11), and whatever the channel throws; the caller
+  /// (`PhoneBudget`) sets the wait.
   static Future<RenderExit?> appExit(int pid, int since) async {
-    if (!Platform.isAndroid || pid <= 0) return null;
-    try {
-      final r = await _channel.invokeMethod<Map<Object?, Object?>>(
-          'exitInfo', {'pid': pid, 'since': since}).timeout(
-          const Duration(seconds: 3));
-      if (r == null || r['unsupported'] == true) return null;
-      return RenderExit.from(r);
-    } catch (_) {
-      return null;
+    if (!Platform.isAndroid || pid <= 0) {
+      throw UnsupportedError('no exit records here');
     }
+    final r = await _channel.invokeMethod<Map<Object?, Object?>>(
+        'exitInfo', {'pid': pid, 'since': since});
+    if (r == null) return null;
+    if (r['unsupported'] == true) {
+      throw UnsupportedError('no exit records before Android 11');
+    }
+    return RenderExit.from(r);
   }
 }
 

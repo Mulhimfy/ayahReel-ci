@@ -261,8 +261,11 @@ abstract final class VideoRenderer {
   /// planned one step smaller for the rest of the process (see
   /// [PhoneBudget.outOfMemory]) rather than failing its way there
   /// again — the same shape as [_hwOk], and for the same reason.
+  ///
+  /// On roomy, the plan's own limits, except on a 4 GB iPhone
+  /// ([PhoneBudget.roomyPassCards]).
   static int? _clipsFor(ExportBudget budget) => switch (budget) {
-        ExportBudget.roomy => null,
+        ExportBudget.roomy => PhoneBudget.roomyPassCards,
         ExportBudget.tight => RenderPlan.clipsPerPassLowMemory,
         ExportBudget.tightest => RenderPlan.clipsPerPassLeast,
         ExportBudget.smallest => RenderPlan.clipsPerPassSmallest,

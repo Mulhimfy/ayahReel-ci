@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
-import 'package:flutter/services.dart' show MethodChannel;
+import 'package:flutter/services.dart'
+    show MethodChannel, MissingPluginException;
 import 'package:path_provider/path_provider.dart';
 
 import '../render/render_process.dart' show RenderExit, RenderProcess;
@@ -116,6 +117,7 @@ abstract final class PhoneBudget {
   static ExportBudget? _hardware;
   static int? _memKb;
   static bool _is32Bit = false;
+  static bool _ios = false;
   static int _losses = 0;
 
   /// Of [_losses], the ones that died while the device's own encoder
@@ -249,7 +251,7 @@ abstract final class PhoneBudget {
   /// started roomy lost a save in its first seconds (2026-10-23), so it
   /// starts tightest: the same 1080x1920, in smaller passes on two
   /// threads. A 4 GB iPhone keeps roomy, and steps down after a loss
-  /// like any phone.
+  /// like any phone; its passes are held to [passCardsFor]'s count.
   @visibleForTesting
   static ExportBudget hardwareBudget(
       {int? memKb, bool is32Bit = false, bool ios = false}) {
@@ -259,6 +261,30 @@ abstract final class PhoneBudget {
       return ExportBudget.tight;
     }
     return ExportBudget.roomy;
+  }
+
+  /// The most verse cards one pass may hold on [ExportBudget.roomy],
+  /// or null for the plan's own (a reel up to two minutes in one pass,
+  /// up to 130 cards).
+  ///
+  /// An iPhone under [tightBelowKb] (an 11, 12, 13, SE of 2022: iOS
+  /// reports 3.6–3.8 GB) gets 16, what a tight Android phone gets. It
+  /// keeps the rest of roomy, the render ahead of Save and every core.
+  /// Every iPhone encodes in the app, and iOS ends an app near 2 GB on
+  /// these: one lost its first save in a single pass of 54 cards, at
+  /// 429 MB at the last reading (2026-10-31). A pass costs about 350 MB
+  /// and 12–17 MB a card, so sixteen stay under a gigabyte.
+  @visibleForTesting
+  static int? passCardsFor({int? memKb, bool ios = false}) =>
+      ios && memKb != null && memKb < tightBelowKb ? roomyIosCards : null;
+
+  /// See [passCardsFor]; `RenderPlan.clipsPerPassLowMemory`.
+  static const roomyIosCards = 16;
+
+  /// [passCardsFor] for this phone.
+  static int? get roomyPassCards {
+    _hardware ??= _readHardware();
+    return passCardsFor(memKb: _memKb, ios: _ios);
   }
 
   /// Whether [version] — `Platform.version`, which ends with the target
@@ -350,9 +376,15 @@ abstract final class PhoneBudget {
   @visibleForTesting
   static String describeLoss(Map<String, dynamic> j) {
     // Where it died, and on what budget (written since 2026-10-17).
+    final since = j['since'];
+    final at = j['at'];
     final stage = [
       if (j['stage'] is String) j['stage'] as String,
       if (j['budget'] is String) j['budget'] as String,
+      // How long the save had run at the last reading (written since
+      // 2026-10-31): a death at once, or a long save given up on.
+      if (since is int && at is int && at >= since)
+        '${((at - since) / 1000).round()} s in',
     ].join(', ');
     final rss = j['rssMb'] as int?;
     final peak = j['peakMb'] as int?;
@@ -392,6 +424,7 @@ abstract final class PhoneBudget {
     final is32 = debug32Bit ?? is32BitBuild(Platform.version);
     _memKb = memKb;
     _is32Bit = is32;
+    _ios = ios;
     final b = hardwareBudget(memKb: memKb, is32Bit: is32, ios: ios);
     rlog('budget: ${memKb == null ? "memory unknown" : "${memKb ~/ 1024} MB"}'
         '${is32 ? ", 32-bit" : ""} -> ${b.name}');
@@ -406,6 +439,8 @@ abstract final class PhoneBudget {
       b.name,
       if (_memKb != null) '${_memKb! ~/ 1024} MB',
       if (_is32Bit) '32-bit',
+      if (b == ExportBudget.roomy && roomyPassCards != null)
+        'passes of $roomyPassCards',
       if (_losses > 0) '$_losses lost',
       if (_survived > 0) '$_survived survived',
       if (_closed > 0) '$_closed closed',
@@ -449,8 +484,18 @@ abstract final class PhoneBudget {
       _survived = (j['survived'] as int?) ?? 0;
       _closed = (j['closed'] as int?) ?? 0;
       if (j['running'] == true) {
-        final exit = j['hidden'] == true ? null : await _appExit(j);
-        if (exit != null && (exit.userEnded || exit.reclaimed)) {
+        final same = _sameProcess(j);
+        final (exit, unheard) =
+            j['hidden'] == true || same ? (null, null) : await _appExit(j);
+        if (same) {
+          // The process that wrote the mark is this one: the app never
+          // died. Its screen went (the engine was let go and made again,
+          // with the app still running), and the save with it. Nothing
+          // about memory, so not a loss either.
+          _closed++;
+          rlog('budget: the last export ended with its screen, the app '
+              'still running — not counted');
+        } else if (exit != null && (exit.userEnded || exit.reclaimed)) {
           // Android says the user closed the app, or that it went out
           // of sight before it was ended: the hidden mark below, come
           // too late or never. A slow save someone gave up on is not a
@@ -479,8 +524,11 @@ abstract final class PhoneBudget {
           _losses++;
           if (hardware) _hwLosses++;
           _lostUntold = true;
-          _lostDetail =
-              describeLoss({...j, if (exit != null) 'exit': '$exit'});
+          _lostDetail = describeLoss({
+            ...j,
+            if (exit != null) 'exit': '$exit' else if (unheard != null)
+              'exit': unheard,
+          });
           rlogError('export', 'the last export died with the app '
               '($_losses lost on this phone) — planning smaller from now on');
         }
@@ -493,17 +541,53 @@ abstract final class PhoneBudget {
 
   /// Android's record of how the process that wrote the running mark
   /// [j] ended, if the mark names it (written since 2026-10-21) and
-  /// Android kept one.
-  static Future<RenderExit?> _appExit(Map<String, dynamic> j) async {
+  /// Android kept one; and when there is none, why, for the note:
+  /// "no record" (Android was asked and had nothing from after the
+  /// save began) or "no answer" (the question went unanswered).
+  ///
+  /// It is asked as the app starts, on the main thread a slow phone's
+  /// cold start keeps busy for seconds: a 2026-10-31 note from an
+  /// Android 13 Go phone came with neither reason nor word, as a
+  /// 3-second wait would leave it. So the wait is long; nothing waits
+  /// on it but the notice of the lost save and the next save's plan.
+  static Future<(RenderExit?, String?)> _appExit(
+      Map<String, dynamic> j) async {
     final p = j['pid'];
     final since = j['since'];
-    if (p is! int || since is! int) return null;
+    if (p is! int || since is! int) return (null, null);
     final read = debugAppExit ?? RenderProcess.appExit;
     try {
-      return await read(p, since);
-    } catch (_) {
-      return null;
+      final exit = await read(p, since).timeout(appExitWait);
+      return (exit, exit == null ? 'no record' : null);
+    } on UnsupportedError {
+      // Before Android 11, or not Android: there is never a record.
+      return (null, null);
+    } on MissingPluginException {
+      return (null, null);
+    } on TimeoutException {
+      rlog('budget: Android did not say how the app ended');
+      return (null, 'no answer');
+    } catch (e) {
+      rlog('budget: asking Android how the app ended failed: $e');
+      return (null, 'no answer');
     }
+  }
+
+  /// How long [_appExit] waits for Android.
+  @visibleForTesting
+  static Duration appExitWait = const Duration(seconds: 20);
+
+  /// Stands in for this process's pid in tests; see [_sameProcess].
+  @visibleForTesting
+  static int? debugLivePid;
+
+  /// Whether the running mark [j] was written by this very process:
+  /// the app lived on, and only its engine (and the save in it) was
+  /// ended and started again. Android only; a test says which pid is
+  /// alive ([debugLivePid]), since there the mark is the test's own.
+  static bool _sameProcess(Map<String, dynamic> j) {
+    final live = debugLivePid ?? (Platform.isAndroid ? pid : null);
+    return live != null && j['pid'] == live;
   }
 
   /// Whether the last run died in the middle of an export and nobody
@@ -748,6 +832,7 @@ abstract final class PhoneBudget {
           'running': running,
           if (running) 'pid': pid,
           if (running && _since != null) 'since': _since,
+          if (running) 'at': DateTime.now().millisecondsSinceEpoch,
           if (hidden) 'hidden': true,
           if (running && _stage != null) 'stage': _stage,
           if (running && _budget != null) 'budget': _budget!.name,
@@ -770,6 +855,8 @@ abstract final class PhoneBudget {
     _memKb = null;
     _iosMemKb = null;
     _is32Bit = false;
+    _ios = false;
+    debugLivePid = null;
     _losses = 0;
     _hwLosses = 0;
     _leanLosses = 0;
