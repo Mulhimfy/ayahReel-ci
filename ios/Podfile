@@ -1,14 +1,15 @@
-# iOS 15.0 is a hard floor, not a preference: ffmpeg-kit's podspec
-# requires 14.0, and Apple rejects uploads below 15.0 starting Spring 2027
-# (ITMS-90068, warned on 1.0.2 build 4). The Runner target's
-# IPHONEOS_DEPLOYMENT_TARGET is set to 15.0 to match — if the two ever
-# drift, the archive step fails with a deployment-target mismatch.
+# iOS 15.1 is a hard floor, not a preference: ONNX Runtime's pod (AyahReel
+# Listen) requires 15.1 since its 1.21, ffmpeg-kit's podspec requires 14.0,
+# and Apple rejects uploads below 15.0 starting Spring 2027 (ITMS-90068,
+# warned on 1.0.2 build 4). The Runner target's IPHONEOS_DEPLOYMENT_TARGET
+# is set to 15.1 to match — if the two ever drift, the archive step fails
+# with a deployment-target mismatch. (15.0 until 2026-10-31.)
 #
 # This file was missing entirely. Flutter would have auto-generated one on the
 # first Mac/CI build using its own default platform, which is below 15.0 and
 # would have failed the pod install step. It is committed so CI and local
 # builds resolve the same way.
-platform :ios, '15.0'
+platform :ios, '15.1'
 
 # CocoaPods analytics sends network stats synchronously, slowing the build.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -43,7 +44,7 @@ target 'Runner' do
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   # AyahReel Listen's model runs on ONNX Runtime (ListenBridge in
   # AppDelegate.swift).
-  pod 'onnxruntime-objc', '~> 1.22'
+  pod 'onnxruntime-objc', '1.30.0'
 
   target 'RunnerTests' do
     inherit! :search_paths
@@ -56,7 +57,7 @@ post_install do |installer|
     target.build_configurations.each do |config|
       # Some transitive pods still declare a lower target than the app; pin them
       # all up so the linker does not warn on every file.
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
     end
   end
 end

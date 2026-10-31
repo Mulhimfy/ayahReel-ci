@@ -24,6 +24,7 @@ import '../widgets/app_toast.dart';
 import '../widgets/glow_button.dart';
 import '../widgets/step_dots.dart';
 import 'listen_screen.dart';
+import 'recite_screen.dart';
 import 'verses_screen.dart';
 
 /// Step 1 of the wizard, pushed from Home. One decision: whose voice.
@@ -55,7 +56,7 @@ class ReciterScreen extends StatefulWidget {
 }
 
 /// The two places a recording can be, each behind its own picker.
-enum _Door { audio, video }
+enum _Door { audio, video, recite }
 
 class _ReciterScreenState extends State<ReciterScreen>
     with WidgetsBindingObserver {
@@ -345,6 +346,17 @@ class _ReciterScreenState extends State<ReciterScreen>
                 subtitle: l.pickVideoFileBody,
                 onTap: () => Navigator.of(context).pop(_Door.video),
               ),
+              // Reciting into the phone, followed live by AyahReel
+              // Listen (a build with the model's key only).
+              if (ListenHost.enabled) ...[
+                const SizedBox(height: 10),
+                _SourceRow(
+                  icon: Icons.mic_rounded,
+                  title: l.reciteNow,
+                  subtitle: l.reciteNowBody,
+                  onTap: () => Navigator.of(context).pop(_Door.recite),
+                ),
+              ],
               const SizedBox(height: 8),
             ],
           ),
@@ -352,6 +364,24 @@ class _ReciterScreenState extends State<ReciterScreen>
       ),
     );
     if (type == null || !mounted) return;
+
+    if (type == _Door.recite) {
+      final audio = await Navigator.of(context).push<UserAudio>(
+        MaterialPageRoute(builder: (_) => const ReciteScreen()),
+      );
+      if (audio == null || !mounted) return;
+      setState(() => _upload = audio);
+      await _pickUpload(audio);
+      if (!mounted) return;
+      // Straight on to hearing it whole: the live view was the follow,
+      // this is the reel's timing.
+      await _player.stop().catchError((_) {});
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => ListenScreen(audio: audio)),
+      );
+      return;
+    }
 
     // Busy from the moment the picker opens, not from when it answers:
     // both pickers copy the file before they answer, and a full surah

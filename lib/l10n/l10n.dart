@@ -575,6 +575,40 @@ class L10n {
   String get listenTryAgain => _t('Try again', 'حاول مرة أخرى', 'دوبارہ کوشش کریں',
       'Coba lagi', 'Erneut versuchen');
 
+  String get reciteNow => _t('Recite now', 'اتلُ الآن', 'ابھی تلاوت کریں',
+      'Baca sekarang', 'Jetzt rezitieren');
+  String get reciteNowBody => _t(
+      'Recite into your phone: AyahReel follows you word by word, then makes the reel from your voice.',
+      'اتلُ إلى هاتفك: يتابعك آية ريل كلمة بكلمة، ثم يصنع المقطع بصوتك.',
+      'اپنے فون میں تلاوت کریں: آیہ ریل لفظ بہ لفظ آپ کے ساتھ چلتا ہے، پھر آپ کی آواز سے ریل بناتا ہے۔',
+      'Bacalah ke ponsel Anda: AyahReel mengikuti kata demi kata, lalu membuat reel dari suara Anda.',
+      'Rezitiere ins Handy: AyahReel folgt dir Wort für Wort und macht dann das Reel aus deiner Stimme.');
+  String get reciteStart => _t('Tap to start reciting', 'اضغط لتبدأ التلاوة',
+      'تلاوت شروع کرنے کے لیے ٹیپ کریں', 'Ketuk untuk mulai membaca',
+      'Tippen, um zu beginnen');
+  String get reciteListening => _t('Listening… start reciting',
+      'نستمع… ابدأ التلاوة', 'سن رہے ہیں… تلاوت شروع کریں',
+      'Mendengarkan… mulailah membaca', 'Hört zu … beginne zu rezitieren');
+  String get reciteStop => _t('Tap to stop', 'اضغط للإيقاف', 'روکنے کے لیے ٹیپ کریں',
+      'Ketuk untuk berhenti', 'Tippen zum Beenden');
+  String get reciteSaving => _t('Getting your recitation ready…',
+      'نجهّز تلاوتك…', 'آپ کی تلاوت تیار ہو رہی ہے…', 'Menyiapkan bacaan Anda…',
+      'Deine Rezitation wird vorbereitet …');
+  String get reciteNothing => _t(
+      'Nothing was heard. Try again a little closer to the microphone.',
+      'لم يُسمع شيء. حاول مرة أخرى بالقرب من الميكروفون.',
+      'کچھ سنائی نہیں دیا۔ مائیکروفون کے قریب ہو کر دوبارہ کوشش کریں۔',
+      'Tidak ada yang terdengar. Coba lagi lebih dekat ke mikrofon.',
+      'Nichts zu hören. Versuche es etwas näher am Mikrofon.');
+  String get reciteMic => _t(
+      'AyahReel needs the microphone to hear you recite. The sound stays on your phone.',
+      'يحتاج آية ريل إلى الميكروفون ليسمع تلاوتك. يبقى الصوت على هاتفك.',
+      'آپ کی تلاوت سننے کے لیے آیہ ریل کو مائیکروفون چاہیے۔ آواز آپ کے فون پر ہی رہتی ہے۔',
+      'AyahReel butuh mikrofon untuk mendengar bacaan Anda. Suaranya tetap di ponsel Anda.',
+      'AyahReel braucht das Mikrofon, um deine Rezitation zu hören. Der Ton bleibt auf deinem Handy.');
+  String get reciteOpenSettings => _t('Open settings', 'افتح الإعدادات',
+      'سیٹنگز کھولیں', 'Buka pengaturan', 'Einstellungen öffnen');
+
   String get listeningToYourAudio => _t('Listening to your audio…',
       'نستمع إلى تسجيلك…', 'آپ کی آڈیو سنی جا رہی ہے…',
       'Mendengarkan audio Anda…', 'Deine Audio wird abgehört …');

@@ -77,6 +77,8 @@ dependencies:
   # release 14 for it. The "video" door already went through
   # image_picker, whose resizer downsamples properly.
   file_selector: ^1.1.0
+  # Recite now (AyahReel Listen): the microphone as a PCM stream.
+  record: ^7.1.2
   # AyahReel Listen's engine (private: Mulhimfy/ayahreel-listen). CI puts it
   # here at the commit listen_ref.txt pins (.github/actions/listen-engine).
   ayahreel_listen:

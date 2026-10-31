@@ -249,6 +249,9 @@ abstract final class ListenService {
   static Future<String> verseText(int surah, int ayah) async =>
       (await _quran())[surah - 1][ayah - 1];
 
+  /// The whole text, per surah, per verse (the engine's input).
+  static Future<List<List<String>>> quranText() => _quran();
+
   /// The model over the whole recording: windows of [m.windowS] seconds
   /// overlapping [m.overlapS] either side, stitched at their middles
   /// (the engine's fc_server scheme), [m.hop] samples per frame.

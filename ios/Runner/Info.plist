@@ -80,7 +80,7 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>AyahReel does not use your location. Its reminder scheduler links a library that references the location APIs, so iOS requires this notice.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>AyahReel does not record audio. Its video engine links a library that can access the microphone, so iOS requires this notice.</string>
+	<string>AyahReel listens when you choose Recite now: it follows your recitation word by word and makes your reel from it. The sound stays on your phone.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Save your finished reel to your photo library, in an album named Ayah Reels.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

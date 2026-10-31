@@ -2,6 +2,9 @@
     xmlns:tools="http://schemas.android.com/tools">
     <!-- Quran text + recitation audio are fetched on demand -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Recite now (AyahReel Listen): asked for only when the user taps it;
+         the sound is heard on the phone and kept as their recording. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- Daily create-a-reel reminder -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
