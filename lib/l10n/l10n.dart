@@ -354,6 +354,19 @@ class L10n {
       'کنکشن نہیں۔ جو آ گیا وہ محفوظ ہے: جاری رکھنے کے لیے ڈاؤن لوڈ دبائیں۔',
       'Tidak ada koneksi. Yang sudah masuk tetap tersimpan: ketuk Unduh untuk lanjut.',
       'Keine Verbindung. Was da ist, bleibt: Tippe auf Laden, um weiterzumachen.');
+  /// The run stopped on files a server wouldn't send, with the
+  /// connection itself working: not [offlineNoNet].
+  String get offlineUnserved => _t(
+      'A server didn’t send what was asked for. What came down is kept: '
+          'tap Download to try again later.',
+      'لم يُرسل أحد الخوادم ما طُلب منه. ما نُزّل محفوظ: اضغط «تنزيل» '
+          'لتحاول لاحقًا.',
+      'ایک سرور نے مانگی گئی فائلیں نہیں بھیجیں۔ جو آ گیا وہ محفوظ ہے: '
+          'بعد میں دوبارہ کوشش کے لیے ڈاؤن لوڈ دبائیں۔',
+      'Sebuah server tidak mengirim yang diminta. Yang sudah masuk tetap '
+          'tersimpan: ketuk Unduh untuk mencoba lagi nanti.',
+      'Ein Server hat nicht geschickt, worum gebeten wurde. Was da ist, '
+          'bleibt: Tippe später auf Laden, um es nochmal zu versuchen.');
   String get offlineFull => _t(
       'Your phone is full. Free some space, then tap Download to carry on.',
       'مساحة هاتفك ممتلئة. أفرغ بعض المساحة ثم اضغط «تنزيل» لتكمل.',
@@ -1063,6 +1076,42 @@ class L10n {
       'یہ منظر ڈاؤن لوڈ نہیں ہو سکا۔ اپنا کنکشن دیکھیں۔',
       'Pemandangan itu gagal diunduh. Periksa koneksi Anda.',
       'Diese Kulisse ließ sich nicht laden. Prüf deine Verbindung.');
+
+  /// Why a scenery didn't download, told as it is: the connection only
+  /// when it was the connection (see [Trouble]).
+  String sceneFailed(Trouble? t) => switch (t) {
+        Trouble.offline || null => sceneDownloadFailed,
+        Trouble.host => sceneHost,
+        Trouble.storage => sceneStorage,
+        Trouble.device || Trouble.missing => sceneDevice,
+      };
+  String get sceneHost => _t(
+      'That scenery’s server didn’t send it. Try again in a little while, '
+          'or choose another.',
+      'لم يُرسل خادم هذا المشهد الملف. حاول بعد قليل، أو اختر مشهدًا آخر.',
+      'اس منظر کے سرور نے فائل نہیں بھیجی۔ تھوڑی دیر بعد دوبارہ کوشش کریں '
+          'یا کوئی اور منتخب کریں۔',
+      'Server pemandangan itu tidak mengirimkannya. Coba lagi sebentar '
+          'lagi, atau pilih yang lain.',
+      'Der Server dieser Kulisse hat sie nicht geschickt. Versuch es gleich '
+          'noch mal oder wähl eine andere.');
+  String get sceneStorage => _t(
+      'Your phone is full, so that scenery couldn’t be kept. Free some '
+          'space and try again.',
+      'مساحة هاتفك ممتلئة، فتعذّر حفظ المشهد. أفرغ بعض المساحة وحاول مجددًا.',
+      'آپ کے فون میں جگہ نہیں، اس لیے یہ منظر محفوظ نہیں ہو سکا۔ کچھ جگہ '
+          'خالی کریں اور دوبارہ کوشش کریں۔',
+      'Penyimpanan ponsel Anda penuh, jadi pemandangan itu tidak bisa '
+          'disimpan. Kosongkan sedikit ruang lalu coba lagi.',
+      'Dein Handy ist voll, deshalb ließ sich die Kulisse nicht speichern. '
+          'Mach etwas Platz frei und versuch es erneut.');
+  String get sceneDevice => _t(
+      'Couldn’t download that scenery. Try again, or choose another.',
+      'تعذّر تنزيل المشهد. حاول مجددًا، أو اختر مشهدًا آخر.',
+      'یہ منظر ڈاؤن لوڈ نہیں ہو سکا۔ دوبارہ کوشش کریں یا کوئی اور منتخب کریں۔',
+      'Pemandangan itu gagal diunduh. Coba lagi, atau pilih yang lain.',
+      'Diese Kulisse ließ sich nicht laden. Versuch es erneut oder wähl '
+          'eine andere.');
 
   // ---- creation wizard: frame format -----------------------------
   String get frameFormat =>
@@ -3031,6 +3080,19 @@ class L10n {
       'مناظر نہیں لائے جا سکے۔ اپنا کنکشن دیکھیں۔',
       'Pemandangan tidak dapat diambil. Periksa koneksi Anda.',
       'Die Kulissen ließen sich nicht holen. Prüf deine Verbindung.');
+
+  /// Let the verses choose, when nothing came of it for a reason other
+  /// than the connection: no scenery matched, or the choosing itself
+  /// failed. [matchedNothing] is for the connection alone.
+  String get matchFailed => _t(
+      'The sceneries couldn’t be chosen this time. Pick them yourself, or '
+          'try again.',
+      'تعذّر اختيار المشاهد هذه المرة. اخترها بنفسك، أو حاول مجددًا.',
+      'اس بار مناظر منتخب نہیں ہو سکے۔ خود منتخب کریں یا دوبارہ کوشش کریں۔',
+      'Pemandangan tidak bisa dipilih kali ini. Pilih sendiri, atau coba '
+          'lagi.',
+      'Diesmal ließen sich keine Kulissen auswählen. Wähl sie selbst oder '
+          'versuch es erneut.');
 
   /// A motif the matcher chose by, for the line that says why.
   String motifName(String id) => _motifs[lang]![id] ?? id;

@@ -350,6 +350,7 @@ class _OfflineSheetState extends State<OfflineSheet> {
           run.missed > 0 ? l.offlineMissed(run.missed) : l.offlineDone,
         OfflineStage.stopped => l.offlineStopped,
         OfflineStage.offline => l.offlineNoNet,
+        OfflineStage.unserved => l.offlineUnserved,
         OfflineStage.full => l.offlineFull,
         _ => null,
       };

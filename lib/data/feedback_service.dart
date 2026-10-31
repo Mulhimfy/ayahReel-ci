@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'dart:convert';
 import 'dart:io' show File, Platform;
 
@@ -164,6 +165,8 @@ abstract final class FeedbackService {
       _renders = j['renders'] as int? ?? 0;
       _asks = j['asks'] as int? ?? 0;
       _sent = j['sent'] as bool? ?? false;
+      _netTrouble = j['net'] as String?;
+      _netAt = DateTime.tryParse(j['netAt'] as String? ?? '');
     } catch (_) {/* an unreadable file just means nobody has been asked */}
   }
 
@@ -298,7 +301,19 @@ abstract final class FeedbackService {
         PhoneBudget.summary,
         if (_exportTrouble != null) _exportTrouble!,
       ].join(' · '),
+      if (_netTrouble != null) 'net': '$_netTrouble${_ago(_netAt)}',
     };
+  }
+
+  /// ", 3 h ago": how long before the note the failure was.
+  static String _ago(DateTime? at) {
+    if (at == null) return '';
+    final d = DateTime.now().difference(at);
+    if (d.isNegative) return '';
+    if (d.inMinutes < 1) return ', just now';
+    if (d.inHours < 1) return ', ${d.inMinutes} min ago';
+    if (d.inDays < 1) return ', ${d.inHours} h ago';
+    return ', ${d.inDays} d ago';
   }
 
   /// The day of the newest fix this code carries.
@@ -311,6 +326,51 @@ abstract final class FeedbackService {
   static const codeDate = '2026-10-24';
 
   static String? _exportTrouble;
+
+  static String? _netTrouble;
+  static DateTime? _netAt;
+
+  /// Keeps the last download that failed — a voice, a surah's text, a
+  /// scenery — for the next note, as its `net` line.
+  ///
+  /// Kept across a restart, unlike [noteExportTrouble]: a note about a
+  /// download is written from Settings, often after the app was closed
+  /// and opened again to try once more. A note of 2026-10-30 said only
+  /// "it can't download the video, though my internet is strong", and
+  /// nothing in it said which download, from which host, or what the
+  /// phone was told; this says all three. Hosts and file names are
+  /// kept, a link's query (a signed address) and the phone's folders
+  /// are not.
+  static void noteNetTrouble(String what, Object error) {
+    final s = netLine(what, error);
+    final at = DateTime.now();
+    _netTrouble = s;
+    _netAt = at;
+    unawaited(() async {
+      // Read first, or the write would put the counts back to nothing.
+      await init();
+      _netTrouble = s;
+      _netAt = at;
+      await _persist();
+    }());
+  }
+
+  /// [what] and [error] as one short line: links cut to their host and
+  /// file, no query, no folders on the phone.
+  @visibleForTesting
+  static String netLine(String what, Object error) {
+    final s = '$what: $error'
+        .replaceAllMapped(RegExp(r'''https?://([^/\s"',)]+)[^\s"',)]*'''),
+            (m) {
+          final path = m[0]!.split('?').first;
+          final file = path.substring(path.lastIndexOf('/') + 1);
+          return path.indexOf('/', 8) < 0 ? m[1]! : '${m[1]}/…/$file';
+        })
+        .replaceAll(RegExp(r'''(?<![\w.…])(?:/[^/\s"']+)+/'''), '…/')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    return s.length <= 240 ? s : '${s.substring(0, 239)}…';
+  }
 
   /// Keeps the last export that failed in this run, for the next note.
   ///
@@ -428,6 +488,8 @@ abstract final class FeedbackService {
         'renders': _renders,
         'asks': _asks,
         'sent': _sent,
+        if (_netTrouble != null) 'net': _netTrouble,
+        if (_netAt != null) 'netAt': _netAt!.toIso8601String(),
       }));
     } catch (_) {/* the ask is best-effort, like the rating it follows */}
   }
@@ -443,5 +505,7 @@ abstract final class FeedbackService {
     _renders = renders;
     _asks = asks;
     _sent = sent;
+    _netTrouble = null;
+    _netAt = null;
   }
 }

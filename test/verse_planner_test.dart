@@ -86,6 +86,34 @@ void main() {
     expect(VersePlanner.estimateUnits(ayahs, 255, 256, 2, look), lines.length);
   });
 
+  test('counted between frames, the lines come out the same', () async {
+    // The scenery screen counts a long passage this way so a build or a
+    // tap never typesets all of it at once (an ANR on a Galaxy A16,
+    // 1.0.10). Same verses, same look, same lines: only when.
+    const other = VerseLook(
+      textScale: 1.1,
+      preset: TextPreset.classic,
+      typography: ReelTypography(),
+      edition: VerseTranslation.english,
+      numbering: VerseNumbering.mark,
+      showTranslation: true,
+      ink: VerseInk.none,
+      surah: 2,
+    );
+    expect(VersePlanner.estimatePartsIfReady(ayahs, 250, 256, 2, other),
+        isNull, reason: 'nothing counted yet');
+    final later =
+        await VersePlanner.estimatePartsAsync(ayahs, 250, 256, 2, other);
+    expect(VersePlanner.estimatePartsIfReady(ayahs, 250, 256, 2, other),
+        same(later));
+    final now = VersePlanner.estimateParts(ayahs, 250, 256, 2, other);
+    expect(later, now);
+    // And a verse counted once is answered from the count.
+    final tokens = VerseText.tokens(kursi.arabic);
+    expect(VersePlanner.linesOf(tokens, 0, tokens.length, other, 255),
+        VersePlanner.linesOf(tokens, 0, tokens.length, other, 255));
+  });
+
   testWidgets('a long verse is cut, timed and shared out', (t) async {
     late VerseLinePlan plan;
     await t.runAsync(() async {

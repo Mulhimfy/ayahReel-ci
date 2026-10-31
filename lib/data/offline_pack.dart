@@ -4,12 +4,14 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 import 'debug_log.dart';
+import 'feedback_service.dart';
 import 'juz_index.dart';
 import 'models.dart';
 import 'qul_words.dart';
 import 'quran_text_service.dart';
 import 'recitation_service.dart';
 import 'scene_catalog.dart';
+import 'trouble.dart';
 import 'word_align_service.dart';
 
 /// How much of a voice to keep on the phone: one choice at a time.
@@ -129,6 +131,10 @@ enum OfflineStage {
 
   /// No connection: too many files in a row would not come.
   offline,
+
+  /// Too many files in a row a server would not send, the connection
+  /// itself working: a missing file, a server error.
+  unserved,
 
   /// The phone is full.
   full,
@@ -261,6 +267,9 @@ abstract final class OfflinePack {
     _stop = false;
     var missed = 0;
     var inARow = 0;
+    // Whether the network itself let any of that run down, rather than
+    // only servers that answered with something else.
+    var netInARow = false;
     final surahs = plan.surahs
         .where((s) => plan.voice.hasSurah(s))
         .toList(growable: false);
@@ -304,6 +313,7 @@ abstract final class OfflinePack {
       try {
         await job();
         inARow = 0;
+        netInARow = false;
       } on FileSystemException catch (e) {
         rlog('offline: disk — $e');
         if (_isFull(e)) {
@@ -315,10 +325,16 @@ abstract final class OfflinePack {
       } catch (e) {
         missed++;
         inARow++;
+        if (troubleOf(e) == Trouble.offline) netInARow = true;
         rlog('offline: ${stage.name} failed — $e');
         if (inARow >= _offlineAfter) {
-          state.value = OfflineProgress(OfflineStage.offline,
-              fraction: done / total, missed: missed);
+          // "No connection" only when it was the connection: six 404s
+          // in a row on a working network once said it too.
+          FeedbackService.noteNetTrouble('offline ${stage.name}', e);
+          state.value = OfflineProgress(
+              netInARow ? OfflineStage.offline : OfflineStage.unserved,
+              fraction: done / total,
+              missed: missed);
           return false;
         }
       }
@@ -415,7 +431,11 @@ abstract final class OfflinePack {
         for (var k = i; k < scenes.length && k < i + 3; k++)
           step(OfflineStage.scenes, () async {
             final f = await SceneCatalog.download(scenes[k]);
-            if (f == null) throw StateError('${scenes[k].id} did not come');
+            if (f == null) {
+              throw TroubleException(
+                  SceneCatalog.failureOf(scenes[k]) ?? Trouble.offline,
+                  '${scenes[k].id} did not come');
+            }
           }),
       ]);
       if (ok.contains(false)) return;

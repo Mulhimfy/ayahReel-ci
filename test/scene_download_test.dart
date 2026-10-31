@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:ayah_reels/data/scene_catalog.dart';
+import 'package:ayah_reels/data/trouble.dart';
 
 /// The picker's Preview button blocks on the scene tap it was given, so
 /// a fetch that never finishes is not a slow download — it is a frozen
@@ -237,5 +238,111 @@ void main() {
         .timeout(const Duration(seconds: 15), onTimeout: () => null);
     expect(file, isNull);
     expect(cache.listSync(), isEmpty);
+  });
+
+  test('a drop halfway carries on from where it stopped, not from zero',
+      () async {
+    // A four megabyte clip on a busy mobile network: the connection
+    // drops after the first half. Two tries from the first byte, back
+    // to back, used to say "check your connection" to somebody whose
+    // connection was fine (2026-10-30). The next try asks for the rest.
+    // Past the server's 8 KB write buffer, so the first half leaves it.
+    final body = List.generate(60000, (i) => i % 251);
+    final ranges = <String?>[];
+    await serve((req) async {
+      final range = req.headers.value('range');
+      ranges.add(range);
+      if (range == null) {
+        req.response.headers.contentLength = body.length;
+        req.response.add(body.sublist(0, 30000));
+        // Then nothing more: the body stops coming mid-way.
+        await req.response.flush();
+        return;
+      }
+      final from = int.parse(RegExp(r'bytes=(\d+)-').firstMatch(range)![1]!);
+      req.response.statusCode = HttpStatus.partialContent;
+      req.response.headers
+          .set('content-range', 'bytes $from-${body.length - 1}/${body.length}');
+      req.response.headers.contentLength = body.length - from;
+      req.response.add(body.sublist(from));
+      await req.response.close();
+    });
+
+    final file = await SceneCatalog.download(sceneNamed('water_resume_01'))
+        .timeout(const Duration(seconds: 15),
+            onTimeout: () => fail('the resumed download never completed'));
+    expect(file, isNotNull);
+    expect(file!.readAsBytesSync(), body,
+        reason: 'the two halves joined exactly');
+    expect(ranges.first, isNull);
+    final from = int.parse(
+        RegExp(r'bytes=(\d+)-').firstMatch(ranges[1] ?? '')?[1] ?? '0');
+    expect(from, greaterThan(0),
+        reason: 'the second try asks only for the rest');
+  });
+
+  test('a host that answers a range with the whole file is read afresh',
+      () async {
+    final body = List.generate(60000, (i) => i % 13);
+    var hits = 0;
+    await serve((req) async {
+      hits++;
+      req.response.headers.contentLength = body.length;
+      if (hits == 1) {
+        req.response.add(body.sublist(0, 30000));
+        await req.response.flush();
+        return;
+      }
+      // Range ignored: 200 and everything.
+      req.response.add(body);
+      await req.response.close();
+    });
+
+    final file = await SceneCatalog.download(sceneNamed('water_norange_01'))
+        .timeout(const Duration(seconds: 15),
+            onTimeout: () => fail('never completed'));
+    expect(file, isNotNull);
+    expect(file!.readAsBytesSync(), body,
+        reason: 'no bytes of the first try glued in front of the second');
+  });
+
+  test('a failure says what it was: the host, or the connection', () async {
+    await serve((req) {
+      req.response.statusCode = HttpStatus.notFound;
+      req.response.close();
+    });
+    final missing = sceneNamed('water_why_404');
+    expect(await SceneCatalog.download(missing), isNull);
+    expect(SceneCatalog.failureOf(missing), Trouble.host,
+        reason: 'a 404 is not "check your connection"');
+    await server?.close(force: true);
+
+    await serve((req) {/* never answers */});
+    final silent = sceneNamed('water_why_silent');
+    expect(
+        await SceneCatalog.download(silent)
+            .timeout(const Duration(seconds: 15), onTimeout: () => null),
+        isNull);
+    expect(SceneCatalog.failureOf(silent), Trouble.offline);
+  });
+
+  test('a scenery that lands forgets the failure before it', () async {
+    var hits = 0;
+    final body = List.filled(4096, 4);
+    await serve((req) {
+      hits++;
+      if (hits == 1) {
+        req.response.statusCode = HttpStatus.serviceUnavailable;
+        req.response.close();
+        return;
+      }
+      req.response.headers.contentLength = body.length;
+      req.response.add(body);
+      req.response.close();
+    });
+    final scene = sceneNamed('water_why_again');
+    expect(await SceneCatalog.download(scene), isNotNull,
+        reason: 'a 503 is worth the next try');
+    expect(SceneCatalog.failureOf(scene), isNull);
   });
 }

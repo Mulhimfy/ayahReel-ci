@@ -243,6 +243,29 @@ abstract final class VersePlanner {
   /// size; the verse's last part carries the verse-end sign.
   static int linesOf(
       List<String> tokens, int s, int e, VerseLook look, int ayahNumber) {
+    final key = '${look.key}|$ayahNumber|$s|$e|${tokens.length}|'
+        '${Object.hashAll(tokens)}';
+    final hit = _lineCounts[key];
+    if (hit != null) return hit;
+    final n = _countLines(tokens, s, e, look, ayahNumber);
+    if (_lineCounts.length >= 20000) _lineCounts.clear();
+    return _lineCounts[key] = n;
+  }
+
+  /// Every count [linesOf] has made, by the verse, the look and the
+  /// tokens asked about.
+  ///
+  /// A count is a typesetting of Arabic, and cutting one long verse asks
+  /// for a few dozen; the scenery screen asked again for every verse of
+  /// the selection each time the selection moved by one, some of it in
+  /// a tap's handler on the main thread. A Galaxy A16 sat in one such
+  /// tap long enough for Android to report the app not responding (Play,
+  /// 1.0.10, 2026-10-29). A verse's count in a look never changes, and
+  /// the faces are bundled, so each is made once.
+  static final _lineCounts = <String, int>{};
+
+  static int _countLines(
+      List<String> tokens, int s, int e, VerseLook look, int ayahNumber) {
     final style = AyahOverlay.verseLayoutStyle(
       width: AyahRasterizer.exportWidth,
       textScale: look.textScale,
@@ -289,7 +312,7 @@ abstract final class VersePlanner {
   /// chosen for a line belongs, whatever the lines come to later.
   static List<({int ayah, int token, String text})> estimateParts(
       List<Ayah> ayahs, int start, int end, int lines, VerseLook look) {
-    final key = '$start-$end-$lines-${look.key}-${ayahs.length}';
+    final key = _estimateKey(ayahs, start, end, lines, look);
     final hit = _estimates[key];
     if (hit != null) return hit;
     final out = <({int ayah, int token, String text})>[];
@@ -325,6 +348,45 @@ abstract final class VersePlanner {
 
   static final _estimates =
       <String, List<({int ayah, int token, String text})>>{};
+
+  static String _estimateKey(
+          List<Ayah> ayahs, int start, int end, int lines, VerseLook look) =>
+      '$start-$end-$lines-${look.key}-${ayahs.length}';
+
+  /// [estimateParts] when it has been worked out already; null when it
+  /// hasn't, without working it out.
+  static List<({int ayah, int token, String text})>? estimatePartsIfReady(
+          List<Ayah> ayahs, int start, int end, int lines, VerseLook look) =>
+      lines <= VerseLines.whole
+          ? estimateParts(ayahs, start, end, lines, look)
+          : _estimates[_estimateKey(ayahs, start, end, lines, look)];
+
+  /// [estimateParts], worked out a verse at a time with the event loop
+  /// let through between verses, so a screen can count a long passage
+  /// without holding a frame or a tap for all of it.
+  static Future<List<({int ayah, int token, String text})>>
+      estimatePartsAsync(List<Ayah> ayahs, int start, int end, int lines,
+          VerseLook look) async {
+    final ready = estimatePartsIfReady(ayahs, start, end, lines, look);
+    if (ready != null) return ready;
+    for (var a = start; a <= end && a - 1 < ayahs.length; a++) {
+      countVerse(ayahs, a, lines, look);
+      await Future<void>.delayed(Duration.zero);
+    }
+    return estimateParts(ayahs, start, end, lines, look);
+  }
+
+  /// Counts verse [a]'s lines the way [estimateParts] will ask for them,
+  /// into [linesOf]'s counts: one step of counting a passage between
+  /// frames. The parts are put together from the counts afterwards.
+  static void countVerse(
+      List<Ayah> ayahs, int a, int lines, VerseLook look) {
+    if (lines <= VerseLines.whole || a < 1 || a > ayahs.length) return;
+    final tokens = VerseText.tokens(ayahs[a - 1].arabic);
+    if (tokens.length < 2) return;
+    VerseSplitter.split(
+        tokens, (s, e) => linesOf(tokens, s, e, look, a) <= lines);
+  }
 
   /// [ayah] as if recited at an even pace — every letter as long as the
   /// next, a breath before each line — and cut the way [plan] cuts it

@@ -662,6 +662,7 @@ class _PreviewScreenState extends State<PreviewScreen>
       // Kept out of rlog: that is compiled away in release, and a boot
       // that fails on a user's phone is exactly the one nobody can see.
       rlogError('boot: surah text', e, st);
+      FeedbackService.noteNetTrouble('text of surah $_surah', e);
       if (mounted) {
         final trouble = troubleOf(e);
         setState(() {
@@ -693,6 +694,8 @@ class _PreviewScreenState extends State<PreviewScreen>
       rlog('boot: recitation ready ${rec.audioPath}');
     } catch (e, st) {
       rlogError('boot: recitation', e, st);
+      FeedbackService.noteNetTrouble(
+          'voice ${_reciter.id}, $_surah:$_startAyah-$_endAyah', e);
       if (mounted) {
         final l = L10n.current;
         final trouble = troubleOf(e);

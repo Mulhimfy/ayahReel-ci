@@ -198,6 +198,41 @@ void main() {
     test('an empty note is never posted', () async {
       expect(await FeedbackService.send(message: '   '), isFalse);
     });
+
+    test('the last download that failed rides along as its own line', () {
+      // "It can't download the video, though my internet is strong"
+      // (2026-10-30) was all a note had: not which download, which
+      // host, or what the phone was told.
+      expect(FeedbackService.payload(message: 'x').containsKey('net'), isFalse,
+          reason: 'nothing failed, nothing to say');
+      FeedbackService.noteNetTrouble(
+          'voice dussary, 2:255-257',
+          'ClientException with SocketException: Connection reset by peer, '
+              'uri=https://everyayah.com/data/Yasser_Ad-Dussary_128kbps/'
+              '002255.mp3');
+      final net = FeedbackService.payload(message: 'x')['net']!;
+      expect(net, startsWith('voice dussary, 2:255-257: ClientException'));
+      expect(net, contains('everyayah.com/…/002255.mp3'),
+          reason: 'the host and the file are what a report needs');
+      expect(net, contains('just now'));
+    });
+
+    test('a signed link and the phone\'s folders stay out of the line', () {
+      final line = FeedbackService.netLine(
+          'scenery sky_pexels_56',
+          'TimeoutException after 0:00:20.000000: '
+              'https://release-assets.githubusercontent.com/github-production-'
+              'release-asset/1328348712/cf1fbe83?sp=r&sv=2018-11-09&sig=abc '
+              'writing /data/user/0/com.ayahreel.app/cache/scenes/'
+              'sky_pexels_56.mp4.part');
+      expect(line, contains('release-assets.githubusercontent.com/…/cf1fbe83'));
+      expect(line, isNot(contains('sig=')));
+      expect(line, contains('…/sky_pexels_56.mp4.part'));
+      expect(line, isNot(contains('/data/user')),
+          reason: 'folders can name the owner; the file is enough');
+      expect(FeedbackService.netLine('x', 'y' * 600).length,
+          lessThanOrEqualTo(240));
+    });
   });
 
   group('what counts as delivered', () {

@@ -12,7 +12,9 @@ import 'package:path_provider/path_provider.dart';
 
 import 'debug_log.dart';
 import 'download.dart';
+import 'feedback_service.dart';
 import 'models.dart';
+import 'trouble.dart';
 
 /// One scenery in the library.
 ///
@@ -442,9 +444,31 @@ abstract final class SceneCatalog {
   /// coming: nothing about a silent socket ever raises.
   static Duration _idleTimeout = const Duration(seconds: 20);
 
-  /// Tries per download. A stall is almost always the network rather
-  /// than the file, and the second attempt usually lands.
-  static const _attempts = 2;
+  /// Tries in a row that brought nothing before a download is given
+  /// up: the recitation's rule ([Download]). A try that brought bytes
+  /// doesn't count against it, and the next one asks only for the rest.
+  ///
+  /// It used to be two tries, back to back, each from the first byte.
+  /// A clip is four megabytes; on a busy mobile network a drop halfway
+  /// through either try was "Couldn't download that scenery. Check
+  /// your connection." to somebody whose connection was fine (a review
+  /// and a note of 2026-10-30, 1.0.10: "my internet is strong").
+  static int get _attempts => Download.attempts;
+
+  /// The pause after the first try in a row that brought nothing,
+  /// doubling after each one ([Download.backoff]'s steps).
+  static Duration _backoffUnit = const Duration(seconds: 1);
+
+  static Duration _backoff(int miss) =>
+      _backoffUnit * (1 << (miss - 1).clamp(0, 3));
+
+  /// Why each scenery's last download failed, until one succeeds: the
+  /// connection, the host, or a full phone. The picker says which,
+  /// rather than "check your connection" to every failure.
+  static final Map<String, Trouble> _failed = {};
+
+  /// Why [s]'s last download failed; null when it didn't.
+  static Trouble? failureOf(Scene s) => _failed[s.id];
 
   /// Points the catalog at a local server and directory, and shortens
   /// the stall timeout — so "a dead connection still ends" can be
@@ -461,7 +485,9 @@ abstract final class SceneCatalog {
     _releases = const {};
     _dir = cacheDir;
     _idleTimeout = idle;
+    _backoffUnit = const Duration(milliseconds: 20);
     _inFlight.clear();
+    _failed.clear();
     // No poster fetches from a test unless it asks for them.
     debugPosterBase ??= '';
   }
@@ -490,50 +516,106 @@ abstract final class SceneCatalog {
     final existing = await cachedFile(s);
     if (existing != null) return existing;
     if (_baseUrl.isEmpty) return null;
-
-    for (var attempt = 1; attempt <= _attempts; attempt++) {
-      final file = await _fetchOnce(s, onProgress);
-      if (file != null) return file;
-      if (attempt < _attempts) {
-        onProgress?.call(0); // the ring starts over rather than sticking
-        rlog('scene ${s.id}: retrying (attempt ${attempt + 1})');
-      }
+    try {
+      final file = await _fetch(s, onProgress);
+      _failed.remove(s.id);
+      return file;
+    } catch (e) {
+      final trouble = troubleOf(e);
+      _failed[s.id] = trouble;
+      rlog('scene ${s.id}: download failed (${trouble.name}) $e');
+      FeedbackService.noteNetTrouble('scenery ${s.id}', e);
+      return null;
     }
-    return null;
   }
 
-  static Future<File?> _fetchOnce(
+  /// [s]'s file, fetched into the cache; throws what stopped it.
+  ///
+  /// What has arrived is kept across the tries and the next one asks
+  /// for the rest with a Range, so every try moves the download on,
+  /// the way a surah's slice does ([Download]). A host that answers a
+  /// range with the whole file is simply read from the start again.
+  static Future<File> _fetch(
       Scene s, void Function(double)? onProgress) async {
     final dest = File('${(await _cacheDir()).path}/${s.fileName}');
     // Written aside and renamed: a download killed halfway must not
     // leave a truncated file that later looks like a complete one.
     final part = File('${dest.path}.part');
+    final url = Uri.parse('${_urlOf(s)}/${s.fileName}');
     final client = http.Client();
     IOSink? sink;
+    var got = 0;
+    int? total;
+    var misses = 0;
     try {
-      final req = http.Request('GET', Uri.parse('${_urlOf(s)}/${s.fileName}'));
-      final res = await client.send(req).timeout(_idleTimeout);
-      if (res.statusCode != 200) {
-        rlog('scene ${s.id}: HTTP ${res.statusCode}');
-        return null;
+      while (true) {
+        final before = got;
+        try {
+          final abort = Completer<void>();
+          final req =
+              http.AbortableRequest('GET', url, abortTrigger: abort.future);
+          if (got > 0) req.headers['Range'] = 'bytes=$got-';
+          final http.StreamedResponse res;
+          try {
+            res = await client.send(req).timeout(_idleTimeout);
+          } on TimeoutException {
+            // Aborted, not left running behind the next try.
+            abort.complete();
+            rethrow;
+          }
+          final resumed = got > 0 &&
+              res.statusCode == 206 &&
+              (res.headers['content-range'] ?? '').startsWith('bytes $got-');
+          if (!resumed) {
+            if (res.statusCode != 200) {
+              Download.discard(res);
+              throw BadStatus(res.statusCode);
+            }
+            // The whole file, from its first byte.
+            await sink?.close();
+            sink = null;
+            got = 0;
+            total = res.contentLength ?? (s.bytes > 0 ? s.bytes : null);
+          }
+          sink ??= part.openWrite();
+          await for (final chunk in res.stream.timeout(_idleTimeout)) {
+            sink.add(chunk);
+            got += chunk.length;
+            final t = total;
+            if (t != null && t > 0) onProgress?.call((got / t).clamp(0.0, 1.0));
+          }
+          // The connection closed early: the network's doing, not the
+          // file's. What came is kept; the next try asks for the rest.
+          final t = total;
+          if (t != null && got < t) {
+            throw TroubleException(
+                Trouble.offline, 'short read: $got of $t bytes');
+          }
+          await sink.close();
+          sink = null;
+          // An error page, not a scenery.
+          if (got < 1024) {
+            throw TroubleException(Trouble.host, 'only $got bytes from $url');
+          }
+          await part.rename(dest.path);
+          onProgress?.call(1);
+          return dest;
+        } catch (e) {
+          // Asking again gets the same answer: a file the host doesn't
+          // have, an answer that isn't one, a full phone.
+          if (Download.isFinal(e) ||
+              e is FileSystemException ||
+              (e is TroubleException && e.trouble == Trouble.host)) {
+            rethrow;
+          }
+          misses = got > before ? 0 : misses + 1;
+          rlog('scene ${s.id}: try failed at $got bytes, '
+              '${misses == 0 ? 'after progress' : 'nothing new '
+                  '$misses/$_attempts in a row'} — $e');
+          if (misses >= _attempts) rethrow;
+          await Future<void>.delayed(_backoff(misses));
+        }
       }
-      final total = res.contentLength ?? s.bytes;
-      sink = part.openWrite();
-      var got = 0;
-      await for (final chunk in res.stream.timeout(_idleTimeout)) {
-        sink.add(chunk);
-        got += chunk.length;
-        if (total > 0) onProgress?.call((got / total).clamp(0.0, 1.0));
-      }
-      await sink.close();
-      sink = null;
-      if (part.lengthSync() < 1024) return null;
-      await part.rename(dest.path);
-      onProgress?.call(1);
-      return dest;
-    } catch (e) {
-      rlog('scene ${s.id}: download failed $e');
-      return null;
     } finally {
       client.close();
       // The sink first: an open handle is enough to make removing the

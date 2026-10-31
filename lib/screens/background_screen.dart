@@ -15,6 +15,7 @@ import '../data/debug_log.dart';
 import '../data/scene_catalog.dart';
 import '../data/scene_matcher.dart';
 import '../data/settings_service.dart';
+import '../data/trouble.dart';
 import '../data/verse_lines.dart';
 import '../l10n/l10n.dart';
 import '../render/scene_plan.dart';
@@ -121,7 +122,12 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
   /// off the recitation when it is already on the device (the verses
   /// screen starts fetching it on the way here), estimated from the
   /// verse count when it is not. See [ScenePlan.maxScenes].
-  int get _sceneLimit {
+  int get _sceneLimit => _sceneLimitOf(_slotCount);
+
+  /// [_sceneLimit] as a build shows it: see [_shownSlotCount].
+  int get _shownSceneLimit => _sceneLimitOf(_shownSlotCount);
+
+  int _sceneLimitOf(int slots) {
     final start = creationState.startAyah;
     final end = creationState.endAyah;
     final r = creationState.reciter;
@@ -131,7 +137,7 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
     final segMs = rec != null && rec.covers(start, end)
         ? rec.timing(end).endMs - rec.timing(start).startMs
         : null;
-    return ScenePlan.maxScenes(_slotCount, segMs: segMs);
+    return ScenePlan.maxScenes(slots, segMs: segMs);
   }
 
   /// What a scene each would be: the verses, or — with long verses shown
@@ -144,6 +150,59 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
     final ayahs = QuranRepository.ayahsIfCached(s.surah);
     return (ayahs == null ? null : _lineTexts(ayahs))?.length ??
         s.endAyah - s.startAyah + 1;
+  }
+
+  /// [_slotCount] for a build, which must not typeset the selection: the
+  /// lines once they are counted, the verses until then. Counting a long
+  /// passage's lines is seconds on a slow phone; it goes on between
+  /// frames ([_countLines]) and the build after it shows the lines. A tap still asks [_slotCount], by then mostly
+  /// answered from the counts this made.
+  int get _shownSlotCount {
+    final s = creationState;
+    final verses = s.endAyah - s.startAyah + 1;
+    final ayahs = QuranRepository.ayahsIfCached(s.surah);
+    final look = _look;
+    if (ayahs == null || look == null) return verses;
+    final parts = VersePlanner.estimatePartsIfReady(
+        ayahs, s.startAyah, s.endAyah, s.verseLines, look);
+    if (parts != null) return parts.length;
+    _countLines(ayahs, look);
+    return verses;
+  }
+
+  /// The selection [_countLines] is counting, or has counted.
+  String? _counting;
+
+  /// The next verse's turn in [_countLines]; cancelled with the screen.
+  Timer? _countTick;
+
+  /// Counts the selection's lines a verse per turn of the event loop,
+  /// then builds again to show them.
+  void _countLines(List<Ayah> ayahs, VerseLook look) {
+    final s = creationState;
+    final start = s.startAyah, end = s.endAyah, lines = s.verseLines;
+    final key = '${s.surah}:$start-$end $lines ${look.key}';
+    if (_counting == key) return;
+    _counting = key;
+    _countTick?.cancel();
+    var a = start;
+    void step() {
+      if (!mounted || _counting != key) return;
+      try {
+        if (a <= end && a - 1 < ayahs.length) {
+          VersePlanner.countVerse(ayahs, a++, lines, look);
+          _countTick = Timer(Duration.zero, step);
+          return;
+        }
+        VersePlanner.estimateParts(ayahs, start, end, lines, look);
+      } catch (e, st) {
+        rlogError('scenery: counting lines', e, st);
+        return;
+      }
+      setState(() {});
+    }
+
+    _countTick = Timer(Duration.zero, step);
   }
 
   /// Whether the run follows the lines rather than the verses: the
@@ -179,30 +238,34 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
   /// starts on: where a scenery chosen for the line is anchored.
   List<({int ayah, int token, String text})>? _lineParts(List<Ayah> ayahs) {
     final s = creationState;
+    final look = _look;
+    if (look == null) return null;
+    return VersePlanner.estimateParts(
+        ayahs, s.startAyah, s.endAyah, s.verseLines, look);
+  }
+
+  /// How the verses will be set, for counting their lines; null when
+  /// every verse is shown whole.
+  VerseLook? get _look {
+    final s = creationState;
     if (s.verseLines == VerseLines.whole) return null;
     final settings = SettingsService.state.value;
-    return VersePlanner.estimateParts(
-      ayahs,
-      s.startAyah,
-      s.endAyah,
-      s.verseLines,
-      VerseLook(
-        textScale: s.textScale,
-        preset: s.textPreset,
-        typography: s.typography,
-        edition: settings.translation,
-        numbering: settings.verseNumbering,
-        showTranslation: !settings.verseTranslationOff,
-        ink: s.verseInk,
-        surah: s.surah,
-      ),
+    return VerseLook(
+      textScale: s.textScale,
+      preset: s.textPreset,
+      typography: s.typography,
+      edition: settings.translation,
+      numbering: settings.verseNumbering,
+      showTranslation: !settings.verseTranslationOff,
+      ink: s.verseInk,
+      surah: s.surah,
     );
   }
 
   /// A scene per verse — or per line — : what the blurb suggests, and
-  /// what the reel is built around.
+  /// what the reel is built around. For the build: see [_shownSlotCount].
   int get _sceneIdeal => _followsLines
-      ? ScenePlan.recommended(_slotCount)
+      ? ScenePlan.recommended(_shownSlotCount)
       : creationState.endAyah - creationState.startAyah + 1;
 
   /// This scenery's place in the run, 1-based; 0 when it is not in it.
@@ -425,10 +488,16 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
       if (!mounted) return;
       final start = creationState.startAyah;
       final end = creationState.endAyah;
-      final limit = _sceneLimit;
       // With long verses going line by line and the scenery following
       // them, every line chooses its own scenery from its own words.
-      final parts = _followsLines ? _lineParts(ayahs) : null;
+      final look = _followsLines ? _look : null;
+      final parts = look == null
+          ? null
+          : await VersePlanner.estimatePartsAsync(
+              ayahs, start, end, creationState.verseLines, look);
+      if (!mounted) return;
+      // After the count above, so this reads it rather than making it.
+      final limit = _sceneLimit;
       final lines = parts?.map((p) => p.text).toList();
       // Where each choice belongs: its verse, and with lines the word its
       // line starts on. See [SceneAnchor].
@@ -464,7 +533,9 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
       rlog('match: ${picks.length} picks for $surah:$start-$end — '
           '${picks.map((p) => "${p.scene.id}(${p.motif})").join(", ")}');
       if (picks.isEmpty) {
-        messenger.showSnackBar(_toast(l.matchedNothing, tone: ToastTone.problem));
+        // Nothing matched: no download was even asked for, so not the
+        // connection.
+        messenger.showSnackBar(_toast(l.matchFailed, tone: ToastTone.problem));
         return;
       }
 
@@ -514,7 +585,17 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
         anchors.add(anchorOf(picks[i]));
       }
       if (resolved.isEmpty) {
-        messenger.showSnackBar(_toast(l.matchedNothing, tone: ToastTone.problem));
+        // Every pick failed to download: said the way the first of them
+        // failed, the connection only when it was the connection.
+        Trouble? why;
+        for (final p in picks) {
+          why ??= SceneCatalog.failureOf(p.scene);
+        }
+        messenger.showSnackBar(_toast(
+            why == null || why == Trouble.offline
+                ? l.matchedNothing
+                : l.sceneFailed(why),
+            tone: ToastTone.problem));
         return;
       }
 
@@ -553,7 +634,12 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
     } catch (e, st) {
       rlogError('scene match', e, st);
       if (mounted) {
-        messenger.showSnackBar(_toast(l.matchedNothing, tone: ToastTone.problem));
+        // Anything thrown here that isn't the network is a fault on the
+        // phone, and "check your connection" sent people to the wrong
+        // place for it.
+        messenger.showSnackBar(_toast(
+            troubleOf(e) == Trouble.offline ? l.matchedNothing : l.matchFailed,
+            tone: ToastTone.problem));
       }
     } finally {
       if (mounted) setState(() => _matching = false);
@@ -768,7 +854,7 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
       setState(() => _selectedId = _selected.id);
       ScaffoldMessenger.of(context).showSnackBar(
         _toast(
-          L10n.of(context).sceneDownloadFailed,
+          L10n.of(context).sceneFailed(SceneCatalog.failureOf(s)),
           tone: ToastTone.problem,
         ),
       );
@@ -809,6 +895,7 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
       ..sceneryTab = _tab
       ..sceneryWide = _wideScenes;
     _scroll.dispose();
+    _countTick?.cancel();
     super.dispose();
   }
 
@@ -1175,12 +1262,12 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
                 ],
                 // A one-verse reel has room for one scenery, so there is
                 // nothing here to offer and no pill for it.
-                if (_sceneLimit > 1)
+                if (_shownSceneLimit > 1)
                   _MultiScenePill(
                     key: _multiKey,
                     on: _multi,
                     chosen: creationState.scenes.length,
-                    limit: _sceneLimit,
+                    limit: _shownSceneLimit,
                     onTap: () => _setMulti(!_multi),
                   ),
               ],
