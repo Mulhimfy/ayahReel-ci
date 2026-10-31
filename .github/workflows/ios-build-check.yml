@@ -1,0 +1,54 @@
+# Does the iOS app compile? `flutter build ios --no-codesign` on the
+# release's Xcode, with nothing signed, uploaded or published: for a branch
+# that changes native iOS code (AyahReel Listen's ONNX Runtime bridge in
+# AppDelegate.swift and its pod) to be checked before a release is cut.
+# Runs on a pushed commit whose message carries `[ios]`, or by hand.
+name: iOS build check
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[ios]')
+    runs-on: macos-26
+    timeout-minutes: 90
+    env:
+      XCODE_APP: /Applications/Xcode_26.6.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/listen-engine
+        with:
+          deploy-key: ${{ secrets.LISTEN_DEPLOY_KEY }}
+      - name: Flutter version
+        id: flutter
+        run: |
+          v=$(bash tool/check_flutter_version.sh)
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+      - name: Select Xcode
+        run: |
+          set -euo pipefail
+          sudo xcode-select -s "$XCODE_APP"
+          xcodebuild -version
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.flutter.outputs.version }}
+          channel: stable
+          cache: true
+      - name: Build (no signing)
+        env:
+          WORDS_KEY: ${{ secrets.WORDS_KEY }}
+        run: |
+          set -euo pipefail
+          flutter pub get
+          flutter build ios --release --no-codesign \
+            --dart-define=WORDS_KEY="$WORDS_KEY" 2>&1 | tail -80
+          ls -la build/ios/iphoneos/
+      - name: Pod versions
+        if: always()
+        run: grep -A1 -i onnxruntime ios/Podfile.lock || true

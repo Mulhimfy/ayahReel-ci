@@ -20,10 +20,10 @@ import '../data/verse_ink.dart';
 import '../data/verse_lines.dart';
 import '../data/verse_motion.dart';
 import '../data/verse_numbering.dart';
+import '../data/word_align_service.dart';
 import '../l10n/l10n.dart';
 import '../render/ayah_rasterizer.dart';
 import '../render/letterbox_layout.dart';
-import '../data/word_align_service.dart';
 import '../state/creation_state.dart';
 import '../theme/app_theme.dart';
 import '../widgets/a11y.dart';
@@ -302,7 +302,10 @@ class _StyleScreenState extends State<StyleScreen> {
                   ),
                   // The user's own recording, with its motion open: how
                   // the light follows it, at the top (OwnAudioNote).
-                  if (_panel == _Panel.motion && creationState.usesUserAudio)
+                  if (_panel == _Panel.motion &&
+                      creationState.usesUserAudio &&
+                      !WordAlignService.supportsSurah(
+                          creationState.reciter!, creationState.surah))
                     const OwnAudioNote(
                         padding: EdgeInsets.fromLTRB(16, 8, 16, 0)),
                   const SizedBox(height: 10),
