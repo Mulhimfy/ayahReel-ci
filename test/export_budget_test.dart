@@ -598,8 +598,9 @@ void main() {
     test('a long failure keeps its end, where FFmpeg says what broke', () {
       FeedbackService.noteExportTrouble('render', '${'x' * 500} the end');
       final line = FeedbackService.payload(message: 'x')['export']!;
-      expect(line, endsWith('the end'));
-      expect(line.length, lessThan(320));
+      // Then how long ago, since the failure outlives the run now.
+      expect(line, endsWith('the end, just now'));
+      expect(line.length, lessThan(340));
     });
   });
 

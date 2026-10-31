@@ -167,6 +167,10 @@ abstract final class FeedbackService {
       _sent = j['sent'] as bool? ?? false;
       _netTrouble = j['net'] as String?;
       _netAt = DateTime.tryParse(j['netAt'] as String? ?? '');
+      // This run's own failure, if one came before the file was read,
+      // is the newer of the two.
+      _exportTrouble ??= j['exportTrouble'] as String?;
+      _exportAt ??= DateTime.tryParse(j['exportAt'] as String? ?? '');
     } catch (_) {/* an unreadable file just means nobody has been asked */}
   }
 
@@ -299,7 +303,7 @@ abstract final class FeedbackService {
       'source': source.name,
       'export': [
         PhoneBudget.summary,
-        if (_exportTrouble != null) _exportTrouble!,
+        if (_exportTrouble != null) '$_exportTrouble${_ago(_exportAt)}',
       ].join(' · '),
       if (_netTrouble != null) 'net': '$_netTrouble${_ago(_netAt)}',
     };
@@ -323,9 +327,10 @@ abstract final class FeedbackService {
   /// 2026-10-06 could have come from either, so a note now says which
   /// code it was written from. Move it forward in every patch that
   /// changes how a save works.
-  static const codeDate = '2026-10-24';
+  static const codeDate = '2026-10-31';
 
   static String? _exportTrouble;
+  static DateTime? _exportAt;
 
   static String? _netTrouble;
   static DateTime? _netAt;
@@ -372,7 +377,7 @@ abstract final class FeedbackService {
     return s.length <= 240 ? s : '${s.substring(0, 239)}…';
   }
 
-  /// Keeps the last export that failed in this run, for the next note.
+  /// Keeps the last export that failed, for the next note.
   ///
   /// The people a save fails for are the ones least able to say why —
   /// "it refuses to download" was all one report had, from a phone that
@@ -380,12 +385,35 @@ abstract final class FeedbackService {
   /// its own fix. Folders are cut out of whatever FFmpeg said: a file's
   /// name is all a report needs, and the folders above it can carry the
   /// name of the phone's owner.
+  ///
+  /// Kept across a restart, as [noteNetTrouble] is: four notes of
+  /// 2026-10-30/31 from one phone said "I still can't save the video",
+  /// each written from Settings, and not one carried the failure — it
+  /// had been held in memory only, and the app had been opened again
+  /// since. A later save that lands doesn't clear it; the line says how
+  /// long ago it was.
   static void noteExportTrouble(String what, Object error) {
+    final s = exportLine(what, error);
+    final at = DateTime.now();
+    _exportTrouble = s;
+    _exportAt = at;
+    unawaited(() async {
+      // Read first, or the write would put the counts back to nothing.
+      await init();
+      _exportTrouble = s;
+      _exportAt = at;
+      await _persist();
+    }());
+  }
+
+  /// [what] and [error] as one short line, folders cut out.
+  @visibleForTesting
+  static String exportLine(String what, Object error) {
     final s = '$what: $error'
         .replaceAll(RegExp(r'''(?:/[^/\s"']+)+/'''), '…/')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
-    _exportTrouble = s.length <= 240 ? s : '…${s.substring(s.length - 240)}';
+    return s.length <= 240 ? s : '…${s.substring(s.length - 240)}';
   }
 
   /// Posts a note. Returns whether it landed.
@@ -490,6 +518,8 @@ abstract final class FeedbackService {
         'sent': _sent,
         if (_netTrouble != null) 'net': _netTrouble,
         if (_netAt != null) 'netAt': _netAt!.toIso8601String(),
+        if (_exportTrouble != null) 'exportTrouble': _exportTrouble,
+        if (_exportAt != null) 'exportAt': _exportAt!.toIso8601String(),
       }));
     } catch (_) {/* the ask is best-effort, like the rating it follows */}
   }
@@ -507,5 +537,7 @@ abstract final class FeedbackService {
     _sent = sent;
     _netTrouble = null;
     _netAt = null;
+    _exportTrouble = null;
+    _exportAt = null;
   }
 }

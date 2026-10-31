@@ -24,6 +24,7 @@ import '../data/instagram_share.dart';
 import '../data/media_aspect.dart';
 import '../data/models.dart';
 import '../data/own_words.dart';
+import '../data/picked_media.dart';
 import '../data/quran_repository.dart';
 import '../data/recitation_service.dart';
 import '../data/trouble.dart';
@@ -34,6 +35,7 @@ import '../data/reel_recipe.dart';
 import '../data/reminder_service.dart';
 import '../data/review_prompt.dart';
 import '../data/rewards_service.dart';
+import '../data/scene_catalog.dart';
 import '../data/platform_share.dart';
 import '../data/settings_service.dart';
 import '../data/share_origin.dart';
@@ -1459,12 +1461,17 @@ class _PreviewScreenState extends State<PreviewScreen>
       // decoder cap above is the whole of it. Read now, not from
       // [foreground]: a Save may have taken this render while it waited.
       if (_jobForeground) _takeForForeground();
+      // Every scenery's file, on the phone now — not the dark stand-in
+      // the renderer lays down for a missing one. See [_sceneryOnPhone].
+      final scenery =
+          await _sceneryOnPhone(_multi ? _usedScenes : [_background]);
+      if (_droppedGen == gen || gen != _jobGen) throw const RenderCancelled();
       return await VideoRenderer.render(
         recitation: _recitation!,
-        background: _background,
+        background: _multi ? _background : scenery.first,
         // One scenery renders exactly as it always did; a run of them
         // takes the multi-scene graph, on the timeline shown here.
-        scenes: _multi ? _usedScenes : const [],
+        scenes: _multi ? scenery : const [],
         cuts: _multi ? _cuts : const [],
         transition: _transition,
         ayahs: _ayahs!,
@@ -1523,6 +1530,53 @@ class _PreviewScreenState extends State<PreviewScreen>
         }
       }
     }
+  }
+
+  /// [scenes] as a render must read them: each one's file on the phone.
+  ///
+  /// The renderer stands a dark gradient in for a scenery whose file
+  /// is missing — the colour a picked file shows before it loads — and
+  /// says nothing. The preview had no way to notice either: a still
+  /// already decoded, and a video player holding its file open, go on
+  /// showing a file that has been deleted. So the reel came out black
+  /// behind the verses ("why are some of my videos black", 2026-10-31,
+  /// a 3.6 GB phone: the gallery picker's copies live in the cache
+  /// folder Android empties when storage runs low).
+  ///
+  /// A library scenery cleared off the phone is downloaded again, and
+  /// one that can't be fails the way its download did. A picked photo
+  /// or video that has gone fails with [SceneryGone]: only the user
+  /// can bring it back.
+  static Future<List<ReelBackground>> _sceneryOnPhone(
+      List<ReelBackground> scenes) async {
+    final out = <ReelBackground>[];
+    for (final b in scenes) {
+      final path = b.filePath;
+      if (path == null || File(path).existsSync()) {
+        out.add(b);
+        continue;
+      }
+      if (b.isUserFile) {
+        rlogError('render: scenery gone',
+            'the picked ${b.isImage ? 'photo' : 'video'} at $path');
+        throw SceneryGone(isImage: b.isImage);
+      }
+      await SceneCatalog.load();
+      final scene = SceneCatalog.byId(b.id);
+      if (scene == null) {
+        rlogError('render: scenery gone', '${b.id}, not in the library now');
+        throw SceneryGone(isImage: b.isImage);
+      }
+      rlog('render: scenery ${b.id} was cleared from the phone — '
+          'downloading it again');
+      final f = await SceneCatalog.download(scene);
+      if (f == null) {
+        throw TroubleException(SceneCatalog.failureOf(scene) ?? Trouble.offline,
+            'downloading scenery ${b.id} again');
+      }
+      out.add(f.path == path ? b : SceneCatalog.background(scene, file: f));
+    }
+    return out;
   }
 
   /// Which [_startRender] is the latest, and the last one dropped.
@@ -2057,6 +2111,11 @@ class _PreviewScreenState extends State<PreviewScreen>
         // A verse card or a copy that could not be written for want of
         // room is the same full phone, met one step earlier or later.
         _ when saysOutOfSpace(e) => L10n.current.phoneStorageFull,
+        SceneryGone(:final isImage) => L10n.current.sceneryGone(isImage),
+        // A cleared library scenery that would not download again.
+        TroubleException(:final trouble, :final doing)
+            when doing.startsWith('downloading scenery') =>
+          L10n.current.sceneFailed(trouble),
         _ => L10n.current.exportFailed(e),
       };
 

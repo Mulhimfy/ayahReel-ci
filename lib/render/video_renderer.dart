@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'dart:io';
 
 import 'package:ffmpeg_kit_flutter_new_min_gpl/ffmpeg_kit.dart';
@@ -625,6 +626,71 @@ abstract final class VideoRenderer {
     }
   }
 
+  /// Whether [file]'s picture is black all through: frames a third and
+  /// two thirds of the way into its [reelMs], each one flat black.
+  ///
+  /// Only ever asked of a hardware encode, whose answer is redone on
+  /// x264 — never of x264's, which is the reference and is never
+  /// failed for being dark. And it can't mistake a dark reel for a
+  /// black one: every frame of a reel carries the mark and, by a
+  /// third of the way in, a verse, both drawn in light ink. A frame
+  /// of 27x48 averaged blocks whose brightest is still black (see
+  /// [blackLumaMax]) has neither. Anything
+  /// that stops the check answers "not black": it is a second
+  /// opinion, not a gate.
+  static Future<bool> _looksBlack(File file, Directory tmp, int reelMs) async {
+    const w = 27, h = 48;
+    final out = File(
+        '${tmp.path}/ayah_luma_${file.path.hashCode.toRadixString(16)}.gray');
+    try {
+      for (final at in [reelMs / 3, reelMs * 2 / 3]) {
+        if (out.existsSync()) out.deleteSync();
+        final session = await FFmpegKit.execute(
+          '-v error -ss ${(at / 1000).toStringAsFixed(3)} -i "${file.path}" '
+          '-map 0:v:0 -frames:v 1 -vf scale=$w:$h:flags=area,format=gray '
+          '-f rawvideo -y "${out.path}"',
+        );
+        if (!ReturnCode.isSuccess(await session.getReturnCode()) ||
+            !out.existsSync()) {
+          return false;
+        }
+        if (!lumaIsBlack(out.readAsBytesSync(), w * h)) return false;
+      }
+      rlogError('render picture check', 'black picture in ${file.path}');
+      return true;
+    } catch (e) {
+      rlog('render: black check threw $e');
+      return false;
+    } finally {
+      if (out.existsSync()) {
+        try {
+          out.deleteSync();
+        } catch (_) {}
+      }
+    }
+  }
+
+  /// Whether a frame's [pixels] (8-bit luma, at least [count] of them)
+  /// are black throughout: none brighter than [blackLumaMax].
+  @visibleForTesting
+  static bool lumaIsBlack(List<int> pixels, int count) {
+    if (pixels.length < count) return false;
+    for (var i = 0; i < count; i++) {
+      if (pixels[i] > blackLumaMax) return false;
+    }
+    return true;
+  }
+
+  /// The brightest an averaged block of a black frame gets. Black reads
+  /// 0 once the scaler has turned the frame to gray (16 where a build
+  /// keeps the encode's limited range), and the luma dither laid over
+  /// every frame averages away inside a block. Desktop FFmpeg 8.0.1: a
+  /// dithered black reel peaks at 0; a near-black one carrying nothing
+  /// but a 44 px mark at 60% white peaks at 30, the darkest a real
+  /// reel's frame can be, and 42 in limited range.
+  @visibleForTesting
+  static const blackLumaMax = 20;
+
   /// The styling key baked into a render's file name by [render].
   /// Two exports that produce the same key are the same reel, byte for
   /// byte, which is what lets the library keep one copy of it.
@@ -1158,6 +1224,13 @@ abstract final class VideoRenderer {
     // frames of the encode. [bgReady] says the graph can use input 0
     // untouched.
     final hasRealBg = bg != null && bg.existsSync();
+    // The dark gradient below stands in for it. The preview checks
+    // every file before it renders (`_sceneryOnPhone`); this is the
+    // trace if one goes in between, or a caller that doesn't.
+    if (!hasRealBg && background.isDeviceFile) {
+      rlogError('render: scenery file missing',
+          '${background.id} — rendering on its gradient');
+    }
     // A luminous band is one picture for the whole reel, drawn by the
     // painter the preview draws it with.
     final bandPath = letterbox != null && backdrop == LetterboxBackdrop.glow
@@ -1828,6 +1901,12 @@ abstract final class VideoRenderer {
       // failed export or a silent one.
       if (failure == null && hardware && _verifyOk == true) {
         unplayable = !await _decodesToPicture(part, work);
+        // Decodable is not the same as a picture: an encoder can write
+        // a stream every decoder plays, of black frames.
+        if (!unplayable && await _looksBlack(part, work, segMs)) {
+          unplayable = true;
+          unawaited(PhoneBudget.hardwareBlack());
+        }
         if (unplayable && part.existsSync()) part.deleteSync();
       }
       // A hardware encode left running still holds its whole graph. On
@@ -2479,6 +2558,10 @@ abstract final class VideoRenderer {
         final len = s.isImage ? null : await MediaDuration.ofPath(f.path);
         out.add(_SceneInput(f.path, s.isImage, secs, sourceMs: len));
         continue;
+      }
+      if (s.isDeviceFile) {
+        rlogError('render: scenery file missing',
+            '${s.id} — scene ${i + 1} on its gradient');
       }
       final g = await AyahRasterizer.rasterizeGradientBackdrop(
         s.gradientArgb,

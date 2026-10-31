@@ -693,6 +693,23 @@ abstract final class PhoneBudget {
     }
   }
 
+  /// The device encoder handed back a reel whose picture is black all
+  /// through (`VideoRenderer`'s picture check), which the save then
+  /// made again on x264. Retired here for good, as a hardware death
+  /// retires it: an encoder that does that once does it again, and
+  /// every launch would probe it, pass it and lose a save's time to it.
+  static Future<void> hardwareBlack() async {
+    await load();
+    _hwLosses++;
+    rlog('budget: the device encoder made a black picture — x264 from now on');
+    try {
+      final f = await _file();
+      await _queue(() async => _write(f, running: _running, hidden: _hidden));
+    } catch (e) {
+      rlog('budget: could not record it: $e');
+    }
+  }
+
   /// FFmpeg was refused memory: every later encode in this run plans one
   /// step smaller. Not remembered across launches — it was answered with
   /// a retry, not a dead app — unlike a lost export.

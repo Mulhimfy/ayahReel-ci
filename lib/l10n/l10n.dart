@@ -1153,6 +1153,30 @@ class L10n {
       _t('Replace', 'استبدال', 'تبدیل کریں', 'Ganti', 'Ersetzen');
   String get previewMyReel => _t('Preview my video', 'معاينة الفيديو',
       'میری ویڈیو کا پیش منظر', 'Pratinjau video saya', 'Video-Vorschau');
+  /// A save stopped because the photo or video picked for it is no
+  /// longer on the phone (see `SceneryGone`): said plainly, with the
+  /// one thing that brings it back.
+  String sceneryGone(bool isImage) => isImage
+      ? _t(
+          'The photo you picked is no longer on your phone. Pick it again '
+              'in the scenery step.',
+          'الصورة التي اخترتها لم تعد على هاتفك. اخترها مجددًا في خطوة المشهد.',
+          'آپ کی چنی ہوئی تصویر اب آپ کے فون میں نہیں ہے۔ منظر والے مرحلے میں '
+              'اسے دوبارہ چنیں۔',
+          'Foto yang Anda pilih sudah tidak ada di ponsel. Pilih lagi di '
+              'langkah pemandangan.',
+          'Das gewählte Foto ist nicht mehr auf deinem Handy. Wähl es im '
+              'Kulissen-Schritt noch einmal.')
+      : _t(
+          'The video you picked is no longer on your phone. Pick it again '
+              'in the scenery step.',
+          'الفيديو الذي اخترته لم يعد على هاتفك. اختره مجددًا في خطوة المشهد.',
+          'آپ کی چنی ہوئی ویڈیو اب آپ کے فون میں نہیں ہے۔ منظر والے مرحلے میں '
+              'اسے دوبارہ چنیں۔',
+          'Video yang Anda pilih sudah tidak ada di ponsel. Pilih lagi di '
+              'langkah pemandangan.',
+          'Das gewählte Video ist nicht mehr auf deinem Handy. Wähl es im '
+              'Kulissen-Schritt noch einmal.');
   String get galleryPickFailed => _t(
       'Couldn’t open your gallery. Try again.',
       'تعذّر فتح المعرض. حاول مجددًا.',

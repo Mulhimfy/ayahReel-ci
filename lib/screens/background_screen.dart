@@ -12,6 +12,7 @@ import '../data/fatiha_data.dart';
 import '../data/models.dart';
 import '../data/quran_repository.dart';
 import '../data/debug_log.dart';
+import '../data/picked_media.dart';
 import '../data/scene_catalog.dart';
 import '../data/scene_matcher.dart';
 import '../data/settings_service.dart';
@@ -954,14 +955,20 @@ class _BackgroundScreenState extends State<BackgroundScreen> {
     _pickFails = 0;
     if (_pickBlocked) setState(() => _pickBlocked = false);
 
+    // Out of the cache folder the picker left it in, which Android
+    // empties when storage runs low: the reel was then made on a black
+    // gradient instead. See [PickedMedia].
+    final path = await PickedMedia.keep(file.path);
+    if (!mounted) return;
+
     final bg = ReelBackground.deviceFile(
       // Unique per picked file so the render cache never serves a stale
       // reel after the user swaps their upload.
-      id: 'custom_${file.path.hashCode.toRadixString(16)}',
+      id: 'custom_${path.hashCode.toRadixString(16)}',
       // Display name is derived from fileIsImage at build time so it
       // follows the app language; this stored one is a fallback only.
       name: isImage ? 'Your photo' : 'Your video',
-      filePath: file.path,
+      filePath: path,
       fileIsImage: isImage,
     );
     setState(() => _custom = bg);

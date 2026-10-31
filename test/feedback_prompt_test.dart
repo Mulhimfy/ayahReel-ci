@@ -217,6 +217,22 @@ void main() {
       expect(net, contains('just now'));
     });
 
+    test('the last failed save rides along in the export line', () {
+      // Four notes from one phone said "I still can't save the video"
+      // (2026-10-30/31), each from Settings after the app was opened
+      // again, and none carried the failure: it was held in memory.
+      expect(FeedbackService.payload(message: 'x')['export'],
+          isNot(contains('render:')));
+      FeedbackService.noteExportTrouble(
+          'render',
+          'SceneryGone: the picked photo is no longer on the phone '
+              '(/data/user/0/com.ayahreel.app/cache/image_picker_9.jpg)');
+      final export = FeedbackService.payload(message: 'x')['export']!;
+      expect(export, contains('render: SceneryGone'));
+      expect(export, contains('just now'));
+      expect(export, isNot(contains('/data/user')));
+    });
+
     test('a signed link and the phone\'s folders stay out of the line', () {
       final line = FeedbackService.netLine(
           'scenery sky_pexels_56',
