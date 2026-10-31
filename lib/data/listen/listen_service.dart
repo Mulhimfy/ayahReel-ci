@@ -164,8 +164,7 @@ abstract final class ListenService {
       final width = vocab.length + 1;
       final frameMs = m.frameMs;
       final t1 = sw.elapsedMilliseconds;
-      final found = await Isolate.run(
-          () => _hear(logp, width, frameMs, vocab, text));
+      final found = await _hearApart(logp, width, frameMs, vocab, text);
       final engineMs = sw.elapsedMilliseconds - t1;
       rlog('listen: ${(audioMs / 1000).toStringAsFixed(1)} s heard in '
           '${modelMs}ms + ${engineMs}ms: '
@@ -205,13 +204,36 @@ abstract final class ListenService {
     var f1 = (span.$2 / fm).ceil() + 25;
     if (f0 < 0) f0 = 0;
     if (f1 > frames) f1 = frames;
-    return Isolate.run(() {
-      final q = engine.QuranIndex(text);
-      final spell = engine.Spell(vocab, frameMs: fm);
-      return engine.timeRange(engine.LogProbs(lp, width, frameMs: fm), spell, q,
-          surah, first, last, f0, f1);
-    });
+    return _timeApart(lp, width, fm, vocab, text, surah, first, last, f0, f1);
   }
+
+  // Isolate.run sends its closure's whole context: these take only plain
+  // data, so nothing of a screen (a State, a callback) is in it.
+  static Future<(List<ListenFound>, int?)> _hearApart(Float32List logp,
+          int width, double frameMs, List<String> vocab,
+          List<List<String>> text) =>
+      Isolate.run(() => _hear(logp, width, frameMs, vocab, text));
+
+  static Future<Map<int, List<int>>?> _timeApart(
+          Float32List lp,
+          int width,
+          double fm,
+          List<String> vocab,
+          List<List<String>> text,
+          int surah,
+          int first,
+          int last,
+          int f0,
+          int f1) =>
+      Isolate.run(() => engine.timeRange(
+          engine.LogProbs(lp, width, frameMs: fm),
+          engine.Spell(vocab, frameMs: fm),
+          engine.QuranIndex(text),
+          surah,
+          first,
+          last,
+          f0,
+          f1));
 
   /// Each verse's word count in the app's text (what the word light
   /// checks a verse's timing against).

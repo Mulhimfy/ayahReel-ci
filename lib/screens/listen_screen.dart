@@ -43,6 +43,7 @@ class _ListenScreenState extends State<ListenScreen> {
   int _modelMb = 0;
   bool _offline = false;
   bool _alive = true;
+  int _lastPaint = 0;
 
   ListenOutcome? _outcome;
 
@@ -101,6 +102,11 @@ class _ListenScreenState extends State<ListenScreen> {
         keepGoing: () => _alive,
         onProgress: (stage, share) {
           if (!mounted) return;
+          // A few times a second is plenty for a progress ring, and a
+          // download reports every chunk.
+          final now = DateTime.now().millisecondsSinceEpoch;
+          if (stage == _stage && share < 1 && now - _lastPaint < 120) return;
+          _lastPaint = now;
           setState(() {
             _stage = stage;
             _share = share;
