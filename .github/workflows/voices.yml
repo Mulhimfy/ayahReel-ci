@@ -1,0 +1,90 @@
+name: Voices
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: commit
+        required: true
+      args:
+        description: 'tool/verify_reciters.py arguments, e.g. --only luhaidan'
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Mulhimfy/ayahReel
+          ref: ${{ inputs.ref }}
+          ssh-key: ${{ secrets.APP_DEPLOY_KEY }}
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Mulhimfy/ayahreel-words
+          path: words
+          ssh-key: ${{ secrets.WORDS_DEPLOY_KEY }}
+          persist-credentials: false
+          sparse-checkout: data/own_tables.json
+          sparse-checkout-cone-mode: false
+      - name: Tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg python3-numpy >/dev/null
+          ffmpeg -version | head -1
+      - name: Verify
+        env:
+          INPUT: ${{ inputs.args }}
+          OWN_TABLES: words/data/own_tables.json
+        run: |
+          line="$INPUT"
+          mkdir -p out
+          exec > out/verify.txt 2>&1
+          echo "arguments: $line"
+          cp tool/reciters_verified.json /tmp/before.json
+          status=0
+          LINE="$line" python3 -I -c 'import os, shlex, subprocess, sys
+          sys.exit(subprocess.call([sys.executable, "-I", "tool/verify_reciters.py",
+                                    *shlex.split(os.environ["LINE"])]))' || status=$?
+          python3 -I - <<'EOF'
+          import base64, gzip, hashlib, json
+          before = json.load(open('/tmp/before.json'))
+          path = 'tool/reciters_verified.json'
+          raw = open(path, 'rb').read()
+          after = json.loads(raw)
+          new = {k: v for k, v in after.items() if before.get(k) != v}
+          gone = sorted(set(before) - set(after))
+          print(f'{len(new)} entries new or changed: {sorted(new)}; removed: {gone}')
+          for k, v in sorted(new.items()):
+              print(f"  {k}: {'PASS' if not v.get('problems') else 'FAIL'} "
+                    f"{json.dumps({x: v.get(x) for x in ('source', 'kbps', 'pace', 'aligned_share', 'shifted_share', 'problems')}, ensure_ascii=False)}")
+              for o, d in (v.get('distinct') or {}).items():
+                  print(f'    against {o}: {json.dumps(d, ensure_ascii=False)}')
+          blob = base64.b64encode(gzip.compress(json.dumps(
+              new, ensure_ascii=False, indent=1, sort_keys=True).encode('utf8'), 9)).decode()
+          print(f'sha256(tool/reciters_verified.json)={hashlib.sha256(raw).hexdigest()}')
+          open('out/entries.b64', 'w').write(blob)
+          EOF
+          exit $status
+      - name: Seal
+        if: always()
+        env:
+          K: ${{ secrets.AR_ARTIFACT_KEY }}
+        run: |
+          set -euo pipefail
+          [ -n "$K" ] || { echo "No AR_ARTIFACT_KEY: nothing kept." >&2; exit 1; }
+          mkdir -p out
+          tar czf - -C out . | openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt \
+            -pass env:K -out sealed.bin
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sealed
+          path: sealed.bin
+          retention-days: 14
+          if-no-files-found: ignore
