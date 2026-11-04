@@ -1,0 +1,72 @@
+name: Flutter tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: commit
+        required: true
+
+concurrency:
+  group: flutter-test-${{ inputs.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Mulhimfy/ayahReel
+          ref: ${{ inputs.ref }}
+          ssh-key: ${{ secrets.APP_DEPLOY_KEY }}
+          persist-credentials: false
+      - if: hashFiles('listen_ref.txt') != ''
+        uses: ./.github/actions/listen-engine
+        with:
+          deploy-key: ${{ secrets.LISTEN_DEPLOY_KEY }}
+      - name: Flutter version
+        id: flutter
+        run: |
+          v=$(bash tool/check_flutter_version.sh)
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.flutter.outputs.version }}
+          channel: stable
+          cache: true
+      - name: Get packages
+        run: mkdir -p out && flutter pub get > out/pub.txt 2>&1
+      - name: Analyze
+        run: |
+          if flutter analyze --no-pub > out/analyze.txt 2>&1; then echo "analyze: clean"
+          else echo "analyze: $(grep -cE '^ *(error|warning|info) ' out/analyze.txt) issues"; exit 1; fi
+      - name: Test
+        if: always()
+        run: |
+          set -o pipefail
+          status=0
+          flutter test --no-pub > out/test.txt 2>&1 || status=$?
+          grep -oE '[0-9]+ tests passed|Some tests failed' out/test.txt | tail -1 || true
+          exit $status
+      - name: Seal
+        if: always()
+        env:
+          K: ${{ secrets.AR_ARTIFACT_KEY }}
+        run: |
+          set -euo pipefail
+          [ -n "$K" ] || { echo "No AR_ARTIFACT_KEY: nothing kept." >&2; exit 1; }
+          mkdir -p out
+          tar czf - -C out . | openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt \
+            -pass env:K -out sealed.bin
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sealed
+          path: sealed.bin
+          retention-days: 7
+          if-no-files-found: ignore
