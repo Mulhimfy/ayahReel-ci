@@ -1,0 +1,181 @@
+name: Android patch
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: commit
+        required: true
+      tag:
+        description: name
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Mulhimfy/ayahReel
+          ref: ${{ inputs.ref }}
+          ssh-key: ${{ secrets.APP_DEPLOY_KEY }}
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Free disk space
+        run: |
+          df -h / | tail -1
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup \
+            /usr/local/share/boost /opt/hostedtoolcache/CodeQL /usr/share/swift \
+            /usr/local/share/powershell /usr/local/share/chromium \
+            /usr/local/lib/node_modules || true
+          df -h / | tail -1
+      - name: Install Shorebird
+        run: |
+          set -euo pipefail
+          if [ -z "${SHOREBIRD_TOKEN:-}" ]; then
+            echo "SHOREBIRD_TOKEN is not set (repo Settings > Secrets > Actions)." >&2
+            exit 1
+          fi
+          curl --proto '=https' --tlsv1.2 -sSf \
+            https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | bash
+          for d in "$HOME/.config/shorebird/bin" "$HOME/.shorebird/bin"; do
+            if [ -x "$d/shorebird" ]; then echo "$d" >> "$GITHUB_PATH"; fi
+          done
+      - name: Patch
+        env:
+          WORDS_KEY: ${{ secrets.WORDS_KEY }}
+        run: |
+          set -euo pipefail
+          TAG_REST="${TAG#gpatch-}"
+          DRY=0
+          case "$TAG_REST" in
+            dry-*) DRY=1; TAG_REST="${TAG_REST#dry-}" ;;
+          esac
+          RELEASE_VERSION="${TAG_REST%%--*}"
+          if [ -z "$RELEASE_VERSION" ]; then
+            echo "Tag '$TAG' names no release version." >&2
+            exit 1
+          fi
+          echo "Release $RELEASE_VERSION, $([ $DRY = 1 ] && echo 'check only' || echo 'check, then publish')"
+          echo "Setting kAppVersion to $(bash tool/sync-version.sh "$RELEASE_VERSION")"
+          sed -i 's/-Xmx8G/-Xmx4G/' android/gradle.properties
+          { echo "== java"; java -version; echo "== shorebird"; shorebird --version; } \
+            > env.log 2>&1 || true
+          ALLOW=""
+          dry_run() {
+            set +e
+            shorebird --verbose patch android \
+              --release-version="$RELEASE_VERSION" --dry-run $ALLOW \
+              -- --dart-define=WORDS_KEY="$WORDS_KEY" > dry-run.log 2>&1
+            STATUS=$?
+            set -e
+            grep -iE 'No issues detected|asset changes|native code changes|Kotlin or Java' dry-run.log | head -5 || true
+          }
+          dry_run
+          if grep -qi 'asset changes' dry-run.log &&
+             ! grep -qiE 'Kotlin or Java|native code changes' dry-run.log; then
+            echo "== Asset changes: comparing with the release's own bundle"
+            set +e
+            python3 tool/verify_asset_diffs.py dry-run.log > asset-check.log 2>&1
+            VERIFIED=$?
+            set -e
+            if [ "$VERIFIED" = 0 ]; then
+              mv dry-run.log dry-run-1.log
+              ALLOW="--allow-asset-diffs"
+              echo "== Checking again, the two verified assets allowed"
+              dry_run
+            fi
+          fi
+          ASSETS_OK=0
+          if ! grep -qi 'asset changes' dry-run.log; then
+            ASSETS_OK=1
+          elif [ -n "$ALLOW" ]; then
+            if ! grep -q 'Changed files:' dry-run.log ||
+               python3 tool/verify_asset_diffs.py dry-run.log > asset-check-2.log 2>&1; then
+              ASSETS_OK=1
+            fi
+          fi
+          CLEAN=0
+          if [ "$STATUS" = 0 ] && grep -qi 'No issues detected' dry-run.log &&
+             ! grep -qiE 'Kotlin or Java|native code changes' dry-run.log &&
+             [ "$ASSETS_OK" = 1 ]; then
+            CLEAN=1
+          fi
+          has() { grep -qiE "$1" dry-run.log && echo 1 || echo 0; }
+          {
+            echo "release=$RELEASE_VERSION status=$STATUS clean=$CLEAN"
+            echo "exception=$([ -n "$ALLOW" ] && echo 1 || echo 0)"
+            echo "noissues=$(has 'No issues detected')"
+            echo "native=$(has 'Kotlin or Java|native code changes')"
+            echo "asset=$(has 'asset changes')"
+            echo "gradlefail=$(has 'FAILURE: Build failed|BUILD FAILED|Gradle task .* failed')"
+            echo "norelease=$(has 'release .*not found|No release found|could not find release')"
+          } | tee verdict.txt
+          sed -n '/asset changes/,/^[[:space:]]*$/p' dry-run.log > changed-assets.txt || true
+          if [ "$DRY" = 1 ]; then
+            echo "Check only; nothing published."
+            exit 0
+          fi
+          if [ "$CLEAN" != 1 ]; then
+            echo "The check was not clean (dry-run.log); nothing published." >&2
+            exit 0
+          fi
+          shorebird patch android --release-version="$RELEASE_VERSION" $ALLOW \
+            -- --dart-define=WORDS_KEY="$WORDS_KEY" > publish.log 2>&1
+          echo "published=1" >> verdict.txt
+      - name: Verdict
+        if: always()
+        run: |
+          {
+            echo '```'
+            cat verdict.txt 2>/dev/null || echo 'no verdict'
+            grep -iE 'Published Patch|patch number' publish.log 2>/dev/null || true
+            df -h / | tail -1
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Done
+        run: |
+          case "$TAG" in
+            gpatch-dry-*) grep -q 'clean=1' verdict.txt ;;
+            *) grep -q '^published=1' verdict.txt ;;
+          esac
+      - name: Blank secrets out of the logs
+        if: always()
+        env:
+          WORDS_KEY: ${{ secrets.WORDS_KEY }}
+          REDACT_VARS: SHOREBIRD_TOKEN WORDS_KEY
+        run: >-
+          python3 tool/redact_logs.py dry-run.log dry-run-1.log
+          asset-check.log asset-check-2.log publish.log verdict.txt
+          changed-assets.txt env.log
+      - name: Seal
+        if: always()
+        env:
+          K: ${{ secrets.AR_ARTIFACT_KEY }}
+        run: |
+          set -euo pipefail
+          [ -n "$K" ] || { echo "No AR_ARTIFACT_KEY: nothing kept." >&2; exit 1; }
+          mkdir -p out
+          for f in dry-run.log dry-run-1.log asset-check.log asset-check-2.log \
+                   publish.log verdict.txt changed-assets.txt env.log; do
+            [ -f "$f" ] && cp "$f" out/ || true
+          done
+          tar czf - -C out . | openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt \
+            -pass env:K -out sealed.bin
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sealed
+          path: sealed.bin
+          retention-days: 14
+          if-no-files-found: ignore
